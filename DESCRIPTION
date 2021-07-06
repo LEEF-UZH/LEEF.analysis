@@ -1,0 +1,22 @@
+Package: LEEF.analysis
+Type: Package
+Title: Access functions, tests and basic analysisof the RRD data from the LEEF project
+Version: 0.1.0
+AAuthors@R: c(
+  person(given = "Rainer M.", family = "Krug", email = "Rainer.Krug@uzh.ch", role = c("aut", "cre")),
+  person("SNF Project 310030_188431", role = "fnd")
+  )
+Maintainer: Rainer M. Krug <Rainer.Krug@uzh.ch>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.5.0)
+Imports: 
+  DBI,
+  RSQLite,
+  yaml,
+  parallel,
+  ggplot2
+RoxygenNote: 7.1.1
