@@ -1,7 +1,10 @@
 #' Plot diagnostic plot to check bottles per timestamp
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
-#'   If not set, defaults to \code{LEEF.RRD.sqlite}
+#'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
+#' @param config_yml the config file containing the sql queries
+#' @param config the configuration in \code{list} format. If not specified,
+#'   the \code{config_yml} will be used
 #'
 #' @return \code{ggplot} object of the plot
 #'
@@ -49,8 +52,10 @@ plot_bottles_per_timestamp <- function(
 
   data <- read_sql(db, sql = sql)
   data$timestamp <- as.Date(data$timestamp, "%Y%m%d")
+  data$bottle[which(data$bottle == "b_100")] <- "b_c_1"
+  data$bottle[which(data$bottle == "b_101")] <- "b_c_2"
 
-  p <- ggplot2::ggplot(data, ggplot2::aes(x = timestamp, y = bottle)) +
+  p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$timestamp, y = .data$bottle)) +
     ggplot2::geom_line() +
     ggplot2::geom_point() +
     ggplot2::xlab("") +

@@ -15,21 +15,25 @@ read_rrd(
 \arguments{
 \item{db}{fully qualified path to the sqlite database}
 
-\item{measurements}{the configuration as int the config file specified to be used}
+\item{measurements}{the configuration as int the config file specified to be
+used}
 
 \item{config_yml}{the config file containing the sql queries}
 
-\item{config}{the configuration in \code{list} format. If not specified, w=the \code{config_yml} will be used}
+\item{config}{the configuration in \code{list} format. If not specified,
+the \code{config_yml} will be used}
 }
 \value{
 if \code{length(measurements) > 1} a list containing the returned tables, otherwise the table as a
   \code{data.frame} object.
 }
 \description{
-The function uses a config file in yaml format to either build an sql query or the sql query provided to execute the query
-and return the data in data.frame format.
-In the config file, either an \code{SQL} statement or a \code{FROM} and \code{SELSECT} fields can be specified. If an \core{SQL}
-statement is provided, it takes precedence over the others. If no \code{SQL} is specified, the SQL statement is build from the
-\code{SELECT} and \code{FROM} parts.
-For security, the database is opened in \bold{read-only} mode.!
+The function uses a config file in yaml format to either build an sql query
+or the sql query provided to execute the query and return the data in
+data.frame format. In the config file, either an \code{SQL} statement or a
+\code{FROM} and \code{SELSECT} fields can be specified. If an \code{SQL}
+statement is provided, it takes precedence over the others. If no \code{SQL}
+is specified, the SQL statement is build from the \code{SELECT} and
+\code{FROM} parts. For security, the database is opened in \bold{read-only}
+mode.!
 }

@@ -1,14 +1,16 @@
 Package: LEEF.analysis
 Type: Package
-Title: Access functions, tests and basic analysisof the RRD data from the LEEF project
+Title: Access Functions, Tests and Basic Analysisof the RRD Data from the LEEF Project
 Version: 0.1.0
-AAuthors@R: c(
+Authors@R: c(
   person(given = "Rainer M.", family = "Krug", email = "Rainer.Krug@uzh.ch", role = c("aut", "cre")),
   person("SNF Project 310030_188431", role = "fnd")
   )
 Maintainer: Rainer M. Krug <Rainer.Krug@uzh.ch>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+BugReports: https://github.com/LEEF-UZH/LEEF.analysis/issues
+URL: https://github.com/LEEF-UZH/LEEF.analysis
+Description: Provides simple access functions to read data out of the sqlite RRD database. SQL queries
+  can be configured in a yaml config file and used.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

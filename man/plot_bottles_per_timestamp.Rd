@@ -4,11 +4,20 @@
 \alias{plot_bottles_per_timestamp}
 \title{Plot diagnostic plot to check bottles per timestamp}
 \usage{
-plot_bottles_per_timestamp(db = getOption("RRDdb", "LEEF.RRD.sqlite"))
+plot_bottles_per_timestamp(
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  config_yml = system.file("tables.yml", package = "LEEF.analysis"),
+  config
+)
 }
 \arguments{
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
-If not set, defaults to \code{LEEF.RRD.sqlite}}
+If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
+
+\item{config_yml}{the config file containing the sql queries}
+
+\item{config}{the configuration in \code{list} format. If not specified,
+the \code{config_yml} will be used}
 }
 \value{
 \code{ggplot} object of the plot
