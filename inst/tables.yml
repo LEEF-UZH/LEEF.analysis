@@ -76,6 +76,197 @@ check_pipeline_all:
        timestamp, bottle,  "o2meter" AS measurement
      FROM
        o2meter__o2meter
+species_per_bottle:
+  FROM: ~
+  SELECT: ~
+  SQL: SELECT
+      "bemovi_mag_16" AS measurement,
+      timestamp,
+      bottle,
+      COUNT(species) AS no_species,
+      MIN(density) AS min_density,
+      MAX(density) AS max_density
+    FROM
+      bemovi_mag_16__mean_density_per_ml
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle
+    UNION ALL
+    SELECT
+      "bemovi_mag_25" AS measurement,
+      timestamp,
+      bottle,
+      COUNT(species) AS no_species,
+      MIN(density) AS min_density,
+      MAX(density) AS max_density
+    FROM
+      bemovi_mag_25__mean_density_per_ml
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle
+    UNION ALL
+    SELECT
+      "bemovi_mag_25" AS measurement,
+      timestamp,
+      bottle,
+      COUNT(species) AS no_species,
+      MIN(density) AS min_density,
+      MAX(density) AS max_density
+    FROM
+      bemovi_mag_25__mean_density_per_ml_cropped
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle
+    UNION ALL
+    SELECT
+      "flowcam" AS measurement,
+      timestamp,
+      bottle,
+      COUNT(species) AS no_species,
+      MIN(density) AS min_density,
+      MAX(density) AS max_density
+    FROM
+      flowcam__algae_density
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle
+    UNION ALL
+    SELECT
+      "flowcytometer" AS measurement,
+      timestamp,
+      bottle,
+      COUNT(name) AS no_species,
+      MIN(density) AS min_density,
+      MAX(density) AS max_density
+    FROM
+      flowcytometer__flowcytometer
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle
+    UNION ALL
+    SELECT
+      "manualcount" AS measurement,
+      timestamp,
+      bottle,
+      COUNT(species) AS no_species,
+      MIN(density) AS min_density,
+      MAX(density) AS max_density
+    FROM
+      manualcount__manualcount
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle
+species_names_per_bottle:
+  FROM: ~
+  SELECT: ~
+  SQL: SELECT 
+    "bemovi_mag_16" AS measurement,
+      timestamp,
+      bottle,
+      species,
+      COUNT(density) AS no_points,
+      AVG(density) AS avg_density
+    FROM 
+      bemovi_mag_16__mean_density_per_ml
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle,
+      species
+    UNION ALL	
+    SELECT 
+      "bemovi_mag_25" AS measurement,
+      timestamp,
+      bottle,
+      species,
+      COUNT(density) AS no_points,
+      AVG(density) AS avg_density
+    FROM 
+      bemovi_mag_25__mean_density_per_ml
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle,
+      species
+    UNION ALL	
+    SELECT 
+      "bemovi_mag_25" AS measurement,
+      timestamp,
+      bottle,
+      species,
+      COUNT(density) AS no_points,
+      AVG(density) AS avg_density
+    FROM 
+      bemovi_mag_25__mean_density_per_ml_cropped
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle,
+      species
+    UNION ALL	
+    SELECT 
+      "flowcam" AS measurement,
+      timestamp,
+      bottle,
+      species,
+      COUNT(density) AS no_points,
+      AVG(density) AS avg_density
+    FROM 
+      flowcam__algae_density
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle,
+      species
+    UNION ALL	
+    SELECT 
+      "flowcytometer" AS measurement,
+      timestamp,
+      bottle,
+      name AS species,
+      COUNT(density) AS no_points,
+      AVG(density) AS avg_density
+    FROM 
+      flowcytometer__flowcytometer
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle,
+      name
+    UNION ALL	
+    SELECT 
+      "manualcount" AS measurement,
+      timestamp,
+      bottle,
+      species,
+      COUNT(density) AS no_points,
+      AVG(density) AS avg_density
+    FROM 
+      manualcount__manualcount
+    WHERE
+        density > 0
+    GROUP BY
+      timestamp,
+      bottle,
+      species
+
 
 
 

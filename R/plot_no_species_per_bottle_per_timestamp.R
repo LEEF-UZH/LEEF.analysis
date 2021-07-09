@@ -2,6 +2,9 @@
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
+#' @param config_yml the config file containing an sql query named \code{species_per_bottle}
+#' @param config the configuration in \code{list} format containing an sql query named \code{species_per_bottle}.
+#'   If not specified, the \code{config_yml} will be used
 #'
 #' @return \code{ggplot} object of the plot
 #'
@@ -12,86 +15,14 @@
 #' @examples
 plot_no_species_per_bottle_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  config_yml = system.file("tables.yml", package = "LEEF.analysis")
+  config_yml = system.file("tables.yml", package = "LEEF.analysis"),
+  config
 ){
+  if (missing(config)) {
+    config <- yaml::read_yaml(config_yml)
+  }
 
-  con <- NULL
-  con <- DBI::dbConnect(RSQLite::SQLite(), db, flags = RSQLite::SQLITE_RO)
-  on.exit({
-    if (class(con) == "RSQLite") {
-      DBI::dbDisconnect(con)
-    }
-  })
-
-  sql <- '
-SELECT
-	"bemovi_mag_16" AS measurement,
-	timestamp,
-	bottle,
-	COUNT(species) AS no_species
-FROM
-	bemovi_mag_16__mean_density_per_ml
-GROUP BY
-	timestamp,
-	bottle
-UNION ALL
-SELECT
-	"bemovi_mag_25" AS measurement,
-	timestamp,
-	bottle,
-	COUNT(species) AS no_species
-FROM
-	bemovi_mag_25__mean_density_per_ml
-GROUP BY
-	timestamp,
-	bottle
-UNION ALL
-SELECT
-	"bemovi_mag_25" AS measurement,
-	timestamp,
-	bottle,
-	COUNT(species) AS no_species
-FROM
-	bemovi_mag_25__mean_density_per_ml_cropped
-GROUP BY
-	timestamp,
-	bottle
-UNION ALL
-SELECT
-	"flowcam" AS measurement,
-	timestamp,
-	bottle,
-	COUNT(species) AS no_species
-FROM
-	flowcam__algae_density
-GROUP BY
-	timestamp,
-	bottle
-UNION ALL
-SELECT
-	"flowcytometer" AS measurement,
-	timestamp,
-	bottle,
-	COUNT(name) AS no_species
-FROM
-	flowcytometer__flowcytometer
-GROUP BY
-	timestamp,
-	bottle
-UNION ALL
-SELECT
-	"manualcount" AS measurement,
-	timestamp,
-	bottle,
-	COUNT(species) AS no_species
-FROM
-	manualcount__manualcount
-GROUP BY
-	timestamp,
-	bottle
-  '
-
-  data <- read_sql(db, sql = sql)
+  data <- read_sql(db, sql = config$species_per_bottle$SQL)
   data$timestamp <- as.Date(data$timestamp, "%Y%m%d")
   data$bottle[which(data$bottle == "b_100")] <- "b_c_1"
   data$bottle[which(data$bottle == "b_101")] <- "b_c_2"

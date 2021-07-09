@@ -58,10 +58,7 @@ read_rrd <- function(
       } else {
         sql <- config[[m]]$SQL
       }
-      x <- NULL
-      if (DBI::dbExistsTable(con, )) {
-        x <- DBI::dbGetQuery(con, sql)
-      }
+      x <- DBI::dbGetQuery(con, sql)
       return(x)
     },
     mc.cores = getOption("mc.cores", 1)
