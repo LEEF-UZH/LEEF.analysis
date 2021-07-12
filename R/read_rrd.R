@@ -12,7 +12,7 @@
 #' @param config_yml the config file containing the sql queries
 #' @param config the configuration in \code{list} format. If not specified,
 #'   the \code{config_yml} will be used
-#' @param measurements the configuration as int the config file specified to be
+#' @param measurements the configuration as in the config file specified to be
 #'   used
 #'
 #' @return if \code{length(measurements) > 1} a list containing the returned tables, otherwise the table as a
@@ -27,9 +27,13 @@
 read_rrd <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   measurements = c(
+    "bemovi_mag_16_morph",
     "bemovi_mag_16",
+    "bemovi_mag_25_morph",
     "bemovi_mag_25",
+    "bemovi_mag_25_cropped_morph",
     "bemovi_mag_25_cropped",
+    "flowcam_traits",
     "flowcam",
     "flowcytometer",
     "manualcount",

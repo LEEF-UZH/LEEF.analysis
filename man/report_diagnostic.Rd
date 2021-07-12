@@ -4,10 +4,13 @@
 \alias{report_diagnostic}
 \title{Report for checking pipeline and sampling}
 \usage{
-report_diagnostic(db)
+report_diagnostic(db, format = "html")
 }
 \arguments{
 \item{db}{fully qualified path to the sqlite database. The report will be saved to the same directory.}
+
+\item{format}{the format of the report as a character vector of length 1.
+Supported are at the moment: \code{html} (the default), \code{pdf} and \code{word}.}
 }
 \value{
 the fully qualified file name to the created report.

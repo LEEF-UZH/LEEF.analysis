@@ -1,51 +1,62 @@
+bemovi_mag_16_morph:
+  FROM: bemovi_mag_16__morph_mvt
+  SELECT: "*"
+  SQL: ~
 bemovi_mag_16:
   FROM: bemovi_mag_16__mean_density_per_ml
-  SELECT: timestamp, date, species, composition_id, bottle, temperature_treatment,
-    magnification, sample, density, 0 as cropped
+  SELECT: "*"
+  SQL: ~
+bemovi_mag_25_morph:
+  FROM: bemovi_mag_25__morph_mvt
+  SELECT: "*"
   SQL: ~
 bemovi_mag_25:
   FROM: bemovi_mag_25__mean_density_per_ml
-  SELECT: timestamp, date, species, composition_id, bottle, temperature_treatment,
-    magnification, sample, density, 1 as cropped
+  SELECT: "*"
+  SQL: ~
+bemovi_mag_25_cropped_morph:
+  FROM: bemovi_mag_25__morph_mvt_cropped
+  SELECT: "*"
   SQL: ~
 bemovi_mag_25_cropped:
   FROM: bemovi_mag_25__mean_density_per_ml_cropped
-  SELECT: timestamp, date, species, composition_id, bottle, temperature_treatment,
-    magnification, sample, density, 1 as cropped
+  SELECT: "*"
+  SQL: ~
+flowcam_traits:
+  FROM: flowcam__algae_traits
+  SELECT: "*"
   SQL: ~
 flowcam:
   FROM: flowcam__algae_density
-  SELECT: timestamp, species, bottle, composition, temperature, incubator, volume_imaged,
-    dilution_factor, richness, count, density
+  SELECT: "*"
   SQL: ~
 flowcytometer:
   FROM: flowcytometer__flowcytometer
-  SELECT: timestamp, sample, bottle, volume, "total.counts", tot_density_perml, dilution_factor,
-    bacteria_counts, bacteria_density_perml, sample_letter, sample_number, lna_counts,
-    mna_counts, hna_counts, lna_perml, mna_perml, hna_perml, algae_counts, algae_perml
+  SELECT: "*"
   SQL: ~
 manualcount:
   FROM: manualcount__manualcount
-  SELECT: timestamp, bottle, species, ml_counted, count, density
+  SELECT: "*"
   SQL: ~
 o2meter:
   FROM: o2meter__o2meter
-  SELECT: timestamp, bottle, sensor, date, time, channel, user, sensorid, sensor_name,
-    delta_t, time_unit, value, o2_unit, mode, phase, phase_unit, amplitude, amplitude_unit,
-    temp, temp_unit, pressure, pressure_unit, salinity, salinity_unit, error, cal0,
-    cal0_unit, t0, t0_unit, o2cal2nd, o2_unit1, cal2nd, cal2nd_unit, t2nd, t2nd_unit,
-    calpressure, calpressure_unit, f1, dphi1, dksv1, dphi2, dksv2, m, cal_mode, signalledcurrent,
-    user_signal_intensity, referenceledcurrent, reference_amplitude, device_serial,
-    fwversion, swversion, sensor_type, batchid, calibration_date, sensor_lot, presens_calibr,
-    battery_voltage, battery_voltage_unit
+  SELECT: "*"
   SQL: ~
-check_pipeline_all:
+  
+
+bottles_per_timestamp:
   FROM: ~
   SELECT: ~
-  SQL: SELECT
+  SQL: 
+    SELECT
        timestamp, bottle, "bemovi_mag_16" AS measurement
      FROM
        bemovi_mag_16__mean_density_per_ml
+     UNION ALL
+     SELECT
+       timestamp, bottle,  "bemovi_mag_16_morph" AS measurement
+     FROM
+       bemovi_mag_16__morph_mvt
      UNION ALL
      SELECT
        timestamp, bottle,  "bemovi_mag_25" AS measurement
@@ -53,14 +64,29 @@ check_pipeline_all:
        bemovi_mag_25__mean_density_per_ml
      UNION ALL
      SELECT
-       timestamp, bottle,  "bemovi_mag_25" AS measurement
+       timestamp, bottle,  "bemovi_mag_25_morph" AS measurement
+     FROM
+       bemovi_mag_25__morph_mvt
+     UNION ALL
+     SELECT
+       timestamp, bottle,  "bemovi_mag_25_cropped" AS measurement
      FROM
        bemovi_mag_25__mean_density_per_ml_cropped
+     UNION ALL
+     SELECT
+       timestamp, bottle,  "bemovi_mag_25_cropped_morph" AS measurement
+     FROM
+       bemovi_mag_25__morph_mvt_cropped
      UNION ALL
      SELECT
        timestamp, bottle,  "flowcam" AS measurement
      FROM
        flowcam__algae_density
+     UNION ALL
+     SELECT
+       timestamp, bottle,  "flowcam_traits" AS measurement
+     FROM
+       flowcam__algae_traits
      UNION ALL
      SELECT
        timestamp, bottle,  "flowcytometer" AS measurement
@@ -76,103 +102,283 @@ check_pipeline_all:
        timestamp, bottle,  "o2meter" AS measurement
      FROM
        o2meter__o2meter
-species_per_bottle:
+       
+       
+       
+no_species_per_bottle:
   FROM: ~
   SELECT: ~
-  SQL: SELECT
-      "bemovi_mag_16" AS measurement,
+  SQL: 
+    SELECT 
+      measurement,
       timestamp,
       bottle,
-      COUNT(species) AS no_species,
-      MIN(density) AS min_density,
-      MAX(density) AS max_density
-    FROM
-      bemovi_mag_16__mean_density_per_ml
-    WHERE
-        density > 0
+      COUNT(species) AS no_species
+    FROM (
+      SELECT
+          "bemovi_mag_16_morph" AS measurement,
+          timestamp,
+            bottle,
+        species,
+            -1 AS min_density,
+            -1 AS max_density
+      FROM
+            bemovi_mag_16__morph_mvt
+      GROUP BY
+          timestamp,
+            bottle,
+        species
+      )
     GROUP BY
       timestamp,
       bottle
     UNION ALL
-    SELECT
-      "bemovi_mag_25" AS measurement,
+
+    SELECT 
+      measurement,
       timestamp,
       bottle,
-      COUNT(species) AS no_species,
-      MIN(density) AS min_density,
-      MAX(density) AS max_density
-    FROM
-      bemovi_mag_25__mean_density_per_ml
-    WHERE
+      COUNT(species) AS no_species
+    FROM (
+      SELECT
+          "bemovi_mag_16" AS measurement,
+          timestamp,
+            bottle,
+        species,
+            MIN(density) AS min_density,
+            MAX(density) AS max_density
+      FROM
+            bemovi_mag_16__mean_density_per_ml
+      WHERE
         density > 0
+      GROUP BY
+          timestamp,
+            bottle,
+        species
+      )
     GROUP BY
       timestamp,
       bottle
     UNION ALL
-    SELECT
-      "bemovi_mag_25_cropped" AS measurement,
+    
+    SELECT 
+      measurement,
       timestamp,
       bottle,
-      COUNT(species) AS no_species,
-      MIN(density) AS min_density,
-      MAX(density) AS max_density
-    FROM
-      bemovi_mag_25__mean_density_per_ml_cropped
-    WHERE
-        density > 0
+      COUNT(species) AS no_species
+    FROM (
+      SELECT
+          "bemovi_mag_25_morph" AS measurement,
+          timestamp,
+            bottle,
+        species,
+            -1 AS min_density,
+            -1 AS max_density
+      FROM
+            bemovi_mag_25__morph_mvt
+      GROUP BY
+          timestamp,
+            bottle,
+        species
+      )
     GROUP BY
       timestamp,
       bottle
     UNION ALL
-    SELECT
-      "flowcam" AS measurement,
+
+    SELECT 
+      measurement,
       timestamp,
       bottle,
-      COUNT(species) AS no_species,
-      MIN(density) AS min_density,
-      MAX(density) AS max_density
-    FROM
-      flowcam__algae_density
-    WHERE
+      COUNT(species) AS no_species
+    FROM (
+      SELECT
+          "bemovi_mag_25" AS measurement,
+          timestamp,
+            bottle,
+        species,
+            MIN(density) AS min_density,
+            MAX(density) AS max_density
+      FROM
+            bemovi_mag_25__mean_density_per_ml
+      WHERE
         density > 0
+      GROUP BY
+          timestamp,
+            bottle,
+        species
+      )
     GROUP BY
       timestamp,
       bottle
     UNION ALL
-    SELECT
-      "flowcytometer" AS measurement,
+
+    SELECT 
+      measurement,
       timestamp,
       bottle,
-      COUNT(name) AS no_species,
-      MIN(density) AS min_density,
-      MAX(density) AS max_density
-    FROM
-      flowcytometer__flowcytometer
-    WHERE
-        density > 0
+      COUNT(species) AS no_species
+    FROM (
+      SELECT
+          "bemovi_mag_25_cropped_morph" AS measurement,
+          timestamp,
+            bottle,
+        species,
+            -1 AS min_density,
+            -1 AS max_density
+      FROM
+            bemovi_mag_25__morph_mvt_cropped
+      GROUP BY
+          timestamp,
+            bottle,
+        species
+      )
     GROUP BY
       timestamp,
       bottle
     UNION ALL
-    SELECT
-      "manualcount" AS measurement,
+
+    SELECT 
+      measurement,
       timestamp,
       bottle,
-      COUNT(species) AS no_species,
-      MIN(density) AS min_density,
-      MAX(density) AS max_density
-    FROM
-      manualcount__manualcount
-    WHERE
+      COUNT(species) AS no_species
+    FROM (
+      SELECT
+          "bemovi_mag_25_cropped" AS measurement,
+          timestamp,
+            bottle,
+        species,
+            MIN(density) AS min_density,
+            MAX(density) AS max_density
+      FROM
+            bemovi_mag_25__mean_density_per_ml_cropped
+      WHERE
         density > 0
+      GROUP BY
+          timestamp,
+            bottle,
+        species
+      )
     GROUP BY
       timestamp,
       bottle
+    UNION ALL
+    
+    SELECT 
+      measurement,
+      timestamp,
+      bottle,
+      COUNT(species) AS no_species
+    FROM (
+      SELECT
+          "flowcam" AS measurement,
+          timestamp,
+            bottle,
+        species,
+            MIN(density) AS min_density,
+            MAX(density) AS max_density
+      FROM
+            flowcam__algae_density
+      WHERE
+        density > 0
+      GROUP BY
+          timestamp,
+            bottle,
+        species
+      )
+    GROUP BY
+      timestamp,
+      bottle
+    UNION ALL    
+
+    SELECT 
+      measurement,
+      timestamp,
+      bottle,
+      COUNT(species) AS no_species
+    FROM (
+      SELECT
+          "flowcam_traits" AS measurement,
+          timestamp,
+            bottle,
+        species,
+            -1 AS min_density,
+            -1 AS max_density
+      FROM
+            flowcam__algae_traits
+      GROUP BY
+          timestamp,
+            bottle,
+        species
+      )
+    GROUP BY
+      timestamp,
+      bottle
+    UNION ALL    
+
+    SELECT 
+      measurement,
+      timestamp,
+      bottle,
+      COUNT(name) AS no_species
+    FROM (
+      SELECT
+          "flowcytometer" AS measurement,
+          timestamp,
+            bottle,
+        name,
+            MIN(density) AS min_density,
+            MAX(density) AS max_density
+      FROM
+            flowcytometer__flowcytometer
+      WHERE
+        density > 0
+      GROUP BY
+          timestamp,
+            bottle,
+        name
+      )
+    GROUP BY
+      timestamp,
+      bottle
+    UNION ALL    
+
+    SELECT 
+      measurement,
+      timestamp,
+      bottle,
+      COUNT(species) AS no_species
+    FROM (
+      SELECT
+          "manualcount" AS measurement,
+          timestamp,
+            bottle,
+        species,
+            MIN(density) AS min_density,
+            MAX(density) AS max_density
+      FROM
+            manualcount__manualcount
+      WHERE
+        density > 0
+      GROUP BY
+          timestamp,
+            bottle,
+        species
+      )
+    GROUP BY
+      timestamp,
+      bottle
+
+
+
+
 species_names_per_bottle:
   FROM: ~
   SELECT: ~
-  SQL: SELECT 
-    "bemovi_mag_16" AS measurement,
+  SQL: 
+    SELECT 
+      "bemovi_mag_16" AS measurement,
       timestamp,
       bottle,
       species,

@@ -2,15 +2,21 @@
 title: "Diagnostic plots for the RRD ``r params$db``"
 author: "Rainer M Krug"
 date: "`r Sys.time()`"
-output: 
+output:
   pdf_document:
+    dev: pdf
     fig_width: 10
-    fig_height: 10
+    fig_height: 12
   html_document:
+    dev: png
     fig_width: 10
-    fig_height: 10
+    fig_height: 12
+  word_document: 
+    dev: png
+    fig_width: 10
+    fig_height: 12
 params:
-  db: "~/Desktop/LEEF.RRD.sqlite"
+  db: ~/Desktop/LEEF.RRD.sqlite
 ---
 
 ```{r setup, include=FALSE}
@@ -18,16 +24,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library(LEEF.analysis)
 ```
 ## Invocation from commandline
-See [https://stackoverflow.com/questions/49904943/run-rmarkdown-with-arguments-on-the-command-line#49908054](https://stackoverflow.com/questions/49904943/run-rmarkdown-with-arguments-on-the-command-line#49908054) on how to implement the invocation in a script in the `local_pipeline_management` repo.
+The report can be generated from the command line by using
 
 ```{bash info_invocation, eval = FALSE}
 Rscript -e '
-db <- "~/Desktop/LEEF.RRD.sqlite"
-rmarkdown::render(
-  input = system.file("DiagnosticPlotsForCheck.Rmd", package = "LEEF.analysis"),
-  params = list(db = db),
-  output_file = file.path(dirname(db), "Diagnostic_plot.html")
-)
+db <- "~/Desktop/LEEF.RRD.sqlite";
+Rscript -e "library(LEEF.analysis); report_diagnostic(db);"
 '
 ```
 
@@ -46,6 +48,6 @@ plot_bottles_per_timestamp(params$db)
 ## Number of Species per timestamp
 
 This plot shows the 
-```{r no_species_per_measurement}
+```{r no_species_per_measurement, fig.height = 8}
 plot_no_species_per_bottle_per_timestamp(params$db)
 ```

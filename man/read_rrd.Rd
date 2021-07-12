@@ -6,8 +6,9 @@
 \usage{
 read_rrd(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  measurements = c("bemovi_mag_16", "bemovi_mag_25", "bemovi_mag_25_cropped",
-    "flowcam", "flowcytometer", "manualcount", "o2meter"),
+  measurements = c("bemovi_mag_16_morph", "bemovi_mag_16", "bemovi_mag_25_morph",
+    "bemovi_mag_25", "bemovi_mag_25_cropped_morph", "bemovi_mag_25_cropped",
+    "flowcam_traits", "flowcam", "flowcytometer", "manualcount", "o2meter"),
   config_yml = system.file("tables.yml", package = "LEEF.analysis"),
   config
 )
@@ -15,7 +16,7 @@ read_rrd(
 \arguments{
 \item{db}{fully qualified path to the sqlite database}
 
-\item{measurements}{the configuration as int the config file specified to be
+\item{measurements}{the configuration as in the config file specified to be
 used}
 
 \item{config_yml}{the config file containing the sql queries}

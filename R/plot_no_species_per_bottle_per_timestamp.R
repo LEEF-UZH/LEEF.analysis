@@ -22,14 +22,15 @@ plot_no_species_per_bottle_per_timestamp <- function(
     config <- yaml::read_yaml(config_yml)
   }
 
-  data <- read_sql(db, sql = config$species_per_bottle$SQL)
-  data$timestamp <- as.Date(data$timestamp, "%Y%m%d")
-  data$bottle[which(data$bottle == "b_100")] <- "b_c_1"
-  data$bottle[which(data$bottle == "b_101")] <- "b_c_2"
+  data <- read_sql(db, sql = config$no_species_per_bottle$SQL)
+
+  data$timestamp <- convert_timestamp(data$timestamp)
+  data$bottle <- fix_bottle(data$bottle)
+  data$measurement <- sort_measurements(data$measurement)
 
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$timestamp, y = .data$no_species)) +
     ggplot2::geom_point() +
     ggplot2::xlab("") +
-    ggplot2::facet_wrap(~measurement)
+    ggplot2::facet_wrap(~measurement, ncol = 3)
   p
 }

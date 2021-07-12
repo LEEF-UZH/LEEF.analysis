@@ -22,43 +22,16 @@ plot_bottles_per_timestamp <- function(
     config <- yaml::read_yaml(config_yml)
   }
 
-  con <- NULL
-  con <- DBI::dbConnect(RSQLite::SQLite(), db, flags = RSQLite::SQLITE_RO)
-  on.exit({
-    if (class(con) == "RSQLite") {
-      DBI::dbDisconnect(con)
-    }
-  })
+  data <- read_sql(db, sql = config$bottles_per_timestamp$SQL)
 
-  sql <- NULL
-  for (i in 1:7) {
-    if (DBI::dbExistsTable(con, config[[i]]$FROM)) {
-      sql <- paste(
-        sql,
-        ifelse(
-          length(sql) == 0,
-          "",
-          "UNION ALL"
-        ),
-        "SELECT",
-        paste0("timestamp, bottle, \"", names(config)[[i]], "\" AS measurement"),
-        "FROM",
-        config[[i]]$FROM,
-
-        sep = "\n"
-      )
-    }
-  }
-
-  data <- read_sql(db, sql = sql)
-  data$timestamp <- as.Date(data$timestamp, "%Y%m%d")
-  data$bottle[which(data$bottle == "b_100")] <- "b_c_1"
-  data$bottle[which(data$bottle == "b_101")] <- "b_c_2"
+  data$timestamp <- convert_timestamp(data$timestamp)
+  data$bottle <- fix_bottle(data$bottle)
+  data$measurement <- sort_measurements(data$measurement)
 
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$timestamp, y = .data$bottle)) +
     ggplot2::geom_line() +
     ggplot2::geom_point() +
     ggplot2::xlab("") +
-    ggplot2::facet_wrap(~measurement)
+    ggplot2::facet_wrap(~measurement, ncol = 3)
   p
 }
