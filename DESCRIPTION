@@ -20,5 +20,6 @@ Imports:
   RSQLite,
   yaml,
   parallel,
-  ggplot2
+  ggplot2,
+  rmarkdown
 RoxygenNote: 7.1.1
