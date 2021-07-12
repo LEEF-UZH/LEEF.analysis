@@ -110,7 +110,7 @@ species_per_bottle:
       bottle
     UNION ALL
     SELECT
-      "bemovi_mag_25" AS measurement,
+      "bemovi_mag_25_cropped" AS measurement,
       timestamp,
       bottle,
       COUNT(species) AS no_species,

@@ -14,10 +14,10 @@ plot_no_species_per_bottle_per_timestamp(
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
 
-\item{config_yml}{the config file containing the sql queries}
+\item{config_yml}{the config file containing an sql query named \code{species_per_bottle}}
 
-\item{config}{the configuration in \code{list} format. If not specified,
-the \code{config_yml} will be used}
+\item{config}{the configuration in \code{list} format containing an sql query named \code{species_per_bottle}.
+If not specified, the \code{config_yml} will be used}
 }
 \value{
 \code{ggplot} object of the plot
