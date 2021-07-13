@@ -30,8 +30,6 @@ plot_species_per_timestamp_per_measure <- function(
 
   data$timestamp  <- data$timestamp + (as.integer(data$measurement) / 20)
 
-  s
-
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$timestamp, y = .data$species)) +
     ggplot2::geom_point(aes(colour = .data$measurement)) +
     ggplot2::xlab("") +
