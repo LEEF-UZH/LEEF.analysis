@@ -28,11 +28,16 @@ plot_species_per_timestamp_per_measure <- function(
   # data$bottle <- fix_bottle(data$bottle)
   data$measurement <- sort_measurements(data$measurement)
 
-  data$timestamp  <- data$timestamp + (as.integer(data$measurement) / 20)
+  ticks <- unique(data$timestamp)
+
+  data$timestamp  <- data$timestamp + (as.integer(data$measurement) / 20) - 0.2745
+
+  data$species[data$measurement == "flowcytometer"] <- paste0("_", data$species[data$measurement == "flowcytometer"])
 
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$timestamp, y = .data$species)) +
     ggplot2::geom_point(aes(colour = .data$measurement)) +
     ggplot2::xlab("") +
-    ggplot2::scale_colour_manual(values = 1:10 )
+    ggplot2::scale_colour_manual(values = 1:10 ) +
+    scale_x_date(breaks = ticks)
   p
 }

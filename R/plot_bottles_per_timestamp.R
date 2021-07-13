@@ -26,12 +26,16 @@ plot_bottles_per_timestamp <- function(
 
   data$timestamp <- convert_timestamp(data$timestamp)
   data$bottle <- fix_bottle(data$bottle)
+
+  ticks <- unique(data$timestamp)
+
   data$measurement <- sort_measurements(data$measurement)
 
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$timestamp, y = .data$bottle)) +
     ggplot2::geom_line() +
     ggplot2::geom_point() +
     ggplot2::xlab("") +
-    ggplot2::facet_wrap(~measurement, ncol = 3)
+    ggplot2::facet_wrap(~measurement, ncol = 3) +
+    scale_x_date(breaks = ticks)
   p
 }

@@ -26,11 +26,17 @@ plot_no_species_per_bottle_per_timestamp <- function(
 
   data$timestamp <- convert_timestamp(data$timestamp)
   data$bottle <- fix_bottle(data$bottle)
+
+  ticks <- unique(data$timestamp)
+
   data$measurement <- sort_measurements(data$measurement)
 
+  data$timestamp  <- data$timestamp + (as.integer(data$measurement) / 20) - 0.2745
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$timestamp, y = .data$no_species)) +
-    ggplot2::geom_point() +
+    ggplot2::geom_point(aes(colour = .data$measurement)) +
     ggplot2::xlab("") +
-    ggplot2::facet_wrap(~measurement, ncol = 3)
+    ggplot2::scale_colour_manual(values = 1:10 ) +
+    # ggplot2::facet_wrap(~measurement, ncol = 3) +
+    scale_x_date(breaks = ticks)
   p
 }

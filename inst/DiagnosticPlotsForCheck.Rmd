@@ -3,12 +3,12 @@ title: "Diagnostic plots for the RRD ``r params$db``"
 author: "Rainer M Krug"
 date: "`r Sys.time()`"
 output:
-  pdf_document:
-    dev: pdf
-    fig_width: 10
-    fig_height: 12
   html_document:
     dev: png
+    fig_width: 10
+    fig_height: 12
+  pdf_document:
+    dev: pdf
     fig_width: 10
     fig_height: 12
   word_document: 
