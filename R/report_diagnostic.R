@@ -7,6 +7,7 @@
 #' @return the fully qualified file name to the created report.
 #'
 #' @importFrom rmarkdown render
+#' @importFrom utils browseURL
 #' @export
 #'
 #' @examples
@@ -33,6 +34,6 @@ report_diagnostic <- function(db, format = "html") {
     params = list(db = db),
     output_file = output_file
   )
-  browseURL(report, encodeIfNeeded = TRUE)
+  utils::browseURL(report, encodeIfNeeded = TRUE)
   return(report)
 }

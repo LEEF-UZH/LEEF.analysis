@@ -1,104 +1,116 @@
 bemovi_mag_16_morph:
+  COMMENT: ~
   FROM: bemovi_mag_16__morph_mvt
   SELECT: "*"
   SQL: ~
 bemovi_mag_16:
+  COMMENT: ~
   FROM: bemovi_mag_16__mean_density_per_ml
   SELECT: "*"
   SQL: ~
 bemovi_mag_25_morph:
+  COMMENT: ~
   FROM: bemovi_mag_25__morph_mvt
   SELECT: "*"
   SQL: ~
 bemovi_mag_25:
+  COMMENT: ~
   FROM: bemovi_mag_25__mean_density_per_ml
   SELECT: "*"
   SQL: ~
 bemovi_mag_25_cropped_morph:
+  COMMENT: ~
   FROM: bemovi_mag_25__morph_mvt_cropped
   SELECT: "*"
   SQL: ~
 bemovi_mag_25_cropped:
+  COMMENT:
   FROM: bemovi_mag_25__mean_density_per_ml_cropped
   SELECT: "*"
   SQL: ~
 flowcam_traits:
+  COMMENT: ~
   FROM: flowcam__algae_traits
   SELECT: "*"
   SQL: ~
 flowcam:
+  COMMENT: ~
   FROM: flowcam__algae_density
   SELECT: "*"
   SQL: ~
 flowcytometer:
+  COMMENT:
   FROM: flowcytometer__flowcytometer
   SELECT: "*"
   SQL: ~
 manualcount:
+  COMMENT: ~
   FROM: manualcount__manualcount
   SELECT: "*"
   SQL: ~
 o2meter:
+  COMMENT: ~
   FROM: o2meter__o2meter
   SELECT: "*"
   SQL: ~
   
 
 bottles_per_timestamp:
+  COMMENT: ~
   FROM: ~
   SELECT: ~
   SQL: 
-    SELECT
+    SELECT DISTINCT
        timestamp, bottle, "bemovi_mag_16" AS measurement
      FROM
        bemovi_mag_16__mean_density_per_ml
      UNION ALL
-     SELECT
+     SELECT DISTINCT
        timestamp, bottle,  "bemovi_mag_16_morph" AS measurement
-     FROM
+     FROM 
        bemovi_mag_16__morph_mvt
      UNION ALL
-     SELECT
+     SELECT DISTINCT
        timestamp, bottle,  "bemovi_mag_25" AS measurement
      FROM
        bemovi_mag_25__mean_density_per_ml
      UNION ALL
-     SELECT
+     SELECT DISTINCT
        timestamp, bottle,  "bemovi_mag_25_morph" AS measurement
      FROM
        bemovi_mag_25__morph_mvt
      UNION ALL
-     SELECT
+     SELECT DISTINCT
        timestamp, bottle,  "bemovi_mag_25_cropped" AS measurement
      FROM
        bemovi_mag_25__mean_density_per_ml_cropped
      UNION ALL
-     SELECT
+     SELECT DISTINCT
        timestamp, bottle,  "bemovi_mag_25_cropped_morph" AS measurement
      FROM
        bemovi_mag_25__morph_mvt_cropped
      UNION ALL
-     SELECT
+     SELECT DISTINCT
        timestamp, bottle,  "flowcam" AS measurement
      FROM
        flowcam__algae_density
      UNION ALL
-     SELECT
+     SELECT DISTINCT
        timestamp, bottle,  "flowcam_traits" AS measurement
      FROM
        flowcam__algae_traits
      UNION ALL
-     SELECT
+     SELECT DISTINCT
        timestamp, bottle,  "flowcytometer" AS measurement
      FROM
        flowcytometer__flowcytometer
     UNION ALL
-     SELECT
+     SELECT DISTINCT
        timestamp, bottle,  "manualcount" AS measurement
      FROM
        manualcount__manualcount
     UNION ALL
-     SELECT
+     SELECT DISTINCT
        timestamp, bottle,  "o2meter" AS measurement
      FROM
        o2meter__o2meter
@@ -106,6 +118,7 @@ bottles_per_timestamp:
        
        
 no_species_per_bottle:
+  COMMENT: ~
   FROM: ~
   SELECT: ~
   SQL: 
@@ -374,6 +387,7 @@ no_species_per_bottle:
 
 
 species_names_per_bottle:
+  COMMENT: ~
   FROM: ~
   SELECT: ~
   SQL: 
@@ -475,8 +489,60 @@ species_names_per_bottle:
 
 
 
-
-
+species_per_timestamp_measure:
+  COMMENT: ~
+  FROM: ~
+  SELECT: ~
+  SQL:
+    SELECT DISTINCT
+       timestamp, species, "bemovi_mag_16" AS measurement
+     FROM
+       bemovi_mag_16__mean_density_per_ml
+     UNION ALL
+     SELECT DISTINCT
+       timestamp, species,  "bemovi_mag_16_morph" AS measurement
+     FROM
+       bemovi_mag_16__morph_mvt
+     UNION ALL
+     SELECT DISTINCT
+       timestamp, species,  "bemovi_mag_25" AS measurement
+     FROM
+       bemovi_mag_25__mean_density_per_ml
+     UNION ALL
+     SELECT DISTINCT
+       timestamp, species,  "bemovi_mag_25_morph" AS measurement
+     FROM
+       bemovi_mag_25__morph_mvt
+     UNION ALL
+     SELECT DISTINCT
+       timestamp, species,  "bemovi_mag_25_cropped" AS measurement
+     FROM
+       bemovi_mag_25__mean_density_per_ml_cropped
+     UNION ALL
+     SELECT DISTINCT
+       timestamp, species,  "bemovi_mag_25_cropped_morph" AS measurement
+     FROM
+       bemovi_mag_25__morph_mvt_cropped
+     UNION ALL
+     SELECT DISTINCT
+       timestamp, species,  "flowcam" AS measurement
+     FROM
+       flowcam__algae_density
+     UNION ALL
+     SELECT DISTINCT
+       timestamp, species,  "flowcam_traits" AS measurement
+     FROM
+       flowcam__algae_traits
+     UNION ALL
+     SELECT DISTINCT
+       timestamp, name AS species,  "flowcytometer" AS measurement
+     FROM
+       flowcytometer__flowcytometer
+    UNION ALL
+     SELECT DISTINCT
+       timestamp, species,  "manualcount" AS measurement
+     FROM
+       manualcount__manualcount
 
 
 
