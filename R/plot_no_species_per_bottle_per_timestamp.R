@@ -31,7 +31,7 @@ plot_no_species_per_bottle_per_timestamp <- function(
 
   data$measurement <- sort_measurements(data$measurement)
 
-  data$timestamp  <- data$timestamp + (as.integer(data$measurement) / 20) - 0.2745
+  data$timestamp  <- data$timestamp + (as.integer(data$measurement) / 5) - 1.1
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$timestamp, y = .data$no_species)) +
     ggplot2::geom_point(aes(colour = .data$measurement)) +
     ggplot2::xlab("") +

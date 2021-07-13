@@ -30,7 +30,7 @@ plot_species_per_timestamp_per_measure <- function(
 
   ticks <- unique(data$timestamp)
 
-  data$timestamp  <- data$timestamp + (as.integer(data$measurement) / 20) - 0.2745
+  data$timestamp  <- data$timestamp + (as.integer(data$measurement) / 5) - 1.1
 
   data$species[data$measurement == "flowcytometer"] <- paste0("_", data$species[data$measurement == "flowcytometer"])
 
