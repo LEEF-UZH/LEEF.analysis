@@ -57,6 +57,6 @@ plot_no_species_per_bottle_per_timestamp(params$db)
 ## Species per timestamp and measurement
 Measurements are colour coded and in the order as in the legend on the right.
 
-```{r species_per_timestamp_per_measure, options}
+```{r species_per_timestamp_per_measure, fig.height = 8}
 plot_species_per_timestamp_per_measure(params$db)
 ```

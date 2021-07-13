@@ -12,10 +12,10 @@
 #' @param config_yml the config file containing the sql queries
 #' @param config the configuration in \code{list} format. If not specified,
 #'   the \code{config_yml} will be used
-#' @param measurements the configuration as in the config file specified to be
-#'   used
+#' @param configuration_name the configuration as in the config file specified to be
+#'   used. The configuration names can be read from the \code{config_yml} file by using \code{configs(config_yml)}.
 #'
-#' @return if \code{length(measurements) > 1} a list containing the returned tables, otherwise the table as a
+#' @return if \code{length(configuration_name) > 1} a list containing the returned tables, otherwise the table as a
 #'   \code{data.frame} object.
 #'
 #' @importFrom DBI dbConnect dbGetQuery dbDisconnect
@@ -26,14 +26,10 @@
 #'
 read_rrd <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  measurements = c(
-    "bemovi_mag_16_morph",
+  configuration_name = c(
     "bemovi_mag_16",
-    "bemovi_mag_25_morph",
     "bemovi_mag_25",
-    "bemovi_mag_25_cropped_morph",
     "bemovi_mag_25_cropped",
-    "flowcam_traits",
     "flowcam",
     "flowcytometer",
     "manualcount",
@@ -55,7 +51,7 @@ read_rrd <- function(
   })
 
   tables <- parallel::mclapply(
-    measurements,
+    configuration_name,
     function(m) {
       if (is.null(config[[m]]$SQL)) {
         sql <- paste0("SELECT ", config[[m]]$SELECT, " FROM ", config[[m]]$FROM)
@@ -68,7 +64,7 @@ read_rrd <- function(
     mc.cores = getOption("mc.cores", 1)
   )
 
-  names(tables) <- measurements
+  names(tables) <- configuration_name
   ##
   if (length(tables) == 1) {
     return(tables[[1]])
