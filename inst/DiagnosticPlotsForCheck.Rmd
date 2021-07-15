@@ -7,6 +7,9 @@ output:
     dev: png
     fig_width: 10
     fig_height: 12
+    toc: true
+    toc_float: true
+    toc_collapsed: true
   pdf_document:
     dev: pdf
     fig_width: 10
@@ -59,4 +62,37 @@ Measurements are colour coded and in the order as in the legend on the right.
 
 ```{r species_per_timestamp_per_measure, fig.height = 8}
 plot_species_per_timestamp_per_measure(params$db)
+```
+
+## Density of Species per bottle as measured by measurement over time
+
+### bemovi_mag_16
+```{r dens_species_16, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "bemovi_mag_16")
+```
+
+
+### bemovi_mag_25
+```{r dens_species_25, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "bemovi_mag_25")
+```
+
+### bemovi_mag_25_cropped
+```{r dens_species_25c, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "bemovi_mag_25_cropped")
+```
+
+### flowcam
+```{r dens_species_fca, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "flowcam")
+```
+
+### flowcytometer
+```{r dens_species_fcy, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "flowcytometer")
+```
+
+### manualcount
+```{r dens_species_mc, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "manualcount")
 ```

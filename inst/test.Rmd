@@ -1,0 +1,16 @@
+---
+title: "Untitled"
+author: "Rainer M Krug"
+date: "7/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## R Markdown
+
+<span class="blinking">Am I blinking?</span>
+
