@@ -1,1 +1,3 @@
-DiagnosticPlotsForCheck.html
+*.html
+*.pdf
+*.md

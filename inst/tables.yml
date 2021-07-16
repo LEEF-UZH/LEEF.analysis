@@ -614,6 +614,43 @@ manualcount_dens_species:
 
 
 
+all_dens_species:
+  COMMENT: ~
+  FROM: ~
+  SELECT: ~
+  SQL: 
+    SELECT
+      timestamp, bottle, "bemovi_mag_16" AS measurement, species, density
+    FROM
+      bemovi_mag_16__mean_density_per_ml
+    UNION ALL
+    SELECT
+      timestamp, bottle,  "bemovi_mag_25" AS measurement, species, density
+    FROM
+      bemovi_mag_25__mean_density_per_ml
+    UNION ALL
+    SELECT
+      timestamp, bottle,  "bemovi_mag_25_cropped" AS measurement, species, density
+    FROM
+      bemovi_mag_25__mean_density_per_ml_cropped
+    UNION ALL
+    SELECT
+      timestamp, bottle,  "flowcam" AS measurement, species, density
+    FROM
+      flowcam__algae_density
+    UNION ALL
+    SELECT
+      timestamp, bottle,  "flowcytometer" AS measurement, name AS species, density
+    FROM
+      flowcytometer__flowcytometer
+    UNION ALL
+    SELECT
+      timestamp, bottle,  "manualcount" AS measurement, species, density
+    FROM
+      manualcount__manualcount
+
+
+
 
 
 
