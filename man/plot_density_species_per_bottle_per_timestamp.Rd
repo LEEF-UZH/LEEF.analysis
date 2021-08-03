@@ -7,6 +7,7 @@
 plot_density_species_per_bottle_per_timestamp(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   measurement = "bemovi_mag_16",
+  bottle = NULL,
   config_yml = system.file("tables.yml", package = "LEEF.analysis"),
   config
 )
@@ -15,7 +16,9 @@ plot_density_species_per_bottle_per_timestamp(
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
 
-\item{measurement}{the measurement which should be used}
+\item{measurement}{the measurement which should be used. M ua character vector of length 1.}
+
+\item{bottle}{bottle to be plotted in the format \code{b_xx} - character vector. If length > 1, alllected.}
 
 \item{config_yml}{the config file containing an sql query named \code{species_per_bottle}}
 

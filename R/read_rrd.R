@@ -45,9 +45,7 @@ read_rrd <- function(
   con <- NULL
   con <- DBI::dbConnect(RSQLite::SQLite(), db, flags = RSQLite::SQLITE_RO)
   on.exit({
-    if (class(con) == "RSQLite") {
-      DBI::dbDisconnect(con)
-    }
+    try(DBI::dbDisconnect(con), silent = TRUE)
   })
 
   tables <- parallel::mclapply(
