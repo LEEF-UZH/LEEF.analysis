@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Interactive report"
 author: "Rainer M Krug"
 date: "7/16/2021"
 output: html_document
@@ -9,14 +9,17 @@ runtime: shiny
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library("LEEF.analysis")
+db <- "~/Desktop/9.backend/LEEF.RRD.sqlite"
 ```
 
 
 To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
 
+## Database ``r db`` is used
+
 ## Per Measurement
 
-```{r eruptions, echo=FALSE}
+```{r testplot, echo = FALSE}
 shiny::inputPanel(
   shiny::selectInput(
     "measurement", 
@@ -49,7 +52,7 @@ shiny::renderPlot(
       bottle <- sprintf("b_%02d", bottle)
     }
     LEEF.analysis::plot_density_species_per_bottle_per_timestamp(
-      db = "~/Desktop/LEEF.RRD.sqlite", 
+      db = db, 
       measurement = input$measurement,
       bottle = bottle
     )

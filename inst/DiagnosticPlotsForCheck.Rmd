@@ -19,7 +19,7 @@ output:
     fig_width: 10
     fig_height: 12
 params:
-  db: ~/Desktop/LEEF.RRD.sqlite
+  db: ~/Desktop/9.backend/LEEF.RRD.sqlite
 runtime: shiny
 ---
 
@@ -69,33 +69,33 @@ plot_species_per_timestamp_per_measure(params$db)
 
 ### bemovi_mag_16
 ```{r dens_species_16, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "bemovi_mag_16")
+plot_density_species_per_bottle_per_timestamp(params$db, "bemovi_mag_16")
 ```
 
 
 ### bemovi_mag_25
 ```{r dens_species_25, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "bemovi_mag_25")
+plot_density_species_per_bottle_per_timestamp(params$db, "bemovi_mag_25")
 ```
 
 ### bemovi_mag_25_cropped
 ```{r dens_species_25c, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "bemovi_mag_25_cropped")
+plot_density_species_per_bottle_per_timestamp(params$db, "bemovi_mag_25_cropped")
 ```
 
 ### flowcam
 ```{r dens_species_fca, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "flowcam")
+plot_density_species_per_bottle_per_timestamp(params$db, "flowcam")
 ```
 
 ### flowcytometer
 ```{r dens_species_fcy, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "flowcytometer")
+plot_density_species_per_bottle_per_timestamp(params$db, "flowcytometer")
 ```
 
 ### manualcount
 ```{r dens_species_mc, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", "manualcount")
+plot_density_species_per_bottle_per_timestamp(params$db, "manualcount")
 ```
 
 
@@ -116,7 +116,7 @@ shiny::inputPanel(
 )
 
 shiny::renderPlot(
-  LEEF.analysis::plot_density_species_per_bottle_per_timestamp("~/Desktop/LEEF.RRD.sqlite", input$measurement),
+  LEEF.analysis::plot_density_species_per_bottle_per_timestamp(params$db, input$measurement),
   height = 1600
 )
 ```
