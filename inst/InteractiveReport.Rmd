@@ -9,7 +9,9 @@ runtime: shiny
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library("LEEF.analysis")
-db <- "~/Desktop/9.backend/LEEF.RRD.sqlite"
+if (!exists("db")) {
+  db <- "fff" #"~/Desktop/9.backend/LEEF.RRD.sqlite"
+}
 ```
 
 
