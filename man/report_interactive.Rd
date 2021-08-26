@@ -10,7 +10,7 @@ report_interactive(db)
 \item{db}{fully qualified path to the sqlite database. The report will be saved to the same directory.}
 }
 \value{
-invisibkly \code{NULL}
+invisibly \code{NULL}
 }
 \description{
 Run interactive report

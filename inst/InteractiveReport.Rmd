@@ -10,8 +10,10 @@ runtime: shiny
 knitr::opts_chunk$set(echo = TRUE)
 library("LEEF.analysis")
 if (!exists("db")) {
-  db <- "fff" #"~/Desktop/9.backend/LEEF.RRD.sqlite"
+  db <- "~/Desktop/9.backend/LEEF.RRD.sqlite"
 }
+
+options(shiny.maxRequestSize=2048*1024^2)
 ```
 
 
@@ -23,6 +25,24 @@ To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authorin
 
 ```{r testplot, echo = FALSE}
 shiny::inputPanel(
+  # shiny::fileInput(
+  #   "db", 
+  #   label = "RRD Database",
+  #    buttonLabel = "Select",
+  #   multiple = FALSE
+  # ),
+  shiny::selectInput(
+    "measurement", 
+    label = "Measurement:",
+    choices = c(
+      "bemovi_mag_16", "bemovi_mag_25", "bemovi_mag_25_cropped", 
+      "flowcam", 
+      "flowcytometer", 
+      "manualcount",
+      "all"
+    ), 
+    selected = 1
+  ),
   shiny::selectInput(
     "measurement", 
     label = "Measurement:",
@@ -40,24 +60,27 @@ shiny::inputPanel(
     label = "Bottle (0 = all Bottles):",
     min = 0, 
     max = 32, 
-    value = 0, 
+    value = 1, 
     step = 1
   )
 )
    
 shiny::renderPlot(
   {
-    bottle <- input$bottle
-    if (bottle == 0) {
-      bottle = NULL
-    } else {
-      bottle <- sprintf("b_%02d", bottle)
+    # db <- input$db$datapath
+    if (length(db) == 1) {
+      bottle <- input$bottle
+      if (bottle == 0) {
+        bottle = NULL
+      } else {
+        bottle <- sprintf("b_%02d", bottle)
+      }
+      LEEF.analysis::plot_density_species_per_bottle_per_timestamp(
+        db = db, # input$db$datapath[[1]], 
+        measurement = input$measurement,
+        bottle = bottle
+      )
     }
-    LEEF.analysis::plot_density_species_per_bottle_per_timestamp(
-      db = db, 
-      measurement = input$measurement,
-      bottle = bottle
-    )
   },
   height = 1600
 )

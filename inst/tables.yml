@@ -40,12 +40,12 @@ flowcam:
   SQL: ~
 flowcytometer:
   COMMENT:
-  FROM: flowcytometer__flowcytometer
+  FROM: flowcytometer__flowcytometer_density
   SELECT: "*"
   SQL: ~
 manualcount:
   COMMENT: ~
-  FROM: manualcount__manualcount
+  FROM: manualcount__manualcount_density
   SELECT: "*"
   SQL: ~
 o2meter:
@@ -53,13 +53,13 @@ o2meter:
   FROM: o2meter__o2meter
   SELECT: "*"
   SQL: ~
-  
+
 
 bottles_per_timestamp:
   COMMENT: ~
   FROM: ~
   SELECT: ~
-  SQL: 
+  SQL:
     SELECT DISTINCT
        timestamp, bottle, "bemovi_mag_16" AS measurement
      FROM
@@ -67,7 +67,7 @@ bottles_per_timestamp:
      UNION ALL
      SELECT DISTINCT
        timestamp, bottle,  "bemovi_mag_16_morph" AS measurement
-     FROM 
+     FROM
        bemovi_mag_16__morph_mvt
      UNION ALL
      SELECT DISTINCT
@@ -103,26 +103,26 @@ bottles_per_timestamp:
      SELECT DISTINCT
        timestamp, bottle,  "flowcytometer" AS measurement
      FROM
-       flowcytometer__flowcytometer
+       flowcytometer__flowcytometer_density
     UNION ALL
      SELECT DISTINCT
        timestamp, bottle,  "manualcount" AS measurement
      FROM
-       manualcount__manualcount
+       manualcount__manualcount_density
     UNION ALL
      SELECT DISTINCT
        timestamp, bottle,  "o2meter" AS measurement
      FROM
        o2meter__o2meter
-       
-       
-       
+
+
+
 no_species_per_bottle:
   COMMENT: ~
   FROM: ~
   SELECT: ~
-  SQL: 
-    SELECT 
+  SQL:
+    SELECT
       measurement,
       timestamp,
       bottle,
@@ -147,7 +147,7 @@ no_species_per_bottle:
       bottle
     UNION ALL
 
-    SELECT 
+    SELECT
       measurement,
       timestamp,
       bottle,
@@ -173,8 +173,8 @@ no_species_per_bottle:
       timestamp,
       bottle
     UNION ALL
-    
-    SELECT 
+
+    SELECT
       measurement,
       timestamp,
       bottle,
@@ -199,7 +199,7 @@ no_species_per_bottle:
       bottle
     UNION ALL
 
-    SELECT 
+    SELECT
       measurement,
       timestamp,
       bottle,
@@ -226,7 +226,7 @@ no_species_per_bottle:
       bottle
     UNION ALL
 
-    SELECT 
+    SELECT
       measurement,
       timestamp,
       bottle,
@@ -251,7 +251,7 @@ no_species_per_bottle:
       bottle
     UNION ALL
 
-    SELECT 
+    SELECT
       measurement,
       timestamp,
       bottle,
@@ -277,8 +277,8 @@ no_species_per_bottle:
       timestamp,
       bottle
     UNION ALL
-    
-    SELECT 
+
+    SELECT
       measurement,
       timestamp,
       bottle,
@@ -303,9 +303,9 @@ no_species_per_bottle:
     GROUP BY
       timestamp,
       bottle
-    UNION ALL    
+    UNION ALL
 
-    SELECT 
+    SELECT
       measurement,
       timestamp,
       bottle,
@@ -328,36 +328,36 @@ no_species_per_bottle:
     GROUP BY
       timestamp,
       bottle
-    UNION ALL    
+    UNION ALL
 
-    SELECT 
+    SELECT
       measurement,
       timestamp,
       bottle,
-      COUNT(name) AS no_species
+      COUNT(species) AS no_species
     FROM (
       SELECT
           "flowcytometer" AS measurement,
           timestamp,
             bottle,
-        name,
+        species,
             MIN(density) AS min_density,
             MAX(density) AS max_density
       FROM
-            flowcytometer__flowcytometer
+            flowcytometer__flowcytometer_density
       WHERE
         density > 0
       GROUP BY
           timestamp,
             bottle,
-        name
+        species
       )
     GROUP BY
       timestamp,
       bottle
-    UNION ALL    
+    UNION ALL
 
-    SELECT 
+    SELECT
       measurement,
       timestamp,
       bottle,
@@ -371,7 +371,7 @@ no_species_per_bottle:
             MIN(density) AS min_density,
             MAX(density) AS max_density
       FROM
-            manualcount__manualcount
+            manualcount__manualcount_density
       WHERE
         density > 0
       GROUP BY
@@ -390,15 +390,15 @@ species_names_per_bottle:
   COMMENT: ~
   FROM: ~
   SELECT: ~
-  SQL: 
-    SELECT 
+  SQL:
+    SELECT
       "bemovi_mag_16" AS measurement,
       timestamp,
       bottle,
       species,
       COUNT(density) AS no_points,
       AVG(density) AS avg_density
-    FROM 
+    FROM
       bemovi_mag_16__mean_density_per_ml
     WHERE
         density > 0
@@ -406,15 +406,15 @@ species_names_per_bottle:
       timestamp,
       bottle,
       species
-    UNION ALL	
-    SELECT 
+    UNION ALL
+    SELECT
       "bemovi_mag_25" AS measurement,
       timestamp,
       bottle,
       species,
       COUNT(density) AS no_points,
       AVG(density) AS avg_density
-    FROM 
+    FROM
       bemovi_mag_25__mean_density_per_ml
     WHERE
         density > 0
@@ -422,15 +422,15 @@ species_names_per_bottle:
       timestamp,
       bottle,
       species
-    UNION ALL	
-    SELECT 
+    UNION ALL
+    SELECT
       "bemovi_mag_25" AS measurement,
       timestamp,
       bottle,
       species,
       COUNT(density) AS no_points,
       AVG(density) AS avg_density
-    FROM 
+    FROM
       bemovi_mag_25__mean_density_per_ml_cropped
     WHERE
         density > 0
@@ -438,15 +438,15 @@ species_names_per_bottle:
       timestamp,
       bottle,
       species
-    UNION ALL	
-    SELECT 
+    UNION ALL
+    SELECT
       "flowcam" AS measurement,
       timestamp,
       bottle,
       species,
       COUNT(density) AS no_points,
       AVG(density) AS avg_density
-    FROM 
+    FROM
       flowcam__algae_density
     WHERE
         density > 0
@@ -454,32 +454,32 @@ species_names_per_bottle:
       timestamp,
       bottle,
       species
-    UNION ALL	
-    SELECT 
+    UNION ALL
+    SELECT
       "flowcytometer" AS measurement,
       timestamp,
       bottle,
-      name AS species,
+      species,
       COUNT(density) AS no_points,
       AVG(density) AS avg_density
-    FROM 
-      flowcytometer__flowcytometer
+    FROM
+      flowcytometer__flowcytometer_density
     WHERE
         density > 0
     GROUP BY
       timestamp,
       bottle,
-      name
-    UNION ALL	
-    SELECT 
+      species
+    UNION ALL
+    SELECT
       "manualcount" AS measurement,
       timestamp,
       bottle,
       species,
       COUNT(density) AS no_points,
       AVG(density) AS avg_density
-    FROM 
-      manualcount__manualcount
+    FROM
+      manualcount__manualcount_density
     WHERE
         density > 0
     GROUP BY
@@ -535,21 +535,21 @@ species_per_timestamp_measure:
        flowcam__algae_traits
      UNION ALL
      SELECT DISTINCT
-       timestamp, name AS species,  "flowcytometer" AS measurement
+       timestamp, species,  "flowcytometer" AS measurement
      FROM
-       flowcytometer__flowcytometer
+       flowcytometer__flowcytometer_density
     UNION ALL
      SELECT DISTINCT
        timestamp, species,  "manualcount" AS measurement
      FROM
-       manualcount__manualcount
+       manualcount__manualcount_density
 
 
 bemovi_mag_16_dens_species:
   COMMENT: ~
   FROM: ~
   SELECT: ~
-  SQL: 
+  SQL:
     SELECT
       timestamp, bottle, "bemovi_mag_16" AS measurement, species, density
     FROM
@@ -560,7 +560,7 @@ bemovi_mag_25_dens_species:
   COMMENT: ~
   FROM: ~
   SELECT: ~
-  SQL: 
+  SQL:
     SELECT
       timestamp, bottle,  "bemovi_mag_25" AS measurement, species, density
     FROM
@@ -571,7 +571,7 @@ bemovi_mag_25_cropped_dens_species:
   COMMENT: ~
   FROM: ~
   SELECT: ~
-  SQL: 
+  SQL:
     SELECT
       timestamp, bottle,  "bemovi_mag_25_cropped" AS measurement, species, density
     FROM
@@ -582,7 +582,7 @@ flowcam_dens_species:
   COMMENT: ~
   FROM: ~
   SELECT: ~
-  SQL: 
+  SQL:
     SELECT
       timestamp, bottle,  "flowcam" AS measurement, species, density
     FROM
@@ -593,22 +593,22 @@ flowcytometer_dens_species:
   COMMENT: ~
   FROM: ~
   SELECT: ~
-  SQL: 
+  SQL:
     SELECT
-      timestamp, bottle,  "flowcytometer" AS measurement, name AS species, density
+      timestamp, bottle,  "flowcytometer" AS measurement, species, density
     FROM
-      flowcytometer__flowcytometer
+      flowcytometer__flowcytometer_density
 
 
 manualcount_dens_species:
   COMMENT: ~
   FROM: ~
   SELECT: ~
-  SQL: 
+  SQL:
     SELECT
       timestamp, bottle,  "manualcount" AS measurement, species, density
     FROM
-      manualcount__manualcount
+      manualcount__manualcount_density
 
 
 
@@ -618,7 +618,7 @@ all_dens_species:
   COMMENT: ~
   FROM: ~
   SELECT: ~
-  SQL: 
+  SQL:
     SELECT
       timestamp, bottle, "bemovi_mag_16" AS measurement, species, density
     FROM
@@ -640,14 +640,14 @@ all_dens_species:
       flowcam__algae_density
     UNION ALL
     SELECT
-      timestamp, bottle,  "flowcytometer" AS measurement, name AS species, density
+      timestamp, bottle,  "flowcytometer" AS measurement, species, density
     FROM
-      flowcytometer__flowcytometer
+      flowcytometer__flowcytometer_density_density
     UNION ALL
     SELECT
       timestamp, bottle,  "manualcount" AS measurement, species, density
     FROM
-      manualcount__manualcount
+      manualcount__manualcount_density
 
 
 

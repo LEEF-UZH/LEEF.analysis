@@ -1,7 +1,7 @@
 Package: LEEF.analysis
 Type: Package
 Title: Access Functions, Tests and Basic Analysisof the RRD Data from the LEEF Project
-Version: 0.1.7
+Version: 0.1.8
 Authors@R: c(
   person(given = "Rainer M.", family = "Krug", email = "Rainer.Krug@uzh.ch", role = c("aut", "cre")),
   person("SNF Project 310030_188431", role = "fnd")
@@ -22,5 +22,7 @@ Imports:
   parallel,
   ggplot2,
   rmarkdown,
-  utils
+  utils,
+  dbplyr,
+  dplyr
 RoxygenNote: 7.1.1

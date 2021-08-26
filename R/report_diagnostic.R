@@ -29,7 +29,7 @@ report_diagnostic <- function(db, format = "html") {
     stop("Unsupported format. Use 'html', 'pdf' or 'word'")
   )
   report <- rmarkdown::render(
-    input = system.file("DiagnosticPlotsForCheck.Rmd", package = "LEEF.analysis"),
+    input = system.file("DiagnosticReport.Rmd", package = "LEEF.analysis"),
     output_format = output_format,
     params = list(db = db),
     output_file = output_file

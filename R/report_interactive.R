@@ -2,7 +2,7 @@
 #'
 #' @param db fully qualified path to the sqlite database. The report will be saved to the same directory.
 #'
-#' @return invisibkly \code{NULL}
+#' @return invisibly \code{NULL}
 #'
 #' @importFrom rmarkdown run
 #' @export
