@@ -64,6 +64,6 @@ plot_species_per_timestamp_per_measure(params$db)
 
 ## Density of Species per bottle as measured by measurement over time
 
-```{r dens_species_16, fig.height = 16}
+```{r dens_species, fig.height = 16}
 plot_density_species_per_bottle_per_timestamp(params$db, transform_density_4throot = TRUE)
 ```
