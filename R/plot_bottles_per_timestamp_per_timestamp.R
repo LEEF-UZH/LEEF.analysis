@@ -14,7 +14,7 @@
 plot_bottles_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){
-  data <- db_read_density() %>%
+  data <- db_read_density(db) %>%
     dplyr::group_by(timestamp, species, bottle, measurement) %>%
     dplyr::summarise(n = dplyr::n()) %>%
     dplyr::collect() %>%

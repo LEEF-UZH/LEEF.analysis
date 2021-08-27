@@ -22,9 +22,9 @@ plot_no_species_per_bottle_per_timestamp <- function(
     dplyr::collect() %>%
     dplyr::mutate(timestamp = convert_timestamp(timestamp))
 
-  data$timestamp  <- data$timestamp + (as.integer(as.factor(data$measurement)) / 5) - 1.1
+  data$no_species  <- data$no_species + (as.integer(as.factor(data$measurement)) / 10)
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$timestamp, y = .data$no_species)) +
-    ggplot2::geom_point(aes(colour = .data$measurement)) +
+    ggplot2::geom_line(aes(colour = .data$measurement)) +
     ggplot2::xlab("") +
     ggplot2::scale_colour_manual(values = 1:10 )
   p

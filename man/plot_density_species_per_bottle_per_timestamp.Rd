@@ -14,6 +14,9 @@ plot_density_species_per_bottle_per_timestamp(
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
 
 \item{transform_density_4throot}{if \code{TRUE}, density is transformed using 4th root transformation.}
+
+\item{measurement}{the measurement to be plotted. If \code{NULL},
+the default, they are plotted by temperature treatment (constant & increasing)}
 }
 \value{
 \code{ggplot} object of the plot

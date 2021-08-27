@@ -31,17 +31,14 @@ library(LEEF.analysis)
 The report can be generated from the command line by using
 
 ```{bash info_invocation, eval = FALSE}
-Rscript -e '
-db <- "~/Desktop/LEEF.RRD.sqlite";
-Rscript -e "library(LEEF.analysis); report_diagnostic(db);"
-'
+Rscript -e "library(LEEF.analysis); db <- '~/Desktop/9.backend/LEEF.RRD.sqlite'; report_interactive();"
 ```
 
 \pagebreak
 
 ## Check Bottles per Measurement per Timestep
 
-This plot shows, if a `bottle` is present for the `measurement` for the timesteamps analysed. Each `measurement` is a panes. Missing dots indicate missing datapoints for the `bottle` at the `measurement` for the `timestamp`.
+This plot shows, if a `bottle` is present for the `measurement` for the timestamps analysed. Each `measurement` is a panes. Missing dots indicate missing datapoints for the `bottle` at the `measurement` for the `timestamp`.
 
 ```{r bottles_per_timestamp}
 plot_bottles_per_timestamp(params$db)
@@ -67,57 +64,6 @@ plot_species_per_timestamp_per_measure(params$db)
 
 ## Density of Species per bottle as measured by measurement over time
 
-### bemovi_mag_16
 ```{r dens_species_16, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp(params$db, "bemovi_mag_16")
+plot_density_species_per_bottle_per_timestamp(params$db, transform_density_4throot = TRUE)
 ```
-
-
-### bemovi_mag_25
-```{r dens_species_25, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp(params$db, "bemovi_mag_25")
-```
-
-### bemovi_mag_25_cropped
-```{r dens_species_25c, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp(params$db, "bemovi_mag_25_cropped")
-```
-
-### flowcam
-```{r dens_species_fca, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp(params$db, "flowcam")
-```
-
-### flowcytometer
-```{r dens_species_fcy, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp(params$db, "flowcytometer")
-```
-
-### manualcount
-```{r dens_species_mc, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp(params$db, "manualcount")
-```
-
-
-### Interactive
-```{r eruptions, echo=FALSE}
-shiny::inputPanel(
-  shiny::selectInput("measurement", label = "Measurement:",
-              choices = c(
-                "bemovi_mag_16", "bemovi_mag_25", "bemovi_mag_25_cropped", 
-                "flowcam", 
-                "flowcytometer", 
-                "manualcount",
-                "all"
-              ), selected = 1),
-  
-  shiny::sliderInput("bottle", label = "Bottle:",
-              min = 1, max = 32, value = 1, step = 1)
-)
-
-shiny::renderPlot(
-  LEEF.analysis::plot_density_species_per_bottle_per_timestamp(params$db, input$measurement),
-  height = 1600
-)
-```
-

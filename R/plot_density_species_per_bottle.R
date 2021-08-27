@@ -2,6 +2,8 @@
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
+#' @param measurement the measurement to be plotted. If \code{NULL},
+#'   the default, they are plotted by temperature treatment (constant & increasing)
 #' @param transform_density_4throot if \code{TRUE}, density is transformed using 4th root transformation.
 #'
 #' @return \code{ggplot} object of the plot
@@ -31,7 +33,7 @@ plot_density_species_per_bottle_per_timestamp <- function(
 
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$exp_day, y = .data$density)) +
     ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
-    ggplot2::facet_wrap(~temperature, ncol = 3) +
+    ggplot2::facet_grid(rows = vars(measurement), cols = vars(temperature), scales = "free_y") +
     ggplot2::scale_colour_manual(values = 1:40) +
     ggplot2::xlab("Day of Experiment") +
     ggplot2::ylab(ifelse(transform_density_4throot, "4th root density", "density")) +
