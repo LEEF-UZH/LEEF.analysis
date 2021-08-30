@@ -27,3 +27,47 @@ fix_bottle <- function(bottle) {
   bottle[which(bottle == "b_101")] <- "b_c_2"
   return(bottle)
 }
+
+#' Defines sets of species
+#'
+#' @param species_set_id if \code{NULL}, return the names of the species sets defined.
+#'   If the name or the index of a specific set, return that set.
+#'
+#' @return Names of sets or the set itself
+#' @export
+#'
+#' @examples
+species_set <- function(species_set_id = NULL){
+  sets <- list(
+    flowcam_algae = c(
+      "Chlamydomonas",
+      "Cosmarium",
+      "Cryptomonas",
+      "Desmodesmus",
+      "Monoraphidium",
+      "Staurastrum1",
+      "Staurastrum2"
+    ),
+    flowcam_ciliates = c(
+      "Coleps_irchel",
+      "Coleps_viridis",
+      "Colpidium",
+      "Dexiostama",
+      "Loxocephallus",
+      "OtherCiliates",
+      "Tetrahymena"
+    ),
+    flowcam_rest = c(
+      "airbubbles",
+      "ChlamydomonasClumps",
+      "ColpidiumVacuoles",
+      "Debris",
+      "DigestedAlgae"
+    )
+  )
+  if (is.null(species_set_id)) {
+    return(names(sets))
+  } else {
+    return(sets[[species_set_id]])
+  }
+}

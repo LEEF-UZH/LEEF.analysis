@@ -4,7 +4,7 @@
 \name{LEEF.analysis-package}
 \alias{LEEF.analysis}
 \alias{LEEF.analysis-package}
-\title{LEEF.analysis: Access Functions, Tests and Basic Analysisof the RRD Data from the LEEF Project}
+\title{LEEF.analysis: Access Functons, Tests and Basic Analysisof the RRD Data from the LEEF Project}
 \description{
 Provides simple access functions to read data out of the sqlite RRD database. SQL queries
   can be configured in a yaml config file and used.

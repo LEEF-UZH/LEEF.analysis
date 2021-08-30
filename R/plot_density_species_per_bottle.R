@@ -9,6 +9,7 @@
 #' @return \code{ggplot} object of the plot
 #'
 #' @importFrom dplyr collect mutate
+#' @importFrom rlang !!
 #' @import ggplot2
 #'
 #' @export
@@ -16,9 +17,21 @@
 #' @examples
 plot_density_species_per_bottle_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  transform_density_4throot = TRUE
+  transform_density_4throot = TRUE,
+  measurement = "bemovi_mag_16",
+  species_set_id = NULL
 ){
+
+  spid <- species_set(species_set_id)
   data <- db_read_density(db) %>%
+    dplyr::filter(measurement == !!measurement) %>%
+    dplyr::filter(
+      ifelse(
+        is.null(species_set_id),
+        TRUE,
+        species %in% !!spid
+      )
+    ) %>%
     dplyr::collect() %>%
     dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
     dplyr::mutate(exp_day = exp_day(timestamp)) %>%
@@ -33,7 +46,7 @@ plot_density_species_per_bottle_per_timestamp <- function(
 
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$exp_day, y = .data$density)) +
     ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
-    ggplot2::facet_grid(rows = vars(measurement), cols = vars(temperature), scales = "free_y") +
+    ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +
     ggplot2::scale_colour_manual(values = 1:40) +
     ggplot2::xlab("Day of Experiment") +
     ggplot2::ylab(ifelse(transform_density_4throot, "4th root density", "density")) +

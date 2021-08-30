@@ -6,7 +6,9 @@
 \usage{
 plot_density_species_per_bottle_per_timestamp(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  transform_density_4throot = TRUE
+  transform_density_4throot = TRUE,
+  measurement = "bemovi_mag_16",
+  species_set_id = NULL
 )
 }
 \arguments{

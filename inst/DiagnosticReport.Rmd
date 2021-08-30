@@ -3,6 +3,10 @@ title: "Diagnostic plots for the RRD ``r params$db``"
 author: "Rainer M Krug"
 date: "`r Sys.time()`"
 output:
+  pdf_document:
+    dev: pdf
+    fig_width: 10
+    fig_height: 12
   html_document:
     dev: png
     fig_width: 10
@@ -10,17 +14,12 @@ output:
     toc: true
     toc_float: true
     toc_collapsed: true
-  pdf_document:
-    dev: pdf
-    fig_width: 10
-    fig_height: 12
   word_document: 
     dev: png
     fig_width: 10
     fig_height: 12
 params:
   db: ~/Desktop/9.backend/LEEF.RRD.sqlite
-runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -64,6 +63,99 @@ plot_species_per_timestamp_per_measure(params$db)
 
 ## Density of Species per bottle as measured by measurement over time
 
-```{r dens_species, fig.height = 16}
-plot_density_species_per_bottle_per_timestamp(params$db, transform_density_4throot = TRUE)
+\pagebreak
+
+### Bemovi Magnification 16
+```{r dens_species_b_16, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "bemovi_mag_16",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25
+```{r dens_species_b_25, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "bemovi_mag_25",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25 cropped
+```{r dens_species_b_25_crop, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "bemovi_mag_25_cropped",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Flowcam Algae
+```{r dens_species_fcam_al, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_algae"
+)
+```
+
+\pagebreak
+
+### Flowcam Ciliates
+```{r dens_species_fcam_cil, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_ciliates"
+)
+```
+
+\pagebreak
+
+### Flowcam Rest
+```{r dens_species_fcam_rest, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_rest"
+)
+```
+
+
+\pagebreak
+
+### Flowcytometer
+```{r dens_species_fcyt, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "flowcytometer",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Manualcount
+```{r dens_species_mc, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "manualcount",
+  species_set_id = NULL
+)
 ```
