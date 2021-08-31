@@ -1,12 +1,8 @@
 ---
 title: "Diagnostic plots for the RRD ``r params$db``"
 author: "Rainer M Krug"
-date: "`r Sys.time()`"
+date: "`r Sys.time()` - `leef.analysis` package version: `r packageVersion('leef.analysis')`"
 output:
-  pdf_document:
-    dev: pdf
-    fig_width: 10
-    fig_height: 12
   html_document:
     dev: png
     fig_width: 10
@@ -14,6 +10,10 @@ output:
     toc: true
     toc_float: true
     toc_collapsed: true
+  pdf_document:
+    dev: pdf
+    fig_width: 10
+    fig_height: 12
   word_document: 
     dev: png
     fig_width: 10

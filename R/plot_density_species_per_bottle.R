@@ -47,6 +47,13 @@ plot_density_species_per_bottle_per_timestamp <- function(
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$exp_day, y = .data$density)) +
     ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
     ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +
+    ggplot2::geom_text(
+      data = data,
+      ggplot2::aes(x = -Inf, y = Inf, label = bottle, group = bottle),
+      hjust = -0.5,
+      vjust = 1.4,
+      size = 3
+    ) +
     ggplot2::scale_colour_manual(values = 1:40) +
     ggplot2::xlab("Day of Experiment") +
     ggplot2::ylab(ifelse(transform_density_4throot, "4th root density", "density")) +

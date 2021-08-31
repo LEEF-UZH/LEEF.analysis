@@ -6,11 +6,11 @@
   "@type": "SoftwareSourceCode",
   "identifier": "LEEF.analysis",
   "description": "Provides simple access functions to read data out of the sqlite RRD database. SQL queries\n  can be configured in a yaml config file and used.",
-  "name": "LEEF.analysis: Access Functions, Tests and Basic Analysisof the RRD Data from the LEEF Project",
+  "name": "LEEF.analysis: Access Functons, Tests and Basic Analysisof the RRD Data from the LEEF Project",
   "codeRepository": "https://github.com/LEEF-UZH/LEEF.analysis",
   "issueTracker": "https://github.com/LEEF-UZH/LEEF.analysis/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "0.1.8",
+  "version": "0.1.10",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -144,5 +144,5 @@
       "sameAs": "https://CRAN.R-project.org/package=dplyr"
     }
   ],
-  "fileSize": "47.672KB"
+  "fileSize": "9233.683KB"
 }
