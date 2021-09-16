@@ -1,0 +1,42 @@
+#' Plot diagnostic plot to check number of species per timestamp
+#'
+#' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
+#'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
+#' @param measurement the measurement to be plotted. If \code{NULL},
+#'   the default, they are plotted by temperature treatment (constant & increasing)
+#' @param transform_density_4throot if \code{TRUE}, density is transformed using 4th root transformation.
+#' Plot diagnostic plot to check bottles per timestamp
+#'
+#' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
+#'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
+#'
+#' @return \code{ggplot} object of the plot
+#'
+#' @importFrom dplyr group_by summarise n collect mutate
+#' @import ggplot2
+#'
+#' @export
+#'
+#' @examples
+plot_bottles_per_timestamp <- function(
+  db = getOption("RRDdb", "LEEF.RRD.sqlite")
+){
+  data <- db_read_density(db)
+
+  # %>%
+  #   dplyr::group_by(timestamp, species, bottle, measurement) %>%
+  #   dplyr::summarise(n = dplyr::n()) %>%
+  #   dplyr::collect() %>%
+  #   dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
+  #   dplyr::mutate(exp_day = exp_day(timestamp)) %>%
+  #   dplyr::mutate(bottle = fix_bottle(bottle))
+  #
+  p <- db_read_density(db) %>%
+    ggplot2::ggplot(ggplot2::aes(x = .data$composition, y = .data$density)) +
+#    ggplot2::geom_line() +
+    ggplot2::geom_point() +
+    ggplot2::xlab("") +
+    ggplot2::facet_wrap(~species, ncol = 3) +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
+  p
+}
