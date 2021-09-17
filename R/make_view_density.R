@@ -51,7 +51,16 @@ FROM
      manualcount__manualcount_density
   )
 INNER JOIN
-  experimetal_design
+  (
+   SELECT
+     'bottle',
+     'temperature' AS temperature_treatment,
+     'richness',
+     'composition',
+     'incubator'
+   FROM
+	 experimetal_design
+  )
 USING
   (bottle)
   "

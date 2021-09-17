@@ -19,4 +19,5 @@ prepare_rrd <- function(
 ){
   add_experiment_tables(db = db, composition = composition, experimetal_design = experimetal_design, overwrite = overwrite)
   make_view_density(db = db, overwrite = overwrite)
+  make_view_o2(db = db, overwrite = overwrite)
 }
