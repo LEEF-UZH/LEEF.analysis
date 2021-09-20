@@ -21,18 +21,23 @@ SELECT
 FROM
   (
    SELECT
-     timestamp, bottle, temp AS 'temp', value AS 'percent_o2', 'o2meter' AS measurement
+     timestamp,
+     bottle,
+     sensor,
+     temp AS 'temperature_actual',
+     value AS 'percent_o2',
+     'o2meter' AS measurement
    FROM
      o2meter__o2meter
   )
 INNER JOIN
   (
    SELECT
-     'bottle',
-     'temperature' AS temperature_treatment,
-     'richness',
-     'composition',
-     'incubator'
+     bottle,
+     temperature,
+     richness,
+     composition,
+     incubator
    FROM
 	 experimetal_design
   )

@@ -35,6 +35,14 @@ Rscript -e "library(LEEF.analysis); db <- '~/Desktop/9.backend/LEEF.RRD.sqlite';
 
 \pagebreak
 
+## Response  variable in the last timestap
+
+```{r response_per_timestamp, fig.height = 26}
+plot_response_incubator(params$db)
+```
+
+\pagebreak
+
 ## Check Bottles per Measurement per Timestep
 
 This plot shows, if a `bottle` is present for the `measurement` for the timestamps analysed. Each `measurement` is a panes. Missing dots indicate missing datapoints for the `bottle` at the `measurement` for the `timestamp`.
@@ -157,5 +165,15 @@ plot_density_species_per_bottle_per_timestamp(
   transform_density_4throot = TRUE, 
   measurement = "manualcount",
   species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Percent O~2~
+
+```{r percent_o2, fig.height = 16}
+plot_o2s_per_bottle_per_timestamp(
+  params$db
 )
 ```

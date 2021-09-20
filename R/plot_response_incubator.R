@@ -18,7 +18,7 @@
 #' @export
 #'
 #' @examples
-plot_bottles_per_timestamp <- function(
+plot_response_incubator <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){
   density <- db_read_density(db) %>%
@@ -74,7 +74,7 @@ plot_bottles_per_timestamp <- function(
     ) +
     ggplot2::geom_point() +
     ggplot2::xlab("") +
-    ggplot2::facet_wrap(~mxs, ncol = 6, scales = "free",) +
+    ggplot2::facet_wrap(~mxs, ncol = 3, scales = "free",) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
   p
 }
