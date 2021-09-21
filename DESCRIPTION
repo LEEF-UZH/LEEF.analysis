@@ -1,7 +1,7 @@
 Package: LEEF.analysis
 Type: Package
 Title: Access Functons, Tests and Basic Analysisof the RRD Data from the LEEF Project
-Version: 0.1.11
+Version: 0.1.12
 Authors@R: c(
   person(given = "Rainer M.", family = "Krug", email = "Rainer.Krug@uzh.ch", role = c("aut", "cre")),
   person("SNF Project 310030_188431", role = "fnd")
