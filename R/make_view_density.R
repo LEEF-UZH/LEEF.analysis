@@ -53,11 +53,11 @@ FROM
 INNER JOIN
   (
    SELECT
-     'bottle',
-     'temperature' AS temperature_treatment,
-     'richness',
-     'composition',
-     'incubator'
+     bottle,
+     temperature,
+     richness,
+     composition,
+     incubator
    FROM
 	 experimetal_design
   )
