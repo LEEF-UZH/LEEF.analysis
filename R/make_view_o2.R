@@ -23,7 +23,8 @@ FROM
    SELECT
      timestamp,
      bottle,
-     temp AS 'temp',
+     sensor,
+     temp AS 'temperature_actual',
      value AS 'percent_o2',
      'o2meter' AS measurement
    FROM
