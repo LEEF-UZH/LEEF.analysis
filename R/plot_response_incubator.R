@@ -74,7 +74,7 @@ plot_response_incubator <- function(
     ) +
     ggplot2::geom_point() +
     ggplot2::xlab("") +
-    ggplot2::facet_wrap(~mxs, ncol = 3, scales = "free",) +
+    ggplot2::facet_wrap(~mxs, ncol = 3, scales = "free_y",) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
   p
 }
