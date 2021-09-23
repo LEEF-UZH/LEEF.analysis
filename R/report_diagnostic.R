@@ -17,14 +17,17 @@ report_diagnostic <- function(db, format = "html") {
     html = {
       output_format <- "html_document"
       output_file <- file.path(dirname(db), "Diagnostic_report.html")
+      output_dir = dirname(db)
     },
     pdf = {
       output_format <- "pdf_document"
       output_file <- file.path(dirname(db), "Diagnostic_report.pdf")
+      output_dir = dirname(db)
     },
     word = {
       output_format <- "word_document"
       output_file <- file.path(dirname(db), "Diagnostic_report.docx")
+      output_dir = dirname(db)
     },
     stop("Unsupported format. Use 'html', 'pdf' or 'word'")
   )
