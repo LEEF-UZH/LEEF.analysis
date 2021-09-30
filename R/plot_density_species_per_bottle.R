@@ -21,6 +21,7 @@ plot_density_species_per_bottle_per_timestamp <- function(
   measurement = "bemovi_mag_16",
   species_set_id = NULL
 ){
+  options(dplyr.summarise.inform = FALSE)
 
   spid <- species_set(species_set_id)
   data <- db_read_density(db) %>%
@@ -42,7 +43,9 @@ plot_density_species_per_bottle_per_timestamp <- function(
       } else {
         density
       }
-    )
+    ) %>%
+    group_by(exp_day, bottle, species, composition, temperature) %>%
+    summarise(density = mean(density))
 
   p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$exp_day, y = .data$density)) +
     ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
