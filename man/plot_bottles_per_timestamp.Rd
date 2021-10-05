@@ -4,7 +4,10 @@
 \alias{plot_bottles_per_timestamp}
 \title{Plot diagnostic plot to check bottles per timestamp}
 \usage{
-plot_bottles_per_timestamp(db = getOption("RRDdb", "LEEF.RRD.sqlite"))
+plot_bottles_per_timestamp(
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  lastDays = 7
+)
 }
 \arguments{
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.

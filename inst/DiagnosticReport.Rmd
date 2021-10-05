@@ -48,7 +48,7 @@ plot_response_incubator(params$db)
 This plot shows, if a `bottle` is present for the `measurement` for the timestamps analysed. Each `measurement` is a panes. Missing dots indicate missing datapoints for the `bottle` at the `measurement` for the `timestamp`.
 
 ```{r bottles_per_timestamp}
-plot_bottles_per_timestamp(params$db)
+plot_bottles_per_timestamp(params$db, lastDays = Inf)
 ```
 
 \pagebreak
