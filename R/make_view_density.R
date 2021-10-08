@@ -2,6 +2,7 @@
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
+#' @param start_date the start date of the experiment
 #' @param overwrite if \code{TRUE}, overwrite existing view
 #'
 #' @return the result of the execution of the ecreatiuon of the view.
@@ -11,9 +12,11 @@
 #' @examples
 make_view_density <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  start_date = "2021-09-20",
   overwrite = FALSE
 ){
-  sql <- "
+  sql <- paste0(
+"
 CREATE VIEW density
 AS
 SELECT
@@ -21,32 +24,62 @@ SELECT
 FROM
   (
    SELECT
-     timestamp, bottle, 'bemovi_mag_16' AS measurement, species, density
+     timestamp,
+     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('", start_date, "') as integer ) AS day,
+     bottle,
+     'bemovi_mag_16' AS measurement,
+     species,
+     density
    FROM
      bemovi_mag_16__mean_density_per_ml
    UNION ALL
    SELECT
-     timestamp, bottle,  'bemovi_mag_25' AS measurement, species, density
+     timestamp,
+     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('", start_date, "') as integer ) AS day,
+     bottle,
+     'bemovi_mag_25' AS measurement,
+     species,
+     density
    FROM
      bemovi_mag_25__mean_density_per_ml
    UNION ALL
    SELECT
-     timestamp, bottle,  'bemovi_mag_25_cropped' AS measurement, species, density
+     timestamp,
+     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('", start_date, "') as integer ) AS day,
+     bottle,
+     'bemovi_mag_25_cropped' AS measurement,
+     species,
+     density
    FROM
      bemovi_mag_25__mean_density_per_ml_cropped
    UNION ALL
    SELECT
-     timestamp, bottle,  'flowcam' AS measurement, species, density
+     timestamp,
+     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('", start_date, "') as integer ) AS day,
+     bottle,
+     'flowcam' AS measurement,
+     species,
+     density
    FROM
      flowcam__algae_density
    UNION ALL
    SELECT
-     timestamp, bottle,  'flowcytometer' AS measurement, species, density
+     timestamp,
+     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('", start_date, "') as integer ) AS day,
+     bottle,
+     'flowcytometer' AS measurement,
+     species,
+     density
    FROM
      flowcytometer__flowcytometer_density
    UNION ALL
    SELECT
-     timestamp, bottle,  'manualcount' AS measurement, species, density
+     timestamp,
+     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('", start_date, "') as integer ) AS day,
+     bottle,
+     'manualcount' AS measurement,
+     species,
+     density
    FROM
      manualcount__manualcount_density
   )
@@ -63,7 +96,8 @@ INNER JOIN
   )
 USING
   (bottle)
-  "
+"
+  )
 
   con <- NULL
   con <- DBI::dbConnect(RSQLite::SQLite(), db)
