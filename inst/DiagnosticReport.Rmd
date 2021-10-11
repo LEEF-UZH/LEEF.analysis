@@ -74,6 +74,115 @@ plot_species_per_timestamp_per_measure(params$db)
 \pagebreak
 
 ### Bemovi Magnification 16
+```{r dens_species_b_16_raw, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_16",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25
+```{r dens_species_b_25_raw, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_25",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25 cropped
+```{r dens_species_b_25_crop_raw, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_25_cropped",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Flowcam Algae
+```{r dens_species_fcam_al_raw, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_algae"
+)
+```
+
+\pagebreak
+
+### Flowcam Ciliates
+```{r dens_species_fcam_cil_raw, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_ciliates"
+)
+```
+
+\pagebreak
+
+### Flowcam Rest
+```{r dens_species_fcam_rest_raw, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_rest"
+)
+```
+
+
+\pagebreak
+
+### Flowcytometer
+```{r dens_species_fcyt_raw, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcytometer",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Manualcount
+```{r dens_species_mc_raw, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "manualcount",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Percent O~2~
+
+```{r percent_o2_raw, fig.height = 16}
+plot_o2s_per_bottle_per_timestamp(
+  params$db
+)
+```
+
+## 4^th root Density of Species per bottle as measured by measurement over time
+
+\pagebreak
+
+### Bemovi Magnification 16
 ```{r dens_species_b_16, fig.height = 16}
 plot_density_species_per_bottle_per_timestamp(
   params$db, 
