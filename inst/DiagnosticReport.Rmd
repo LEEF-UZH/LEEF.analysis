@@ -178,7 +178,7 @@ plot_o2s_per_bottle_per_timestamp(
 )
 ```
 
-## 4^th root Density of Species per bottle as measured by measurement over time
+## 4^th^ root Density of Species per bottle as measured by measurement over time
 
 \pagebreak
 
