@@ -1,0 +1,46 @@
+---
+title: "Sanity Check of the data directory `r params$sample_dir`"
+author: "Rainer M Krug"
+date: "Timestamp: `r LEEF.analysis::sanity_get_timestamp(params$sample_dir)` - LEEF.analysis package version: `r packageVersion('LEEF.analysis')`"
+output:
+  html_document:
+    dev: png
+    fig_width: 10
+    fig_height: 12
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+  pdf_document:
+    dev: pdf
+    fig_width: 10
+    fig_height: 12
+  word_document: 
+    dev: png
+    fig_width: 10
+    fig_height: 12
+params:
+  sample_dir: ~/Desktop/
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(LEEF.analysis)
+```
+## Invocation from commandline
+The report can be generated from the command line by using
+
+```{bash info_invocation, eval = FALSE}
+Rscript -e "library(LEEF.analysis); sample_dir <- '~/Desktop/'; report_sanity_check();"
+```
+
+\pagebreak
+
+## Do the Sanity check
+
+```{r check}
+check <- sanity_check( params$sample_dir )
+check
+```
+
+
+\pagebreak
