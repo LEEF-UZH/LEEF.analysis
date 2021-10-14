@@ -22,7 +22,7 @@ plot_response_incubator <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){
   density <- db_read_density(db) %>%
-    dplyr::filter(timestamp == max(timestamp)) %>%
+    dplyr::filter(timestamp == max(timestamp, na.rm = TRUE)) %>%
     dplyr::mutate(mxs = paste(species, measurement)) %>%
     dplyr::select(timestamp, bottle, composition, incubator, density, mxs)
 
