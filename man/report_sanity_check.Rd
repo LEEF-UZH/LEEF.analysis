@@ -4,11 +4,13 @@
 \alias{report_sanity_check}
 \title{Report for the sanity check of the data for submission to the pipeline}
 \usage{
-report_sanity_check(sample_dir, format = "html")
+report_sanity_check(sample_dir, suffix = "", format = "html")
 }
 \arguments{
 \item{sample_dir}{root dir in which the folder \code{00.general.parameter} and \code{0.raw.data}
 are located}
+
+\item{suffix}{suffix for the file name}
 
 \item{format}{the format of the report as a character vector of length 1.
 Supported are at the moment: \code{html} (the default), \code{pdf} and \code{word}.}

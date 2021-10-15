@@ -17,11 +17,6 @@ convert_timestamp <- function(timestamp) {
   as.Date(timestamp, "%Y%m%d")
 }
 
-exp_day <- function(timestamp, relative_to = min(timestamp)) {
-  d <- timestamp - relative_to
-  d <- as.integer(d)
-}
-
 fix_bottle <- function(bottle) {
   bottle[which(bottle == "b_100")] <- "b_c_1"
   bottle[which(bottle == "b_101")] <- "b_c_2"

@@ -16,15 +16,14 @@ plot_bottles_per_timestamp <- function(
   lastDays = 7
 ){
   data <- db_read_density(db) %>%
-    dplyr::group_by(timestamp, species, bottle, measurement) %>%
+    dplyr::group_by(timestamp, day, species, bottle, measurement) %>%
     dplyr::summarise(n = dplyr::n()) %>%
     dplyr::collect() %>%
     dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
     dplyr::mutate(bottle = fix_bottle(bottle))
 
-  data$exp_day <-  exp_day(data$timestamp)
   data <- data %>%
-    dplyr::filter(exp_day <= lastDays)
+    dplyr::filter(day <= lastDays)
 
   p <- data %>%
     ggplot2::ggplot(ggplot2::aes(x = .data$timestamp, y = .data$bottle)) +

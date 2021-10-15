@@ -35,7 +35,6 @@ plot_density_species_per_bottle_per_timestamp <- function(
     ) %>%
     dplyr::collect() %>%
     dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
-    dplyr::mutate(exp_day = exp_day(timestamp)) %>%
     dplyr::mutate(bottle = fix_bottle(bottle)) %>%
     dplyr::mutate(
       density = if (transform_density_4throot) {
@@ -44,10 +43,10 @@ plot_density_species_per_bottle_per_timestamp <- function(
         density
       }
     ) %>%
-    group_by(exp_day, bottle, species, composition, temperature) %>%
+    group_by(day, bottle, species, composition, temperature) %>%
     summarise(density = mean(density))
 
-  p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$exp_day, y = .data$density)) +
+  p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$density)) +
     ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
     ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +
     ggplot2::geom_text(

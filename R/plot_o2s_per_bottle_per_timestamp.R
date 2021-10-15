@@ -25,11 +25,10 @@ plot_o2s_per_bottle_per_timestamp <- function(
     dplyr::mutate(percent_o2 = as.numeric(percent_o2)) %>%
     dplyr::mutate(sensor = as.character(sensor)) %>%
     dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
-    dplyr::mutate(exp_day = exp_day(timestamp)) %>%
     dplyr::mutate(bottle = fix_bottle(bottle))
 
 
-  p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$exp_day, y = .data$percent_o2)) +
+  p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$percent_o2)) +
     ggplot2::geom_line(ggplot2::aes(y = .data$percent_o2, colour = .data$sensor)) +
     ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +
     ggplot2::geom_text(

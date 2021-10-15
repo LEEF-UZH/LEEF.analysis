@@ -27,7 +27,7 @@ plot_response_incubator <- function(
     dplyr::select(timestamp, bottle, composition, incubator, density, mxs)
 
   o2 <- db_read_o2(db) %>%
-    dplyr::filter(timestamp == max(timestamp)) %>%
+    dplyr::filter(timestamp == max(timestamp, na.rm = TRUE)) %>%
     dplyr::rename(density = percent_o2) %>%
     dplyr::mutate(mxs = measurement) %>%
     dplyr::select(timestamp, bottle, composition, incubator, density, mxs) %>%
