@@ -477,7 +477,7 @@ sanity_check_flowcytometer <- function(
   fd <- file.path(sample_dir, "0.raw.data", "flowcytometer")
 
   required_data_files <- c(
-    "20210920",
+    timestamp,
     paste0(timestamp, ".ciplus")
   )
 
