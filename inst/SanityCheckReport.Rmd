@@ -1,5 +1,5 @@
 ---
-title: "Sanity Check of the data directory `r params$sample_dir`"
+title: "Sanity Check of the data directory `r basename(params$sample_dir)`"
 author: "Rainer M Krug"
 date: | 
   | `Timestamp`: `r LEEF.analysis::sanity_get_timestamp(params$sample_dir)`
