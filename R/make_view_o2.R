@@ -15,7 +15,7 @@ make_view_o2 <- function(
   start_date = "2021-09-20",
   overwrite = FALSE
 ){
-  sql <- paste(
+  sql <- paste0(
 "
 CREATE VIEW o2
 AS
@@ -25,7 +25,10 @@ FROM
   (
    SELECT
      timestamp,
-     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('", start_date, "') as integer ) AS day,
+     cast(
+          julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) -
+          julianday('", start_date, "') AS integer
+     ) AS day,
      bottle,
      sensor,
      temp AS 'temperature_actual',
