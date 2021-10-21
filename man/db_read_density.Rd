@@ -4,11 +4,19 @@
 \alias{db_read_density}
 \title{Read \code{density} from RRD database and return as an \code{tbl_SQLiteConnection}.}
 \usage{
-db_read_density(db = getOption("RRDdb", "LEEF.RRD.sqlite"))
+db_read_density(
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  from_timestamp = 20210920,
+  to_timestamp = 21000101
+)
 }
 \arguments{
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
+
+\item{from_timestamp}{\code{integer}. Earliest timestamp to return. Default: \code{20210920}}
+
+\item{to_timestamp}{\code{integer}. Latest timestamp to return. Default: \code{21000101}}
 }
 \value{
 Link to the table \code{density} in the RRD to be used with \code{dplyr} and friends
