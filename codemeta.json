@@ -10,7 +10,7 @@
   "codeRepository": "https://github.com/LEEF-UZH/LEEF.analysis",
   "issueTracker": "https://github.com/LEEF-UZH/LEEF.analysis/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -144,5 +144,5 @@
       "sameAs": "https://CRAN.R-project.org/package=dplyr"
     }
   ],
-  "fileSize": "96.897KB"
+  "fileSize": "96.924KB"
 }

@@ -22,7 +22,7 @@ output:
     fig_width: 10
     fig_height: 12
 params:
-  db: ~/Desktop/9.backend/LEEF.RRD.sqlite
+  db: /Volumes/LEEF/0.RRD/LEEF.RRD.20211029.sqlite
 ---
 
 ```{r setup, include=FALSE}
