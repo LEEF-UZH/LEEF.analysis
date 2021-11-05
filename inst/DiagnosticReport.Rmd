@@ -22,7 +22,7 @@ output:
     fig_width: 10
     fig_height: 12
 params:
-  db: /Volumes/LEEF/0.RRD/LEEF.RRD.20211029.sqlite
+  db: /Volumes/LEEF/0.RRD/LEEF.RRD.20211103.sqlite
 ---
 
 ```{r setup, include=FALSE}
@@ -45,7 +45,7 @@ plot_response_incubator(params$db)
 ```
 
 \pagebreak
-
+`
 ## Check Bottles per Measurement per Timestep
 
 This plot shows, if a `bottle` is present for the `measurement` for the timestamps analysed. Each `measurement` is a panes. Missing dots indicate missing datapoints for the `bottle` at the `measurement` for the `timestamp`.
@@ -94,6 +94,18 @@ plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "bemovi_mag_25",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25 non_cropped
+```{r dens_species_b_25_non_crop_raw, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_25_non_cropped",
   species_set_id = NULL
 )
 ```
@@ -203,6 +215,18 @@ plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "bemovi_mag_25",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25 non cropped
+```{r dens_species_b_25_crop, fig.height = 16}
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "bemovi_mag_25_non_cropped",
   species_set_id = NULL
 )
 ```
