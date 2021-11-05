@@ -222,7 +222,7 @@ plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Bemovi Magnification 25 non cropped
-```{r dens_species_b_25_crop, fig.height = 16}
+```{r dens_species_b_25_non_crop, fig.height = 16}
 plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
