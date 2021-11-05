@@ -2,8 +2,8 @@
 title: "Diagnostic plots for the RRD `r params$db`"
 author: "Rainer M Krug"
 date: | 
-  | Last `timestamp`: `r LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(timestamp) FROM density')`
-  | Sampling `day`: `r LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(day) FROM density')`
+  | Last `timestamp`: `r LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(timestamp) FROM density WHERE timestamp < 30000000')`
+  | Sampling `day`: `r LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(day) FROM density WHERE day < 1000')`
   | `LEEF.analysis` package version: `r packageVersion('LEEF.analysis')`
 output:
   html_document:
@@ -22,7 +22,7 @@ output:
     fig_width: 10
     fig_height: 12
 params:
-  db: ~/Desktop/9.backend/LEEF.RRD.sqlite
+  db: /Volumes/LEEF/0.RRD/LEEF.RRD.20211029.sqlite
 ---
 
 ```{r setup, include=FALSE}

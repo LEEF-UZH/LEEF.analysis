@@ -23,7 +23,7 @@ plot_bottles_per_timestamp <- function(
     dplyr::mutate(bottle = fix_bottle(bottle))
 
   data <- data %>%
-    dplyr::filter(day <= lastDays)
+    dplyr::filter(day >= (max(data$day) - lastDays))
 
   p <- data %>%
     ggplot2::ggplot(ggplot2::aes(x = .data$timestamp, y = .data$bottle)) +
