@@ -57,6 +57,16 @@ FROM
      timestamp,
      cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('", start_date, "') as integer ) AS day,
      bottle,
+     'bemovi_mag_25_non_cropped' AS measurement,
+     species,
+     density
+   FROM
+     bemovi_mag_25__mean_density_per_ml_non_cropped
+   UNION ALL
+   SELECT
+     timestamp,
+     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('", start_date, "') as integer ) AS day,
+     bottle,
      'flowcam' AS measurement,
      species,
      density
