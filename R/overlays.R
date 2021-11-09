@@ -7,8 +7,9 @@
 #'   \code{"pecies"}.
 #' @param overlay.type Overlays can either be shown as "label", "circle" or
 #'   "both". Default: \code{"both"}
-#' @param hq if \code{TRUE}, overlays are in same quality as the original video,
-#'   if \code{FALSE} they will be downsampled. Default \code{FALSE}
+#' @param crf integer value between 1 to 51, where 1 means lossless, 17 is nearly visually lossless,
+#'    51 is worst quality. Default value is 23
+#' @param gamma increase video dynamic range. Value between 0.1 and 10. Default 2. see \url{https://ffmpeg.org/ffmpeg-filters.html#eq} for further info
 #' @param ffmpeg command to run ffmpeg. It can include a path. Default
 #'   \code{ffmpeg}
 #' @param mc.cores number of cores to be used for parallel execution. Defaults
@@ -27,7 +28,8 @@ overlays <- function(
   cropped = FALSE,
   label = "species",
   overlay.type = "both",
-  hq = FALSE,
+  crf = 17,
+  gamma = 2,
   ffmpeg = "ffmpeg",
   from_current_to_archive_dir = "./../../../../../Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data",
   mc.cores = 7
@@ -85,7 +87,8 @@ overlays <- function(
     ffmpeg = ffmpeg,
     master = mf,
     overlay.type = overlay.type,
-    hq = hq,
+    crf = crf,
+    gamma = gamma,
     mc.cores = mc.cores
   )
 }
