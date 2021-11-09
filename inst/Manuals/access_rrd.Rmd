@@ -11,7 +11,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = FALSE
+  eval = TRUE
 )
 ```
 
@@ -42,7 +42,7 @@ set the database:
 options(RRDdb = "/Volumes/LEEF/0.RRD/LEEF.RRD.sqlite")
 ```
 
-**All build-in functions to read the data (i.e. `read_sql()`, `read_rrd()` (should not be used aymore), `db_read_density()` and `db_read_o2()`) access the database in READ ONLY mode and do not pose any danger of corrupting the data. Using fu nctions from the `DBI` package, can be destructive and shluld be avoided!**
+**All build-in functions to read the data (i.e. `read_sql()`, `read_rrd()` (should not be used aymore), `db_read_density()` and `db_read_o2()`) access the database in READ ONLY mode and do not pose any danger of corrupting the data. Using functions from the `DBI` package, can be destructive and shluld be avoided!**
 
 ## Simple reading of data
 The densities can be read by using 
