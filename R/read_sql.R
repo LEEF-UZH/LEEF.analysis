@@ -10,6 +10,7 @@
 #'
 #' @importFrom DBI dbConnect dbGetQuery dbDisconnect
 #' @importFrom RSQLite SQLite SQLITE_RO
+#' @importFrom tibble as_tibble
 #' @export
 #'
 read_sql <- function(
@@ -27,5 +28,5 @@ read_sql <- function(
 
   ##
 
-  return(table)
+  return(tibble::as_tibble(table))
 }
