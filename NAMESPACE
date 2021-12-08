@@ -2,6 +2,7 @@
 
 export(add_experiment_tables)
 export(configs)
+export(create_rrd_trimmed)
 export(db_disconnect)
 export(db_read_density)
 export(db_read_o2)
