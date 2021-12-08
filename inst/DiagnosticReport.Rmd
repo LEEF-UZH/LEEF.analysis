@@ -13,6 +13,7 @@ output:
     toc: true
     toc_float: true
     toc_collapsed: true
+    code_folding: hide
   pdf_document:
     dev: pdf
     fig_width: 10
@@ -45,7 +46,7 @@ plot_response_incubator(params$db)
 ```
 
 \pagebreak
-`
+
 ## Check Bottles per Measurement per Timestep
 
 This plot shows, if a `bottle` is present for the `measurement` for the timestamps analysed. Each `measurement` is a panes. Missing dots indicate missing datapoints for the `bottle` at the `measurement` for the `timestamp`.

@@ -15,15 +15,25 @@ plot_bottles_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   lastDays = 7
 ){
-  data <- db_read_density(db) %>%
-    dplyr::group_by(timestamp, day, species, bottle, measurement) %>%
-    dplyr::summarise(n = dplyr::n()) %>%
-    dplyr::collect() %>%
+  data <- rbind(
+    db_read_density(db) %>%
+      dplyr::select(timestamp, day, bottle, measurement) %>%
+      dplyr::filter(day >= (max(day, na.rm=TRUE) - lastDays)) %>%
+      # dplyr::group_by(timestamp, day, bottle, measurement) %>%
+      # dplyr::summarise(n = dplyr::n()) %>%
+      dplyr::collect(),
+    db_read_o2(db) %>%
+      dplyr::select(timestamp, day, bottle, measurement) %>%
+      dplyr::filter(day >= (max(day, na.rm=TRUE) - lastDays)) %>%
+      # dplyr::group_by(timestamp, day, bottle, measurement) %>%
+      # dplyr::summarise(n = dplyr::n()) %>%
+      dplyr::collect()
+  )
+  max_day <- max(data$day) - lastDays
+  data <- data %>%
+    dplyr::filter(day >= max_day) %>%
     dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
     dplyr::mutate(bottle = fix_bottle(bottle))
-
-  data <- data %>%
-    dplyr::filter(day >= (max(data$day) - lastDays))
 
   p <- data %>%
     ggplot2::ggplot(ggplot2::aes(x = .data$timestamp, y = .data$bottle)) +
