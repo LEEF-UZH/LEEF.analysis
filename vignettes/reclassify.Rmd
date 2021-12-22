@@ -1,0 +1,249 @@
+---
+title: "Reclassify flowcytometer and bemovi"
+author: Rainer Krug
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    number_sections: true
+    code_folding: hide
+    toc: true
+    toc_float: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Reclassify flowcytometer and bemovi}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  echo = TRUE,
+  eval = FALSE
+)
+```
+# Installation of required packages
+
+The reclassification needs the following libraries instelled:
+
+- `LEEF.analysis`
+- `LEEF.measurement.flowcam`
+- `LEEF.meaurement.bemovi`
+
+and the package `drat` to make installation easier.
+
+These can be installed as followed:
+
+```{r install, eval = FALSE}
+install.packages("drat")
+drat::addRepo("LEEF-UZH")
+install.packages("LEEF.analysis")
+install.packages("LEEF.measurement.flowcam")
+install.packages("LEEF.measurement.bemovi")
+```
+
+# Loading of packages
+
+Only one package needs to be loaded
+
+```{r setup}
+library(LEEF.analysis)
+```
+
+## Flowcam re-classification
+
+The reclassification **does not add the reclassified data to the RRD databaese yet!**
+
+```{r, warning=TRUE, message=TRUE}
+reclssified <- reclassify_flowcam_rrd(
+  db = "~/Desktop/9.backend/LEEF.RRD.20211206.sqlite",
+  timestamp = "20211206", 
+  classifier_constant = "~/git/LEEF/LEEF.parameter/parameter/flowcam/svm_flowcam_classifiers_18c_december2021.rds", 
+  classifier_increasing = "~/git/LEEF/LEEF.parameter/parameter/flowcam/svm_flowcam_classifiers_increasing_trained_at_18c_december2021.rds", 
+  species_tracked = c("Chlamydomonas", "Cosmarium", "Cryptomonas", "Desmodesmus", "Dexiostoma","Loxocephallus", "Monoraphidium", "Staurastrum1", "Staurastrum2", "Tetrahymena","airbubbles", "ColpidiumVacuoles", "Debris", "OtherCiliate", "ChlamydomonasClumps","Coleps_irchel", "Colpidium", "DigestedAlgae"))
+```
+
+
+# BEMOVI re-classification
+
+**STILL NEEDS TO BE DONE**
+
+The re-classification of the videos based on the RRD only cannot be done as of now, because at some point in the script below the trajectory.data is needed which is currently not in the RRD.
+
+## 16x
+
+### The RRD data
+
+```{r morph_mvt}
+options(RRDdb = "/Volumes/Groups/LEEF/0.RRD/LEEF.RRD.sqlite")
+morph_mvt <- db_read_table(table = "bemovi_mag_16__morph_mvt") %>%
+  dplyr::filter(timestamp=="20211112") %>%
+  collect()
+
+morph_mvt <- morph_mvt %>%
+  dplyr::select(
+    -c(
+      "didinium_prob",
+      "paramecium_bursaria_prob",
+      "smaller_ciliates_prob",
+      "stylonychia1_prob",
+      "euplotes_prob",
+      "paramecium_caudatum_prob",
+      "stylonychia2_prob",
+      "coleps_irchel_prob",
+      "colpidium_prob"
+    )
+  )
+```
+
+## Compositions file
+
+```{r}
+comps <- read.csv("flowcam/FlowcamAnalysisScript/compositions.csv")
+```
+
+### The re-classification
+
+```{r}
+# # 1. Load in classifiers (rds)
+# 
+# #classifier files
+# 
+# # the classifiers for increasing temperatures will have to be updated during experiment!!
+# name_constant <- "bemovi/VideoClassification/Classifiers_18C/16x/svm_classifier_early_2021/svm_video_classifiers_18c_16x.rds" # magnification dependent!
+# name_increasing <- "bemovi/VideoClassification/Classifiers_18C/16x/svm_classifier_early_2021/svm_video_classifiers_18c_16x.rds" # magnification dependent!
+# 
+# classifiers_constant <- readRDS(name_constant)
+# classifiers_increasing <- readRDS(name_increasing)
+# 
+# 
+# # 2. Make a list of 32 dataframes: split morph_mvt based on species combination and temperature regime
+# 
+# morph_mvt_list <- split(x = morph_mvt,
+#                         f = interaction(morph_mvt$composition_id, morph_mvt$temperature_treatment),
+#                         drop = T)
+# 
+# # 3. Predict species identities in the 32 dfs based on the 32 rf classifiers
+# 
+# for(i in 1:length(morph_mvt_list)){
+# 
+#   df <- morph_mvt_list[[i]]
+# 
+#   temperature_treatment <- unique(df$temperature_treatment) # either "constant" or "increasing"
+#   composition_id <- unique(df$composition_id) # a char between c_01 and c_16
+#   noNAs <- !rowSums(is.na(df)) > 0
+# 
+#   if (temperature_treatment == "constant"){
+#     pr <- predict(classifiers_constant[[composition_id]], df, probability = T)
+#     df$species[noNAs] <- as.character(pr) # species prediction
+#     df$species_probability[noNAs] <- apply(attributes(pr)$probabilities,1,max) # probability of each species prediction
+#     probabilities <- attributes(pr)$probabilities
+#     colnames(probabilities) <- paste0(colnames(probabilities),"_prob")
+#     df <- cbind(df, probabilities)
+#   } else {
+#     pr <- predict(classifiers_increasing[[composition_id]], df, probability = T)
+#     df$species[noNAs] <- as.character(pr) # species prediction
+#     df$species_probability[noNAs] <- apply(attributes(pr)$probabilities,1,max)  # probability of each species prediction
+#     probabilities <- attributes(pr)$probabilities
+#     colnames(probabilities) <- paste0(colnames(probabilities),"_prob")
+#     df <- cbind(df, probabilities)
+#   }
+# 
+#   morph_mvt_list[[i]] <- df
+# }
+# 
+# # 4. Merge the 32 dfs back into a single df: morph_mvt
+# 
+# morph_mvt <- purrr::reduce(morph_mvt_list, dplyr::full_join)
+# 
+# # 5. Add species identity to trajectory.data
+# 
+# ########## NOTE: this cannot be done with the RRD because the trajectory data is not on there...
+# 
+# take_all <- as.data.table(morph_mvt)
+# take_all <- take_all[, list(id, species)]
+# setkey(take_all, id)
+# setkey(trajectory.data.filtered, id)
+# trajectory.data.filtered <- trajectory.data.filtered[take_all]
+# trajectory.data <- trajectory.data.filtered
+# 
+# trajectory.data$predict_spec <- trajectory.data$species # needed for overlays
+# 
+# # -----------------------------------------------------------------------------------------------------
+# # calculate species densities -------------------------------------------------------------------------
+# 
+# # add temporary dummy variables in trajectory.data to be deleted afterwards
+# 
+# exp_design <- read.csv("flowcam/FlowcamAnalysisScript/experimental_design.csv")
+# 
+# empty_videos_ind <- which(!is.element(exp_design$file, unique(trajectory.data$file)))
+# empty_videos <- exp_design[empty_videos_ind,]
+# 
+# dummy_rows <- trajectory.data[1:nrow(empty_videos),]
+# 
+# dummy_rows <- left_join(empty_videos, dummy_rows, by=colnames(empty_videos))
+# dummy_rows$frame <- 1
+# dummy_rows$species <- "dummy_species"
+# 
+# trajectory.data <- rbind(trajectory.data, dummy_rows)
+# 
+# # density for each frame in each sample
+# 
+# extrapolation.factor <- 23.367 # to be updated
+# cropping.factor <- 1 ## NEW! cropping specific
+# 
+# count_per_frame <- trajectory.data %>%
+#   group_by(file, date, species, bottle, composition_id, temperature_treatment, magnification, sample, video, frame, dilution_factor) %>%
+#   summarise(count = n()) %>%
+#   mutate(dens.ml = count * extrapolation.factor * cropping.factor * dilution_factor)
+# 
+# mean_density_per_ml <- count_per_frame %>%
+#   group_by(date, species, composition_id, bottle, temperature_treatment, magnification, sample) %>%
+#   summarise(density = sum(dens.ml)/(3*125))
+# 
+# 
+# # -----------------------------------------------------------------------------------------------------
+# # add density = 0 for extinct species ------------------------------------------------------------
+# 
+# # magnification & cropping specific!
+# # species.tracked <- c("Dexiostoma", "Loxocephallus", "Tetrahymena", "Debris_and_other", "Cryptomonas")
+# species.tracked <- c("Coleps_irchel", "Colpidium", "Stylonychia1", "Stylonychia2", "Didinium", "Paramecium_caudatum", "Paramecium_bursaria", "Euplotes")
+# 
+# 
+# comps <- read_csv("../../compositions.csv")
+# comp_id <- unique(comps$composition)
+# comps <- comps %>%
+#   select(tidyselect::any_of(species.tracked))
+# 
+# comps.list <- apply(comps, 1, function(x){
+#   idx <- which(x==1)
+#   names(idx)
+# })
+# names(comps.list) <- comp_id
+# 
+# mean_density_per_ml_list <- split(x = mean_density_per_ml,
+#                                   f = mean_density_per_ml$bottle,
+#                                   drop = T)
+# 
+# for(i in 1:length(mean_density_per_ml_list)){
+#   df <- mean_density_per_ml_list[[i]]
+#   ID <- unique(df$composition_id)
+#   idx <- which(!is.element(unlist(comps.list[[ID]]), df$species))
+#   if(length(idx)==0) next
+#   for(j in idx){
+#     new.entry <- tail(df,1)
+#     new.entry$species <- comps.list[[ID]][j]
+#     new.entry$density <- 0
+#     df <- rbind(df, new.entry)
+#   }
+#   mean_density_per_ml_list[[i]] <- df
+# }
+# 
+# mean_density_per_ml <- do.call("rbind", mean_density_per_ml_list) %>%
+#   filter(species %in% species.tracked)
+# morph_mvt <- morph_mvt %>%
+#   filter(species %in% species.tracked)
+# trajectory.data <- trajectory.data %>%
+#   filter(species %in% species.tracked)
+```
