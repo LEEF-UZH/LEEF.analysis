@@ -9,7 +9,7 @@
 #' @param classifier_constant_name the classifier for temperature treatment **constant**
 #' @param classifier_increasing_name the classifier for temperature treatment **increasing**
 #' @param db_path if a valid path for an existing or new database `LEEF.RRD.sqlite` to which the
-#'   classified data will be added. If `NULL` the data will not be added to a database.
+#'   classified data will be added.
 #'
 #' @return invisible `NULL`
 #' @export
@@ -24,7 +24,7 @@ classify_flowcam_archive <- function(
   algae_traits_name = "algae_traits_filtered.rds",
   classifier_constant_name,
   classifier_increasing_name,
-  db_path = NULL
+  db_path
 ){
 
   dir.create( db_path, showWarnings = FALSE, recursive = TRUE)
@@ -37,22 +37,23 @@ classify_flowcam_archive <- function(
     lapply(
       timestamps,
       function(timestamp){
-        algae_traits_path <- file.path(
+        datadir <- file.path(
           archive_dir,
           "LEEF.archived.data/LEEF/3.archived.data/extracted",
-          paste0("LEEF.fast.flowcam.", as.character(timestamp)),
-          algae_traits_name
+          paste0("LEEF.fast.flowcam.", as.character(timestamp))
         )
         message("###############################################")
         message("Classifying timestamp ", timestamp, "...")
         suppressMessages(
-          classified <- classify_flowcam_files(
-            datadir = "~/Desktop/2.extracted.data/flowcam/",
-            algae_traits_name = algae_traits_name,
-            classifier_constant_name = "~/Desktop/1.pre-processed.data/flowcam/svm_flowcam_classifiers_18c_december2021.rds",
-            classifier_increasing_name = "~/Desktop/1.pre-processed.data/flowcam/svm_flowcam_classifiers_increasing_trained_at_18c_december2021.rds",
-            dir = NULL
-          )
+          {
+            classified <- classify_flowcam_files(
+              datadir = datadir,
+              algae_traits_name = algae_traits_name,
+              classifier_constant_name = classifier_constant_name,
+              classifier_increasing_name = classifier_increasing_name,
+              timestamp = timestamp
+            )
+          }
         )
 
         message("Saving timestamp ", timestamp, "...")
@@ -82,7 +83,7 @@ classify_flowcam_archive <- function(
 
         message("Done")
         message("###############################################")
-        return(TRUE)
+        return(NULL)
       }
     )
   )

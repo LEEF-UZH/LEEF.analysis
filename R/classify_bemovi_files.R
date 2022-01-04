@@ -7,9 +7,6 @@
 #'   for temperature treatment **constant** including path
 #' @param classifier_increasing_name `character` vector of name of the
 #'   classifier for temperature treatment **increasing** including path
-
-#' @param timestamp timestamp to be used to stamp the classified data
-#'
 #' @return `list` containing two objects:
 #'       - `algae_traits` including species
 #'       - `algae_densities` densities of the different particles identified
@@ -22,32 +19,34 @@
 #' @examples
 #'
 #'
-classify_flowcam_files <- function(
+classify_bemovi_files <- function(
   datadir,
-  algae_traits_name = "algae_traits_filtered.rds",
+  bemovi_extract_name = "bemovi_extract.yml",
   classifier_constant_name,
-  classifier_increasing_name,
-  timestamp = "55555555"
+  classifier_increasing_name
 ){
 
-  p <- yaml::read_yaml(file.path(datadir, "flowcam.yml"))
+  p <- yaml::read_yaml(file.path(datadir, bemovi_extract_name))
 
 
 # The classification ------------------------------------------------------
 
+  morph_mvt <- readRDS(file.path(datadir, p$merged.data.folder, p$morph_mvt))
+  morph_mvt <- morph_mvt[, grep("_prob|species", names(morph_mvt), invert = TRUE)]
 
-  classified <- LEEF.measurement.flowcam::classify(
-    algae_traits = readRDS(file.path(datadir, algae_traits_name)),
+  classified <- LEEF.measurement.bemovi::classify(
+    bemovi_extract = file.path(datadir, bemovi_extract_name),
+    morph_mvt = morph_mvt,
+    trajectory_data = readRDS(file.path(datadir, p$merged.data.folder, p$master)),
     classifiers_constant = readRDS(classifier_constant_name),
     classifiers_increasing = readRDS(classifier_increasing_name),
-    composition = read.csv(file.path(datadir, "compositions.csv")),
-    exp_design = read.csv(file.path(datadir, "experimental_design.csv")),
-    species_tracked = p$species_tracked,
-    timestamp = timestamp
+    video_description_file = as.data.frame(read.table(file.path(datadir, p$video.description.folder, p$video.description.file), sep = "\t", header = TRUE, stringsAsFactors = FALSE)),
+    composition = utils::read.csv(file.path(datadir, "compositions.csv"))
   )
 
 
 # Return the classifications --------------------------------------------------
+
 
   return(classified)
 }
