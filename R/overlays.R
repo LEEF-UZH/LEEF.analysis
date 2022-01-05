@@ -1,4 +1,4 @@
-#' Create
+#' Create overlays
 #'
 #' @param timestamp the timestamp of the sampling day
 #' @param magnification the magnification of the bemovi method

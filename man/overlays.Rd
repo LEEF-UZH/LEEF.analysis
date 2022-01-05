@@ -2,7 +2,7 @@
 % Please edit documentation in R/overlays.R
 \name{overlays}
 \alias{overlays}
-\title{Create}
+\title{Create overlays}
 \usage{
 overlays(
   timestamp = 20210920,
@@ -50,5 +50,5 @@ to 1}
 
 }
 \description{
-Create
+Create overlays
 }

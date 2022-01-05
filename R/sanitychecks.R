@@ -79,6 +79,15 @@ sanity_check_bemovi.mag.16 <- function(
   fd <- file.path(sample_dir, "0.raw.data", "bemovi.mag.16")
   fn <- list.files(fd, full.names = FALSE)
 
+  classifiers <- NULL
+  if ("bemovi_extract.mag.16.yml" %in% fn) {
+    p <- yaml::read_yaml(file.path(fd, "bemovi_extract.mag.16.yml"))
+    classifiers <- c(
+      p$classifier_constant,
+      p$classifier_increasing
+    )
+  }
+
   required_files <- c(
     paste0(
       timestamp,
@@ -176,24 +185,23 @@ sanity_check_bemovi.mag.16 <- function(
       )
     ),
     "bemovi_extract.mag.16.yml",
-    "svm_video_classifiers_18c_16x.rds",
-    "svm_video_classifiers_increasing_16x_best_available.rds",
-    "video.description.txt"
+    "video.description.txt",
+    classifiers
   )
 
   if (!all(required_files %in% fn)){
     return(
       paste0(
         "The folder 'bemovi.mag.16' misses the requred file(s): '",
-        required_files[!all(required_files %in% fn)],
+        required_files[!(required_files %in% fn)],
         "'!"
       )
     )
   }
 
-  fn <- file.path(sample_dir, "0.raw.data", "bemovi.mag.16", required_files)
+  fn <- file.path(fd, required_files)
 
-  vd <- read.table(fn[94], header = TRUE)
+  vd <- read.table(file.path(fd, "video.description.txt"), header = TRUE)
 
   if (!all(gsub("\\.cxd$", "", required_files[1:90]) %in% vd$file)) {
     return("There is an error in the 'video.description.txt' file in the 'file' column!")
@@ -238,6 +246,33 @@ sanity_check_bemovi.mag.25 <- function(
 
   fd <- file.path(sample_dir, "0.raw.data", "bemovi.mag.25")
   fn <- list.files(fd, full.names = FALSE)
+
+  classifiers <- NULL
+  if ("bemovi_extract.mag.25.cropped.yml" %in% fn) {
+    p <- yaml::read_yaml(file.path(fd, "bemovi_extract.mag.25.cropped.yml"))
+    classifiers <- c(
+      p$classifier_constant,
+      p$classifier_increasing
+    )
+  }
+
+  if ("bemovi_extract.mag.25.non_cropped.yml" %in% fn) {
+    p <- yaml::read_yaml(file.path(fd, "bemovi_extract.mag.25.non_cropped.yml"))
+    classifiers <- c(
+      classifiers,
+      p$classifier_constant,
+      p$classifier_increasing
+    )
+  }
+
+  if ("bemovi_extract.mag.25.cropped.yml" %in% fn) {
+    p <- yaml::read_yaml(file.path(fd, "bemovi_extract.mag.25.cropped.yml"))
+    classifiers <- c(
+      classifiers,
+      p$classifier_constant,
+      p$classifier_increasing
+    )
+  }
 
   required_files <- c(
     paste0(
@@ -336,17 +371,17 @@ sanity_check_bemovi.mag.25 <- function(
       )
     ),
     "bemovi_extract.mag.25.cropped.yml",
+    "bemovi_extract.mag.25.non_cropped.yml",
     "bemovi_extract.mag.25.yml",
-    "svm_video_classifiers_18c_25x.rds",
-    "svm_video_classifiers_increasing_25x_best_available.rds",
-    "video.description.txt"
+    "video.description.txt",
+    classifiers
   )
 
   if (!all(required_files %in% fn)){
     return(
       paste0(
         "The folder 'bemovi.mag.25' misses the requred file(s): '",
-        required_files[!all(required_files %in% fn)],
+        required_files[!(required_files %in% fn)],
         "'!"
       )
     )
@@ -354,7 +389,7 @@ sanity_check_bemovi.mag.25 <- function(
 
   fn <- file.path(sample_dir, "0.raw.data", "bemovi.mag.25", required_files)
 
-  vd <- read.table(fn[95], header = TRUE)
+  vd <- read.table(file.path(fd, "video.description.txt"), header = TRUE)
 
   if (!all(gsub("\\.cxd$", "", required_files[1:90]) %in% vd$file)) {
     return("There is an error in the 'video.description.txt' file in the 'file' column!")
@@ -399,6 +434,15 @@ sanity_check_flowcam <- function(
   fd <- file.path(sample_dir, "0.raw.data", "flowcam")
   fn <- list.files(fd, full.names = FALSE)
 
+  classifiers <- NULL
+  if ("flowcam.yml" %in% fn) {
+    p <- yaml::read_yaml(file.path(fd, "flowcam.yml"))
+    classifiers <- c(
+      p$classifier_constant,
+      p$classifier_increasing
+    )
+  }
+
   required_files <- c(
     "1",
     "2",
@@ -432,15 +476,14 @@ sanity_check_flowcam <- function(
     "30",
     "flowcam_dilution.csv",
     "flowcam.yml",
-    "svm_flowcam_classifiers_18c.rds",
-    "svm_flowcam_classifiers_increasing_best_available.rds"
+    classifiers
   )
 
   if (!all(required_files %in% fn)){
     return(
       paste0(
         "The folder 'flowcam' misses the requred file(s): '",
-        required_files[!all(required_files %in% fn)],
+        required_files[!(required_files %in% fn)],
         "'!"
       )
     )
