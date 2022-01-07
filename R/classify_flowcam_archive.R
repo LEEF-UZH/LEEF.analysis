@@ -65,11 +65,13 @@ classify_flowcam_archive <- function(
 
         write.csv(
           x = classified$algae_traits,
-          file = file.path(path, "algae_traits.csv")
+          file = file.path(path, "algae_traits.csv"),
+          row.names = FALSE
         )
         write.csv(
           x = classified$algae_density,
-          file = file.path(path, "algae_densities.csv")
+          file = file.path(path, "algae_densities.csv"),
+          row.names = FALSE
         )
 
         message("Adding timestamp ", timestamp, " to db...")
