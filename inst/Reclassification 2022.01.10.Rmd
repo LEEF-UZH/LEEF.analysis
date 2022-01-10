@@ -98,21 +98,21 @@ dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
 class_constant <- file.path(pdir, "class_constant.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/blob/Reclassification_1/parameter/bemovi.mag.16/svm_video_classifiers_18c_16x_december2021.rds", 
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.16/svm_video_classifiers_18c_16x_december2021.rds", 
   destfile = class_constant,
   mode = "wb"
 )
 
 class_increasing <- file.path(pdir, "class_increasing.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/blob/Reclassification_1/parameter/bemovi.mag.16/svm_video_classifiers_increasing_trained_at_18c_16x_december2021.rds", 
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.16/svm_video_classifiers_increasing_trained_at_18c_16x_december2021.rds", 
   destfile = class_increasing,
   mode = "wb"
 )
 
 bemovi_config <- file.path(pdir, "bemovi_extract.yml")
 download.file(
-  "https://raw.githubusercontent.com/LEEF-UZH/LEEF.parameter/Reclassification_1/parameter/bemovi.mag.16/bemovi_extract.mag.16.yml", 
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.16/bemovi_extract.mag.16.yml", 
   destfile = bemovi_config,
   mode = "wb"
 )
@@ -144,14 +144,14 @@ dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
 class_constant <- file.path(pdir, "class_constant.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/blob/Reclassification_1/parameter/bemovi.mag.25/svm_video_classifiers_18c_25x_december2021.rds", 
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/svm_video_classifiers_18c_25x_december2021.rds", 
   destfile = class_constant,
   mode = "wb"
 )
 
 class_increasing <- file.path(pdir, "class_increasing.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/blob/Reclassification_1/parameter/bemovi.mag.16/svm_video_classifiers_increasing_trained_at_18c_16x_december2021.rds", 
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/svm_video_classifiers_increasing_trained_at_18c_16x_december2021.rds", 
   destfile = class_increasing,
   mode = "wb"
 )
