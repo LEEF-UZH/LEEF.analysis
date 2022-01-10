@@ -61,9 +61,10 @@ timestamps <- c(20210920, 20220105)
 
 # Reclassification 
 
-## flowcam
+## Flowcam
 
-```{r class_flowcam}
+### Prepare Flowcam
+```{r prepare_flowcam}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -80,7 +81,10 @@ download.file(
   destfile = class_increasing,
   mode = "wb"
 )
+```
 
+### Classify Flowcam
+```{r classify_flowcam}
 system.time(
   LEEF.analysis::classify_flowcam_archive(
     archive_dir = archive_dir, 
@@ -91,14 +95,17 @@ system.time(
     db_path = db_path
   )
 )
+```
 
+### Cleanu Up Flowcam
+```{r cleanup_flowcam}
 unlink(pdir)
 rm(class_constant, class_increasing)
 ```
 
-## bemovi magnification 16
-### `bemovi.mag.16/bemovi_extract.mag.16.yml`
-```{r class_bemovi_16}
+## Bemovi magnification 16
+### Prepare Bemovi 16
+```{r prepare_bemovi_16}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -115,7 +122,10 @@ download.file(
   destfile = class_increasing,
   mode = "wb"
 )
+```
 
+### Classify `bemovi_extract.mag.16.yml`
+```{r classify_bemovi_16}
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -130,14 +140,15 @@ system.time(
 )
 ```
 
-### And clean everything up
-```{r bemovi_16_clean}
+### Clean Up Bemovi 16
+```{r cleanup_bemovi_16}
 unlink(pdir)
 rm(pdir, class_constant, class_increasing)
 ```
-## bemovi magnification 25
-### `bemovi_extract.mag.25.yml` 
-```{r class_bemovi_25}
+
+## Bemovi magnification 25
+### Prepare Bemovi 25
+```{r prepare_bemovi_25}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -150,11 +161,14 @@ download.file(
 
 class_increasing <- file.path(pdir, "class_increasing.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/svm_video_classifiers_increasing_trained_at_18c_16x_december2021.rds", 
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/svm_video_classifiers_increasing_trained_at_18c_25x_december2021.rds", 
   destfile = class_increasing,
   mode = "wb"
 )
+```
 
+### Classify `bemovi_extract.mag.25.yml` 
+```{r classify_bemovi_25}
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -169,8 +183,8 @@ system.time(
 )
 ```
 
-### `bemovi_extract.mag.25.non_cropped.yml` 
-```{r class_bemovi_25_uncropped6}
+### Classify `bemovi_extract.mag.25.non_cropped.yml` 
+```{r classify_bemovi_25_uncropped6}
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -186,8 +200,8 @@ system.time(
 
 ```
 
-### `bemovi_extract.mag.25.non_cropped.yml` 
-```{r class_bemovi_25_cropped}
+### Classify `bemovi_extract.mag.25.non_cropped.yml` 
+```{r classify_bemovi_25_cropped}
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -202,8 +216,8 @@ system.time(
 )
 ```
 
-### And clean everything up
-```{r bemovi_25_clean}
+### Clean Up Bemovi 25
+```{r cleanup_bemovi_25}
 unlink(pdir)
 rm(pdir, class_constant, class_increasing)
 ```
