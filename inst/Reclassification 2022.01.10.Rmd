@@ -1,0 +1,232 @@
+---
+title: "Reclassification"
+author: "Rainer M Krug"
+date: "1/10/2022"
+output:
+  html_document:
+    dev: png
+    fig_width: 10
+    fig_height: 12
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = TRUE,
+  message = TRUE,
+  warning = TRUE
+)
+library("LEEF.analysis")
+```
+
+# Preparation
+This reclassification is based on the classifiers as in the LEEF.parameter repo in the release Reclassification_1 https://github.com/LEEF-UZH/LEEF.parameter/releases/tag/Reclassification_1.
+
+```{r output_path}
+db_path = "~/Desktop/RRD.Reclassification/"
+dir.create(
+  db_path,
+  showWarnings = FALSE,
+  recursive = TRUE
+)
+file.copy(
+  from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
+  to = file.path(db_path, "LEEF.RRD.sqlite"),
+  overwrite = FALSE
+)
+```
+
+Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
+
+## Set Archive Directory
+```{r setArchive}
+archive_dir <- "~/Duck/LEEFSwift3/"
+```
+
+## Set timestamps
+```{r timestamps, eval = TRUE}
+# timestamps <- c(20210920, 20210922, 20210924, 20210927, 20210929, 20211001, 20211004, 20211006, 20211008, 20211011, 20211013, 20211015, 20211018, 20211020, 20211022, 20211025, 20211027, 20211029, 20211101, 20211103, 20211105, 20211108, 20211110, 20211112, 20211115, 20211117, 20211119, 20211122, 20211124, 20211126, 20211129, 20211201, 20211203, 20211206, 20211208, 20211210, 20211213, 20211215, 20211217, 20211220, 20211222, 20211224, 20211227, 20211229, 20211231, 20220103, 20220105)
+timestamps <- c(20210920, 20220105)
+```
+
+# Reclassification 
+
+## flowcam
+
+```{r class_flowcam}
+pdir <- tempfile()
+dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
+
+class_constant <- file.path(pdir, "class_constant.rds")
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/flowcam/svm_flowcam_classifiers_18c_december2021.rds", 
+  destfile = class_constant,
+  mode = "wb"
+)
+
+class_increasing <- file.path(pdir, "class_increasing.rds")
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/flowcam/svm_flowcam_classifiers_increasing_trained_at_18c_december2021.rds", 
+  destfile = class_increasing,
+  mode = "wb"
+)
+
+system.time(
+  LEEF.analysis::classify_flowcam_archive(
+    archive_dir = archive_dir, 
+    timestamps = timestamps, 
+    algae_traits_name = "algae_traits_filtered.rds", 
+    classifier_constant_name = class_constant, 
+    classifier_increasing_name = class_increasing, 
+    db_path = db_path
+  )
+)
+
+unlink(pdir)
+rm(class_constant, class_increasing)
+```
+
+## bemovi magnification 16
+### `bemovi.mag.16/bemovi_extract.mag.16.yml`
+```{r class_bemovi_16}
+pdir <- tempfile()
+dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
+
+class_constant <- file.path(pdir, "class_constant.rds")
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/blob/Reclassification_1/parameter/bemovi.mag.16/svm_video_classifiers_18c_16x_december2021.rds", 
+  destfile = class_constant,
+  mode = "wb"
+)
+
+class_increasing <- file.path(pdir, "class_increasing.rds")
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/blob/Reclassification_1/parameter/bemovi.mag.16/svm_video_classifiers_increasing_trained_at_18c_16x_december2021.rds", 
+  destfile = class_increasing,
+  mode = "wb"
+)
+
+bemovi_config <- file.path(pdir, "bemovi_extract.yml")
+download.file(
+  "https://raw.githubusercontent.com/LEEF-UZH/LEEF.parameter/Reclassification_1/parameter/bemovi.mag.16/bemovi_extract.mag.16.yml", 
+  destfile = bemovi_config,
+  mode = "wb"
+)
+system.time(
+  LEEF.analysis::classify_bemovi_archive( 
+    timestamps = timestamps, 
+    archive_dir = archive_dir, 
+    magnification = 16, 
+    classifier_constant_name = class_constant, 
+    classifier_increasing_name = class_increasing, 
+    bemovi_extract_name = bemovi_config, 
+    db_path = db_path
+  )
+)
+
+unlink(bemovi_config)
+```
+
+### And clean everything up
+```{r bemovi_16_clean}
+unlink(pdir)
+rm(pdir, class_constant, class_increasing, bemovi_config)
+```
+## bemovi magnification 25
+### `bemovi_extract.mag.25.yml` 
+```{r class_bemovi_25}
+pdir <- tempfile()
+dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
+
+class_constant <- file.path(pdir, "class_constant.rds")
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/blob/Reclassification_1/parameter/bemovi.mag.25/svm_video_classifiers_18c_25x_december2021.rds", 
+  destfile = class_constant,
+  mode = "wb"
+)
+
+class_increasing <- file.path(pdir, "class_increasing.rds")
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/blob/Reclassification_1/parameter/bemovi.mag.16/svm_video_classifiers_increasing_trained_at_18c_16x_december2021.rds", 
+  destfile = class_increasing,
+  mode = "wb"
+)
+
+bemovi_config <- file.path(pdir, "bemovi_extract.yml")
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/bemovi_extract.mag.25.yml", 
+  destfile = bemovi_config,
+  mode = "wb"
+)
+
+system.time(
+  LEEF.analysis::classify_bemovi_archive( 
+    timestamps = timestamps, 
+    archive_dir = archive_dir, 
+    magnification = 25, 
+    classifier_constant_name = class_constant, 
+    classifier_increasing_name = class_increasing, 
+    bemovi_extract_name = bemovi_config, 
+    db_path = db_path
+  )
+)
+unlink(bemovi_config)
+```
+
+### `bemovi_extract.mag.25.non_cropped.yml` 
+```{r class_bemovi_25_uncropped6}
+
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/bemovi_extract.mag.25.non_cropped.yml", 
+  destfile = bemovi_config,
+  mode = "wb"
+)
+
+system.time(
+  LEEF.analysis::classify_bemovi_archive( 
+    timestamps = timestamps, 
+    archive_dir = archive_dir, 
+    magnification = 25, 
+    classifier_constant_name = class_constant, 
+    classifier_increasing_name = class_increasing, 
+    bemovi_extract_name = bemovi_config, 
+    db_path = db_path
+  )
+)
+
+unlink(bemovi_config)
+```
+
+### `bemovi_extract.mag.25.non_cropped.yml` 
+```{r class_bemovi_25_cropped}
+
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/bemovi_extract.mag.25.cropped.yml", 
+  destfile = bemovi_config,
+  mode = "wb"
+)
+
+system.time(
+  LEEF.analysis::classify_bemovi_archive( 
+    timestamps = timestamps, 
+    archive_dir = archive_dir, 
+    magnification = 25, 
+    classifier_constant_name = class_constant, 
+    classifier_increasing_name = class_increasing, 
+    bemovi_extract_name = bemovi_config, 
+    db_path = db_path
+  )
+)
+
+unlink(bemovi_config)
+```
+
+### And clean everything up
+```{r bemovi_25_clean}
+unlink(pdir)
+rm(pdir, class_constant, class_increasing, bemovi_config)
+```

@@ -70,7 +70,7 @@ classify_flowcam_archive <- function(
         )
         write.csv(
           x = classified$algae_density,
-          file = file.path(path, "algae_densities.csv"),
+          file = file.path(path, "algae_density.csv"),
           row.names = FALSE
         )
 
