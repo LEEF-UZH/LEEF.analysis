@@ -26,6 +26,7 @@ library("LEEF.analysis")
 # Preparation
 This reclassification is based on the classifiers as in the LEEF.parameter repo in the release Reclassification_1 https://github.com/LEEF-UZH/LEEF.parameter/releases/tag/Reclassification_1.
 
+## Set db path
 ```{r output_path}
 db_path = "~/Desktop/RRD.Reclassification/"
 dir.create(
@@ -33,6 +34,11 @@ dir.create(
   showWarnings = FALSE,
   recursive = TRUE
 )
+if (file.exists(file.path(db_path, "LEEF.RRD.sqlite"))) {
+  stop("A database exists at ", file.path(db_path, "LEEF.RRD.sqlite"), "!\n",
+       "This function does not run when a database exists!\n",
+       "Please remove the database or rename it!")
+}
 file.copy(
   from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
   to = file.path(db_path, "LEEF.RRD.sqlite"),
@@ -110,12 +116,6 @@ download.file(
   mode = "wb"
 )
 
-bemovi_config <- file.path(pdir, "bemovi_extract.yml")
-download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.16/bemovi_extract.mag.16.yml", 
-  destfile = bemovi_config,
-  mode = "wb"
-)
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -123,18 +123,17 @@ system.time(
     magnification = 16, 
     classifier_constant_name = class_constant, 
     classifier_increasing_name = class_increasing, 
-    bemovi_extract_name = bemovi_config, 
-    db_path = db_path
+    bemovi_extract_name = "bemovi_extract.mag.16.yml", 
+    db_path = db_path,
+    trajectory_path = db_path
   )
 )
-
-unlink(bemovi_config)
 ```
 
 ### And clean everything up
 ```{r bemovi_16_clean}
 unlink(pdir)
-rm(pdir, class_constant, class_increasing, bemovi_config)
+rm(pdir, class_constant, class_increasing)
 ```
 ## bemovi magnification 25
 ### `bemovi_extract.mag.25.yml` 
@@ -156,13 +155,6 @@ download.file(
   mode = "wb"
 )
 
-bemovi_config <- file.path(pdir, "bemovi_extract.yml")
-download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/bemovi_extract.mag.25.yml", 
-  destfile = bemovi_config,
-  mode = "wb"
-)
-
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -170,22 +162,15 @@ system.time(
     magnification = 25, 
     classifier_constant_name = class_constant, 
     classifier_increasing_name = class_increasing, 
-    bemovi_extract_name = bemovi_config, 
-    db_path = db_path
+    bemovi_extract_name = "bemovi_extract.mag.25.yml", 
+    db_path = db_path,
+    trajectory_path = db_path
   )
 )
-unlink(bemovi_config)
 ```
 
 ### `bemovi_extract.mag.25.non_cropped.yml` 
 ```{r class_bemovi_25_uncropped6}
-
-download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/bemovi_extract.mag.25.non_cropped.yml", 
-  destfile = bemovi_config,
-  mode = "wb"
-)
-
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -193,23 +178,16 @@ system.time(
     magnification = 25, 
     classifier_constant_name = class_constant, 
     classifier_increasing_name = class_increasing, 
-    bemovi_extract_name = bemovi_config, 
-    db_path = db_path
+    bemovi_extract_name = "bemovi_extract.mag.25.non_cropped.yml", 
+    db_path = db_path,
+    trajectory_path = db_path
   )
 )
 
-unlink(bemovi_config)
 ```
 
 ### `bemovi_extract.mag.25.non_cropped.yml` 
 ```{r class_bemovi_25_cropped}
-
-download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/bemovi_extract.mag.25.cropped.yml", 
-  destfile = bemovi_config,
-  mode = "wb"
-)
-
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -217,16 +195,15 @@ system.time(
     magnification = 25, 
     classifier_constant_name = class_constant, 
     classifier_increasing_name = class_increasing, 
-    bemovi_extract_name = bemovi_config, 
-    db_path = db_path
+    bemovi_extract_name = "bemovi_extract.mag.25.cropped.yml", 
+    db_path = db_path,
+    trajectory_path = db_path
   )
 )
-
-unlink(bemovi_config)
 ```
 
 ### And clean everything up
 ```{r bemovi_25_clean}
 unlink(pdir)
-rm(pdir, class_constant, class_increasing, bemovi_config)
+rm(pdir, class_constant, class_increasing)
 ```
