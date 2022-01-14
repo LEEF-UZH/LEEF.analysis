@@ -28,7 +28,7 @@ This reclassification is based on the classifiers as in the LEEF.parameter repo 
 
 ## Set db path
 ```{r output_path}
-db_path = "~/Desktop/RRD.Reclassification/"
+db_path = "~/RRD.Reclassification/"
 dir.create(
   db_path,
   showWarnings = FALSE,
@@ -39,11 +39,6 @@ if (file.exists(file.path(db_path, "LEEF.RRD.sqlite"))) {
        "This function does not run when a database exists!\n",
        "Please remove the database or rename it!")
 }
-file.copy(
-  from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
-  to = file.path(db_path, "LEEF.RRD.sqlite"),
-  overwrite = FALSE
-)
 ```
 
 Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
@@ -84,6 +79,12 @@ download.file(
 
 ### Classify Flowcam
 ```{r classify_flowcam}
+file.copy(
+  from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
+  to = file.path(db_path, "LEEF.RRD.sqlite"),
+  overwrite = FALSE
+)
+
 system.time(
   LEEF.analysis::classify_flowcam_archive(
     archive_dir = archive_dir, 
@@ -94,9 +95,14 @@ system.time(
     db_path = db_path
   )
 )
+
+file.rename(
+  from = file.path(db_path, "LEEF.RRD.sqlite"),
+  to = file.path(db_path, "LEEF.RRD.flowcam.sqlite")
+)
 ```
 
-### Cleanu Up Flowcam
+### Clean Up Flowcam
 ```{r cleanup_flowcam}
 unlink(pdir)
 rm(class_constant, class_increasing)
@@ -125,6 +131,12 @@ download.file(
 
 ### Classify `bemovi_extract.mag.16.yml`
 ```{r classify_bemovi_16}
+file.copy(
+  from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
+  to = file.path(db_path, "LEEF.RRD.sqlite"),
+  overwrite = FALSE
+)
+
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -136,6 +148,11 @@ system.time(
     db_path = db_path,
     trajectory_path = db_path
   )
+)
+
+file.rename(
+  from = file.path(db_path, "LEEF.RRD.sqlite"),
+  to = file.path(db_path, "LEEF.RRD.bemovi.mag.16.sqlite")
 )
 ```
 
@@ -168,6 +185,12 @@ download.file(
 
 ### Classify `bemovi_extract.mag.25.yml` 
 ```{r classify_bemovi_25}
+file.copy(
+  from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
+  to = file.path(db_path, "LEEF.RRD.sqlite"),
+  overwrite = FALSE
+)
+
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -180,10 +203,21 @@ system.time(
     trajectory_path = db_path
   )
 )
+
+file.rename(
+  from = file.path(db_path, "LEEF.RRD.sqlite"),
+  to = file.path(db_path, "LEEF.RRD.bemovi.mag.25.sqlite")
+)
 ```
 
 ### Classify `bemovi_extract.mag.25.non_cropped.yml` 
 ```{r classify_bemovi_25_uncropped6}
+file.copy(
+  from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
+  to = file.path(db_path, "LEEF.RRD.sqlite"),
+  overwrite = FALSE
+)
+
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -197,10 +231,20 @@ system.time(
   )
 )
 
+file.rename(
+  from = file.path(db_path, "LEEF.RRD.sqlite"),
+  to = file.path(db_path, "LEEF.RRD.bemovi.mag.25.non_cropped.sqlite")
+)
 ```
 
-### Classify `bemovi_extract.mag.25.non_cropped.yml` 
+### Classify `bemovi_extract.mag.25.cropped.yml` 
 ```{r classify_bemovi_25_cropped}
+file.copy(
+  from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
+  to = file.path(db_path, "LEEF.RRD.sqlite"),
+  overwrite = FALSE
+)
+
 system.time(
   LEEF.analysis::classify_bemovi_archive( 
     timestamps = timestamps, 
@@ -212,6 +256,11 @@ system.time(
     db_path = db_path,
     trajectory_path = db_path
   )
+)
+
+file.rename(
+  from = file.path(db_path, "LEEF.RRD.sqlite"),
+  to = file.path(db_path, "LEEF.RRD.bemovi.mag.25.cropped.sqlite")
 )
 ```
 
