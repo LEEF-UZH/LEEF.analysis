@@ -46,42 +46,49 @@ classify_flowcam_archive <- function(
         message("Classifying timestamp ", timestamp, "...")
         suppressMessages(
           {
-            classified <- classify_flowcam_files(
-              datadir = datadir,
-              algae_traits_name = algae_traits_name,
-              classifier_constant_name = classifier_constant_name,
-              classifier_increasing_name = classifier_increasing_name,
-              timestamp = timestamp
+            classified <- NULL
+            try(
+              expr = {
+                classified <- classify_flowcam_files(
+                  datadir = datadir,
+                  algae_traits_name = algae_traits_name,
+                  classifier_constant_name = classifier_constant_name,
+                  classifier_increasing_name = classifier_increasing_name,
+                  timestamp = timestamp
+                )
+              }
             )
           }
         )
 
-        message("Saving timestamp ", timestamp, "...")
-        path <- file.path(dir, "flowcam")
-        dir.create(
-          path,
-          recursive = TRUE,
-          showWarnings = FALSE)
+        if (!is.null(classified)) {
+          message("Saving timestamp ", timestamp, "...")
+          path <- file.path(dir, "flowcam")
+          dir.create(
+            path,
+            recursive = TRUE,
+            showWarnings = FALSE)
 
-        write.csv(
-          x = classified$algae_traits,
-          file = file.path(path, "algae_traits.csv"),
-          row.names = FALSE
-        )
-        write.csv(
-          x = classified$algae_density,
-          file = file.path(path, "algae_density.csv"),
-          row.names = FALSE
-        )
+          write.csv(
+            x = classified$algae_traits,
+            file = file.path(path, "algae_traits.csv"),
+            row.names = FALSE
+          )
+          write.csv(
+            x = classified$algae_density,
+            file = file.path(path, "algae_density.csv"),
+            row.names = FALSE
+          )
 
-        message("Adding timestamp ", timestamp, " to db...")
-        LEEF.backend.sqlite::additor_sqlite_multiple_db(
-          input = file.path(dir),
-          output = db_path
-        )
+          message("Adding timestamp ", timestamp, " to db...")
+          LEEF.backend.sqlite::additor_sqlite_multiple_db(
+            input = file.path(dir),
+            output = db_path
+          )
 
-        message("Deleting temporary data ", timestamp, "...")
-        unlink(path, recursive = TRUE, force = TRUE)
+          message("Deleting temporary data ", timestamp, "...")
+          unlink(path, recursive = TRUE, force = TRUE)
+        }
 
         message("Done")
         message("###############################################")
