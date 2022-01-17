@@ -10,7 +10,8 @@ classify_flowcam_archive(
   algae_traits_name = "algae_traits_filtered.rds",
   classifier_constant_name,
   classifier_increasing_name,
-  db_path
+  output,
+  mc.cores = 1
 )
 }
 \arguments{
@@ -20,8 +21,9 @@ classify_flowcam_archive(
 
 \item{classifier_increasing_name}{the classifier for temperature treatment \strong{increasing}}
 
-\item{db_path}{if a valid path for an existing or new database \code{LEEF.RRD.sqlite} to which the
-classified data will be added.}
+\item{output}{path to which the classified data will be saved as \code{rds}}
+
+\item{mc.cores}{number of cores to be used. Defaults to 1}
 
 \item{root_dir}{directory containes the archive. It contains the following directories:
 \itemize{

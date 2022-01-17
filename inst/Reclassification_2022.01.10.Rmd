@@ -26,31 +26,28 @@ library("LEEF.analysis")
 # Preparation
 This reclassification is based on the classifiers as in the LEEF.parameter repo in the release Reclassification_1 https://github.com/LEEF-UZH/LEEF.parameter/releases/tag/Reclassification_1.
 
-## Set db path
+## Set output path
 ```{r output_path}
-db_path = "~/RRD.Reclassification/"
-dir.create(
-  db_path,
-  showWarnings = FALSE,
-  recursive = TRUE
-)
-if (file.exists(file.path(db_path, "LEEF.RRD.sqlite"))) {
-  stop("A database exists at ", file.path(db_path, "LEEF.RRD.sqlite"), "!\n",
-       "This function does not run when a database exists!\n",
-       "Please remove the database or rename it!")
-}
+output = "~/RRD.Reclassification/"
 ```
 
-Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
 
 ## Set Archive Directory
+Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
+
 ```{r setArchive}
 archive_dir <- "~/Duck/LEEFSwift3/"
+```
+
+## Set number of cores to be used
+```{r setCores}
+cores <- 7
 ```
 
 ## Set timestamps
 ```{r timestamps, eval = TRUE}
 timestamps <- c(20210920, 20210922, 20210924, 20210927, 20210929, 20211001, 20211004, 20211006, 20211008, 20211011, 20211013, 20211015, 20211018, 20211020, 20211022, 20211025, 20211027, 20211029, 20211101, 20211103, 20211105, 20211108, 20211110, 20211112, 20211115, 20211117, 20211119, 20211122, 20211124, 20211126, 20211129, 20211201, 20211203, 20211206, 20211208, 20211210, 20211213, 20211215, 20211217, 20211220, 20211222, 20211224, 20211227, 20211229, 20211231, 20220103, 20220105)
+timestamps <- c(20211231, 20220103, 20220105)
 ```
 
 # Reclassification 
@@ -79,13 +76,9 @@ download.file(
 
 ### Classify Flowcam
 ```{r classify_flowcam}
-if (!file.exists(file.path(db_path, "LEEF.RRD.flowcam.sqlite"))) {
-  file.copy(
-    from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
-    to = file.path(db_path, "LEEF.RRD.sqlite"),
-    overwrite = FALSE
-  )
-  
+out <- file.path(output, "flowcam")
+if (!file.exists(out)) {
+  message("Classifying flowcam...")
   system.time(
     LEEF.analysis::classify_flowcam_archive(
       archive_dir = archive_dir, 
@@ -93,13 +86,14 @@ if (!file.exists(file.path(db_path, "LEEF.RRD.flowcam.sqlite"))) {
       algae_traits_name = "algae_traits_filtered.rds", 
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
-      db_path = db_path
+      output = out,
+      mc.cores = cores
     )
   )
-  
-  file.rename(
-    from = file.path(db_path, "LEEF.RRD.sqlite"),
-    to = file.path(db_path, "LEEF.RRD.flowcam.sqlite")
+} else {
+  message(
+    "Directory ", out, "exists\n",
+    "skipping Flowcam."
   )
 }
 ```
@@ -107,7 +101,7 @@ if (!file.exists(file.path(db_path, "LEEF.RRD.flowcam.sqlite"))) {
 ### Clean Up Flowcam
 ```{r cleanup_flowcam}
 unlink(pdir)
-rm(class_constant, class_increasing)
+rm(class_constant, class_increasing, out)
 ```
 
 ## Bemovi magnification 16
@@ -133,13 +127,9 @@ download.file(
 
 ### Classify `bemovi_extract.mag.16.yml`
 ```{r classify_bemovi_16}
-if (!file.exists(file.path(db_path, "LEEF.RRD.bemovi.mag.16.sqlite"))) {
-  file.copy(
-    from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
-    to = file.path(db_path, "LEEF.RRD.sqlite"),
-    overwrite = FALSE
-  )
-  
+out <- file.path(output, "bemovi_extract.mag.16")
+if (!file.exists(out)) {
+  message("Classifying bemovi_extract.mag.16")
   system.time(
     LEEF.analysis::classify_bemovi_archive( 
       timestamps = timestamps, 
@@ -148,14 +138,14 @@ if (!file.exists(file.path(db_path, "LEEF.RRD.bemovi.mag.16.sqlite"))) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.16.yml", 
-      db_path = db_path,
-      trajectory_path = db_path
+      output = out,
+      mc.cores = cores
     )
   )
-  
-  file.rename(
-    from = file.path(db_path, "LEEF.RRD.sqlite"),
-    to = file.path(db_path, "LEEF.RRD.bemovi.mag.16.sqlite")
+} else {
+  message(
+    "Directory ", out, "exists\n",
+    "Skipping 'bemovi_extract.mag.16.'"
   )
 }
 ```
@@ -163,7 +153,7 @@ if (!file.exists(file.path(db_path, "LEEF.RRD.bemovi.mag.16.sqlite"))) {
 ### Clean Up Bemovi 16
 ```{r cleanup_bemovi_16}
 unlink(pdir)
-rm(pdir, class_constant, class_increasing)
+rm(pdir, class_constant, class_increasing, out)
 ```
 
 ## Bemovi magnification 25
@@ -189,13 +179,8 @@ download.file(
 
 ### Classify `bemovi_extract.mag.25.yml` 
 ```{r classify_bemovi_25}
-if (!file.exists(file.path(db_path, "LEEF.RRD.bemovi.mag.25.sqlite"))) {
-  file.copy(
-    from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
-    to = file.path(db_path, "LEEF.RRD.sqlite"),
-    overwrite = FALSE
-  )
-  
+out <- file.path(output, "bemovi_extract.mag.25")
+if (!file.exists(out)) {
   system.time(
     LEEF.analysis::classify_bemovi_archive( 
       timestamps = timestamps, 
@@ -204,27 +189,22 @@ if (!file.exists(file.path(db_path, "LEEF.RRD.bemovi.mag.25.sqlite"))) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.25.yml", 
-      db_path = db_path,
-      trajectory_path = db_path
+      output = out,
+      mc.cores = cores
     )
   )
-  
-  file.rename(
-    from = file.path(db_path, "LEEF.RRD.sqlite"),
-    to = file.path(db_path, "LEEF.RRD.bemovi.mag.25.sqlite")
+} else {
+  message(
+    "Directory ", out, "exists\n",
+    "Skipping 'bemovi_extract.mag.25'"
   )
 }
 ```
 
 ### Classify `bemovi_extract.mag.25.non_cropped.yml` 
 ```{r classify_bemovi_25_uncropped6}
-if (!file.exists(file.path(db_path, "LEEF.RRD.bemovi.mag.25.non_cropped.sqlite"))) {
-  file.copy(
-    from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
-    to = file.path(db_path, "LEEF.RRD.sqlite"),
-    overwrite = FALSE
-  )
-  
+out <- file.path(output, "bemovi_extract.mag.25.non_cropped")
+if (!file.exists(out)) {
   system.time(
     LEEF.analysis::classify_bemovi_archive( 
       timestamps = timestamps, 
@@ -233,27 +213,22 @@ if (!file.exists(file.path(db_path, "LEEF.RRD.bemovi.mag.25.non_cropped.sqlite")
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.25.non_cropped.yml", 
-      db_path = db_path,
-      trajectory_path = db_path
+      output = out,
+      mc.cores = cores
     )
   )
-  
-  file.rename(
-    from = file.path(db_path, "LEEF.RRD.sqlite"),
-    to = file.path(db_path, "LEEF.RRD.bemovi.mag.25.non_cropped.sqlite")
+} else {
+  message(
+    "Directory ", out, "exists\n",
+    "Skipping 'bemovi_extract.mag.25.non_cropped'"
   )
 }
 ```
 
 ### Classify `bemovi_extract.mag.25.cropped.yml` 
 ```{r classify_bemovi_25_cropped}
-if (!file.exists(file.path(db_path, "LEEF.RRD.bemovi.mag.25.cropped.sqlite"))) {
-  file.copy(
-    from = system.file("LEEF.RRD.EMPTY.sqlite", package = "LEEF.analysis"),
-    to = file.path(db_path, "LEEF.RRD.sqlite"),
-    overwrite = FALSE
-  )
-  
+out <- file.path(output, "bemovi_extract.mag.25.cropped")
+if (!file.exists(out)) {
   system.time(
     LEEF.analysis::classify_bemovi_archive( 
       timestamps = timestamps, 
@@ -262,14 +237,14 @@ if (!file.exists(file.path(db_path, "LEEF.RRD.bemovi.mag.25.cropped.sqlite"))) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.25.cropped.yml", 
-      db_path = db_path,
-      trajectory_path = db_path
+      output = out,
+      mc.cores = cores
     )
   )
-  
-  file.rename(
-    from = file.path(db_path, "LEEF.RRD.sqlite"),
-    to = file.path(db_path, "LEEF.RRD.bemovi.mag.25.cropped.sqlite")
+} else {
+  message(
+    "Directory ", out, "exists\n",
+    "Skipping 'bemovi_extract.mag.25.cropped'"
   )
 }
 ```
@@ -277,5 +252,5 @@ if (!file.exists(file.path(db_path, "LEEF.RRD.bemovi.mag.25.cropped.sqlite"))) {
 ### Clean Up Bemovi 25
 ```{r cleanup_bemovi_25}
 unlink(pdir)
-rm(pdir, class_constant, class_increasing)
+rm(pdir, class_constant, class_increasing, out)
 ```

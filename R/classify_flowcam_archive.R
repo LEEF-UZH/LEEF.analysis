@@ -8,8 +8,8 @@
 #' @param timestamps `character` vector containing the timestamps to be classified
 #' @param classifier_constant_name the classifier for temperature treatment **constant**
 #' @param classifier_increasing_name the classifier for temperature treatment **increasing**
-#' @param db_path if a valid path for an existing or new database `LEEF.RRD.sqlite` to which the
-#'   classified data will be added.
+#' @param output path to which the classified data will be saved as `rds`
+#' @param mc.cores number of cores to be used. Defaults to 1
 #'
 #' @return invisible `NULL`
 #' @export
@@ -24,17 +24,19 @@ classify_flowcam_archive <- function(
   algae_traits_name = "algae_traits_filtered.rds",
   classifier_constant_name,
   classifier_increasing_name,
-  db_path
+  output,
+  mc.cores = 1
+
 ){
 
-  dir.create( db_path, showWarnings = FALSE, recursive = TRUE)
+  dir.create( output, showWarnings = FALSE, recursive = TRUE)
 
   dir <- tempfile(pattern = "extracted.data_")
 
   # do the stuff -------------------------------------------------------
 
   return(
-    lapply(
+    parallel::mclapply(
       timestamps,
       function(timestamp){
         datadir <- file.path(
@@ -63,37 +65,23 @@ classify_flowcam_archive <- function(
 
         if (!is.null(classified)) {
           message("Saving timestamp ", timestamp, "...")
-          path <- file.path(dir, "flowcam")
-          dir.create(
-            path,
-            recursive = TRUE,
-            showWarnings = FALSE)
 
-          write.csv(
-            x = classified$algae_traits,
-            file = file.path(path, "algae_traits.csv"),
-            row.names = FALSE
+          saveRDS(
+            classified$algae_traits,
+            file = file.path(output, paste0("algae_traits.", timestamp, ".rds"))
           )
-          write.csv(
-            x = classified$algae_density,
-            file = file.path(path, "algae_density.csv"),
-            row.names = FALSE
+          saveRDS(
+            classified$algae_density,
+            file = file.path(output, paste0("algae_density.", timestamp, ".rds"))
           )
-
-          message("Adding timestamp ", timestamp, " to db...")
-          LEEF.backend.sqlite::additor_sqlite_multiple_db(
-            input = file.path(dir),
-            output = db_path
-          )
-
-          message("Deleting temporary data ", timestamp, "...")
-          unlink(path, recursive = TRUE, force = TRUE)
         }
 
         message("Done")
         message("###############################################")
         return(NULL)
-      }
+      },
+      mc.preschedule = FALSE,
+      mc.cores = mc.cores
     )
   )
 }

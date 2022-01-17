@@ -10,12 +10,11 @@
 #' @param timestamps `character` vector containing the timestamps to be classified
 #' @param classifier_constant_name the classifier for temperature treatment **constant**
 #' @param classifier_increasing_name the classifier for temperature treatment **increasing**
-#' @param db_path if a valid path for an existing or new database `LEEF.RRD.sqlite` to which the
-#'   classified data will be added.
-#' @param trajectory_path if `NULL`, the trajectory files will be discarded. Otherwise, they
-#'   will be saved in the path specified in a subdirectory called `trajectories` and the files
-#'   named `trajectory.mag_MAGNIFICATION.BEMOVI_EXTRACT_NAME.TIMESTAMP.rds`
+#' @param output path to which the classified data will be saved as `rds`
+#' @param mc.cores number of cores to be used. Defaults to 1
 #' @return invisible `NULL`
+#'
+#' @importFrom  parallel mclapply
 #' @export
 #'
 #' @md
@@ -29,30 +28,21 @@ classify_bemovi_archive <- function(
   timestamps,
   classifier_constant_name,
   classifier_increasing_name,
-  db_path,
-  trajectory_path = NULL
+  output,
+  mc.cores = 1
 ){
-
   dir.create(
-    db_path,
+    output,
     showWarnings = FALSE,
     recursive = TRUE
   )
-  if (!is.null(trajectory_path)) {
-    trajectory_path <- file.path(trajectory_path, "trajectories")
-    dir.create(
-      trajectory_path,
-      showWarnings = FALSE,
-      recursive = TRUE
-    )
-  }
 
   dir <- tempfile(pattern = "extracted.data_")
 
   # do the stuff -------------------------------------------------------
 
   return(
-    lapply(
+    parallel::mclapply(
       timestamps,
       function(timestamp){
         datadir <- file.path(
@@ -83,69 +73,46 @@ classify_bemovi_archive <- function(
 
           p <- yaml::read_yaml(file.path(datadir, bemovi_extract_name))
 
-          path <- file.path(dir, "bemovi")
+
+          trajectory_path <- file.path(output, "trajectories")
 
           dir.create(
-            path,
+            output,
             recursive = TRUE,
             showWarnings = FALSE
           )
           dir.create(
-            file.path(path, p$merged.data.folder),
+            trajectory_path,
             recursive = TRUE,
             showWarnings = FALSE
           )
 
-          write.csv(
-            x = classified$morph_mvt,
-            file = file.path(path, gsub("\\.rds$", ".csv", p$morph_mvt)),
-            row.names = FALSE
+          saveRDS(
+            classified$morph_mvt,
+            file = file.path(output, gsub("\\.rds$", paste0(timestamp, ".rds"), p$morph_mvt))
           )
 
-          tfn <- NULL
-          if (!is.null(trajectory_path)) {
-            tfn <- paste0(
-              "trajectory.mag_", magnification, ".",
-              gsub("\\.yml$", "", bemovi_extract_name), ".",
-              timestamp, ".",
-              "rds"
-            )
-            tfn <- file.path(
-              trajectory_path,
-              tfn
-            )
-            saveRDS(
-              classified$trajectory_data,
-              file = tfn
-            )
-          }
-
-          write.csv(
-            x = classified$mean_density_per_ml,
-            file = file.path(path, gsub("\\.rds$", ".csv", p$mean_density)),
-            row.names = FALSE
+          saveRDS(
+            classified$mean_density_per_ml,
+            file = file.path(output, gsub("\\.rds$", paste0(timestamp, ".rds"), p$mean_density))
           )
 
-          message("Adding timestamp ", timestamp, " to db...")
-          LEEF.backend.sqlite::additor_sqlite_multiple_db(
-            input = file.path(dir),
-            output = db_path
+          saveRDS(
+            classified$trajectory_data,
+            file = file.path(trajectory_path, paste0("trajectory", gsub("\\.rds$", paste0(timestamp, ".rds"), p$mean_density)))
           )
-
-          message("Deleting temporary data ", timestamp, "...")
-          unlink(path, recursive = TRUE, force = TRUE)
 
         } else {
-          message("EREROR in classifying timestamp ", timestamp)
-          tfn <- NULL
+          message("ERROR in classifying timestamp ", timestamp)
         }
-
 
 
         message("Done")
         message("###############################################")
-        return(tfn)
-      }
+        invisible(NULL)
+      },
+      mc.preschedule = FALSE,
+      mc.cores = mc.cores
     )
   )
 }

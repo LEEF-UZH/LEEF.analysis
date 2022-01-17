@@ -32,7 +32,7 @@ overlays <- function(
   gamma = 2,
   ffmpeg = "ffmpeg",
   from_current_to_archive_dir = "./../../../../../Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data",
-  mc.cores = 7
+  mc.cores = 1
 ){
   output.dir <- "."
   mdf <- file.path(

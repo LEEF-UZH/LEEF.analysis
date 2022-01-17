@@ -9,6 +9,8 @@ db_read_table(db = getOption("RRDdb", "LEEF.RRD.sqlite"), table = NULL)
 \arguments{
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
+
+\item{table}{the name of the table. If `NULL`, a list of tables in the database `db` will be shown.}
 }
 \value{
 Link to the table \code{density} in the RRD to be used with \code{dplyr} and friends
