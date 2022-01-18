@@ -47,6 +47,7 @@ cores <- 7
 ## Set timestamps
 ```{r timestamps}
 timestamps <- c(20210920, 20210922, 20210924, 20210927, 20210929, 20211001, 20211004, 20211006, 20211008, 20211011, 20211013, 20211015, 20211018, 20211020, 20211022, 20211025, 20211027, 20211029, 20211101, 20211103, 20211105, 20211108, 20211110, 20211112, 20211115, 20211117, 20211119, 20211122, 20211124, 20211126, 20211129, 20211201, 20211203, 20211206, 20211208, 20211210, 20211213, 20211215, 20211217, 20211220, 20211222, 20211224, 20211227, 20211229, 20211231, 20220103, 20220105)
+timestamps <- c(20210920, 20210922, 20220105)
 ```
 
 # Reclassification 
@@ -126,7 +127,7 @@ download.file(
 
 ### Classify `bemovi_extract.mag.16.yml`
 ```{r classify_bemovi_16}
-out <- file.path(output, "bemovi_extract.mag.16")
+out <- file.path(output, "bemovi_mag_16")
 if (!file.exists(out)) {
   message("Classifying bemovi_extract.mag.16")
   system.time(
@@ -176,9 +177,9 @@ download.file(
 )
 ```
 
-### Classify `bemovi_extract.mag.25.yml` 
+### Classify `bemovi_mag.25` 
 ```{r classify_bemovi_25}
-out <- file.path(output, "bemovi_extract.mag.25")
+out <- file.path(output, "bemovi_mag_25")
 if (!file.exists(out)) {
   system.time(
     LEEF.analysis::classify_bemovi_archive( 
@@ -192,18 +193,6 @@ if (!file.exists(out)) {
       mc.cores = cores
     )
   )
-} else {
-  message(
-    "Directory ", out, "exists\n",
-    "Skipping 'bemovi_extract.mag.25'"
-  )
-}
-```
-
-### Classify `bemovi_extract.mag.25.non_cropped.yml` 
-```{r classify_bemovi_25_uncropped6}
-out <- file.path(output, "bemovi_extract.mag.25.non_cropped")
-if (!file.exists(out)) {
   system.time(
     LEEF.analysis::classify_bemovi_archive( 
       timestamps = timestamps, 
@@ -216,18 +205,6 @@ if (!file.exists(out)) {
       mc.cores = cores
     )
   )
-} else {
-  message(
-    "Directory ", out, "exists\n",
-    "Skipping 'bemovi_extract.mag.25.non_cropped'"
-  )
-}
-```
-
-### Classify `bemovi_extract.mag.25.cropped.yml` 
-```{r classify_bemovi_25_cropped}
-out <- file.path(output, "bemovi_extract.mag.25.cropped")
-if (!file.exists(out)) {
   system.time(
     LEEF.analysis::classify_bemovi_archive( 
       timestamps = timestamps, 
@@ -243,7 +220,7 @@ if (!file.exists(out)) {
 } else {
   message(
     "Directory ", out, "exists\n",
-    "Skipping 'bemovi_extract.mag.25.cropped'"
+    "Skipping 'bemovi_mag_25'"
   )
 }
 ```

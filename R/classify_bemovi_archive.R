@@ -89,17 +89,29 @@ classify_bemovi_archive <- function(
 
           saveRDS(
             classified$morph_mvt,
-            file = file.path(output, gsub("\\.rds$", paste0(timestamp, ".rds"), p$morph_mvt))
+            file = file.path(
+              output,
+              tolower(gsub("\\.rds$", paste0(".", timestamp, ".rds"), p$morph_mvt))
+              )
           )
 
           saveRDS(
             classified$mean_density_per_ml,
-            file = file.path(output, gsub("\\.rds$", paste0(timestamp, ".rds"), p$mean_density))
+            file = file.path(
+              output,
+              tolower(
+                gsub("\\.rds$", paste0(".", timestamp, ".rds"), p$mean_density))
+            )
           )
 
           saveRDS(
             classified$trajectory_data,
-            file = file.path(trajectory_path, paste0("trajectory", gsub("\\.rds$", paste0(timestamp, ".rds"), p$mean_density)))
+            file = file.path(
+              trajectory_path,
+              tolower(
+                paste0("trajectory.", gsub("\\.rds$", paste0(".", timestamp, ".rds"), p$mean_density))
+              )
+            )
           )
 
         } else {
