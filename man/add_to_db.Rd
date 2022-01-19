@@ -4,17 +4,29 @@
 \alias{add_to_db}
 \title{Add data to RRD database into existing table}
 \usage{
-add_to_db(fn, dbname, table)
+add_to_db(
+  fns,
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  tables,
+  remove_timestamp = FALSE
+)
 }
 \arguments{
-\item{fn}{\code{rds} file containing data to be added. The name has to be as expected for the additor function.}
+\item{fns}{vector of \code{rds} file names containing data to be added.
+The data has to contain a colum named \code{timestamp}.}
 
-\item{table}{name of the table the data should be added to}
+\item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
+If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
 
-\item{db}{RRD sqlite databaes}
+\item{tables}{\code{vector} of the table names the data of the \code{fns} of
+the same index should be added to.
+\strong{The table has to exist and contain a field named \code{timestamp}}}
+
+\item{remove_timestamp}{if \code{TRUE}, the timestamp(s) is removed from the table before adding.}
 }
 \value{
-\code{TRUE} if the data has been added, \code{FALSE} otherwise
+vector of length of \code{fns} with \code{TRUE} if the data has been added,
+\code{FALSE} otherwise
 }
 \description{
 Add data to RRD database into existing table
