@@ -37,6 +37,12 @@ Make sure, that the S3 LEEF archive is mounted and you know the path to the arch
 
 ```{r setArchive}
 archive_dir <- "~/Duck/LEEFSwift3/"
+if (!file.exists(archive_dir)){
+  stop(
+    "Archive directory '", archive_dir, "' does not exist.\n",
+    "Probably not mounted?" 
+  )
+}
 ```
 
 ## Set number of cores to be used
