@@ -47,13 +47,18 @@ add_to_db <- function(
       )
 
       if (remove_timestamp) {
-        message("Removing ", paste0(timestamps, collapse = ", "), "from ", tables[i])
-        extract_timestamps(
-          db = db,
-          table = tables[i],
-          timestamps = unique(dat$timestamp),
-          delete_data = TRUE
-        )
+        if (any(unique(dat$timestamp) %in% timestamps)) {
+          message("Removing ", paste0(unique(dat$timestamp), collapse = ", "), " from ", tables[i])
+          extract_timestamps(
+            db = db,
+            table = tables[i],
+            timestamps = unique(dat$timestamp),
+            delete_data = TRUE
+          )
+          timestamps <- unlist(
+            DBI::dbGetQuery(conn, paste("SELECT DISTINCT timestamp FROM", tables[i]))
+          )
+        }
       }
 
       if (any(unique(dat$timestamp) %in% timestamps)) {

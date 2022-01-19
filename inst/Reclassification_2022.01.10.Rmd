@@ -235,3 +235,14 @@ if (!file.exists(out)) {
 unlink(pdir)
 rm(pdir, class_constant, class_increasing, out)
 ```
+
+# Add to database
+```{r addRRD}
+add_reclassified_to_db(
+  path = output, 
+  db = file.path(output, "LEEF.RRD.sqlite")
+)
+```
+
+# Overlays
+TODO This still needs to be discussed. Options include using `bemovi.LEEF::create_overlays_subtitle_directory()` in a standalone function or `bemovi.LEEF::create_overlays_subtitle_single()` directly in the `classify_bemovi_archive()` function. Likely the first option of=s better as more flexible.

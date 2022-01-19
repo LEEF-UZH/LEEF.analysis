@@ -12,6 +12,9 @@ add_reclassified_to_db <- function(
   path,
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){
+  if (!file.exists(db)){
+    LEEF.backend.sqlite::new_RRD(db)
+  }
 
   methods <- list.dirs(
     path,
