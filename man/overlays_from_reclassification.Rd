@@ -5,7 +5,7 @@
 \title{Create overlays}
 \usage{
 overlays_from_reclassification(
-  archive_dir = "/Users/rainerkrug/MountainDuck/LEEFSwift3",
+  archive_dir = "/Users/rainerkrug/Duck/LEEFSwift3",
   classification_dir = "~/RRD.Reclassification_1",
   magnification = 16,
   yml_postfix = NULL,
