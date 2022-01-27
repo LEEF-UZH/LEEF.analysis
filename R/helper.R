@@ -56,6 +56,7 @@ species_set <- function(species_set_id = NULL){
       "airbubbles",
       "ChlamydomonasClumps",
       "ColpidiumVacuoles",
+      "DividingChlamydomonas",
       "Debris",
       "DigestedAlgae"
     )
