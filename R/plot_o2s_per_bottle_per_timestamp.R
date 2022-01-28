@@ -27,20 +27,23 @@ plot_o2s_per_bottle_per_timestamp <- function(
     dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
     dplyr::mutate(bottle = fix_bottle(bottle))
 
-
-  p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$percent_o2)) +
-    ggplot2::geom_line(ggplot2::aes(y = .data$percent_o2, colour = .data$sensor)) +
-    ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +
-    ggplot2::geom_text(
-      data = data,
-      ggplot2::aes(x = -Inf, y = Inf, label = bottle, group = bottle),
-      hjust = -0.5,
-      vjust = 1.4,
-      size = 3
-    ) +
-    ggplot2::scale_colour_manual(values = 1:40) +
-    ggplot2::xlab("Day of Experiment") +
-    ggplot2::ylab(expression("% O"[2])) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
-  p
+  if (nrow(data) > 0) {
+    p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$percent_o2)) +
+      ggplot2::geom_line(ggplot2::aes(y = .data$percent_o2, colour = .data$sensor)) +
+      ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +
+      ggplot2::geom_text(
+        data = data,
+        ggplot2::aes(x = -Inf, y = Inf, label = bottle, group = bottle),
+        hjust = -0.5,
+        vjust = 1.4,
+        size = 3
+      ) +
+      ggplot2::scale_colour_manual(values = 1:40) +
+      ggplot2::xlab("Day of Experiment") +
+      ggplot2::ylab(expression("% O"[2])) +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
+    p
+  } else {
+    warning("No data for available!")
+  }
 }

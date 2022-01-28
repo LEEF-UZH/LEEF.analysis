@@ -14,7 +14,7 @@ sort_measurements <- function(measurement) {
 }
 
 convert_timestamp <- function(timestamp) {
-  as.Date(timestamp, "%Y%m%d")
+  as.Date(as.character(timestamp), "%Y%m%d")
 }
 
 fix_bottle <- function(bottle) {

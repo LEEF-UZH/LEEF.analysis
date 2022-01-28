@@ -24,7 +24,8 @@ plot_response_incubator <- function(
   density <- db_read_density(db) %>%
     dplyr::filter(timestamp == max(timestamp, na.rm = TRUE)) %>%
     dplyr::mutate(mxs = paste(species, measurement)) %>%
-    dplyr::select(timestamp, bottle, composition, incubator, density, mxs)
+    dplyr::select(timestamp, bottle, composition, incubator, density, mxs) %>%
+    collect()
 
   o2 <- db_read_o2(db) %>%
     dplyr::filter(timestamp == max(timestamp, na.rm = TRUE)) %>%
@@ -37,44 +38,56 @@ plot_response_incubator <- function(
 
 
 
-  data <- dplyr::bind_rows(collect(density), o2)
+  if(nrow(density) == 0 & nrow(o2) == 0){
+    data <- NULL
+  } else if (nrow(density) == 0){
+    data <- o2
+  } else if (nrow(o2) == 0) {
+    data <- density
+  } else {
+    data <- dplyr::bind_rows(collect(density), o2)
+  }
 
-  p <- data %>%
-    ggplot2::ggplot(
-      ggplot2::aes(
-        x = .data$composition,
-        y = .data$density,
-        colour = .data$incubator,
-        shape = .data$incubator
-      )
-    ) +
-    ggplot2::scale_color_manual(
-      values = c(
-        "A" = "#00798c",
-        "B" = "#edae49",
-        "C" = "#66a182",
-        "D" = "#2e4057",
-        "E" = "red",
-        "F" = "#8d96a3",
-        "G" = "#d1495b",
-        "H" = "#8d96a3"
-      )
-    ) +
-    ggplot2::scale_shape_manual(
-      values = c(
-        "A" = 20,
-        "B" = 20,
-        "C" = 20,
-        "D" = 20,
-        "E" = 23,
-        "F" = 20,
-        "G" = 20,
-        "H" = 20
-      )
-    ) +
-    ggplot2::geom_point() +
-    ggplot2::xlab("") +
-    ggplot2::facet_wrap(~mxs, ncol = 3, scales = "free_y",) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
-  p
+  if (!is.null(data)){
+    p <- data %>%
+      ggplot2::ggplot(
+        ggplot2::aes(
+          x = .data$composition,
+          y = .data$density,
+          colour = .data$incubator,
+          shape = .data$incubator
+        )
+      ) +
+      ggplot2::scale_color_manual(
+        values = c(
+          "A" = "#00798c",
+          "B" = "#edae49",
+          "C" = "#66a182",
+          "D" = "#2e4057",
+          "E" = "red",
+          "F" = "#8d96a3",
+          "G" = "#d1495b",
+          "H" = "#8d96a3"
+        )
+      ) +
+      ggplot2::scale_shape_manual(
+        values = c(
+          "A" = 20,
+          "B" = 20,
+          "C" = 20,
+          "D" = 20,
+          "E" = 23,
+          "F" = 20,
+          "G" = 20,
+          "H" = 20
+        )
+      ) +
+      ggplot2::geom_point() +
+      ggplot2::xlab("") +
+      ggplot2::facet_wrap(~mxs, ncol = 3, scales = "free_y",) +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
+    p
+  } else {
+    warning("No data available!")
+  }
 }

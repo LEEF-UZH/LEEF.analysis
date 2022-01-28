@@ -33,32 +33,36 @@ plot_density_species_per_bottle_per_timestamp <- function(
         species %in% !!spid
       )
     ) %>%
-    dplyr::collect() %>%
-    dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
-    dplyr::mutate(bottle = fix_bottle(bottle)) %>%
-    dplyr::mutate(
-      density = if (transform_density_4throot) {
-        exp(log(density)/4)
-      } else {
-        density
-      }
-    ) %>%
-    group_by(day, bottle, species, composition, temperature) %>%
-    summarise(density = mean(density))
+    dplyr::collect()
+    if (nrow(data) < 1) {
+      warning("No data for available!")
+    } else {
+      data %>% dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
+        dplyr::mutate(bottle = fix_bottle(bottle)) %>%
+        dplyr::mutate(
+          density = if (transform_density_4throot) {
+            exp(log(density)/4)
+          } else {
+            density
+          }
+        ) %>%
+        group_by(day, bottle, species, composition, temperature) %>%
+        summarise(density = mean(density))
 
-  p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$density)) +
-    ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
-    ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +
-    ggplot2::geom_text(
-      data = data,
-      ggplot2::aes(x = -Inf, y = Inf, label = bottle, group = bottle),
-      hjust = -0.5,
-      vjust = 1.4,
-      size = 3
-    ) +
-    ggplot2::scale_colour_manual(values = 1:40) +
-    ggplot2::xlab("Day of Experiment") +
-    ggplot2::ylab(ifelse(transform_density_4throot, "4th root density", "density")) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
-  p
+      p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$density)) +
+        ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
+        ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +
+        ggplot2::geom_text(
+          data = data,
+          ggplot2::aes(x = -Inf, y = Inf, label = bottle, group = bottle),
+          hjust = -0.5,
+          vjust = 1.4,
+          size = 3
+        ) +
+        ggplot2::scale_colour_manual(values = 1:40) +
+        ggplot2::xlab("Day of Experiment") +
+        ggplot2::ylab(ifelse(transform_density_4throot, "4th root density", "density")) +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
+      p
+    }
 }
