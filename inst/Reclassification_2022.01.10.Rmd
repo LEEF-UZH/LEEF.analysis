@@ -53,6 +53,8 @@ cores <- 7
 ## Set timestamps
 ```{r timestamps}
 timestamps <- c(20210920, 20210922, 20210924, 20210927, 20210929, 20211001, 20211004, 20211006, 20211008, 20211011, 20211013, 20211015, 20211018, 20211020, 20211022, 20211025, 20211027, 20211029, 20211101, 20211103, 20211105, 20211108, 20211110, 20211112, 20211115, 20211117, 20211119, 20211122, 20211124, 20211126, 20211129, 20211201, 20211203, 20211206, 20211208, 20211210, 20211213, 20211215, 20211217, 20211220, 20211222, 20211224, 20211227, 20211229, 20211231, 20220103, 20220105)
+timestamps <- c(20210920, 20210922, 20220105)
+
 ```
 
 # Reclassification 
@@ -77,6 +79,15 @@ download.file(
   destfile = class_increasing,
   mode = "wb"
 )
+
+config <- file.path(pdir, "flowcam.yml")
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/flowcam/flowcam.yml", 
+  destfile = config,
+  mode = "wb"
+)
+species_tracked <- yaml::read_yaml(config)$species_tracked
+rm(config)
 ```
 
 ### Classify Flowcam
@@ -91,6 +102,7 @@ if (!file.exists(out)) {
       algae_traits_name = "algae_traits_filtered.rds", 
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
+      species_tracked = species_tracked,
       output = out,
       mc.cores = cores
     )
@@ -106,7 +118,7 @@ if (!file.exists(out)) {
 ### Clean Up Flowcam
 ```{r cleanup_flowcam}
 unlink(pdir)
-rm(class_constant, class_increasing, out)
+rm(class_constant, class_increasing, out, species_tracked)
 ```
 
 ## Bemovi magnification 16
@@ -128,6 +140,15 @@ download.file(
   destfile = class_increasing,
   mode = "wb"
 )
+
+config <- file.path(pdir, "bemovi.yml")
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.16/bemovi_extract.mag.16.yml", 
+  destfile = config,
+  mode = "wb"
+)
+species_tracked <- yaml::read_yaml(config)$species_tracked
+rm(config)
 ```
 
 ### Classify `bemovi_extract.mag.16.yml`
@@ -143,6 +164,7 @@ if (!file.exists(out)) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.16.yml", 
+      species_tracked = species_tracked,
       output = out,
       mc.cores = cores
     )
@@ -158,7 +180,7 @@ if (!file.exists(out)) {
 ### Clean Up Bemovi 16
 ```{r cleanup_bemovi_16}
 unlink(pdir)
-rm(pdir, class_constant, class_increasing, out)
+rm(pdir, class_constant, class_increasing, out, species_tracked)
 ```
 
 ## Bemovi magnification 25
@@ -180,6 +202,15 @@ download.file(
   destfile = class_increasing,
   mode = "wb"
 )
+
+config <- file.path(pdir, "bemovi.yml")
+download.file(
+  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/bemovi_extract.mag.25.yml", 
+  destfile = config,
+  mode = "wb"
+)
+species_tracked <- yaml::read_yaml(config)$species_tracked
+rm(config)
 ```
 
 ### Classify `bemovi_mag.25` 
@@ -194,6 +225,7 @@ if (!file.exists(out)) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.25.yml", 
+      species_tracked = species_tracked,
       output = out,
       mc.cores = cores
     )
@@ -206,6 +238,7 @@ if (!file.exists(out)) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.25.non_cropped.yml", 
+      species_tracked = species_tracked,
       output = out,
       mc.cores = cores
     )
@@ -218,6 +251,7 @@ if (!file.exists(out)) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.25.cropped.yml", 
+      species_tracked = species_tracked,
       output = out,
       mc.cores = cores
     )
@@ -233,14 +267,16 @@ if (!file.exists(out)) {
 ### Clean Up Bemovi 25
 ```{r cleanup_bemovi_25}
 unlink(pdir)
-rm(pdir, class_constant, class_increasing, out)
+rm(pdir, class_constant, class_increasing, out, species_tracked)
 ```
 
 # Add to database
 ```{r addRRD}
-add_reclassified_to_db(
-  path = output, 
-  db = file.path(output, "LEEF.RRD.sqlite")
+system.time(
+  add_reclassified_to_db(
+    path = output, 
+    db = file.path(output, "LEEF.RRD.sqlite")
+  )
 )
 ```
 

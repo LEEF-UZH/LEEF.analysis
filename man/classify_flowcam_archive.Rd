@@ -10,6 +10,7 @@ classify_flowcam_archive(
   algae_traits_name = "algae_traits_filtered.rds",
   classifier_constant_name,
   classifier_increasing_name,
+  species_tracked = NULL,
   output,
   mc.cores = 1
 )
@@ -20,6 +21,9 @@ classify_flowcam_archive(
 \item{classifier_constant_name}{the classifier for temperature treatment \strong{constant}}
 
 \item{classifier_increasing_name}{the classifier for temperature treatment \strong{increasing}}
+
+\item{species_tracked}{names of the species tracked as a character vector.
+If \code{NULL} it will be read from the original configuration file in the \code{datadir}.}
 
 \item{output}{path to which the classified data will be saved as \code{rds}}
 

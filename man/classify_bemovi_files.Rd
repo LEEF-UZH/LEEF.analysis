@@ -6,7 +6,7 @@
 \usage{
 classify_bemovi_files(
   datadir,
-  bemovi_extract_name = "bemovi_extract.yml",
+  bemovi_extract_name = NULL,
   classifier_constant_name,
   classifier_increasing_name
 )
@@ -14,19 +14,20 @@ classify_bemovi_files(
 \arguments{
 \item{datadir}{\code{character} vector containing the root directory for all files}
 
+\item{bemovi_extract_name}{\code{character} vector containing the name of the
+bemovi config file including path.}
+
 \item{classifier_constant_name}{\code{character} vector of name of the classifier
 for temperature treatment \strong{constant} including path}
 
 \item{classifier_increasing_name}{\code{character} vector of name of the
 classifier for temperature treatment \strong{increasing} including path}
-
-\item{algae_traits_name}{\code{character} vector containing the name of the algae
-traits file without path}
 }
 \value{
-\code{list} containing two objects:
-- \code{algae_traits} including species
-- \code{algae_densities} densities of the different particles identified
+\code{list} containing three objects:
+- \code{mean_density_per_ml}
+- \code{morph_mvt}
+- \code{trajectory_data}
 }
 \description{
 Classify algae_traits data.frame

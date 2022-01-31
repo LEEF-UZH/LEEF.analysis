@@ -8,6 +8,8 @@
 #' @param timestamps `character` vector containing the timestamps to be classified
 #' @param classifier_constant_name the classifier for temperature treatment **constant**
 #' @param classifier_increasing_name the classifier for temperature treatment **increasing**
+#' @param species_tracked names of the species tracked as a character vector.
+#'   If `NULL` it will be read from the original configuration file in the `datadir`.
 #' @param output path to which the classified data will be saved as `rds`
 #' @param mc.cores number of cores to be used. Defaults to 1
 #'
@@ -24,6 +26,7 @@ classify_flowcam_archive <- function(
   algae_traits_name = "algae_traits_filtered.rds",
   classifier_constant_name,
   classifier_increasing_name,
+  species_tracked = NULL,
   output,
   mc.cores = 1
 
@@ -56,7 +59,8 @@ classify_flowcam_archive <- function(
                   algae_traits_name = algae_traits_name,
                   classifier_constant_name = classifier_constant_name,
                   classifier_increasing_name = classifier_increasing_name,
-                  timestamp = timestamp
+                  timestamp = timestamp,
+                  species_tracked = species_tracked
                 )
               }
             )

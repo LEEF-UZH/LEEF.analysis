@@ -7,9 +7,10 @@
 #'   \code{"pecies"}.
 #' @param overlay.type Overlays can either be shown as "label", "circle" or
 #'   "both". Default: \code{"both"}
-#' @param crf integer value between 1 to 51, where 1 means lossless, 17 is nearly visually lossless,
-#'    51 is worst quality. Default value is 23
-#' @param gamma increase video dynamic range. Value between 0.1 and 10. Default 2. see \url{https://ffmpeg.org/ffmpeg-filters.html#eq} for further info
+#' @param crf integer value between 1 to 51, where 1 means lossless, 17 is
+#'   nearly visually lossless, 51 is worst quality. Default value is 23
+#' @param gamma increase video dynamic range. Value between 0.1 and 10. Default
+#'   2. see \url{https://ffmpeg.org/ffmpeg-filters.html#eq} for further info
 #' @param ffmpeg command to run ffmpeg. It can include a path. Default
 #'   \code{ffmpeg}
 #' @param mc.cores number of cores to be used for parallel execution. Defaults
@@ -20,7 +21,6 @@
 #'
 #' @return
 #'
-#' @importFrom bemovi.LEEF create_overlays_subtitle_directory
 #' @export
 #'
 #' @examples

@@ -8,6 +8,7 @@ classify_bemovi_archive(
   archive_dir = "/Users/rainerkrug/MountainDuck/LEEFSwift3",
   magnification = 16,
   bemovi_extract_name = "bemovi_extract.yml",
+  species_tracked = NULL,
   timestamps,
   classifier_constant_name,
   classifier_increasing_name,
@@ -16,15 +17,24 @@ classify_bemovi_archive(
 )
 }
 \arguments{
-\item{magnification}{the magnification or the bemovi videos to be reclassified}
+\item{magnification}{the magnification or the bemovi videos to be
+reclassified}
 
-\item{bemovi_extract_name}{the name of the \code{.yml} containing the parameter for the nalysis}
+\item{bemovi_extract_name}{the name of the \code{.yml} containing the parameter
+for the analysis in the directory of the data. The directory depends on the
+root_dir\verb{, }magnification\code{and}timestamp`}
 
-\item{timestamps}{\code{character} vector containing the timestamps to be classified}
+\item{species_tracked}{names of the species tracked as a character vector.
+If \code{NULL} the species tracked from the \code{bemovi_extract_file}  will be used.}
 
-\item{classifier_constant_name}{the classifier for temperature treatment \strong{constant}}
+\item{timestamps}{\code{character} vector containing the timestamps to be
+classified}
 
-\item{classifier_increasing_name}{the classifier for temperature treatment \strong{increasing}}
+\item{classifier_constant_name}{\code{character} vector of name of the classifier
+for temperature treatment \strong{constant} including path}
+
+\item{classifier_increasing_name}{\code{character} vector of name of the
+classifier for temperature treatment \strong{increasing} including path}
 
 \item{output}{path to which the classified data will be saved as \code{rds}}
 

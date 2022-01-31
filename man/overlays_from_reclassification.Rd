@@ -32,10 +32,11 @@ overlays_from_reclassification(
 \item{ffmpeg}{command to run ffmpeg. It can include a path. Default
 \code{ffmpeg}}
 
-\item{crf}{integer value between 1 to 51, where 1 means lossless, 17 is nearly visually lossless,
-51 is worst quality. Default value is 23}
+\item{crf}{integer value between 1 to 51, where 1 means lossless, 17 is
+nearly visually lossless, 51 is worst quality. Default value is 23}
 
-\item{gamma}{increase video dynamic range. Value between 0.1 and 10. Default 2. see \url{https://ffmpeg.org/ffmpeg-filters.html#eq} for further info}
+\item{gamma}{increase video dynamic range. Value between 0.1 and 10. Default
+2. see \url{https://ffmpeg.org/ffmpeg-filters.html#eq} for further info}
 
 \item{cropped}{if \code{TRUE}, the cropped measurement should be used}
 

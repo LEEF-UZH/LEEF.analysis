@@ -9,7 +9,8 @@ classify_flowcam_files(
   algae_traits_name = "algae_traits_filtered.rds",
   classifier_constant_name,
   classifier_increasing_name,
-  timestamp = "55555555"
+  timestamp = "55555555",
+  species_tracked = NULL
 )
 }
 \arguments{
@@ -25,6 +26,9 @@ for temperature treatment \strong{constant} including path}
 classifier for temperature treatment \strong{increasing} including path}
 
 \item{timestamp}{timestamp to be used to stamp the classified data}
+
+\item{species_tracked}{names of the species tracked as a character vector.
+If \code{NULL} it will be read from the original configuration file in the \code{datadir}.}
 }
 \value{
 \code{list} containing two objects:
