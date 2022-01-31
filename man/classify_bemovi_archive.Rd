@@ -22,7 +22,7 @@ reclassified}
 
 \item{bemovi_extract_name}{the name of the \code{.yml} containing the parameter
 for the analysis in the directory of the data. The directory depends on the
-root_dir\verb{, }magnification\code{and}timestamp`}
+\code{root_dir}, \code{magnification} and \code{timestamp}}
 
 \item{species_tracked}{names of the species tracked as a character vector.
 If \code{NULL} the species tracked from the \code{bemovi_extract_file}  will be used.}
