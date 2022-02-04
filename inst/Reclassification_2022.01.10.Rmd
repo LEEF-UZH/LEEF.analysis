@@ -26,7 +26,10 @@ library("LEEF.analysis")
 ```
 
 # Preparation
-This reclassification is based on the classifiers as in the LEEF.parameter repo in the release Reclassification_1 https://github.com/LEEF-UZH/LEEF.parameter/releases/tag/Reclassification_1.
+This reclassification is based on the classifiers as in the repo at the base URL which speicifies the repo and the reference / tag which should be used for this reclassification
+```{r}
+base <- paste0("https://github.com/LEEF-UZH/LEEF.parameter/raw/", "v1.2.1", "/")
+```
 
 ## Set output path
 ```{r output_path}
@@ -58,6 +61,7 @@ cores <- 7
 timestamps <- c(20210920, 20210922, 20210924, 20210927, 20210929, 20211001, 20211004, 20211006, 20211008, 20211011, 20211013, 20211015, 20211018, 20211020, 20211022, 20211025, 20211027, 20211029, 20211101, 20211103, 20211105, 20211108, 20211110, 20211112, 20211115, 20211117, 20211119, 20211122, 20211124, 20211126, 20211129, 20211201, 20211203, 20211206, 20211208, 20211210, 20211213, 20211215, 20211217, 20211220, 20211222, 20211224, 20211227, 20211229, 20211231, 20220103, 20220105)
 ```
 
+
 # Reclassification 
 
 ## Flowcam
@@ -69,25 +73,17 @@ dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
 class_constant <- file.path(pdir, "class_constant.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/flowcam/svm_flowcam_classifiers_18c_december2021.rds", 
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_18c_december2021.rds"), 
   destfile = class_constant,
   mode = "wb"
 )
 
 class_increasing <- file.path(pdir, "class_increasing.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/flowcam/svm_flowcam_classifiers_increasing_trained_at_18c_december2021.rds", 
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_increasing_trained_at_18c_december2021.rds"), 
   destfile = class_increasing,
   mode = "wb"
 )
-
-config <- file.path(pdir, "flowcam.yml")
-download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/flowcam/flowcam.yml", 
-  destfile = config,
-  mode = "wb"
-)
-species_tracked <- yaml::read_yaml(config)$species_tracked
 rm(config)
 ```
 
@@ -103,7 +99,7 @@ if (!file.exists(out)) {
       algae_traits_name = "algae_traits_filtered.rds", 
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
-      species_tracked = species_tracked,
+      species_tracked = yaml::read_yaml(paste0(base, "parameter/flowcam/flowcam.yml"))$species_tracked,
       output = out,
       mc.cores = cores
     )
@@ -130,26 +126,17 @@ dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
 class_constant <- file.path(pdir, "class_constant.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.16/svm_video_classifiers_18c_16x_december2021.rds", 
+  paste0(base, "parameter/bemovi.mag.16/svm_video_classifiers_18c_16x_december2021.rds"), 
   destfile = class_constant,
   mode = "wb"
 )
 
 class_increasing <- file.path(pdir, "class_increasing.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.16/svm_video_classifiers_increasing_trained_at_18c_16x_december2021.rds", 
+  paste0(base, "/parameter/bemovi.mag.16/svm_video_classifiers_increasing_trained_at_18c_16x_december2021.rds"), 
   destfile = class_increasing,
   mode = "wb"
 )
-
-config <- file.path(pdir, "bemovi.yml")
-download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.16/bemovi_extract.mag.16.yml", 
-  destfile = config,
-  mode = "wb"
-)
-species_tracked <- yaml::read_yaml(config)$species_tracked
-rm(config)
 ```
 
 ### Classify `bemovi_extract.mag.16.yml`
@@ -165,7 +152,7 @@ if (!file.exists(out)) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.16.yml", 
-      species_tracked = species_tracked,
+      species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.16/bemovi_extract.mag.16.yml"))$species_tracked,
       output = out,
       mc.cores = cores
     )
@@ -192,26 +179,17 @@ dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
 class_constant <- file.path(pdir, "class_constant.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/svm_video_classifiers_18c_25x_december2021.rds", 
+  paste0(base, "parameter/bemovi.mag.25/svm_video_classifiers_18c_25x_december2021.rds"), 
   destfile = class_constant,
   mode = "wb"
 )
 
 class_increasing <- file.path(pdir, "class_increasing.rds")
 download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/svm_video_classifiers_increasing_trained_at_18c_25x_december2021.rds", 
+  paste0(base, "parameter/bemovi.mag.25/svm_video_classifiers_increasing_trained_at_18c_25x_december2021.rds"), 
   destfile = class_increasing,
   mode = "wb"
 )
-
-config <- file.path(pdir, "bemovi.yml")
-download.file(
-  "https://github.com/LEEF-UZH/LEEF.parameter/raw/Reclassification_1/parameter/bemovi.mag.25/bemovi_extract.mag.25.yml", 
-  destfile = config,
-  mode = "wb"
-)
-species_tracked <- yaml::read_yaml(config)$species_tracked
-rm(config)
 ```
 
 ### Classify `bemovi_mag.25` 
@@ -226,7 +204,7 @@ if (!file.exists(out)) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.25.yml", 
-      species_tracked = species_tracked,
+      species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.yml"))$species_tracked,
       output = out,
       mc.cores = cores
     )
@@ -239,7 +217,7 @@ if (!file.exists(out)) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.25.non_cropped.yml", 
-      species_tracked = species_tracked,
+      species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.non_cropped.yml"))$species_tracked,
       output = out,
       mc.cores = cores
     )
@@ -252,7 +230,7 @@ if (!file.exists(out)) {
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
       bemovi_extract_name = "bemovi_extract.mag.25.cropped.yml", 
-      species_tracked = species_tracked,
+      species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.cropped.yml"))$species_tracked,
       output = out,
       mc.cores = cores
     )

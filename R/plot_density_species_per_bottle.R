@@ -37,7 +37,7 @@ plot_density_species_per_bottle_per_timestamp <- function(
     if (nrow(data) < 1) {
       warning("No data for available!")
     } else {
-      data %>% dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
+      data <- data %>% dplyr::mutate(timestamp = convert_timestamp(timestamp)) %>%
         dplyr::mutate(bottle = fix_bottle(bottle)) %>%
         dplyr::mutate(
           density = if (transform_density_4throot) {
