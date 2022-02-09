@@ -42,6 +42,10 @@ add_to_db <- function(
       dat <- readRDS(fns[i])
       names(dat) <- tolower(names(dat))
 
+      if ("timestamp" %in% names(dat)) {
+        dat$timestamp <- as.character(dat$timestamp)
+      }
+
       timestamps <- unlist(
         DBI::dbGetQuery(conn, paste("SELECT DISTINCT timestamp FROM", tables[i]))
       )
