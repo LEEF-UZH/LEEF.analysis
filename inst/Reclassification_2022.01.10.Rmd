@@ -254,10 +254,46 @@ rm(pdir, class_constant, class_increasing, out, species_tracked)
 system.time(
   add_reclassified_to_db(
     path = output, 
-    db = file.path(output, "LEEF.RRD.sqlite")
+    db = file.path(output, "LEEF.RRD.reclassified.sqlite")
   )
 )
 ```
 
-# Overlays
-TODO This still needs to be discussed. Options include using `bemovi.LEEF::create_overlays_subtitle_directory()` in a standalone function or `bemovi.LEEF::create_overlays_subtitle_single()` directly in the `classify_bemovi_archive()` function. Likely the first option of=s better as more flexible.
+# Add experiment specific tables
+```{r addExptables}
+pdir <- tempfile()
+dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
+
+experimental_design <- file.path(pdir, "experimental_design.csv")
+download.file(
+  paste0(base, "parameter/00.general.parameter/experimental_design.csv"), 
+  destfile = experimental_design,
+  mode = "wb"
+)
+
+compositions <- file.path(pdir, "compositions.csv")
+download.file(
+  paste0(base, "parameter/00.general.parameter/compositions.csv"), 
+  destfile = experimental_design,
+  mode = "wb"
+)
+
+add_experiment_tables(
+  db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
+  composition = compositions, 
+  experimetal_design = experimental_design
+)
+
+unlink(pdir)
+rm(pdir, compositions, add_experiment_tables)
+```
+
+# Create Diagnostic Report
+```{r createDiagReport}
+report_diagnostic(
+  db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
+  suffix = "reclassified", 
+  format = "html"
+)
+```
+
