@@ -7,7 +7,7 @@
 #' @param tables `vector` of the table names the data of the `fns` of
 #'   the same index should be added to.
 #'   **The table has to exist and contain a field named `timestamp`**
-#' @param remove_timestamp vector of timestamps to be removed.
+#' @param remove_timestamps vector of timestamps to be removed.
 #'
 #' @return vector of length of `fns` with `TRUE` if the data has been added,
 #'   `FALSE` otherwise

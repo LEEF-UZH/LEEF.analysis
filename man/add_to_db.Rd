@@ -22,7 +22,7 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 the same index should be added to.
 \strong{The table has to exist and contain a field named \code{timestamp}}}
 
-\item{remove_timestamp}{vector of timestamps to be removed.}
+\item{remove_timestamps}{vector of timestamps to be removed.}
 }
 \value{
 vector of length of \code{fns} with \code{TRUE} if the data has been added,

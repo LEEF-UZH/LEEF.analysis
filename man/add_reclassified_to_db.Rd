@@ -4,13 +4,19 @@
 \alias{add_reclassified_to_db}
 \title{Title}
 \usage{
-add_reclassified_to_db(path, db = getOption("RRDdb", "LEEF.RRD.sqlite"))
+add_reclassified_to_db(
+  path,
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  remove_timestamps = NULL
+)
 }
 \arguments{
 \item{path}{path to the root directory of the reclassification}
 
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
+
+\item{remove_timestamps}{vector of timestamps to be removed.}
 }
 \value{
 

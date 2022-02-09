@@ -3,6 +3,7 @@
 #' @param path path to the root directory of the reclassification
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
+#' @param remove_timestamps vector of timestamps to be removed.
 #'
 #' @return
 #' @export
@@ -10,7 +11,8 @@
 #' @examples
 add_reclassified_to_db <- function(
   path,
-  db = getOption("RRDdb", "LEEF.RRD.sqlite")
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  remove_timestamps = NULL
 ){
   if (!file.exists(db)){
     LEEF.backend.sqlite::new_RRD(db)
@@ -35,7 +37,7 @@ add_reclassified_to_db <- function(
       fns = files,
       tables = tables,
       db = db,
-      remove_timestamp = TRUE
+      remove_timestamps = remove_timestamps
     )
   }
 }

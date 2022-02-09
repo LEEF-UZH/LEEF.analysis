@@ -254,7 +254,8 @@ rm(pdir, class_constant, class_increasing, out, species_tracked)
 system.time(
   add_reclassified_to_db(
     path = output, 
-    db = file.path(output, "LEEF.RRD.reclassified.sqlite")
+    db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
+    remove_timestamps = timestamps
   )
 )
 ```
