@@ -47,10 +47,11 @@ species_set <- function(species_set_id = NULL){
       "Coleps_irchel",
       "Coleps_viridis",
       "Colpidium",
-      "Dexiostama",
+      "Dexiostoma",
       "Loxocephallus",
       "OtherCiliates",
-      "Tetrahymena"
+      "Tetrahymena",
+      "OtherCiliate"
     ),
     flowcam_rest = c(
       "airbubbles",
@@ -58,7 +59,8 @@ species_set <- function(species_set_id = NULL){
       "ColpidiumVacuoles",
       "DividingChlamydomonas",
       "Debris",
-      "DigestedAlgae"
+      "DigestedAlgae",
+      "Small_unidentified"
     )
   )
   if (is.null(species_set_id)) {
