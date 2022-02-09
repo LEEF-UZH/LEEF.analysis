@@ -17,7 +17,7 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 
 \item{table}{the name of the table. If \code{NULL}, a list of tables in the database \code{db} will be shown.}
 
-\item{timestamps}{timestamps which shopuld be extracted}
+\item{timestamps}{timestamps which should be extracted}
 
 \item{delete_data}{\strong{Attention!} If \code{TRUE} the data is deleted from the database!}
 }

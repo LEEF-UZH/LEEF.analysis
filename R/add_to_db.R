@@ -7,7 +7,7 @@
 #' @param tables `vector` of the table names the data of the `fns` of
 #'   the same index should be added to.
 #'   **The table has to exist and contain a field named `timestamp`**
-#' @param remove_timestamp if `TRUE`, the timestamp(s) is removed from the table before adding.
+#' @param remove_timestamp vector of timestamps to be removed.
 #'
 #' @return vector of length of `fns` with `TRUE` if the data has been added,
 #'   `FALSE` otherwise
@@ -19,7 +19,7 @@ add_to_db <- function(
   fns,
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   tables,
-  remove_timestamp = FALSE
+  remove_timestamps = NULL
 ){
   if (length(fns) != length(tables)){
     stop("'fns' and 'tables' have to have the same length!")
@@ -35,13 +35,29 @@ add_to_db <- function(
     try(DBI::dbDisconnect(conn), silent = TRUE)
   })
 
+  tss <- unique(remove_timestamps)
+  sapply(
+    unique(tables),
+    function(table){
+      message("Removing timestamps from ", table)
+      extract_timestamps(
+        db = db,
+        table = table,
+        timestamps = tss,
+        delete_data = TRUE
+      )
+      message("Vacuuming...")
+      DBI::dbExecute(conn, "VACUUM")
+    }
+  )
+
   added <- sapply(
     1:length(fns),
     function(i){
       message("Adding '", basename(fns[i]), "' to '", tables[i], "'..."  )
+
       dat <- readRDS(fns[i])
       names(dat) <- tolower(names(dat))
-
       if ("timestamp" %in% names(dat)) {
         dat$timestamp <- as.character(dat$timestamp)
       }
@@ -49,21 +65,6 @@ add_to_db <- function(
       timestamps <- unlist(
         DBI::dbGetQuery(conn, paste("SELECT DISTINCT timestamp FROM", tables[i]))
       )
-
-      if (remove_timestamp) {
-        if (any(unique(dat$timestamp) %in% timestamps)) {
-          message("Removing ", paste0(unique(dat$timestamp), collapse = ", "), " from ", tables[i])
-          extract_timestamps(
-            db = db,
-            table = tables[i],
-            timestamps = unique(dat$timestamp),
-            delete_data = TRUE
-          )
-          timestamps <- unlist(
-            DBI::dbGetQuery(conn, paste("SELECT DISTINCT timestamp FROM", tables[i]))
-          )
-        }
-      }
 
       if (any(unique(dat$timestamp) %in% timestamps)) {
         msg <- paste0("'", fns[i], "' not added as timestamp already present in table '", tables[i], "'.")
@@ -80,9 +81,7 @@ add_to_db <- function(
           append = TRUE
         )
         DBI::dbCommit(conn)
-        message("Vacuuming...")
         return(TRUE)
-        DBI::dbExecute(conn, "VACUUM")
       }
     }
   )

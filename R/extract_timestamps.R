@@ -6,7 +6,7 @@
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
 #' @param table the name of the table. If `NULL`, a list of tables in the database `db` will be shown.
-#' @param timestamps timestamps which shopuld be extracted
+#' @param timestamps timestamps which should be extracted
 #' @param delete_data **Attention!** If `TRUE` the data is deleted from the database!
 #'
 #' @return invisibly NULL

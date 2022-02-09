@@ -8,7 +8,7 @@ add_to_db(
   fns,
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   tables,
-  remove_timestamp = FALSE
+  remove_timestamps = NULL
 )
 }
 \arguments{
@@ -22,7 +22,7 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 the same index should be added to.
 \strong{The table has to exist and contain a field named \code{timestamp}}}
 
-\item{remove_timestamp}{if \code{TRUE}, the timestamp(s) is removed from the table before adding.}
+\item{remove_timestamp}{vector of timestamps to be removed.}
 }
 \value{
 vector of length of \code{fns} with \code{TRUE} if the data has been added,
