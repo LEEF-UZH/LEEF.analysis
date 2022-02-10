@@ -46,8 +46,6 @@ add_to_db <- function(
         timestamps = tss,
         delete_data = TRUE
       )
-      message("Vacuuming...")
-      DBI::dbExecute(conn, "VACUUM")
     }
   )
 
@@ -85,6 +83,9 @@ add_to_db <- function(
       }
     }
   )
+
+  message("Vacuuming...")
+  DBI::dbExecute(conn, "VACUUM")
 
   return(added)
 }
