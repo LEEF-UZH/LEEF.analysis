@@ -84,7 +84,6 @@ download.file(
   destfile = class_increasing,
   mode = "wb"
 )
-rm(config)
 ```
 
 ### Classify Flowcam
