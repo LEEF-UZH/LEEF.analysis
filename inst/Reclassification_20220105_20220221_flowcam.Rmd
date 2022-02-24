@@ -28,7 +28,7 @@ library("LEEF.analysis")
 # Preparation
 This reclassification is based on the classifiers as in the repo at the base URL which specifies the repo and the reference / tag which should be used for this reclassification
 ```{r}
-base <- paste0("https://github.com/LEEF-UZH/LEEF.parameter/raw/", "v1.3.0", "/")
+base <- paste0("https://github.com/LEEF-UZH/LEEF.parameter/raw/", "v1.4.0", "/")
 ```
 
 ## Set output path
@@ -82,14 +82,14 @@ dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
 class_constant <- file.path(pdir, "class_constant.rds")
 download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_18c_december2021.rds"), 
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_18c_decrLight18_trained_earlyFeb22.rds"), 
   destfile = class_constant,
   mode = "wb"
 )
 
 class_increasing <- file.path(pdir, "class_increasing.rds")
 download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_increasing_trained_at_18c_december2021.rds"), 
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_18c_normLight30_trained_earlyFeb22.rds"), 
   destfile = class_increasing,
   mode = "wb"
 )
