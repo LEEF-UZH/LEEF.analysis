@@ -15,9 +15,9 @@
 #'
 #' @examples
 report_reclassification <- function(
-  reclassification_report = system.file("Reclassification_2022.01.10.Rmd", package = "LEEF.analysis"),
-  output_dir =  file.path("~", "RRD.Reclassification"),
-  output_name = "RRD.Reclassification",
+  reclassification_report = system.file("Reclassification_20220105_20220221_flowcam.Rmd", package = "LEEF.analysis"),
+  output_dir =  file.path("~", "Reclassification_20220105_20220221_flowcam"),
+  output_name = "Reclassification_20220105_20220221_flowcam",
   format = "html"
 ) {
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
