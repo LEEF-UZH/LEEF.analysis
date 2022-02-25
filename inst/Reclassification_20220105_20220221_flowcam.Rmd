@@ -169,12 +169,4 @@ unlink(pdir)
 rm(pdir, compositions, add_experiment_tables)
 ```
 
-# Create Diagnostic Report
-```{r createDiagReport}
-report_diagnostic(
-  db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
-  suffix = "reclassified", 
-  format = "html"
-)
-```
 
