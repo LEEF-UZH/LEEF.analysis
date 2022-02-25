@@ -161,7 +161,8 @@ download.file(
 add_experiment_tables(
   db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
   composition = compositions, 
-  experimetal_design = experimental_design
+  experimetal_design = experimental_design,
+  overwrite = TRUE
 )
 
 unlink(pdir)
