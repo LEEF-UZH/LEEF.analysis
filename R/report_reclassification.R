@@ -16,7 +16,7 @@
 #' @examples
 report_reclassification <- function(
   reclassification_report = system.file("Reclassification_20220105_20220221_flowcam.Rmd", package = "LEEF.analysis"),
-  output_dir =  file.path("~", "Reclassification_20220105_20220221_flowcam"),
+  output_dir =  normalizePath(file.path("~", "Reclassification_20220105_20220221_flowcam")),
   output_name = "Reclassification_20220105_20220221_flowcam",
   format = "html"
 ) {

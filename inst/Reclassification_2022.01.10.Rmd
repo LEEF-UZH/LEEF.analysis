@@ -26,6 +26,7 @@ library("LEEF.analysis")
 ```
 
 # Preparation
+## Set Base to use
 This reclassification is based on the classifiers as in the repo at the base URL which speicifies the repo and the reference / tag which should be used for this reclassification
 ```{r}
 base <- paste0("https://github.com/LEEF-UZH/LEEF.parameter/raw/", "v1.2.1", "/")
@@ -274,18 +275,19 @@ download.file(
 compositions <- file.path(pdir, "compositions.csv")
 download.file(
   paste0(base, "parameter/00.general.parameter/compositions.csv"), 
-  destfile = experimental_design,
+  destfile = compositions,
   mode = "wb"
 )
 
 add_experiment_tables(
   db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
   composition = compositions, 
-  experimetal_design = experimental_design
+  experimetal_design = experimental_design,
+  overwrite = TRUE
 )
 
 unlink(pdir)
-rm(pdir, compositions, add_experiment_tables)
+rm(pdir, compositions, experimental_design)
 ```
 
 # Create Diagnostic Report
