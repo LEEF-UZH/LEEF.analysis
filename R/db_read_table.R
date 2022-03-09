@@ -26,13 +26,11 @@ db_read_table <- function(
   quiet = FALSE
 ){
   con <- DBI::dbConnect(RSQLite::SQLite(), db, flags = RSQLite::SQLITE_RO)
-  on.exit(
-    DBI::dbDisconnect(con)
-  )
 
   tables <- DBI::dbListTables(con)
   ##
   if (is.null(table)) {
+    DBI::dbDisconnect(con)
   	if (!quiet){
   	  warning(
   	    "This function needs a table name.\n",
