@@ -2,23 +2,30 @@
 % Please edit documentation in R/db_read_table.R
 \name{db_read_table}
 \alias{db_read_table}
-\title{Read a tablefrom RRD database and return as an \code{tbl_SQLiteConnection}.}
+\title{Read a table from RRD database and return as an \code{tbl_SQLiteConnection}.}
 \usage{
-db_read_table(db = getOption("RRDdb", "LEEF.RRD.sqlite"), table = NULL)
+db_read_table(
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  table = NULL,
+  quiet = FALSE
+)
 }
 \arguments{
-\item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
-If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
+\item{db}{fully qualified path to the sqlite database. Default, read from
+option \code{RRDdb}. If not set, defaults to option \code{RRDdb}; if this
+is not set, defaults to \code{LEEF.RRD.sqlite}}
 
-\item{table}{the name of the table. If `NULL`, a list of tables in the database `db` will be shown.}
+\item{table}{the name of the table. If `NULL`, a list of tables in the
+database `db` will be returned.}
+
+\item{quiet}{if \code{TRUE} a warning will be issued whe the \code{table} name is NULL.}
 }
 \value{
 Link to the table \code{density} in the RRD to be used with \code{dplyr} and friends
 }
 \description{
-This function does not actually fetch the data,
-but returns an \code{tbl_SQLiteConnection} object which can be further processed / filtered
-using \code{dplyr}.
-See \link{https://db.rstudio.com/r-packages/dplyr/} for details.
-To fetch the actual data, execute \code{collect()}.
+This function does not actually fetch the data, but returns an
+\code{tbl_SQLiteConnection} object which can be further processed / filtered
+using \code{dplyr}. See \link{https://db.rstudio.com/r-packages/dplyr/} for
+details. To fetch the actual data, execute \code{collect()}.
 }
