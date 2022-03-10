@@ -131,7 +131,13 @@ get_table_metadata <- function(
   )
   cmd <- do.call(rbind, cmd)
 
-  metadata <- cbind(tmd, cmd)
+  metadata <- cbind(
+    tmd,
+    unit = as.character(NA),
+    description = as.character(NA),
+    cmd,
+    comments = as.character(NA)
+  )
   return(metadata)
 }
 
@@ -142,21 +148,22 @@ get_db_metadata <- function(
     max_values = 50
 ){
   tables <- db_read_table(db, quiet = TRUE)
-tables <- tables[1:3]
-  tmd <- lapply(
+  tables <- tables[1:3]
+  metadata <- lapply(
     1:length(tables),
     function(i){
       message("Processing table ", i, " out of ", length(tables), " (", tables[i], ") ...")
-      get_table_metadata(
+      metadata <- get_table_metadata(
         db = db,
         table = tables[i],
         mimema = mimema,
         values = values,
         max_values = max_values
       )
+      write.csv(metadata, paste0("metadata.",tables[i], ".csv"))
+      return(metadata)
     }
   )
-  metadata <- do.call(rbind, tmd)
-
-  return(metadata)
+  names(metadata) <- tables
+  invisible(metadata)
 }
