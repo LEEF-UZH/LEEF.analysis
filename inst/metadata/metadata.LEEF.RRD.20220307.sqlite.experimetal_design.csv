@@ -1,0 +1,6 @@
+"","table_name","column_name","type","min","mean","max","no_distict_values","values"
+"1","experimetal_design","bottle","TEXT",NA,NA,NA,30,""
+"2","experimetal_design","temperature","TEXT",NA,NA,NA,2,""
+"3","experimetal_design","richness","INTEGER",7,10.3333333333333,14,3,""
+"4","experimetal_design","composition","TEXT",NA,NA,NA,15,""
+"5","experimetal_design","incubator","TEXT",NA,NA,NA,8,""

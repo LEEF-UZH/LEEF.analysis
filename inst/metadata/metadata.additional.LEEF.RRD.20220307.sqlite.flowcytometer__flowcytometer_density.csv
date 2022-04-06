@@ -1,0 +1,16 @@
+"","table_name","column_name","unit","description","comment"
+"1","flowcytometer__flowcytometer_density","timestamp",NA,NA,NA
+"2","flowcytometer__flowcytometer_density","filename",NA,NA,NA
+"3","flowcytometer__flowcytometer_density","bottle",NA,NA,NA
+"4","flowcytometer__flowcytometer_density","date",NA,NA,NA
+"5","flowcytometer__flowcytometer_density","sample",NA,NA,NA
+"6","flowcytometer__flowcytometer_density","volume",NA,NA,NA
+"7","flowcytometer__flowcytometer_density","total.counts",NA,NA,NA
+"8","flowcytometer__flowcytometer_density","tot_density_perml",NA,NA,NA
+"9","flowcytometer__flowcytometer_density","specname",NA,NA,NA
+"10","flowcytometer__flowcytometer_density","dilution_factor",NA,NA,NA
+"11","flowcytometer__flowcytometer_density","sample_letter",NA,NA,NA
+"12","flowcytometer__flowcytometer_density","sample_number",NA,NA,NA
+"13","flowcytometer__flowcytometer_density","species",NA,NA,NA
+"14","flowcytometer__flowcytometer_density","count",NA,NA,NA
+"15","flowcytometer__flowcytometer_density","density",NA,NA,NA

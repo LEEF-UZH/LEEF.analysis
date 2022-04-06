@@ -1,0 +1,11 @@
+"","table_name","column_name","unit","description","comment"
+"1","density","timestamp",NA,NA,NA
+"2","density","day",NA,NA,NA
+"3","density","bottle",NA,NA,NA
+"4","density","measurement",NA,NA,NA
+"5","density","species",NA,NA,NA
+"6","density","density",NA,NA,NA
+"7","density","temperature",NA,NA,NA
+"8","density","richness",NA,NA,NA
+"9","density","composition",NA,NA,NA
+"10","density","incubator",NA,NA,NA

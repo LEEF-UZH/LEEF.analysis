@@ -1,0 +1,10 @@
+"","table_name","column_name","unit","description","comment"
+"1","bemovi_mag_25__mean_density_per_ml_non_cropped","timestamp",NA,NA,NA
+"2","bemovi_mag_25__mean_density_per_ml_non_cropped","date",NA,NA,NA
+"3","bemovi_mag_25__mean_density_per_ml_non_cropped","species",NA,NA,NA
+"4","bemovi_mag_25__mean_density_per_ml_non_cropped","composition_id",NA,NA,NA
+"5","bemovi_mag_25__mean_density_per_ml_non_cropped","bottle",NA,NA,NA
+"6","bemovi_mag_25__mean_density_per_ml_non_cropped","temperature_treatment",NA,NA,NA
+"7","bemovi_mag_25__mean_density_per_ml_non_cropped","magnification",NA,NA,NA
+"8","bemovi_mag_25__mean_density_per_ml_non_cropped","sample",NA,NA,NA
+"9","bemovi_mag_25__mean_density_per_ml_non_cropped","density",NA,NA,NA

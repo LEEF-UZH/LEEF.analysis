@@ -1,0 +1,12 @@
+"","table_name","column_name","unit","description","comment"
+"1","o2","timestamp",NA,NA,NA
+"2","o2","day",NA,NA,NA
+"3","o2","bottle",NA,NA,NA
+"4","o2","sensor",NA,NA,NA
+"5","o2","temperature_actual",NA,NA,NA
+"6","o2","percent_o2",NA,NA,NA
+"7","o2","measurement",NA,NA,NA
+"8","o2","temperature",NA,NA,NA
+"9","o2","richness",NA,NA,NA
+"10","o2","composition",NA,NA,NA
+"11","o2","incubator",NA,NA,NA

@@ -1,0 +1,13 @@
+"","table_name","column_name","unit","description","comment"
+"1","flowcam__algae_density","date_flowcam",NA,NA,NA
+"2","flowcam__algae_density","species",NA,NA,NA
+"3","flowcam__algae_density","bottle",NA,NA,NA
+"4","flowcam__algae_density","composition",NA,NA,NA
+"5","flowcam__algae_density","temperature",NA,NA,NA
+"6","flowcam__algae_density","incubator",NA,NA,NA
+"7","flowcam__algae_density","volume_imaged",NA,NA,NA
+"8","flowcam__algae_density","dilution_factor",NA,NA,NA
+"9","flowcam__algae_density","richness",NA,NA,NA
+"10","flowcam__algae_density","count",NA,NA,NA
+"11","flowcam__algae_density","density",NA,NA,NA
+"12","flowcam__algae_density","timestamp",NA,NA,NA

@@ -1,0 +1,7 @@
+"","table_name","column_name","unit","description","comment"
+"1","manualcount__manualcount_density","timestamp",NA,NA,NA
+"2","manualcount__manualcount_density","bottle",NA,NA,NA
+"3","manualcount__manualcount_density","species",NA,NA,NA
+"4","manualcount__manualcount_density","ml_counted",NA,NA,NA
+"5","manualcount__manualcount_density","count",NA,NA,NA
+"6","manualcount__manualcount_density","density",NA,NA,NA

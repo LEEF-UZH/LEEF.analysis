@@ -1,0 +1,7 @@
+"","table_name","column_name","type","min","mean","max","no_distict_values","values"
+"1","manualcount__manualcount_density","timestamp","TEXT",NA,NA,NA,63,"20210920, 20210922, 20210924, 20210927, 20210929, 20211001, 20211004, 20211006, 20211008, 20211011, 20211013, 20211015, 20211018, 20211020, 20211022, 20211025, 20211027, 20211029, 20211101, 20211103, 20211105, 20211108, 20211110, 20211112, 20211115, ..., 20210920, 20210922, 20210924, 20210927, 20210929, 20211001, 20211004, 20211006, 20211008, 20211011, 20211013, 20211015, 20211018, 20211020, 20211022, 20211025, 20211027, 20211029, 20211101, 20211103, 20211105, 20211108, 20211110, 20211112, 20211115"
+"2","manualcount__manualcount_density","bottle","TEXT",NA,NA,NA,30,""
+"3","manualcount__manualcount_density","species","TEXT",NA,NA,NA,1,""
+"4","manualcount__manualcount_density","ml_counted","INTEGER",1,1.79365079365079,3,2,""
+"5","manualcount__manualcount_density","count","INTEGER",0,0.00476190476190476,2,3,""
+"6","manualcount__manualcount_density","density","INTEGER",0,0.00158730158730159,0.666666666666667,3,""
