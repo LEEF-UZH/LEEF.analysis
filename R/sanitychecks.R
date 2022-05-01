@@ -646,8 +646,8 @@ sanity_check_flowcytometer <- function(
   if (!all(required_files %in% fn)){
     return(
       paste0(
-        "The folder 'flowcam' misses the requred file(s): '",
-        required_files[!all(required_files %in% fn)],
+        "The folder 'flowcytometer' misses the requred file(s): '",
+        required_files[!(required_files %in% fn)],
         "'!"
       )
     )
