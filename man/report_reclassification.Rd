@@ -2,20 +2,24 @@
 % Please edit documentation in R/report_reclassification.R
 \name{report_reclassification}
 \alias{report_reclassification}
-\title{Do the reclassification and a report}
+\title{Do the reclassification and create a report}
 \usage{
 report_reclassification(
- 
-    reclassification_report = system.file("Reclassification_20220105_20220221_flowcam.Rmd",
-    package = "LEEF.analysis"),
-  output_dir = normalizePath(file.path("~",
-    "Reclassification_20220105_20220221_flowcam")),
-  output_name = "Reclassification_20220105_20220221_flowcam",
+  reclassification_report = system.file("Reclassification_20220105.Rmd", package =
+    "LEEF.analysis"),
+  output_dir = normalizePath(file.path("~", "Reclassification_20220105")),
+  output_name = "Reclassification_20220105",
   format = "html"
 )
 }
 \arguments{
-\item{reclassification_report}{The name of the reclassification report. The default points to the first one.}
+\item{reclassification_report}{The name of the reclassification report. The default points to the first one.
+Included reclassification reports are:
+\itemize{
+\item \code{Reclassification_2022.01.10}
+\item \code{Reclassification_20220105_20220221_flowcam}
+\item \code{Reclassification_20220501}
+}}
 
 \item{output_dir}{directory of the output of the reclassification and the report}
 
