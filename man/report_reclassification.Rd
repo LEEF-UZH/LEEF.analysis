@@ -18,7 +18,7 @@ Included reclassification reports are:
 \itemize{
 \item \code{Reclassification_2022.01.10}
 \item \code{Reclassification_20220105_20220221_flowcam}
-\item \code{Reclassification_20220501}
+\item \code{Reclassification_20220503}
 }}
 
 \item{output_dir}{directory of the output of the reclassification and the report}
