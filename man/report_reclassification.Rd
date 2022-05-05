@@ -16,9 +16,9 @@ report_reclassification(
 \item{reclassification_report}{The name of the reclassification report. The default points to the first one.
 Included reclassification reports are:
 \itemize{
-\item \code{Reclassification_2022.01.10.Rmd}
-\item \code{Reclassification_20220105_20220221_flowcam.Rmd}
-\item \code{Reclassification_20220503.Rmd}
+\item \code{system.file(Reclassification_2022.01.10.Rmd, package = "LEEF.analysis")}
+\item \code{system.file(Reclassification_20220105_20220221_flowcam.Rmd, package = "LEEF.analysis")}
+\item \code{system.file(Reclassification_20220506.Rmd, package = "LEEF.analysis")}
 }}
 
 \item{output_dir}{directory of the output of the reclassification and the report}

@@ -3,9 +3,9 @@
 #' The report needs to adapted to new classifications.
 #' @param reclassification_report The name of the reclassification report. The default points to the first one.
 #'   Included reclassification reports are:
-#'   - `Reclassification_2022.01.10.Rmd`
-#'   - `Reclassification_20220105_20220221_flowcam.Rmd`
-#'   - `Reclassification_20220503.Rmd`
+#'   - `system.file(Reclassification_2022.01.10.Rmd, package = "LEEF.analysis")`
+#'   - `system.file(Reclassification_20220105_20220221_flowcam.Rmd, package = "LEEF.analysis")`
+#'   - `system.file(Reclassification_20220506.Rmd, package = "LEEF.analysis")`
 #' @param output_dir directory of the output of the reclassification and the report
 #' @param output_name The name of the final report, without extension.
 #' @param format the format of the report as a character vector of length 1.
