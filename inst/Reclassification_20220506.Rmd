@@ -29,7 +29,7 @@ library("LEEF.analysis")
 ## Set Base to use
 This reclassification is based on the classifiers as in the repo at the base URL which speicifies the repo and the reference / tag which should be used for this reclassification
 ```{r}
-base <- paste0("https://github.com/LEEF-UZH/LEEF.parameter/raw/", "v1.5.0", "/")
+base <- paste0("https://github.com/LEEF-UZH/LEEF.parameter/raw/", "v1.5.1", "/")
 ```
 
 ## Set output path
