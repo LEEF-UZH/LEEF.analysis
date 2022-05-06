@@ -15,7 +15,7 @@ params:
   output_dir: ~/RRD.Reclassification_20220506/
 ---
 
-```{r setup, include=FALSE}
+```{r setup_reclass, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
   eval = TRUE,
