@@ -23,7 +23,8 @@ output:
     fig_width: 10
     fig_height: 12
 params:
-  db: /Volumes/LEEF/0.RRD/LEEF.RRD.20211103.sqlite
+  db: /Volumes/LEEF/0.RRD/LEEF.RRD.sqlite
+  lastDays: 7
 ---
 
 ```{r setup, include=FALSE}
@@ -52,7 +53,7 @@ plot_response_incubator(params$db)
 This plot shows, if a `bottle` is present for the `measurement` for the timestamps analysed. Each `measurement` is a panes. Missing dots indicate missing datapoints for the `bottle` at the `measurement` for the `timestamp`.
 
 ```{r bottles_per_timestamp}
-plot_bottles_per_timestamp(params$db, lastDays = 7)
+plot_bottles_per_timestamp(params$db, lastDays = params$lastDays)
 ```
 
 \pagebreak

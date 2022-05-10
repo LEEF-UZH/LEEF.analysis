@@ -4,6 +4,7 @@
 #' @param suffix suffix for the file name
 #' @param format the format of the report as a character vector of length 1.
 #'     Supported are at the moment: \code{html} (the default), \code{pdf} and \code{word}.
+#' @param lastDays number of last days to be included in graph 2. Default: 7
 #'
 #' @return the fully qualified file name to the created report.
 #'
@@ -12,7 +13,7 @@
 #' @export
 #'
 #' @examples
-report_diagnostic <- function(db, suffix = "", format = "html") {
+report_diagnostic <- function(db, suffix = "", format = "html", lastDays = 7) {
   name <- ifelse(
     suffix == "",
     "Diagnostic_Report",
@@ -41,7 +42,7 @@ report_diagnostic <- function(db, suffix = "", format = "html") {
   report <- rmarkdown::render(
     input = system.file("DiagnosticReport.Rmd", package = "LEEF.analysis"),
     output_format = output_format,
-    params = list(db = db),
+    params = list(db = db, lastDays = lastDays),
     output_file = output_file
   )
   utils::browseURL(report, encodeIfNeeded = TRUE)

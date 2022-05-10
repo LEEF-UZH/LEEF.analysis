@@ -1,23 +1,28 @@
-#' Do the reclassification and a report
+#' Do the reclassification and create a report
 #'
 #' The report needs to adapted to new classifications.
 #' @param reclassification_report The name of the reclassification report. The default points to the first one.
+#'   Included reclassification reports are:
+#'   - `system.file(Reclassification_2022.01.10.Rmd, package = "LEEF.analysis")`
+#'   - `system.file(Reclassification_20220105_20220221_flowcam.Rmd, package = "LEEF.analysis")`
+#'   - `system.file(Reclassification_20220506.Rmd, package = "LEEF.analysis")`
 #' @param output_dir directory of the output of the reclassification and the report
 #' @param output_name The name of the final report, without extension.
 #' @param format the format of the report as a character vector of length 1.
-#'     Supported are at the moment: \code{html} (the default), \code{pdf} and \code{word}.
+#'     Supported are at the moment: `html` (the default), `pdf` and `word`.
 #'
 #' @return the fully qualified file name to the created report.
 #'
+#' @md
 #' @importFrom rmarkdown render
 #' @importFrom utils browseURL
 #' @export
 #'
 #' @examples
 report_reclassification <- function(
-  reclassification_report = system.file("Reclassification_20220105_20220221_flowcam.Rmd", package = "LEEF.analysis"),
-  output_dir =  normalizePath(file.path("~", "Reclassification_20220105_20220221_flowcam")),
-  output_name = "Reclassification_20220105_20220221_flowcam",
+  reclassification_report = system.file("Reclassification_20220105.Rmd", package = "LEEF.analysis"),
+  output_dir =  normalizePath(file.path("~", "Reclassification_20220105")),
+  output_name = "Reclassification_20220105",
   format = "html"
 ) {
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
