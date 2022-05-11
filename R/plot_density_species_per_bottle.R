@@ -49,6 +49,9 @@ plot_density_species_per_bottle_per_timestamp <- function(
         group_by(day, bottle, species, composition, temperature) %>%
         summarise(density = mean(density))
 
+      data$temperature[data$temperature == "increasing"] <- "decreasing light"
+      data$temperature[data$temperature == "constant"]   <- "constant light"
+
       p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$density)) +
         ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
         ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +
