@@ -1,4 +1,4 @@
-#' Read \code{immigration_schedule} from RRD database and return as an \code{tbl_SQLiteConnection}.
+#' Read \code{immigration_sevent} from RRD database and return as an \code{tbl_SQLiteConnection}.
 #'
 #' This function does not actually fetch the data,
 #' but returns an \code{tbl_SQLiteConnection} object which can be further processed / filtered
@@ -17,10 +17,10 @@
 #' @export
 #'
 #' @examples
-db_read_immigration_schedule <- function(
+db_read_immigration <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){
   con <- DBI::dbConnect(RSQLite::SQLite(), db, flags = RSQLite::SQLITE_RO)
-  data <- dplyr::tbl(con, "immigration_schedule")
+  data <- dplyr::tbl(con, "immigration_event")
   return(data)
 }

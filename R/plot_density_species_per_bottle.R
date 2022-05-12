@@ -52,6 +52,15 @@ plot_density_species_per_bottle_per_timestamp <- function(
       data$temperature[data$temperature == "increasing"] <- "decreasing light"
       data$temperature[data$temperature == "constant"]   <- "constant light"
 
+      ls <- db_read_light_decline_schedule(db) %>% collect()
+      ls$timestamp <- as.integer(ls$timestamp)
+      im <- db_read_immigration_schedule(db) %>% collect()
+      im$timestamp <- as.integer(im$timestamp)
+
+      day_timestamp <- db_read_density(db) %>% select(timestamp, day) %>% dplyr::distinct() %>% collect()
+      diff <- min(as.integer(day_timestamp$timestamp))
+      ls$day <- ls$timestamp - diff
+
       p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$density)) +
         ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
         ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +

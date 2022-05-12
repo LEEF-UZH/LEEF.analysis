@@ -1,4 +1,4 @@
-#' Read \code{light_decline_schedule} from RRD database and return as an \code{tbl_SQLiteConnection}.
+#' Read \code{light_decline} from RRD database and return as an \code{tbl_SQLiteConnection}.
 #'
 #' This function does not actually fetch the data,
 #' but returns an \code{tbl_SQLiteConnection} object which can be further processed / filtered
@@ -17,10 +17,10 @@
 #' @export
 #'
 #' @examples
-db_read_light_decline_schedule <- function(
+db_read_light_decline <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){
   con <- DBI::dbConnect(RSQLite::SQLite(), db, flags = RSQLite::SQLITE_RO)
-  data <- dplyr::tbl(con, "light_decline_schedule")
+  data <- dplyr::tbl(con, "light_decline")
   return(data)
 }
