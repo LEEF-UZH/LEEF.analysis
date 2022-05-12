@@ -52,14 +52,7 @@ plot_density_species_per_bottle_per_timestamp <- function(
       data$temperature[data$temperature == "increasing"] <- "decreasing light"
       data$temperature[data$temperature == "constant"]   <- "constant light"
 
-      ls <- db_read_light_decline_schedule(db) %>% collect()
-      ls$timestamp <- as.integer(ls$timestamp)
-      im <- db_read_immigration_schedule(db) %>% collect()
-      im$timestamp <- as.integer(im$timestamp)
-
-      day_timestamp <- db_read_density(db) %>% select(timestamp, day) %>% dplyr::distinct() %>% collect()
-      diff <- min(as.integer(day_timestamp$timestamp))
-      ls$day <- ls$timestamp - diff
+      ls <- db_read_light_decline(db) %>% collect()
 
       p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$density)) +
         ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
@@ -74,7 +67,8 @@ plot_density_species_per_bottle_per_timestamp <- function(
         ggplot2::scale_colour_manual(values = 1:40) +
         ggplot2::xlab("Day of Experiment") +
         ggplot2::ylab(ifelse(transform_density_4throot, "4th root density", "density")) +
-        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45)) +
+      geom_vline(xintercept = range(ls$day), colour = "lightgrey")
       p
     }
 }
