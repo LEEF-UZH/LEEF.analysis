@@ -8,6 +8,8 @@ add_experiment_tables(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   composition = NULL,
   experimetal_design = NULL,
+  light_decline_schedule = NULL,
+  immigration_schedule = NULL,
   overwrite = FALSE
 )
 }
@@ -17,7 +19,9 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 
 \item{composition}{fully qualified path to the \code{csv} file with the composition data}
 
-\item{experimetal_design}{fully qualified path to the \code{csv} file with the experimetal_design data}
+\item{light_decline_schedule}{fully qualified path to the \code{csv} file with the light decline dates}
+
+\item{immigration_schedule}{fully qualified path to the \code{csv} file with the immigration event dates}
 
 \item{overwrite}{if \code{TRUE}, the existing tables will be overwritten. There is actually no need for this.}
 }
