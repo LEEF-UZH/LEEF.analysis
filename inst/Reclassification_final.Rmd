@@ -12,7 +12,7 @@ output:
     toc_collapsed: true
     code_folding: hide
 params:
-  output_dir: ~/RRD.Reclassification_all/
+  output_dir: ~/RRD.Reclassification_final/
 ---
 
 ```{r setup_reclass, include=FALSE}
@@ -267,7 +267,7 @@ rm(pdir, class_constant, class_increasing, out, species_tracked)
 system.time(
   add_reclassified_to_db(
     path = output, 
-    db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
+    db = file.path(output, "LEEF.RRD.reclassified_final.sqlite"), 
     remove_timestamps = timestamps
   )
 )
