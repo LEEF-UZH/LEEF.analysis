@@ -38,7 +38,3 @@ If \code{NULL} it will be read from the original configuration file in the \code
 \description{
 Classify algae_traits data.frame
 }
-\examples{
-
-
-}

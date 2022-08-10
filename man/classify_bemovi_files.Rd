@@ -32,7 +32,3 @@ classifier for temperature treatment \strong{increasing} including path}
 \description{
 Classify algae_traits data.frame
 }
-\examples{
-
-
-}

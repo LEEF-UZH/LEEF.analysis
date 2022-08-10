@@ -13,8 +13,8 @@ overlays(
   crf = 17,
   gamma = 2,
   ffmpeg = "ffmpeg",
- 
-    from_current_to_archive_dir = "./../../../../../Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data",
+  from_current_to_archive_dir =
+    "./../../../../../Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data",
   mc.cores = 1
 )
 }
@@ -45,9 +45,6 @@ archived data can be found and the folders \code{extracted} and
 
 \item{mc.cores}{number of cores to be used for parallel execution. Defaults
 to 1}
-}
-\value{
-
 }
 \description{
 Create overlays
