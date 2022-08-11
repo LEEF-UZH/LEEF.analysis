@@ -6,19 +6,16 @@
 \usage{
 zen_deposit(
   token = NULL,
-  sandbox = TRUE,
-  archive_dir = "~/Duck/LEEFSwift3",
   timestamp,
   measuring_method,
-  description = "Description of the data"
+  archive_dir = "~/Duck/LEEFSwift3",
+  metadata = zen_metadata(),
+  publish = FALSE,
+  sandbox = TRUE
 )
 }
 \arguments{
 \item{token}{Zenodo token to upload the deposit}
-
-\item{sandbox}{if \code{TRUE} (default) upload to the Zenodo sandbox for testing, if \code{FALSE} upload to the "real" Zenodo}
-
-\item{archive_dir}{root directory of the archive directories}
 
 \item{timestamp}{timestamp to be uploaded}
 
@@ -32,7 +29,13 @@ zen_deposit(
 \item \code{"manualcount"}
 }}
 
-\item{description}{Description of the two data deposits}
+\item{archive_dir}{base directory of the data archive}
+
+\item{metadata}{metadata as genersted by the function \code{zen_metadata()}}
+
+\item{publish}{if \code{TRUE} publish the packages immediately - should normally be \code{FALSE}}
+
+\item{sandbox}{if \code{TRUE} (default) upload to the Zenodo sandbox for testing, if \code{FALSE} upload to the "real" Zenodo}
 }
 \value{
 list with all info concerning the deposits

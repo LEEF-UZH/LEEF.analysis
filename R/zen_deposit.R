@@ -1,7 +1,91 @@
+#' Create list containing the zenodo metadata for the data deposit
+#'
+#' @param community community to which the dateposited data should be added
+#' @param upload_type type of the deposited data
+#' @param authors authors of the deposited data. Each contributor
+#'   is also a list with the following fields:
+#'   - firstname
+#'   - lastname
+#'   - affiliation
+#'   - orcid
+#' @param description description of the deposited data
+#' @param version version of the deposited data
+#' @param language lanuage of the deposited data
+#' @param keywords keywords
+#' @param access_right access right of the deposited data
+#' @param license license of the deposited data
+#' @param contributors list of contributors of the deposited data. Each contributor
+#'   is also a list with the following fields:
+#'   - firstname
+#'   - lastname
+#'   - type
+#'   - affiliation
+#'   - orcid
+#'
+#' @return list containing the metadata necessary for the data deposit
+#'
+#' @md
+#'
+#' @export
+#'
+zen_metadata <- function(
+    community = "LEEF Experiment data",
+    upload_type = "dataset",
+    authors = list(
+      RMK = list(
+        firstname = "Rainer M",
+        lastname = "Krug",
+        affiliation = "University of Zurich",
+        orcid = "0000-0002-7490-0066"
+      ),
+      OLP = list(
+        firstname = "Owen L",
+        lastname = "Petchey",
+        affiliation = "University of Zurich",
+        orcid = "0000-0002-7724-1633"
+      )
+    ),
+    description = "Description of the data",
+    version = "1.0.0",
+    language = "eng",
+    keywords = c("LEEZ-UZH", "LEEF-1"),
+    access_right = "open",
+    license = "CC-BY-SA-4.0",
+    contributors = list(
+      RMK = list(
+        firstname = "Rainer M",
+        lastname = "Krug",
+        type = "DataManager",
+        affiliation = "University of Zurich",
+        orcid = "0000-0002-7490-0066"
+      ),
+      OLP = list(
+        firstname = "Owen L",
+        lastname = "Petchey",
+        type = "ProjectLeader",
+        affiliation = "University of Zurich",
+        orcid = "0000-0002-7724-1633"
+      )
+    )
+){
+  metadata <- list(
+    community = community,
+    upload_type = upload_type,
+    authors = authors,
+    description = description,
+    version = version,
+    language = language,
+    keywords = keywords,
+    access_right = access_right,
+    license = license,
+    contributors = contributors
+  )
+  return(metadata)
+}
+
 #' Deposit data on Zenodo
 #'
 #' @param token Zenodo token to upload the deposit
-#' @param sandbox if `TRUE` (default) upload to the Zenodo sandbox for testing, if `FALSE` upload to the "real" Zenodo
 #' @param timestamp timestamp to be uploaded
 #' @param measuring_method measuring method to be uploaded. Allowed values at the moment:
 #'    - `"bemovi.mag.16"`
@@ -10,8 +94,11 @@
 #'    - `"flowcytometer"`
 #'    - `"o2meter"`
 #'    - `"manualcount"`
-#' @param archive_dir root directory of the archive directories
-#' @param description Description of the two data deposits
+#' @param metadata metadata as genersted by the function \code{zen_metadata()}
+#' @param archive_dir base directory of the data archive
+#' @param publish if \code{TRUE} publish the packages immediately - should normally be \code{FALSE}
+#' @param sandbox if `TRUE` (default) upload to the Zenodo sandbox for testing, if `FALSE` upload to the "real" Zenodo
+#'
 #'
 #' @return list with all info concerning the deposits
 #'
@@ -24,11 +111,16 @@
 #'
 zen_deposit <- function(
     token = NULL,
-    sandbox = TRUE,
-    archive_dir = "~/Duck/LEEFSwift3",
+
     timestamp,
     measuring_method,
-    description = "Description of the data"
+
+    archive_dir = "~/Duck/LEEFSwift3",
+
+    metadata = zen_metadata(),
+
+    publish = FALSE,
+    sandbox = TRUE
 ){
   if (sandbox) {
     url <- "https://sandbox.zenodo.org/api"
@@ -55,12 +147,13 @@ zen_deposit <- function(
     extracted = list(
       stage = "extracted",
       datapath = file.path(
-        extracted = archive_dir,
+        archive_dir,
         "LEEF.archived.data/LEEF/3.archived.data/extracted",
         folder
       )
     )
   )
+
 
   # Connect to Zenodo -------------------------------------------------------
 
@@ -77,32 +170,51 @@ zen_deposit <- function(
     function(x){
       rec <- zen4R::ZenodoRecord$new()
 
-      rec$setUploadType("dataset")
-      # rec$setPublicationType(chapters$type[i])
-      rec$setTitle(
-        paste0(
-          "LEEF Experiment ", x["stage"], " data from ", as.Date(timestamp, "%Y%m%d")
-        )
-      )
-      rec$setDescription(description)
-      rec$addCreator(
-        firstname = "Rainer M",
-        lastname = "Krug",
-        affiliation = "University of Zurich"
-      )
-      rec$setLicense("CC-BY-SA-4.0")
-      rec$setAccessRight("open")
-      rec$setVersion("1.0")
-      rec$setLanguage("eng")
-      rec$setKeywords(c("LEEF-UZH"))
-      # rec$addRelatedIdentifier(
-      #   relation = chapters$figures[[i]]$relation[n],
-      #   identifier = chapters$figures[[i]]$figureDOI[n]
+      rec$setUploadType(metadata$upload_type)
+      title = paste0("LEEF Experiment ", x["stage"], " data from ", as.Date(timestamp, "%Y%m%d"))
+      rec$setTitle(title)
+      #   paste0(
+      #     "LEEF Experiment ", x["stage"], " data from ", as.Date(timestamp, "%Y%m%d")
+      #   )
       # )
-      # rec$addRelatedIdentifier("isPartOf", "http://bookDOI") # the reference to the DOI of Volume
+      lapply(
+        metadata$authors,
+        function(aut){
+          rec$addCreator(
+            firstname = aut$firstname,
+            lastname = aut$lastname,
+            affiliation = aut$affiliation,
+            orcid = aut$orcid
+          )
+        }
+      )
+      rec$setDescription(metadata$description)
+      rec$setVersion(metadata$version)
+      rec$setLanguage(metadata$language)
+      keywords <- c(
+        metadata$keywords,
+        x["stage"],
+        measuring_method,
+        paste0("timestamp_", timestamp)
+      )
+      rec$setKeywords(metadata$keywords)
+      rec$setLicense(metadata$license)
+      rec$setAccessRight(metadata$access_right)
       # rec$setGrants("654359") # eLTER
       # rec$setGrants("871126") # eLTER-PPP
       # rec$setGrants("871128") # eLTER-Plus
+      lapply(
+        metadata$contributors,
+        function(con){
+          rec$addContributor(
+            firstname = con$firstname,
+            lastname = con$lastname,
+            type = con$type,
+            affiliation = con$affiliation,
+            orcid = con$orcid
+          )
+        }
+      )
 
       x$rec <-  rec
 
@@ -126,9 +238,9 @@ zen_deposit <- function(
 
 
   deposits[["pre_processed"]]$rec$addRelatedIdentifier(
-      relation = "isCompiledBy",
-      identifier = deposits[["extracted"]]$doi
-    )
+    relation = "isCompiledBy",
+    identifier = deposits[["extracted"]]$doi
+  )
   deposits[["pre_processed"]]$rec <- zenodo$depositRecord(deposits[["pre_processed"]]$rec)
 
   deposits[["extracted"]]$rec$addRelatedIdentifier(
@@ -167,12 +279,45 @@ zen_deposit <- function(
 
   # Publish deposits
 
-  recs <- lapply(
-    deposits,
-    function(x){
-      zenodo$publishRecord(x$rec$id)
-    }
-  )
+  if (publish) {
+    recs <- lapply(
+      deposits,
+      function(x){
+        zenodo$publishRecord(x$rec$id)
+      }
+    )
+  }
 
   return(deposits)
+}
+
+#' Get all measurement_method / timestamp combinations in the archive
+#'
+#' @param archive_dir base directory of the data archive
+#' @param stage either \code{"pre_processed"} or \code{extracted}
+#'
+#' @return
+#' @export
+#'
+#' @examples
+all_archives <- function(
+    archive_dir = "~/Duck/LEEFSwift3",
+    stage
+){
+  datapath  <- file.path(
+    archive_dir,
+    "LEEF.archived.data/LEEF/3.archived.data",
+    stage
+  )
+  dirs <- list.dirs(datapath, full.names = FALSE, recursive = FALSE)
+  dirs <- gsub("^LEEF\\.", "", dirs)
+  dirs <- gsub("^fast\\.", "", dirs)
+  dirs <- gsub("\\.bemovi\\.", "\\.", dirs)
+  dirs <- gsub("^bemovi\\.mag\\.", "bemovi_mag_", dirs)
+  dirs <- strsplit(dirs, "\\.") |>
+    simplify2array() |>
+    t() |>
+    as.data.frame()
+  names(dirs) <- c("measurement_method", "timestamp")
+  dirs$measurement_method <- gsub("bemovi_mag_", "bemovi\\.mag\\.", dirs$measurement_method)
 }
