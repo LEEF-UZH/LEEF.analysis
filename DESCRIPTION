@@ -13,7 +13,6 @@ Description: Provides simple access functions to read data out of the sqlite RRD
   can be configured in a yaml config file and used.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 Depends: R (>= 3.5.0)
 Imports: 
   DBI,
@@ -27,7 +26,8 @@ Imports:
   dplyr,
   magrittr,
   rlang,
-  tibble
+  tibble,
+  zen4R
 RoxygenNote: 7.2.1
 Suggests: 
     knitr
