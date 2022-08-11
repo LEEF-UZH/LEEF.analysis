@@ -9,7 +9,6 @@
 #'
 #' @export
 #'
-#' @examples
 db_disconnect <- function(
   x
 ){

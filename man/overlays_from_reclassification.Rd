@@ -50,6 +50,9 @@ to 1}
 archived data can be found and the folders \code{extracted} and
 \code{pre-processed}}
 }
+\value{
+return value from \code{bemovi.LEEF::create_overlays_subtitle_directory}
+}
 \description{
 Create overlays
 }

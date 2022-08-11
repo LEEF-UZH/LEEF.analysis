@@ -19,7 +19,6 @@
 #'
 #' @export
 #'
-#' @examples
 create_rrd_trimmed <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   trimmed_db = gsub("\\.sqlite", ".trimmed.sqlite", db)

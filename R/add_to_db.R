@@ -14,7 +14,6 @@
 #' @export
 #'
 #' @md
-#' @examples
 add_to_db <- function(
   fns,
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),

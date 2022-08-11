@@ -18,6 +18,9 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 
 \item{remove_timestamps}{vector of timestamps to be removed.}
 }
+\value{
+undefined
+}
 \description{
 Title
 }

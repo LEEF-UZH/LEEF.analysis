@@ -16,7 +16,6 @@
 #'
 #' @export
 #'
-#' @examples
 db_read_light_decline <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){

@@ -19,7 +19,6 @@
 #'
 #' @export
 #'
-#' @examples
 db_read_table <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   table = NULL,

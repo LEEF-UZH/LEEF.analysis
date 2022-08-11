@@ -12,7 +12,6 @@
 #' @return NULL
 #' @export
 #'
-#' @examples
 add_experiment_tables <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   composition = NULL,

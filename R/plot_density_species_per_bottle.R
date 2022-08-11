@@ -14,7 +14,6 @@
 #'
 #' @export
 #'
-#' @examples
 plot_density_species_per_bottle_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   transform_density_4throot = TRUE,

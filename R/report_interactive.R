@@ -7,7 +7,6 @@
 #' @importFrom rmarkdown run
 #' @export
 #'
-#' @examples
 report_interactive <- function(db) {
   rmarkdown::run(
     file = system.file("InteractiveReport.Rmd", package = "LEEF.analysis")

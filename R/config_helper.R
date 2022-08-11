@@ -8,7 +8,6 @@
 #'
 #' @export
 #'
-#' @examples
 configs <- function(
   config_yml = system.file("tables.yml", package = "LEEF.analysis")
 ){

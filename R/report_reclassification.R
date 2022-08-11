@@ -18,7 +18,6 @@
 #' @importFrom utils browseURL
 #' @export
 #'
-#' @examples
 report_reclassification <- function(
   reclassification_report = system.file("Reclassification_20220105.Rmd", package = "LEEF.analysis"),
   output_dir =  normalizePath(file.path("~", "Reclassification_20220105")),

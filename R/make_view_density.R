@@ -9,7 +9,6 @@
 #'
 #' @export
 #'
-#' @examples
 make_view_density <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   start_date = "2021-09-20",

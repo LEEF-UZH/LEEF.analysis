@@ -10,7 +10,6 @@
 #'
 #' @export
 #'
-#' @examples
 plot_no_species_per_bottle_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){

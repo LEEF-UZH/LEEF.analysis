@@ -13,7 +13,7 @@
 #' @export
 #'
 #' @md
-#' @examples
+#'
 extract_timestamps <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   table = NULL,

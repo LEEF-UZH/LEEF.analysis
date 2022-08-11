@@ -17,8 +17,6 @@
 #' @export
 #'
 #' @md
-#' @examples
-#'
 #'
 classify_bemovi_files <- function(
   datadir,

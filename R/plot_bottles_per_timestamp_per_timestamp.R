@@ -10,7 +10,6 @@
 #'
 #' @export
 #'
-#' @examples
 plot_bottles_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   lastDays = 7

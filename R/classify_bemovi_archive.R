@@ -27,8 +27,6 @@
 #' @export
 #'
 #' @md
-#' @examples
-#'
 #'
 classify_bemovi_archive <- function(
   archive_dir = "/Users/rainerkrug/MountainDuck/LEEFSwift3",

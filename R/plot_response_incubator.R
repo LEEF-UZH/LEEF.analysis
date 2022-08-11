@@ -17,7 +17,6 @@
 #'
 #' @export
 #'
-#' @examples
 plot_response_incubator <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){

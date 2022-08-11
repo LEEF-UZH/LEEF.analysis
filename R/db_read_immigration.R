@@ -16,7 +16,6 @@
 #'
 #' @export
 #'
-#' @examples
 db_read_immigration <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){

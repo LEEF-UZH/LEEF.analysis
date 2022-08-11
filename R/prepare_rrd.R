@@ -10,7 +10,6 @@
 #' @return NULL
 #' @export
 #'
-#' @examples
 prepare_rrd <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   composition = NULL,

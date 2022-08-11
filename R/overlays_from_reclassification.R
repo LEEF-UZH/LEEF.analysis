@@ -19,11 +19,10 @@
 #'   archived data can be found and the folders \code{extracted} and
 #'   \code{pre-processed}
 #'
-#' @return
+#' @return return value from \code{bemovi.LEEF::create_overlays_subtitle_directory}
 #'
 #' @export
 #'
-#' @examples
 overlays_from_reclassification <- function(
   archive_dir = "/Users/rainerkrug/Duck/LEEFSwift3",
   classification_dir = "~/RRD.Reclassification_1",

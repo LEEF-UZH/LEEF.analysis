@@ -14,7 +14,6 @@
 #'
 #' @export
 #'
-#' @examples
 plot_o2s_per_bottle_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){

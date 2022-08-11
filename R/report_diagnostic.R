@@ -12,7 +12,6 @@
 #' @importFrom utils browseURL
 #' @export
 #'
-#' @examples
 report_diagnostic <- function(db, suffix = "", format = "html", lastDays = 7) {
   name <- ifelse(
     suffix == "",

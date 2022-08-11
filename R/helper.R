@@ -31,7 +31,6 @@ fix_bottle <- function(bottle) {
 #' @return Names of sets or the set itself
 #' @export
 #'
-#' @examples
 species_set <- function(species_set_id = NULL){
   sets <- list(
     flowcam_algae = c(

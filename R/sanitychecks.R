@@ -6,7 +6,6 @@
 #' @return The extracted timestamp as a string
 #' @export
 #'
-#' @examples
 sanity_get_timestamp <- function(
   sample_dir = "."
 ){
@@ -37,7 +36,6 @@ sanity_get_timestamp <- function(
 #' @return \code{TRUE} if the test passed, a string indicating the error if it failed.
 #' @export
 #'
-#' @examples
 sanity_check_general.data <- function(
   sample_dir = "."
 ){
@@ -70,7 +68,6 @@ sanity_check_general.data <- function(
 #' @return \code{TRUE} if the test passed, a string indicating the error if it failed.
 #' @export
 #'
-#' @examples
 sanity_check_bemovi.mag.16 <- function(
   sample_dir = "."
 ){
@@ -238,7 +235,6 @@ sanity_check_bemovi.mag.16 <- function(
 #' @return \code{TRUE} if the test passed, a string indicating the error if it failed.
 #' @export
 #'
-#' @examples
 sanity_check_bemovi.mag.25 <- function(
   sample_dir = "."
 ){
@@ -425,7 +421,6 @@ sanity_check_bemovi.mag.25 <- function(
 #' @return \code{TRUE} if the test passed, a string indicating the error if it failed.
 #' @export
 #'
-#' @examples
 sanity_check_flowcam <- function(
   sample_dir = "."
 ){
@@ -511,7 +506,6 @@ sanity_check_flowcam <- function(
 #' @return \code{TRUE} if the test passed, a string indicating the error if it failed.
 #' @export
 #'
-#' @examples
 sanity_check_flowcytometer <- function(
   sample_dir = "."
 ){
@@ -677,7 +671,6 @@ sanity_check_flowcytometer <- function(
 #' @return \code{TRUE} if the test passed, a string indicating the error if it failed.
 #' @export
 #'
-#' @examples
 sanity_check_manualcount <- function(
   sample_dir = "."
 ){
@@ -712,7 +705,6 @@ sanity_check_manualcount <- function(
 #' @return \code{TRUE} if the test passed, a string indicating the error if it failed.
 #' @export
 #'
-#' @examples
 sanity_check_o2meter <- function(
   sample_dir = "."
 ){
@@ -746,7 +738,6 @@ sanity_check_o2meter <- function(
 #'   reason why it failed
 #' @export
 #'
-#' @examples
 sanity_check <- function(
   sample_dir = "."
 ){

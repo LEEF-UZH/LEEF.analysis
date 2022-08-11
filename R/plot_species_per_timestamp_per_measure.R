@@ -10,7 +10,6 @@
 #'
 #' @export
 #'
-#' @examples
 plot_species_per_timestamp_per_measure <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite")
 ){

@@ -46,6 +46,9 @@ archived data can be found and the folders \code{extracted} and
 \item{mc.cores}{number of cores to be used for parallel execution. Defaults
 to 1}
 }
+\value{
+return value from \code{bemovi.LEEF::create_overlays_subtitle}
+}
 \description{
 Create overlays
 }

@@ -5,10 +5,9 @@
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
 #' @param remove_timestamps vector of timestamps to be removed.
 #'
-#' @return
+#' @return undefined
 #' @export
 #'
-#' @examples
 add_reclassified_to_db <- function(
   path,
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),

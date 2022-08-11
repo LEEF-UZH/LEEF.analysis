@@ -20,8 +20,7 @@
 #' @export
 #'
 #' @md
-#' @examples
-#'
+
 #'
 classify_flowcam_files <- function(
   datadir,

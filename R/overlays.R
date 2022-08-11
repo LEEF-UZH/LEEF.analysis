@@ -18,10 +18,9 @@
 #'   archived data can be found and the folders \code{extracted} and
 #'   \code{pre-processed}
 #'
-#' @return
+#' @return return value from \code{bemovi.LEEF::create_overlays_subtitle}
 #' @export
 #'
-#' @examples
 overlays <- function(
   timestamp = 20210920,
   magnification = 25,

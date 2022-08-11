@@ -18,7 +18,6 @@
 #'
 #' @export
 #'
-#' @examples
 db_read_density <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   from_timestamp = 20210920,

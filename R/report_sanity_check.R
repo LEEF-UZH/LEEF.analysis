@@ -12,7 +12,6 @@
 #' @importFrom utils browseURL
 #' @export
 #'
-#' @examples
 report_sanity_check <- function(sample_dir, suffix = "", format = "html") {
   name <- ifelse(
     suffix == "",
