@@ -7,9 +7,8 @@
 zen_deposit(
   token = NULL,
   timestamp,
-  measuring_method,
-  archive_dir = "~/Duck/LEEFSwift3",
-  metadata = zen_metadata(),
+  data_dir = "./tmp",
+  metadata_bib = zen_metadata_bib(),
   publish = FALSE,
   sandbox = TRUE
 )
@@ -18,6 +17,10 @@ zen_deposit(
 \item{token}{Zenodo token to upload the deposit}
 
 \item{timestamp}{timestamp to be uploaded}
+
+\item{publish}{if \code{TRUE} publish the packages immediately - should normally be \code{FALSE}}
+
+\item{sandbox}{if \code{TRUE} (default) upload to the Zenodo sandbox for testing, if \code{FALSE} upload to the "real" Zenodo}
 
 \item{measuring_method}{measuring method to be uploaded. Allowed values at the moment:
 \itemize{
@@ -29,13 +32,9 @@ zen_deposit(
 \item \code{"manualcount"}
 }}
 
-\item{archive_dir}{base directory of the data archive}
-
 \item{metadata}{metadata as genersted by the function \code{zen_metadata()}}
 
-\item{publish}{if \code{TRUE} publish the packages immediately - should normally be \code{FALSE}}
-
-\item{sandbox}{if \code{TRUE} (default) upload to the Zenodo sandbox for testing, if \code{FALSE} upload to the "real" Zenodo}
+\item{archive_dir}{base directory of the data archive}
 }
 \value{
 list with all info concerning the deposits

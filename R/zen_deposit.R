@@ -1,6 +1,6 @@
-#' Create list containing the zenodo metadata for the data deposit
+#' Create list containing the bibligraphic metadata for the data deposit
 #'
-#' @param community community to which the dateposited data should be added
+#' @param community community to which the deposited data should be added
 #' @param upload_type type of the deposited data
 #' @param authors authors of the deposited data. Each contributor
 #'   is also a list with the following fields:
@@ -28,8 +28,8 @@
 #'
 #' @export
 #'
-zen_metadata <- function(
-    community = "LEEF Experiment data",
+zen_metadata_bib <- function(
+    community = "leef-uzh",
     upload_type = "dataset",
     authors = list(
       RMK = list(
@@ -113,15 +113,27 @@ zen_deposit <- function(
     token = NULL,
 
     timestamp,
-    measuring_method,
 
-    archive_dir = "~/Duck/LEEFSwift3",
+    data_dir = "./tmp",
 
-    metadata = zen_metadata(),
+    metadata_bib = zen_metadata_bib(),
 
     publish = FALSE,
     sandbox = TRUE
 ){
+
+  # For Safety during testing -----------------------------------------------
+
+
+  message("Publishing is disabled until finalising of the Function!")
+  message("Sandbox is always used until finalising of the Function!")
+  publish <- FALSE
+  sandbox <- TRUE
+
+
+  # Preparations ------------------------------------------------------------
+
+
   if (sandbox) {
     url <- "https://sandbox.zenodo.org/api"
   } else {
@@ -129,33 +141,46 @@ zen_deposit <- function(
   }
   ##
 
-  if (any(grepl("bemovi", measuring_method))) {
-    folder <- paste0("LEEF.", measuring_method, ".bemovi.", as.character(timestamp))
-  } else {
-    folder <- paste0("LEEF.fast.", measuring_method, ".", as.character(timestamp))
-  }
-
   deposits <- list(
     pre_processed = list(
       stage = "pre_processed",
-      datapath = file.path(
-        archive_dir,
-        "LEEF.archived.data/LEEF/3.archived.data/pre_processed",
-        folder
+      data = file.path(
+        data_dir,
+        paste0("data_pre_processed_", timestamp, ".zip")
+      ),
+      metadata = file.path(
+        data_dir,
+        paste0("metadata_pre_processed.zip")
       )
     ),
     extracted = list(
       stage = "extracted",
-      datapath = file.path(
-        archive_dir,
-        "LEEF.archived.data/LEEF/3.archived.data/extracted",
-        folder
+      data = file.path(
+        data_dir,
+        paste0("data_extracted_", timestamp, ".zip")
+      ),
+      metadata = file.path(
+        data_dir,
+        paste0("metadata_extracted.zip")
       )
     )
   )
 
+  lapply(
+    deposits,
+    function(x){
+      if (!file.exists(x$data)) {
+        stop("Data file for stage ", x$stage, " does not exist!")
+      }
+      if (!file.exists(x$metadata)) {
+        stop("Metadata file for stage ", x$stage, " does not exist!")
+      }
+    }
+  )
+
 
   # Connect to Zenodo -------------------------------------------------------
+
 
   zenodo <- zen4R::ZenodoManager$new(
     url = url,
@@ -163,14 +188,21 @@ zen_deposit <- function(
     logger = "INFO"
   )
 
+
   # Create individual records ------
+
 
   deposits <- lapply(
     deposits,
     function(x){
+
+
+      # Create and populate records -------------------------------------------------
+
+
       rec <- zen4R::ZenodoRecord$new()
 
-      rec$setUploadType(metadata$upload_type)
+      rec$setUploadType(metadata_bib$upload_type)
       title = paste0("LEEF Experiment ", x["stage"], " data from ", as.Date(timestamp, "%Y%m%d"))
       rec$setTitle(title)
       #   paste0(
@@ -178,7 +210,7 @@ zen_deposit <- function(
       #   )
       # )
       lapply(
-        metadata$authors,
+        metadata_bib$authors,
         function(aut){
           rec$addCreator(
             firstname = aut$firstname,
@@ -188,23 +220,23 @@ zen_deposit <- function(
           )
         }
       )
-      rec$setDescription(metadata$description)
-      rec$setVersion(metadata$version)
-      rec$setLanguage(metadata$language)
+      rec$setDescription(metadata_bib$description)
+      rec$setVersion(metadata_bib$version)
+      rec$setLanguage(metadata_bib$language)
       keywords <- c(
-        metadata$keywords,
+        metadata_bib$keywords,
         x["stage"],
-        measuring_method,
-        paste0("timestamp_", timestamp)
+        paste0("timestamp_", timestamp),
+        as.Date(timestamp, "%Y%m%d")
       )
-      rec$setKeywords(metadata$keywords)
-      rec$setLicense(metadata$license)
-      rec$setAccessRight(metadata$access_right)
+      rec$setKeywords(metadata_bib$keywords)
+      rec$setLicense(metadata_bib$license)
+      rec$setAccessRight(metadata_bib$access_right)
       # rec$setGrants("654359") # eLTER
       # rec$setGrants("871126") # eLTER-PPP
       # rec$setGrants("871128") # eLTER-Plus
       lapply(
-        metadata$contributors,
+        metadata_bib$contributors,
         function(con){
           rec$addContributor(
             firstname = con$firstname,
@@ -218,64 +250,46 @@ zen_deposit <- function(
 
       x$rec <-  rec
 
-      return(x)
-    }
-  )
+
+      # Upload records ----------------------------------------------------------
 
 
-  # Upload records ----------------------------------------------------------
-
-  deposits <- lapply(
-    deposits,
-    function(x){
       x$rec <- zenodo$depositRecord(x$rec)
       x$doi <- x$rec$metadata$prereserve_doi$doi
+
+
+      # Upload data files ----------------------------------------------------------
+
+
+      zenodo$uploadFile(x$metadata, x$rec)
+      zenodo$uploadFile(x$data, x$rec)
+
+
+      # End ---------------------------------------------------------------------
+
+
       return(x)
     }
   )
+
 
   # Add related identifiers -------------------------------------------------
 
 
   deposits[["pre_processed"]]$rec$addRelatedIdentifier(
-    relation = "isCompiledBy",
-    identifier = deposits[["extracted"]]$doi
+    identifier = deposits[["extracted"]]$doi,
+    relation = "isDerivedFrom",
+    resource_type = "dataset"
   )
   deposits[["pre_processed"]]$rec <- zenodo$depositRecord(deposits[["pre_processed"]]$rec)
 
   deposits[["extracted"]]$rec$addRelatedIdentifier(
-    relation = "compiles",
-    identifier = deposits[["pre_processed"]]$doi
+    identifier = deposits[["pre_processed"]]$doi,
+    relation = "isSourceOf",
+    resource_type = "dataset"
   )
   deposits[["extracted"]]$rec <- zenodo$depositRecord(deposits[["extracted"]]$rec)
 
-  # Add data files ----------------------------------------------------------
-
-  recs <- lapply(
-    deposits,
-    function(x){
-      olddir <- getwd()
-      f <- file.path(tempfile())
-      on.exit(
-        {
-          setwd(olddir)
-          if (dir.exists(dirname(f))) {
-            unlink(dirname(f), recursive = TRUE)
-          }
-        }
-      )
-      f <- file.path(tempfile())
-      dir.create(f)
-      f <- file.path(f, "data.zip")
-
-      olddir <- setwd(file.path(x$datapath, ".."))
-      utils::zip(
-        zipfile = f,
-        files =  basename(x$datapath)
-      )
-      zenodo$uploadFile(f, x$rec)
-    }
-  )
 
   # Publish deposits
 
@@ -291,33 +305,100 @@ zen_deposit <- function(
   return(deposits)
 }
 
-#' Get all measurement_method / timestamp combinations in the archive
+
+#' Title
 #'
+#' @param to_dir directory in which the compressed data folders should be saved to
 #' @param archive_dir base directory of the data archive
-#' @param stage either \code{"pre_processed"} or \code{extracted}
+#' @param timestamp timestamp to be uploaded
+#' @param stage stage of the data. Allowed values are \code{"pre_processed"}, \code{"extracted"}
 #'
-#' @return
+#' @return names of the created data zip archives
 #' @export
 #'
-#' @examples
-all_archives <- function(
+zen_create_data_archives <- function(
+    to_dir = ".",
     archive_dir = "~/Duck/LEEFSwift3",
-    stage
+    timestamp,
+    stage = c("pre_processed", "extracted")
 ){
+
+
+  # Helper function - comp --------------------------------------------------
+
+
+  comp <- function(datapath, timestamp, zipfile){
+    # zip -9X ~/tmp/data_20220406.zip  *.20220406/*
+
+    olddir <- getwd()
+    f <- file.path(tempfile())
+    result <- NULL
+    on.exit(
+      {
+        setwd(olddir)
+        return(result)
+      }
+    )
+
+    f <- file.path(tempfile())
+    dir.create(f)
+    f <- file.path(f, "data.zip")
+
+    setwd(file.path(datapath))
+
+    utils::zip(
+      zipfile = zipfile,
+      flags = "-9X",
+      files = file.path(".", paste0("*.", timestamp), "*")
+    )
+    result <- zipfile
+  }
+
+
+  # get datapath and timestamps ---------------------------------------------
+
+
   datapath  <- file.path(
     archive_dir,
     "LEEF.archived.data/LEEF/3.archived.data",
     stage
   )
+
   dirs <- list.dirs(datapath, full.names = FALSE, recursive = FALSE)
-  dirs <- gsub("^LEEF\\.", "", dirs)
-  dirs <- gsub("^fast\\.", "", dirs)
-  dirs <- gsub("\\.bemovi\\.", "\\.", dirs)
-  dirs <- gsub("^bemovi\\.mag\\.", "bemovi_mag_", dirs)
-  dirs <- strsplit(dirs, "\\.") |>
-    simplify2array() |>
-    t() |>
-    as.data.frame()
-  names(dirs) <- c("measurement_method", "timestamp")
-  dirs$measurement_method <- gsub("bemovi_mag_", "bemovi\\.mag\\.", dirs$measurement_method)
+  timestamps <- gsub("^(.*?)\\.202", "202", dirs)
+  timestamps <- gsub("^(.*?)\\.302", "302", timestamps)
+  timestamps <- unique(timestamps)
+
+  archives <- lapply(
+    timestamps,
+    function(timestamp){
+      list(
+        timestamp = timestamp,
+        zipfile = file.path(
+          to_dir, paste0(
+            "data", "_",
+            stage, "_",
+            timestamp, ".",
+            "zip"
+          )
+        )
+      )
+    }
+  )
+
+
+  # Archive all timestamps --------------------------------------------------
+
+  result <- parallel::mclapply(
+    archives,
+    function(x) {
+      comp(
+        datapath = datapath,
+        timestamp = x$timestamp,
+        zipfile = x$zipfile
+      )
+    },
+  )
+
+  return(result)
 }
