@@ -87,7 +87,7 @@ add_extracted_csv_to_db <- function(
       }
       dat <- read.csv(temp_fn)
       message("     |-Adding data ...")
-      if (grep("flowcam", table_name)){
+      if (grepl("flowcam", table_name)){
         if (!("filtration" %in% names(dat))) {
           dat$filtration <- as.numeric(NA)
         }
@@ -96,6 +96,15 @@ add_extracted_csv_to_db <- function(
         }
         if (!("instrument" %in% names(dat))) {
           dat$instrument <- as.character(NA)
+        }
+        if (!("instrument" %in% names(dat))) {
+          dat$instrument <- as.character(NA)
+        }
+        if (!("DividingChlamydomonas_prob" %in% names(dat))) {
+          dat$DividingChlamydomonas_prob <- as.numeric(NA)
+        }
+        if (!("Small_unidentified_prob" %in% names(dat))) {
+          dat$Small_unidentified_prob <- as.numeric(NA)
         }
       }
       DBI::dbBegin(conn)
