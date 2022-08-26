@@ -50,9 +50,6 @@ to 1}
 archived data can be found and the folders \code{extracted} and
 \code{pre-processed}}
 }
-\value{
-
-}
 \description{
 Create overlays
 }

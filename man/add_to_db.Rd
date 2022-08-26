@@ -12,7 +12,7 @@ add_to_db(
 )
 }
 \arguments{
-\item{fns}{vector of \code{rds} file names containing data to be added.
+\item{fns}{vector of \code{rds} or \code{csv} files names containing data to be added.
 The data has to contain a colum named \code{timestamp}.}
 
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.

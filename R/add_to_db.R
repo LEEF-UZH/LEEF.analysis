@@ -1,6 +1,6 @@
 #' Add data to RRD database into existing table
 #'
-#' @param fns vector of `rds` file names containing data to be added.
+#' @param fns vector of `rds` or `csv` files names containing data to be added.
 #'   The data has to contain a colum named `timestamp`.
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
@@ -54,7 +54,13 @@ add_to_db <- function(
     function(i){
       message("Adding '", basename(fns[i]), "' to '", tables[i], "'..."  )
 
-      dat <- readRDS(fns[i])
+      if (grepl("\\.rds$", fns[i])) {
+        dat <- readRDS(fns[i])
+      } else if (grepl("\\.csv$", fns[i])) {
+        dat <- read.csv(fns[[i]])
+      } else {
+        stop("Input file ", fns[[i]], " has to be either `.csv` or `.rds`!")
+      }
       names(dat) <- tolower(names(dat))
       if ("timestamp" %in% names(dat)) {
         dat$timestamp <- as.character(dat$timestamp)

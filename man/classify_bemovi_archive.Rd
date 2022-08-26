@@ -54,7 +54,3 @@ invisible \code{NULL}
 \description{
 Classify bemovi data by using the archived data
 }
-\examples{
-
-
-}

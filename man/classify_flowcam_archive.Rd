@@ -43,7 +43,3 @@ invisible \code{NULL}
 \description{
 Classify algae_traits data.frame
 }
-\examples{
-
-
-}
