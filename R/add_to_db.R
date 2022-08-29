@@ -35,19 +35,21 @@ add_to_db <- function(
     try(DBI::dbDisconnect(conn), silent = TRUE)
   })
 
-  tss <- unique(remove_timestamps)
-  sapply(
-    unique(tables),
-    function(table){
-      message("Removing timestamps from ", table)
-      extract_timestamps(
-        db = db,
-        table = table,
-        timestamps = tss,
-        delete_data = TRUE
-      )
-    }
-  )
+  if (!is.null(remove_timestamps)){
+    tss <- unique(remove_timestamps)
+    sapply(
+      unique(tables),
+      function(table){
+        message("Removing timestamps from ", table)
+        extract_timestamps(
+          db = db,
+          table = table,
+          timestamps = tss,
+          delete_data = TRUE
+        )
+      }
+    )
+  }
 
   added <- sapply(
     1:length(fns),
