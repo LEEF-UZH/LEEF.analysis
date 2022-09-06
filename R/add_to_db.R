@@ -92,8 +92,8 @@ add_to_db <- function(
     }
   )
 
-  message("Vacuuming...")
-  DBI::dbExecute(conn, "VACUUM")
+  # message("Vacuuming...")
+  # DBI::dbExecute(conn, "VACUUM")
 
   return(added)
 }

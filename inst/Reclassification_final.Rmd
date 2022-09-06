@@ -12,7 +12,7 @@ output:
     toc_collapsed: true
     code_folding: hide
 params:
-  output_dir: ~/RRD.Reclassification_final/
+  output_dir: ~/reclassification/
 ---
 
 ```{r setup_reclass, include=FALSE}
@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
   message = TRUE,
   warning = TRUE
 )
-library("LEEF.analysis")
+# library("LEEF.analysis")
 ```
 
 # Preparation
@@ -58,30 +58,14 @@ cores <- 7
 ```
 
 ## Set timestamps
-```{r timestamps}
-timestamps <- c(
-20210920, 20210922, 20210924, 20210927, 20210929, 
-20211001, 20211004, 20211006, 20211008, 20211011, 20211013, 20211015, 20211018, 20211020, 20211022, 20211025, 20211027, 20211029, 
-20211101, 20211103, 20211105, 20211108, 20211110, 20211112, 20211115, 20211117, 20211119, 20211122, 20211124, 20211126, 20211129, 
-20211201, 20211203, 20211206, 20211208, 20211210, 20211213, 20211215, 20211217, 20211220, 20211222, 20211224, 20211227, 20211229, 20211231, 
-20220103, 20220105, 20220107, 20220110, 20220112, 20220114, 20220117, 20220119, 20220121, 20220124, 20220126, 20220128, 20220131, 
-20220202, 20220204, 20220207, 20220209, 20220211, 20220214, 20220216, 20220218, 20220221, 20220223, 20220225, 20220228, 
-20220302, 20220304, 20220307, 20220309, 20220311, 20220314, 20220316, 20220318, 20220321, 20220323, 20220325, 20220328, 20220330, 
-20220401, 20220404, 20220406, 20220408, 20220411, 20220413, 20220415, 20220418, 20220420, 20220422, 20220425, 20220427, 20220429, 
-20220502, 20220504, 20220506, 20220509, 20220511, 20220513, 20220516, 20220518, 20220520, 20220523, 20220525, 20220527, 20220530, 
-20220601, 20220603, 20220606, 20220608, 20220610, 20220613, 20220615, 20220617, 20220620, 20220622, 20220624, 20220627, 20220629, 
-20220704, 
-30211020, 30211103, 30211110, 30211201, 30211215
-)
-```
-
+All available data will be reclassified. Thereforwe, the timestamps are determined for each method below based on the archived data.
 
 # Reclassification 
 
 ## Flowcam
 
 ### Prepare Flowcam
-```{r prepare_flowcam}
+```{r prepare_flowcam, eval = FALSE}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -98,10 +82,18 @@ download.file(
   destfile = class_increasing,
   mode = "wb"
 )
+
+timestamps <- list.files(
+  path = file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"), 
+  pattern = "^LEEF\\.fast\\.flowcam\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub(^LEEF\\.fast\\.flowcam\\.", "", timestamps)
 ```
 
 ### Classify Flowcam
-```{r classify_flowcam}
+```{r classify_flowcam, eval = FALSE}
 out <- file.path(output, "flowcam")
 if (!file.exists(out)) {
   message("Classifying flowcam...")
@@ -126,7 +118,7 @@ if (!file.exists(out)) {
 ```
 
 ### Clean Up Flowcam
-```{r cleanup_flowcam}
+```{r cleanup_flowcam, eval = FALSE}
 unlink(pdir)
 rm(class_constant, class_increasing, out)
 ```
@@ -150,6 +142,14 @@ download.file(
   destfile = class_increasing,
   mode = "wb"
 )
+
+timestamps <- list.files(
+  path = file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"), 
+  pattern = "^LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.", "", timestamps)
 ```
 
 ### Classify `bemovi_extract.mag.16.yml`
@@ -203,6 +203,14 @@ download.file(
   destfile = class_increasing,
   mode = "wb"
 )
+
+timestamps <- list.files(
+  path = file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"), 
+  pattern = "^LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.", "", timestamps)
 ```
 
 ### Classify `bemovi_mag.25` 
@@ -268,7 +276,7 @@ system.time(
   add_reclassified_to_db(
     path = output, 
     db = file.path(output, "LEEF.RRD empty.sqlite"), 
-    remove_timestamps = timestamps
+    remove_timestamps = NULL
   )
 )
 ```
