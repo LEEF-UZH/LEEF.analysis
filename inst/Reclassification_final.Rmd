@@ -81,7 +81,7 @@ timestamps <- c(
 ## Flowcam
 
 ### Prepare Flowcam
-```{r prepare_flowcam, eval=FALSE}
+```{r prepare_flowcam}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -101,7 +101,7 @@ download.file(
 ```
 
 ### Classify Flowcam
-```{r classify_flowcam, eval=FALSE}
+```{r classify_flowcam}
 out <- file.path(output, "flowcam")
 if (!file.exists(out)) {
   message("Classifying flowcam...")
@@ -126,7 +126,7 @@ if (!file.exists(out)) {
 ```
 
 ### Clean Up Flowcam
-```{r cleanup_flowcam, eval=FALSE}
+```{r cleanup_flowcam}
 unlink(pdir)
 rm(class_constant, class_increasing, out)
 ```
