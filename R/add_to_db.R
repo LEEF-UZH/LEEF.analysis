@@ -8,6 +8,8 @@
 #'   the same index should be added to.
 #'   **The table has to exist and contain a field named `timestamp`**
 #' @param remove_timestamps vector of timestamps to be removed.
+#' @param check_timestamps. If `TRUE`, the data will ony be added when timestamp does not exist in db yet. If `FALSE`,
+#'   it will always be added. Usually this should **NOT** be done.
 #'
 #' @return vector of length of `fns` with `TRUE` if the data has been added,
 #'   `FALSE` otherwise
@@ -19,7 +21,8 @@ add_to_db <- function(
   fns,
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   tables,
-  remove_timestamps = NULL
+  remove_timestamps = NULL,
+  check_timestamps = TRUE
 ){
   if (length(fns) != length(tables)){
     stop("'fns' and 'tables' have to have the same length!")
@@ -72,7 +75,7 @@ add_to_db <- function(
         DBI::dbGetQuery(conn, paste("SELECT DISTINCT timestamp FROM", tables[i]))
       )
 
-      if (any(unique(dat$timestamp) %in% timestamps)) {
+      if (check_timestamps & any(unique(dat$timestamp) %in% timestamps)) {
         msg <- paste0("'", fns[i], "' not added as timestamp already present in table '", tables[i], "'.")
         message(msg)
         warning(msg)

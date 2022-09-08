@@ -4,7 +4,8 @@
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
 #' @param remove_timestamps vector of timestamps to be removed.
-#'
+#' @param check_timestamps. If `TRUE`, the data will ony be added when timestamp does not exist in db yet. If `FALSE`,
+#'   it will always be added. Usually this should **NOT** be done.#'
 #' @return
 #' @export
 #'
@@ -12,7 +13,8 @@
 add_reclassified_to_db <- function(
   path,
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  remove_timestamps = NULL
+  remove_timestamps = NULL,
+  check_timestamps = TRUE
 ){
   if (!file.exists(db)){
     LEEF.backend.sqlite::new_RRD(db)
@@ -37,7 +39,8 @@ add_reclassified_to_db <- function(
       fns = files,
       tables = tables,
       db = db,
-      remove_timestamps = remove_timestamps
+      remove_timestamps = remove_timestamps,
+      check_timestamps = check_timestamps
     )
   }
 }

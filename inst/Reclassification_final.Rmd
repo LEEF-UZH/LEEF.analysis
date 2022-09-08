@@ -58,14 +58,14 @@ cores <- 7
 ```
 
 ## Set timestamps
-All available data will be reclassified. Thereforwe, the timestamps are determined for each method below based on the archived data.
+All available data will be reclassified. Therefore, the timestamps are determined for each method below based on the archived data.
 
 # Reclassification 
 
 ## Flowcam
 
 ### Prepare Flowcam
-```{r prepare_flowcam, eval = FALSE}
+```{r prepare_flowcam}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -89,11 +89,11 @@ timestamps <- list.files(
   recursive = FALSE, 
   full.names = FALSE
 )
-timestamps <- gsub(^LEEF\\.fast\\.flowcam\\.", "", timestamps)
+timestamps <- gsub("^LEEF\\.fast\\.flowcam\\.", "", timestamps)
 ```
 
 ### Classify Flowcam
-```{r classify_flowcam, eval = FALSE}
+```{r classify_flowcam}
 out <- file.path(output, "flowcam")
 if (!file.exists(out)) {
   message("Classifying flowcam...")
@@ -118,7 +118,7 @@ if (!file.exists(out)) {
 ```
 
 ### Clean Up Flowcam
-```{r cleanup_flowcam, eval = FALSE}
+```{r cleanup_flowcam}
 unlink(pdir)
 rm(class_constant, class_increasing, out)
 ```
@@ -275,7 +275,7 @@ rm(pdir, class_constant, class_increasing, out, species_tracked)
 system.time(
   add_reclassified_to_db(
     path = output, 
-    db = file.path(output, "LEEF.RRD empty.sqlite"), 
+    db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
     remove_timestamps = NULL
   )
 )
@@ -331,7 +331,7 @@ rm(pdir, compositions, experimental_design)
 # Create Diagnostic Report
 ```{r createDiagReport}
 report_diagnostic(
-  db = file.path(output, "LEEF.RRD empty.sqlite"), 
+  db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
   suffix = "reclassified", 
   format = "html"
 )

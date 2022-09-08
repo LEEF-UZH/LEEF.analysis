@@ -10,6 +10,7 @@
 #' @param timestamp timestamp to be used to stamp the classified data
 #' @param species_tracked names of the species tracked as a character vector.
 #'   If `NULL` it will be read from the original configuration file in the `datadir`.
+#' @param bottle if not 'NULL' (default) only classify this bottle. Needs to be a single bottle!
 #'
 #' @return `list` containing two objects:
 #'       - `algae_traits` including species
@@ -29,7 +30,8 @@ classify_flowcam_files <- function(
   classifier_constant_name,
   classifier_increasing_name,
   timestamp = "55555555",
-  species_tracked = NULL
+  species_tracked = NULL,
+  bottle = NULL
 ){
 
   p <- yaml::read_yaml(file.path(datadir, "flowcam.yml"))
@@ -38,11 +40,29 @@ classify_flowcam_files <- function(
     species_tracked <- p$species_tracked
   }
 
+
+# Filter for bottle -------------------------------------------------------
+
+
+  if (!is.null(bottle)){
+    tmp_algae_traits <- tempfile(
+      pattern = paste0("algae_traits_bottle_", bottle, "_"),
+      fileext = ".rds"
+    )
+    dat <- readRDS(file.path(datadir, algae_traits_name))
+    saveRDS(
+      dat[dat$bottle == bottle,],
+      tmp_algae_traits
+    )
+  } else {
+    tmp_algae_traits <- file.path(datadir, algae_traits_name)
+  }
+
 # The classification ------------------------------------------------------
 
 
   classified <- LEEF.measurement.flowcam::classify(
-    algae_traits = readRDS(file.path(datadir, algae_traits_name)),
+    algae_traits = readRDS(tmp_algae_traits),
     classifiers_constant = readRDS(classifier_constant_name),
     classifiers_increasing = readRDS(classifier_increasing_name),
     composition = read.csv(file.path(datadir, "compositions.csv")),

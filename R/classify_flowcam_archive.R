@@ -12,6 +12,7 @@
 #'   If `NULL` it will be read from the original configuration file in the `datadir`.
 #' @param output path to which the classified data will be saved as `rds`
 #' @param mc.cores number of cores to be used. Defaults to 1
+#' @param bottle if not 'NULL' (default) only classify this bottle. Needs to be a single bottle!
 #'
 #' @return invisible `NULL`
 #' @export
@@ -28,7 +29,8 @@ classify_flowcam_archive <- function(
   classifier_increasing_name,
   species_tracked = NULL,
   output,
-  mc.cores = 1
+  mc.cores = 1,
+  bottle = NULL
 
 ){
 
@@ -60,7 +62,8 @@ classify_flowcam_archive <- function(
                   classifier_constant_name = classifier_constant_name,
                   classifier_increasing_name = classifier_increasing_name,
                   timestamp = timestamp,
-                  species_tracked = species_tracked
+                  species_tracked = species_tracked,
+                  bottle = bottle
                 )
               }
             )
