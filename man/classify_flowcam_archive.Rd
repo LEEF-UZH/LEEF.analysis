@@ -12,7 +12,8 @@ classify_flowcam_archive(
   classifier_increasing_name,
   species_tracked = NULL,
   output,
-  mc.cores = 1
+  mc.cores = 1,
+  bottle = NULL
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ If \code{NULL} it will be read from the original configuration file in the \code
 \item{output}{path to which the classified data will be saved as \code{rds}}
 
 \item{mc.cores}{number of cores to be used. Defaults to 1}
+
+\item{bottle}{if not 'NULL' (default) only classify this bottle. Needs to be a single bottle!}
 
 \item{root_dir}{directory containes the archive. It contains the following directories:
 \itemize{

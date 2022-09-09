@@ -8,7 +8,8 @@ extract_timestamps(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   table = NULL,
   timestamps,
-  delete_data = FALSE
+  delete_data = FALSE,
+  only_delete = FALSE
 )
 }
 \arguments{
@@ -20,6 +21,8 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 \item{timestamps}{timestamps which should be extracted}
 
 \item{delete_data}{\strong{Attention!} If \code{TRUE} the data is deleted from the database!}
+
+\item{only_delete}{if \code{TRUE} data will only be deleted and not extracted.}
 }
 \value{
 invisibly NULL

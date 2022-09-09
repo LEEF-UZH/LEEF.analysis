@@ -8,7 +8,9 @@ add_to_db(
   fns,
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   tables,
-  remove_timestamps = NULL
+  remove_timestamps = NULL,
+  check_timestamps = TRUE,
+  backup_removed = TRUE
 )
 }
 \arguments{
@@ -23,6 +25,10 @@ the same index should be added to.
 \strong{The table has to exist and contain a field named \code{timestamp}}}
 
 \item{remove_timestamps}{vector of timestamps to be removed.}
+
+\item{check_timestamps.}{If \code{TRUE}, the data will ony be added when timestamp does not exist in db yet. If \code{FALSE},
+it will always be added. Usually this should \strong{NOT} be done.
+@param backup_removed if 'TRUE` data which will be replaced will be backed up.}
 }
 \value{
 vector of length of \code{fns} with \code{TRUE} if the data has been added,

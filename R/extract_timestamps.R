@@ -8,6 +8,7 @@
 #' @param table the name of the table. If `NULL`, a list of tables in the database `db` will be shown.
 #' @param timestamps timestamps which should be extracted
 #' @param delete_data **Attention!** If `TRUE` the data is deleted from the database!
+#' @param only_delete if `TRUE` data will only be deleted and not extracted.
 #'
 #' @return invisibly NULL
 #' @export
@@ -18,7 +19,8 @@ extract_timestamps <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   table = NULL,
   timestamps,
-  delete_data = FALSE
+  delete_data = FALSE,
+  only_delete = FALSE
 ){
   con <- DBI::dbConnect(RSQLite::SQLite(), db)
   on.exit({
@@ -53,12 +55,14 @@ extract_timestamps <- function(
         timestamp, " NOT removed!"
       )
     } else {
-      data <- con %>%
-        dplyr::tbl(table) %>%
-        dplyr::filter(timestamp == !!timestamp) %>%
-        dplyr::collect()
-      message("  Saving ", timestamp, "...")
-      saveRDS(data, backup)
+      if (!only_delete){
+        data <- con %>%
+          dplyr::tbl(table) %>%
+          dplyr::filter(timestamp == !!timestamp) %>%
+          dplyr::collect()
+        message("  Saving ", timestamp, "...")
+        saveRDS(data, backup)
+      }
       if (delete_data){
         message("  Deleting ", timestamp, "...")
         delete <- paste0(

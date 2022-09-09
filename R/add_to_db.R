@@ -10,6 +10,7 @@
 #' @param remove_timestamps vector of timestamps to be removed.
 #' @param check_timestamps. If `TRUE`, the data will ony be added when timestamp does not exist in db yet. If `FALSE`,
 #'   it will always be added. Usually this should **NOT** be done.
+#'   @param backup_removed if 'TRUE` data which will be replaced will be backed up.
 #'
 #' @return vector of length of `fns` with `TRUE` if the data has been added,
 #'   `FALSE` otherwise
@@ -22,7 +23,8 @@ add_to_db <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   tables,
   remove_timestamps = NULL,
-  check_timestamps = TRUE
+  check_timestamps = TRUE,
+  backup_removed = TRUE
 ){
   if (length(fns) != length(tables)){
     stop("'fns' and 'tables' have to have the same length!")
@@ -48,7 +50,8 @@ add_to_db <- function(
           db = db,
           table = table,
           timestamps = tss,
-          delete_data = TRUE
+          delete_data = TRUE,
+          only_delete = !backup_removed
         )
       }
     )

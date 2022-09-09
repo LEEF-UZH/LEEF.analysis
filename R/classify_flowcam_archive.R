@@ -31,7 +31,6 @@ classify_flowcam_archive <- function(
   output,
   mc.cores = 1,
   bottle = NULL
-
 ){
 
   dir.create( output, showWarnings = FALSE, recursive = TRUE)

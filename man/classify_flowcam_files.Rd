@@ -10,7 +10,8 @@ classify_flowcam_files(
   classifier_constant_name,
   classifier_increasing_name,
   timestamp = "55555555",
-  species_tracked = NULL
+  species_tracked = NULL,
+  bottle = NULL
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ classifier for temperature treatment \strong{increasing} including path}
 
 \item{species_tracked}{names of the species tracked as a character vector.
 If \code{NULL} it will be read from the original configuration file in the \code{datadir}.}
+
+\item{bottle}{if not 'NULL' (default) only classify this bottle. Needs to be a single bottle!}
 }
 \value{
 \code{list} containing two objects:
