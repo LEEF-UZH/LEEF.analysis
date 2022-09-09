@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 ## Set Base to use
 This reclassification is based on the classifiers as in the repo at the base URL which speicifies the repo and the reference / tag which should be used for this reclassification
 ```{r}
-base <- paste0("https://github.com/LEEF-UZH/LEEF.parameter/raw/", "v1.6.0", "/")
+base <- paste0("https://github.com/LEEF-UZH/LEEF.parameter/raw/", "v1.6.1", "/")
 ```
 
 ## Set output path
@@ -38,6 +38,10 @@ output <-  params$output
 dir.create(output, recursive = TRUE, showWarnings = FALSE)
 ```
 
+## Set database
+```{r output_path}
+db <- file.path(output, "LEEF.RRD.reclassified.sqlite")
+```
 
 ## Set Archive Directory
 Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
@@ -60,7 +64,7 @@ cores <- 7
 ## Set timestamps
 All available data will be reclassified. Therefore, the timestamps are determined for each method below based on the archived data.
 
-# Reclassification 
+# Reclassification of all timestamps
 
 ## Flowcam
 
@@ -270,18 +274,20 @@ unlink(pdir)
 rm(pdir, class_constant, class_increasing, out, species_tracked)
 ```
 
-# Add to database
+## Add to database
+Old timestamps will be removed and not be backed up.
 ```{r addRRD}
 system.time(
   add_reclassified_to_db(
     path = output, 
-    db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
-    remove_timestamps = NULL
+    db = db, 
+    remove_timestamps = timestamps,
+    backup_removed = FALSE
   )
 )
 ```
 
-# Add experiment specific tables
+## Add experiment specific tables
 ```{r addExptables}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
@@ -316,7 +322,7 @@ download.file(
 
 
 add_experiment_tables(
-  db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
+  db = db, 
   composition = compositions, 
   experimetal_design = experimental_design,
   light_decline_schedule = light_decline_schedule,
@@ -328,10 +334,149 @@ unlink(pdir)
 rm(pdir, compositions, experimental_design)
 ```
 
+# Reclassification of individual bottles and possibly timestamps
+## Flowcam Bottle `b_05`
+Bottle `b_02` was contaminated and needs to be classified separately. All timestamps will be classified using the same classifier.
+
+### Set Bottle and range of timestamps
+```{r bot_after_until}
+bott <- "b_02"
+after <- 20200000
+until <- 30000000
+```
+
+### Set output path
+```{r output_path_b}
+out <- file.path(output, paste0("flowcam_", bott, "_", after, "_", until))
+dir.create(out, recursive = TRUE, showWarnings = FALSE)
+```
+
+### Determine timestamps
+All available after `20220504` data will be reclassified and are determined below based on the archived data.
+```{r prepare_flowcam_b}
+timestamps <- list.files(
+  path = file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"), 
+  pattern = "^LEEF\\.fast\\.flowcam\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcam\\.", "", timestamps)
+timestamps <- as.integer(timestamps)
+
+timestamps <- timestamps[(timestamps >= after) & (timestamps <= until)]
+timestamps
+```
+
+
+### Prepare Flowcam
+```{r prepare_flowcam}
+pdir <- tempfile()
+dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
+
+class_constant <- file.path(pdir, "class_constant.rds")
+download.file(
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_after_20220504_20220710_MergedData.rds"), 
+  destfile = class_constant,
+  mode = "wb"
+)
+
+class_increasing <- file.path(pdir, "class_increasing.rds")
+download.file(
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_after_20220504_20220710_MergedData.rds"), 
+  destfile = class_increasing,
+  mode = "wb"
+)
+```
+
+### Classify Flowcam
+```{r classify_flowcam}
+if (!file.exists(out)) {
+  message("Classifying flowcam...")
+  system.time(
+    classify_flowcam_archive(
+      archive_dir = archive_dir, 
+      timestamps = timestamps, 
+      algae_traits_name = "algae_traits_filtered.rds", 
+      classifier_constant_name = class_constant, 
+      classifier_increasing_name = class_increasing, 
+      species_tracked = yaml::read_yaml(paste0(base, "parameter/flowcam/flowcam.yml"))$species_tracked,
+      output = out,
+      mc.cores = cores,
+      bottle = bott
+    )
+  )
+} else {
+  message(
+    "Directory ", out, "exists\n",
+    "skipping Flowcam."
+  )
+}
+```
+
+### Clean Up Flowcam
+```{r cleanup_flowcam}
+unlink(pdir)
+rm(class_constant, class_increasing)
+```
+
+### Add to database
+#### Delete entries from database
+```{r}
+message("Deleting entries...")
+delete_density_sql <- paste0(
+  "DELETE ",
+  "FROM flowcam__algae_density ", 
+  "WHERE bottle = '", bott, "' AND timestamp > ", format(after, scientific = FALSE), " AND timestamp < ", format(until, scientific = FALSE)
+)
+delete_traits_sql <- paste0(
+  "DELETE ",
+  "FROM flowcam__algae_traits ", 
+  "WHERE bottle = '", bott, "' AND timestamp > ", format(after, scientific = FALSE), " AND timestamp < ", format(until, scientific = FALSE)
+)
+
+conn <- DBI::dbConnect(
+  drv = RSQLite::SQLite(),
+  db = db
+)
+message("Executing query '", delete_density_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_density_sql)
+message("   ", rd, " rows deleted.")
+
+message("Executing query '", delete_traits_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_traits_sql)
+message("   ", rd, " rows deleted.")
+DBI::dbDisconnect(conn)
+```
+
+#### Add new entries to database 
+```{r addRRD}
+message("Adding directory '", basename(out), "' to the database")
+
+files <- list.files(out, full.names = TRUE)
+tables <- paste0(
+  basename("flowcam"), "__",
+  sapply( files, function(f) {strsplit(basename(f), "\\.")[[1]][[1]]})
+)
+names(tables) <- NULL
+
+system.time(
+  add_to_db(
+    fns = files,
+    tables = tables,
+    db = db,
+    remove_timestamps = NULL,
+    check_timestamps = FALSE,
+    backup_removed = FALSE
+  )
+)
+rm(out)
+```
+
+
 # Create Diagnostic Report
 ```{r createDiagReport}
 report_diagnostic(
-  db = file.path(output, "LEEF.RRD.reclassified.sqlite"), 
+  db = db, 
   suffix = "reclassified", 
   format = "html"
 )
