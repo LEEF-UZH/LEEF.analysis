@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
   message = TRUE,
   warning = TRUE
 )
-# library("LEEF.analysis")
+library("LEEF.analysis")
 ```
 
 # Preparation
@@ -47,7 +47,8 @@ db <- file.path(output, "LEEF.RRD.reclassified.sqlite")
 Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
 
 ```{r setArchive}
-archive_dir <- "~/Duck/LEEFSwift3/"
+# archive_dir <- "~/Duck/LEEFSwift3/"
+archive_dir <- "/Volumes/LEEF/"
 if (!file.exists(archive_dir)){
   stop(
     "Archive directory '", archive_dir, "' does not exist.\n",
@@ -341,14 +342,13 @@ Bottle `b_02` was contaminated and needs to be classified separately. All timest
 ### Set Bottle and range of timestamps
 ```{r bot_after_until}
 bott <- "b_02"
-after <- 20200000
+after <- 20220128
 until <- 30000000
 ```
 
 ### Set output path
 ```{r output_path_b}
-out <- file.path(output, paste0("flowcam_", bott, "_", after, "_", until))
-dir.create(out, recursive = TRUE, showWarnings = FALSE)
+out <- file.path(output, paste0("flowcam_", bott, "_", format(after, scientific = FALSE), "_", format(until, scientific = FALSE)))
 ```
 
 ### Determine timestamps
@@ -472,6 +472,15 @@ system.time(
 rm(out)
 ```
 
+# Do a final vacuuming into new database
+Vacuuming the database will take some time!
+
+To vacuum the sqlite database, i.e. recover the space from the deletion of rows, please run the following command in the directory where the database is located:
+
+```{r echo = FALSE}
+db_vac <- gsub("\\.sqlite$", ".vacuumed.sqlite", db)
+paste0("sqlite3 \"./", basename(db), "\" 'VACUUM main INTO \"", basename(db_vac), "\"'")
+```
 
 # Create Diagnostic Report
 ```{r createDiagReport}

@@ -50,19 +50,16 @@ classify_flowcam_files <- function(
       fileext = ".rds"
     )
     dat <- readRDS(file.path(datadir, algae_traits_name))
-    saveRDS(
-      dat[dat$bottle == bottle,],
-      tmp_algae_traits
-    )
+    dat <- dat[dat$bottle == bottle,]
   } else {
-    tmp_algae_traits <- file.path(datadir, algae_traits_name)
+    dat <- readRDS(tmp_algae_traits)
   }
 
 # The classification ------------------------------------------------------
 
 
   classified <- LEEF.measurement.flowcam::classify(
-    algae_traits = readRDS(tmp_algae_traits),
+    algae_traits = dat,
     classifiers_constant = readRDS(classifier_constant_name),
     classifiers_increasing = readRDS(classifier_increasing_name),
     composition = read.csv(file.path(datadir, "compositions.csv")),

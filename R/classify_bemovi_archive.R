@@ -122,8 +122,7 @@ classify_bemovi_archive <- function(
             classified$mean_density_per_ml,
             file = file.path(
               output,
-              tolower(
-                gsub("\\.rds$", paste0(".", timestamp, ".rds"), p$mean_density))
+              tolower(gsub("\\.rds$", paste0(".", timestamp, ".rds"), p$mean_density))
             )
           )
 
@@ -131,9 +130,7 @@ classify_bemovi_archive <- function(
             classified$trajectory_data,
             file = file.path(
               trajectory_path,
-              tolower(
-                paste0("trajectory.", gsub("\\.rds$", paste0(".", timestamp, ".rds"), p$mean_density))
-              )
+              tolower(gsub("\\.rds$", paste0(".", timestamp, ".rds"), p$master))
             )
           )
 
