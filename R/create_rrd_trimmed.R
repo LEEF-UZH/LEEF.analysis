@@ -64,13 +64,13 @@ create_rrd_trimmed <- function(
       paste0("DROP TABLE ", tbl)
     )
   }
-  message("Vacuuming")
+  message("Vacuuming. This will take some time")
   DBI::dbExecute(
     con,
     "VACUUM"
   )
   DBI::dbDisconnect(con)
-  message("Moving to finak location")
+  message("Moving to final location")
   file.rename(
     from = tmpdb,
     to = trimmed_db

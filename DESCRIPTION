@@ -14,7 +14,7 @@ Description: Provides simple access functions to read data out of the sqlite RRD
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.1.0)
 Imports: 
   DBI,
   RSQLite,

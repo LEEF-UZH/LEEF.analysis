@@ -1,0 +1,235 @@
+---
+title: "Update `extracted`"
+author: "Rainer M Krug"
+date: "06/05/2022"
+input:
+  html_document:
+    dev: png
+    fig_width: 10
+    fig_height: 12
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    code_folding: hide
+params:
+  input_dir: ~/reclassification/
+---
+
+```{r setup_reclass, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = TRUE,
+  message = TRUE,
+  warning = TRUE
+)
+library(pbmcapply)
+```
+
+# Preparation
+## Set input path 
+The input path contains the reclassified data and was output path in the reclassification.
+```{r input_path}
+input <-  params$input
+```
+
+## Set Archive Directory
+Make sure, that id does not point to the the S3 LEEF archive, but to a writable location containing the extracted data
+
+```{r setArchive}
+archive_dir <- "/Volumes/LEEF/"
+extracted_dir <- file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted")
+if (!file.exists(archive_dir)){
+  stop(
+    "Expected directory '", extracted_dir, "' does not exist.\n",
+    "Probably not mounted?" 
+  )
+}
+testfile <- file.path(extracted_dir, "test.tmp")
+file.create(testfile)
+if (!file.exists(testfile)){
+  stop("The location ", testfile, " is not writable!")
+}
+unlink(testfile)
+rm(testfile)
+```
+
+## Set number of cores to be used
+```{r setCores}
+cores <- 7
+```
+
+# Update `bemovi.mag.16`
+
+## Define paths and files
+```{r define_bemovi_mag_16_parameter}
+source_dir <- file.path(input, "bemovi_mag_16")
+source_files <- list.files(source_dir, pattern = ".rds$", recursive = TRUE)
+timestamps <- sapply( strsplit(source_files, "\\."), "[[", 2)
+dest_files <- basename(
+  paste0(sapply( strsplit(source_files, "\\."), "[[", 1), ".", sapply( strsplit(source_files, "\\."), "[[", 3))
+)
+dest_files <- paste0(
+  toupper(substring(dest_files, 1, 1)), 
+  substring(dest_files, 2)
+)
+
+dest_rds <- file.path(
+  extracted_dir, paste0("LEEF.bemovi.mag.16.bemovi.", timestamps), "5 - merged data", dest_files
+)
+
+dest_csv <- file.path(
+  extracted_dir, paste0("LEEF.bemovi.mag.16.bemovi.", timestamps), gsub( "\\.rds$", ".csv", dest_files)
+)
+  
+csv_files <- gsub("\\.rds$", ".csv", source_files)
+```
+
+## Update `.rds` files
+```{r update_bemovi_mag_16_csv}
+pbmcapply::pbmclapply(
+  sample(length(source_files)),
+  function(i){
+    file.copy(
+      file.path(source_dir, source_files[i]),
+      dest_rds[i],
+      overwrite = TRUE
+    )
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = 2
+)
+```
+
+## Update `.csv` files
+
+```{r update_bemovi_mag_16_csv}
+pbmcapply::pbmclapply(
+  sample(length(source_files)),
+  function(i){
+    write.csv(
+      readRDS(file.path(source_dir, source_files[i])),
+      dest_csv[i]
+    )
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = cores
+)
+```
+
+
+
+# Update `bemovi.mag.25`
+
+## Define paths and files
+```{r define_bemovi_mag_25_parameter}
+source_dir <- file.path(input, "bemovi_mag_25")
+source_files <- list.files(source_dir, pattern = ".rds$", recursive = TRUE)
+timestamps <- sapply( strsplit(source_files, "\\."), "[[", 2)
+dest_files <- basename(
+  paste0(sapply( strsplit(source_files, "\\."), "[[", 1), ".", sapply( strsplit(source_files, "\\."), "[[", 3))
+)
+dest_files <- paste0(
+  toupper(substring(dest_files, 1, 1)), 
+  substring(dest_files, 2)
+)
+
+dest_rds <- file.path(
+  extracted_dir, paste0("LEEF.bemovi.mag.25.bemovi.", timestamps), "5 - merged data", dest_files
+)
+
+dest_csv <- file.path(
+  extracted_dir, paste0("LEEF.bemovi.mag.25.bemovi.", timestamps), gsub( "\\.rds$", ".csv", dest_files)
+)
+  
+csv_files <- gsub("\\.rds$", ".csv", source_files)
+```
+
+## Update `.rds` files
+```{r update_bemovi_mag_25_rds}
+pbmcapply::pbmclapply(
+  sample(length(source_files)),
+  function(i){
+    file.copy(
+      file.path(source_dir, source_files[i]),
+      dest_rds[i],
+      overwrite = TRUE
+    )
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = 2
+)
+```
+
+## Update `.csv` files
+
+```{r update_bemovi_mag_25_csv}
+pbmcapply::pbmclapply(
+  sample(length(source_files)),
+  function(i){
+    write.csv(
+      readRDS(file.path(source_dir, source_files[i])),
+      dest_csv[i]
+    )
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = cores
+)
+```
+
+# Update `flowcam`
+## Define paths and files
+```{r define_flowcytometer_parameter}
+source_dir <- file.path(input, "reclassification flowcam_b_02_20220128_30000000", "flowcam_b_02_20220128_30000000")
+source_files <- list.files(source_dir, pattern = ".rds$", recursive = TRUE)
+timestamps <- sapply( strsplit(source_files, "\\."), "[[", 2)
+dest_files <- basename(
+  paste0(sapply( strsplit(source_files, "\\."), "[[", 1), ".", sapply( strsplit(source_files, "\\."), "[[", 3))
+)
+
+dest_csv <- file.path(
+  extracted_dir, paste0("LEEF.fast.flowcam.", timestamps), gsub( "\\.rds$", ".csv", dest_files)
+)
+  
+csv_files <- gsub("\\.rds$", ".csv", source_files)
+```
+
+## Update `.csv` files
+
+```{r update_flowcytometer_csv}
+pbmcapply::pbmclapply(
+  sample(length(source_files)),
+  function(i){
+    write.csv(
+      readRDS(file.path(source_dir, source_files[i])),
+      dest_csv[i]
+    )
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = cores
+)
+```
+
+
+# Re-create overlays
+
+
+```{r overlays}
+stop("TODO")
+
+overlays_from_folders <- function(
+    traj_data_file,
+    avi_dir,
+    bemovi_extract_yml_file,
+    temp_overlay_folder,
+    overlay_folder,
+    overlay_type = "both",
+    label = "species",
+    ffmpeg = "ffmpeg",
+    font_size = 24,
+    circle_size = 120,
+    crf = 23,
+    gamma = 2,
+    mc_cores = 1
+)
+
+```
