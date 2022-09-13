@@ -2,9 +2,8 @@
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
-#' @param measurement the measurement to be plotted. If \code{NULL},
-#'   the default, they are plotted by temperature treatment (constant & increasing)
-#' @param transform_density_4throot if \code{TRUE}, density is transformed using 4th root transformation.
+#' @param type the type of the measurement which should be displayed. A vector with the types.
+#'   Possible values are: "TOC", "TN", "IC", "TN", "".
 #'
 #' @return \code{ggplot} object of the plot
 #'
@@ -16,11 +15,13 @@
 #'
 #' @examples
 plot_tocs_per_bottle_per_timestamp <- function(
-  db = getOption("RRDdb", "LEEF.RRD.sqlite")
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  type = c("TOC", "TN", "IC", "TN")
 ){
   options(dplyr.summarise.inform = FALSE)
 
   data <- db_read_toc(db) %>%
+    filter(type %in% !!type) %>%
     dplyr::collect()
 
   if (nrow(data) < 1) {
@@ -28,7 +29,6 @@ plot_tocs_per_bottle_per_timestamp <- function(
   } else {
     data <- data %>%
       dplyr::mutate(bottle = fix_bottle(bottle)) %>%
-      filter(type != "") %>%
       # dplyr::mutate(
       #   density = if (transform_density_4throot) {
       #     exp(log(density)/4)

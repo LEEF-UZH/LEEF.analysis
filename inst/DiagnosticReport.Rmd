@@ -197,11 +197,24 @@ plot_o2s_per_bottle_per_timestamp(
 
 \pagebreak
 
-### Toc et al. Concentration
+### TOC and TC
 
 ```{r toc_raw, fig.height = 16}
 plot_tocs_per_bottle_per_timestamp(
-  params$db
+  params$db,
+  type = c("TOC", "TC")
+)
+```
+
+\pagebreak
+
+### IC and TN
+
+
+```{r toc_raw, fig.height = 16}
+plot_tocs_per_bottle_per_timestamp(
+  params$db,
+  type = c("IC", "TN")
 )
 ```
 
@@ -328,10 +341,23 @@ plot_o2s_per_bottle_per_timestamp(
 
 \pagebreak
 
-### Toc et al. Concentration
+### TOC and TC
 
-```{r toc_raw_2, fig.height = 16}
+```{r toc_raw, fig.height = 16}
 plot_tocs_per_bottle_per_timestamp(
-  params$db
+  params$db,
+  type = c("TOC", "TC")
+)
+```
+
+\pagebreak
+
+### IC and TN
+
+
+```{r toc_raw, fig.height = 16}
+plot_tocs_per_bottle_per_timestamp(
+  params$db,
+  type = c("IC", "TN")
 )
 ```
