@@ -8,7 +8,8 @@
 #'
 update_overlays <- function(
     extracted_dir = "/Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/",
-    avi_dir = "~/Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data/pre_processed"
+    avi_dir = "~/Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data/pre_processed",
+    cores = 7
 ){
   bemovi_dirs <- function(
   ){
