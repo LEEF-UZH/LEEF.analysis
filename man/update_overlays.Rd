@@ -5,8 +5,10 @@
 \title{Just a function to update the overlays.}
 \usage{
 update_overlays(
-  extracted_dir = "/Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/",
-  avi_dir = "~/Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data/pre_processed"
+  params = list(extracted_dir =
+    "/Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/", avi_dir =
+    "~/Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data/pre_processed"),
+  cores = 7
 )
 }
 \arguments{

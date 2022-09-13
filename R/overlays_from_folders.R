@@ -46,19 +46,51 @@ overlays_from_folders <- function(
     gamma = 2,
     mc_cores = 1
 ){
-  bemovi.LEEF::create_overlays_subtitle_directory(
-    traj_data = readRDS(traj_data_file),
-    avi_file_dir = avi_dir,
-    crop = yaml::read_yaml(bemovi_extract_yml_file)$crop,
-    temp_overlay_folder = temp_overlay_folder,
-    overlay_folder = overlay_folder,
-    overlay_type = overlay_type,
-    label = label,
-    ffmpeg = ffmpeg,
-    font_size = font_size,
-    circle_size = circle_size,
-    crf = crf,
-    gamma = gamma,
-    mc_cores = mc_cores
+  avi_files <- list.files(
+    avi_dir,
+    pattern = "\\.avi$",
+    full.names = TRUE,
+    recursive = FALSE
   )
+
+  tmpdir <- tempfile()
+  dir.create(tmpdir)
+  on.exit(
+    unlink(tmpdir, recursive = TRUE)
+  )
+
+  result <- pbmcapply::pbmclapply(
+    avi_files,
+    function(avi_file) {
+      message("Generating Overlay ", basename(avi_file), "...")
+      tmp_avi <- file.path(tmpdir, basename(avi_file))
+      file.copy(
+        from = avi_file,
+        to = tmp_avi
+      )
+      on.exit(
+        unlink(tmp_avi)
+      )
+      suppressMessages(
+        bemovi.LEEF::create_overlays_subtitle_single(
+          traj_data = readRDS(traj_data_file),
+          avi_file = tmp_avi,
+          crop = yaml::read_yaml(bemovi_extract_yml_file)$crop,
+          temp_overlay_folder = temp_overlay_folder,
+          overlay_folder = overlay_folder,
+          overlay_type = overlay_type,
+          label = label,
+          ffmpeg = ffmpeg,
+          font_size = font_size,
+          circle_size = circle_size,
+          crf = crf,
+          gamma = gamma,
+          to_do = c("subtitles", "burnin")
+        )
+      )
+    },
+    mc.cores = mc_cores
+  )
+
+  return(result)
 }
