@@ -262,20 +262,21 @@ pbmcapply::pbmclapply(
       function(bemovi_config, bemovi_dir){
         bc <- yaml::read_yaml(file.path(params$extracted_dir, bemovi_dir, bemovi_config))
         
-        overlay_folder <- file.path( params$extracted_dir, bemovi_dir, bc$overlay.folder
-        unlink(overlay_folder), recursive = TRUE, force = TRUE)
-        dir.create(file.path( params$extracted_dir, bemovi_dir, bc$overlay.folder ), recursive = TRUE)
+        temp_overlay_folder <- file.path( params$extracted_dir, bemovi_dir, bc$temp.overlay.folder)
+        overlay_folder <- file.path( params$extracted_dir, bemovi_dir, bc$overlay.folder)
         
-        temp_overlay_folder <- file.path( params$extracted_dir, bemovi_dir, bc$overlay.folder
-        unlink(temp_overlay_folder), recursive = TRUE, force = TRUE)
-        dir.create(temp_overlay_folder), recursive = TRUE)
+        unlink(overlay_folder, recursive = TRUE, force = TRUE)
+        dir.create(overlay_folder, recursive = TRUE)
+        
+        unlink(temp_overlay_folder, recursive = TRUE, force = TRUE)
+        dir.create(temp_overlay_folder, recursive = TRUE)
     
         LEEF.analysis::overlays_from_folders(
           traj_data_file = file.path( params$extracted_dir, bemovi_dir, bc$merged.data.folder, bc$master ),
           avi_dir = file.path(params$avi_dir, bemovi_dir),
           bemovi_extract_yml_file = file.path(params$extracted_dir, bemovi_dir, bemovi_config),
-          temp_overlay_folder = file.path( params$extracted_dir, bemovi_dir, bc$temp.overlay.folder ),
-          overlay_folder = file.path( params$extracted_dir, bemovi_dir, bc$overlay.folder ),
+          temp_overlay_folder = temp_overlay_folder,
+          overlay_folder = overlay_folder,
           overlay_type = "both",
           label = "species",
           ffmpeg = "ffmpeg",

@@ -195,6 +195,16 @@ plot_o2s_per_bottle_per_timestamp(
 )
 ```
 
+\pagebreak
+
+### Toc et al. Concentration
+
+```{r toc_raw, fig.height = 16}
+plot_tocs_per_bottle_per_timestamp(
+  params$db
+)
+```
+
 ## 4^th^ root Density of Species per bottle as measured by measurement over time
 
 \pagebreak
@@ -312,6 +322,16 @@ plot_density_species_per_bottle_per_timestamp(
 
 ```{r percent_o2, fig.height = 16}
 plot_o2s_per_bottle_per_timestamp(
+  params$db
+)
+```
+
+\pagebreak
+
+### Toc et al. Concentration
+
+```{r toc_raw_2, fig.height = 16}
+plot_tocs_per_bottle_per_timestamp(
   params$db
 )
 ```
