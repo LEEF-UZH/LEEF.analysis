@@ -211,7 +211,7 @@ plot_tocs_per_bottle_per_timestamp(
 ### IC and TN
 
 
-```{r toc_raw_1_2, fig.height = 16}
+```{r toc_raw_2_1, fig.height = 16}
 plot_tocs_per_bottle_per_timestamp(
   params$db,
   type = c("IC", "TN")
