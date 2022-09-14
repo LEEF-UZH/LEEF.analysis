@@ -231,8 +231,7 @@ pbmcapply::pbmclapply(
 
 ```{r overlays, eval = FALSE}
 update_overlays(
-  extracted_dir = params$extracted_dir, 
-  avi_dir = params$avi_dir, 
+  params = params,  
   cores = cores
 )
 ```
