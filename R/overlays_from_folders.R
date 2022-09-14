@@ -84,8 +84,7 @@ overlays_from_folders <- function(
           font_size = font_size,
           circle_size = circle_size,
           crf = crf,
-          gamma = gamma,
-          to_do = c("subtitles", "burnin")
+          gamma = gamma
         )
       )
     },

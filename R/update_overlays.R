@@ -78,7 +78,7 @@ update_overlays <- function(
             circle_size = 120,
             crf = 23,
             gamma = 2,
-            # mc_cores = cores
+            mc_cores = cores
           )
 
         },
