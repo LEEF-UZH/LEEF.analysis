@@ -48,7 +48,7 @@ update_overlays <- function(
 
   message("Generating overlays for ", length(ymls), " bemovi sessions. This will take some time...")
 
-  lapply(
+  result <- lapply(
     ymls,
     function(yml){
       bemovi_configs <- yml$ymls
@@ -86,4 +86,5 @@ update_overlays <- function(
       )
     }
   )
+  return(result)
 }

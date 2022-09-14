@@ -71,25 +71,32 @@ overlays_from_folders <- function(
       on.exit(
         unlink(tmp_avi)
       )
-      suppressMessages(
-        bemovi.LEEF::create_overlays_subtitle_single(
-          traj_data = readRDS(traj_data_file),
-          avi_file = tmp_avi,
-          crop = yaml::read_yaml(bemovi_extract_yml_file)$crop,
-          temp_overlay_folder = temp_overlay_folder,
-          overlay_folder = overlay_folder,
-          overlay_type = overlay_type,
-          label = label,
-          ffmpeg = ffmpeg,
-          font_size = font_size,
-          circle_size = circle_size,
-          crf = crf,
-          gamma = gamma
-        )
+      result <- -999
+      try(
+        {
+          result <- suppressMessages(
+            bemovi.LEEF::create_overlays_subtitle_single(
+              traj_data = readRDS(traj_data_file),
+              avi_file = tmp_avi,
+              crop = yaml::read_yaml(bemovi_extract_yml_file)$crop,
+              temp_overlay_folder = temp_overlay_folder,
+              overlay_folder = overlay_folder,
+              overlay_type = overlay_type,
+              label = label,
+              ffmpeg = ffmpeg,
+              font_size = font_size,
+              circle_size = circle_size,
+              crf = crf,
+              gamma = gamma
+            )
+          )
+        }
       )
+      return(result)
     },
     mc.cores = mc_cores
   )
+  names(result) <- avi_files
 
   return(result)
 }
