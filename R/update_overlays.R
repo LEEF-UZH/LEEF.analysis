@@ -4,6 +4,8 @@
 #' @param avi_dir directory in which all avis are in the subdirectories.
 #'
 #' @return
+#'
+#' @importFrom pbmcapply  pbmclapply
 #' @export
 #'
 update_overlays <- function(

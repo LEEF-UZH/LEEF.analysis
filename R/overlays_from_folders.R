@@ -28,6 +28,8 @@
 #' @return
 #'
 #' @md
+#'
+#' @importFrom pbmcapply  pbmclapply
 #' @export
 #'
 #' @examples

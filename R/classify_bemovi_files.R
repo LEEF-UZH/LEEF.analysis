@@ -13,6 +13,7 @@
 #'       - `trajectory_data`
 #'
 #' @importFrom yaml read_yaml
+#' @importFrom utils read.table
 #'
 #' @export
 #'

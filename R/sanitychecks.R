@@ -68,6 +68,8 @@ sanity_check_general.data <- function(
 #'   are located
 #'
 #' @return \code{TRUE} if the test passed, a string indicating the error if it failed.
+#'
+#' @importFrom utils read.table
 #' @export
 #'
 #' @examples
@@ -236,6 +238,8 @@ sanity_check_bemovi.mag.16 <- function(
 #'   are located
 #'
 #' @return \code{TRUE} if the test passed, a string indicating the error if it failed.
+#'
+#' @importFrom utils read.table
 #' @export
 #'
 #' @examples
