@@ -16,7 +16,7 @@ params:
   input_dir: ~/reclassification/
   archive_dir: /Volumes/LEEF/
   extracted_dir: /Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/
-  avi_dir: https://cloud.s3it.uzh.ch:8080/v1/AUTH_0ac1f146d16c4aa8aee335872ef84aed/LEEF.archived.data/LEEF/3.archived.data/pre_processed/
+  avi_url: https://cloud.s3it.uzh.ch:8080/v1/AUTH_0ac1f146d16c4aa8aee335872ef84aed/LEEF.archived.data/LEEF/3.archived.data/pre_processed/
 ---
 
 ```{r}
@@ -34,15 +34,9 @@ library(LEEF.analysis)
 ```
 
 # Preparation
-## Set input path 
-The input path contains the reclassified data and was output path in the reclassification.
-```{r}
-#| label = "input_path"
-input <-  params$input
-```
 
-## Set Archive Directory
-Make sure, that id does not point to the the S3 LEEF archive, but to a writable location containing the extracted data
+## Check Extracted Directory
+Make sure, that it points to a writable location containing the extracted data
 
 ```{r}
 #| label = "setArchive"
@@ -66,7 +60,7 @@ rm(testfile)
 ## Define paths and files
 ```{r}
 #| label = "define_bemovi_mag_16_parameter"
-source_dir <- file.path(input, "bemovi_mag_16")
+source_dir <- file.path(params$input_dir, "bemovi_mag_16")
 source_files <- list.files(source_dir, pattern = ".rds$", recursive = TRUE)
 timestamps <- sapply( strsplit(source_files, "\\."), "[[", 2)
 dest_files <- basename(
@@ -129,7 +123,7 @@ pbmcapply::pbmclapply(
 ## Define paths and files
 ```{r}
 #| label = "define_bemovi_mag_25_parameter"
-source_dir <- file.path(input, "bemovi_mag_25")
+source_dir <- file.path(params$input_dir, "bemovi_mag_25")
 source_files <- list.files(source_dir, pattern = ".rds$", recursive = TRUE)
 timestamps <- sapply( strsplit(source_files, "\\."), "[[", 2)
 dest_files <- basename(
@@ -189,7 +183,7 @@ pbmcapply::pbmclapply(
 ## Define paths and files
 ```{r}
 #| label = "define_flowcytometer_parameter"
-source_dir <- file.path(input, "reclassification flowcam_b_02_20220128_30000000", "flowcam_b_02_20220128_30000000")
+source_dir <- file.path(params$input_dir, "reclassification flowcam_b_02_20220128_30000000", "flowcam_b_02_20220128_30000000")
 source_files <- list.files(source_dir, pattern = ".rds$", recursive = TRUE)
 timestamps <- sapply( strsplit(source_files, "\\."), "[[", 2)
 dest_files <- basename(
@@ -226,7 +220,6 @@ pbmcapply::pbmclapply(
 
 ```{r overlays, eval = FALSE}
 update_overlays(
-  params = params,  
-  cores = params$cores
+  params = params
 )
 ```

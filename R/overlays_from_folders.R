@@ -99,7 +99,7 @@ overlays_from_folders <- function(
       )
       return(result)
     },
-    mc.cores = 1 #mc_cores
+    mc.cores = mc_cores
   )
   names(result) <- avi_files
 
