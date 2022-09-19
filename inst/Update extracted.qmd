@@ -12,10 +12,11 @@ input:
     toc_collapsed: true
     code_folding: hide
 params:
+  cores: 7
   input_dir: ~/reclassification/
   archive_dir: /Volumes/LEEF/
   extracted_dir: /Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/
-  avi_dir: ~/Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data/pre_processed
+  avi_url: https://cloud.s3it.uzh.ch:8080/v1/AUTH_0ac1f146d16c4aa8aee335872ef84aed/LEEF.archived.data/LEEF/3.archived.data/pre_processed/
 ---
 
 ```{r}
@@ -58,12 +59,6 @@ if (!file.exists(testfile)){
 }
 unlink(testfile)
 rm(testfile)
-```
-
-## Set number of cores to be used
-```{r}
-#| label = "setCores"
-cores <- 7
 ```
 
 # Update `bemovi.mag.16`

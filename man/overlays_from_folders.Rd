@@ -6,7 +6,7 @@
 \usage{
 overlays_from_folders(
   traj_data_file,
-  avi_dir,
+  avi_url,
   bemovi_extract_yml_file,
   temp_overlay_folder,
   overlay_folder,
@@ -23,7 +23,7 @@ overlays_from_folders(
 \arguments{
 \item{traj_data_file}{file name of the file containing the trajectory data (usually from the Master file)}
 
-\item{avi_dir}{directory containing the input \code{.avi} files}
+\item{avi_url}{url containing the input \code{.avi} files}
 
 \item{bemovi_extract_yml_file}{name of the \code{bemovi_extract.yml} config file}
 

@@ -6,7 +6,7 @@
 \usage{
 update_overlays(
   params = list(extracted_dir =
-    "/Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/", avi_dir =
+    "/Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/", avi_url =
     "~/Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data/pre_processed"),
   cores = 7
 )
@@ -14,7 +14,7 @@ update_overlays(
 \arguments{
 \item{extracted_dir}{directory with extracted data to be used}
 
-\item{avi_dir}{directory in which all avis are in the subdirectories.}
+\item{avi_url}{url in which all avis are in the subdirectories.}
 }
 \description{
 Just a function to update the overlays.
