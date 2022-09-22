@@ -14,7 +14,15 @@ library(dplyr)
 options(RRDdb = "/Volumes/LEEF/0.RRD/LEEF.RRD.sqlite")
 ```
 
-You can add options to executable code like this
+## Check Duplicates if one is 0 / NA
+
+## Check timestamp / id / Filename
+
+Not more than two timestamps in one file.
+
+## Exclude zero in raw data / extraction stage
+
+## 
 
 ```{r}
 #| echo: false
