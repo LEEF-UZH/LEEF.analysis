@@ -1,0 +1,29 @@
+---
+title: "Check TOC"
+format: html
+editor: visual
+---
+
+## Some preliminary setup
+
+```{r}
+#| label: setup
+#| eval: true
+library(LEEF.analysis)
+library(dplyr)
+options(RRDdb = "/Volumes/LEEF/0.RRD/LEEF.RRD.sqlite")
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+db_read_table(table = "toc__toc") %>%
+  # filter(identification != "") %>%
+  group_by(timestamp, bottle, identification) %>%
+  summarise(n = n()) %>% filter(n > 2) %>%
+  collect()
+
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
