@@ -14,7 +14,7 @@ update_overlays <- function(
       input_dir = "~/reclassification/",
       archive_dir = "/Volumes/LEEF/",
       extracted_dir = "/Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/",
-      avi_url = " https://cloud.s3it.uzh.ch:8080/v1/AUTH_0ac1f146d16c4aa8aee335872ef84aed/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
+      avi_url = "https://cloud.s3it.uzh.ch:8080/v1/AUTH_0ac1f146d16c4aa8aee335872ef84aed/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
     )
 ){
   avi_url <- params$avi_url
@@ -87,7 +87,7 @@ update_overlays <- function(
             circle_size = 120,
             crf = 23,
             gamma = 2,
-            mc_cores = parms$cores
+            mc_cores = params$cores
           )
 
         },

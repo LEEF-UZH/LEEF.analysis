@@ -29,7 +29,7 @@
 #'
 #' @md
 #'
-#' @importFrom pbmcapply  pbmclapply
+#' @importFrom pbapply  pblapply
 #' @export
 #'
 #' @examples
@@ -64,25 +64,29 @@ overlays_from_folders <- function(
     unlink(tmpdir, recursive = TRUE)
   )
 
-  result <- pbmcapply::pbmclapply(
+  message("Downloading ", length(avi_files), " avi files...")
+  pbapply::pblapply(
     avi_files,
-    function(avi_file) {
-      message("Generating Overlay ", basename(avi_file), "...")
-      tmp_avi <- file.path(tmpdir, basename(avi_file))
+    function(avi_file){
       download.file(
         url = avi_file,
-        destfile = tmp_avi
+        destfile = file.path(tmpdir, basename(avi_file)),
+        quiet = TRUE
       )
-      on.exit(
-        unlink(tmp_avi)
-      )
+    }
+  )
+
+  result <- pbmcapply::pbmclapply(
+    basename(avi_files),
+    function(avi_file) {
+      message("Generating Overlay ", avi_file, "...")
       result <- -999
       try(
         {
           result <- suppressMessages(
             bemovi.LEEF::create_overlays_subtitle_single(
               traj_data = traj_data,
-              avi_file = tmp_avi,
+              avi_file = file.path(tmpdir, avi_file),
               crop = yaml::read_yaml(bemovi_extract_yml_file)$crop,
               temp_overlay_folder = temp_overlay_folder,
               overlay_folder = overlay_folder,
@@ -99,6 +103,7 @@ overlays_from_folders <- function(
       )
       return(result)
     },
+    mc.allow.recursive = FALSE,
     mc.cores = mc_cores
   )
   names(result) <- avi_files
