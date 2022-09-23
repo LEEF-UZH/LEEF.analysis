@@ -1,7 +1,14 @@
 ---
 title: "Check TOC"
-format: html
-editor: visual
+format: 
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    code-summary: "Show the code"
+    self-contained: true
+editor: source
+
 ---
 
 ## Some preliminary setup
@@ -11,27 +18,218 @@ editor: visual
 #| eval: true
 library(LEEF.analysis)
 library(dplyr)
-options(RRDdb = "/Volumes/LEEF/0.RRD/LEEF.RRD.sqlite")
+options(dplyr.summarise.inform = FALSE)
+
+db <- "~/Desktop/9.backend/toc.sqlite"
+options(RRDdb = db)
+
+toc <- db_read_table(table = "toc__toc_original")%>%
+  collect()
+
+toc_original <- toc
+
+# conn <- DBI::dbConnect(
+#   drv = RSQLite::SQLite(),
+#   db = db
+# )
+# 
+# DBI::dbBegin(conn)
+# DBI::dbWriteTable(
+#   conn,
+#   name = "toc__toc",
+#   value = toc,
+#   overwrite = TRUE,
+#   append = FALSE
+# )
+# DBI::dbCommit(conn)
+# 
+# DBI::dbDisconnect(conn)
 ```
 
-## Check Duplicates if one is 0 / NA
+## Remove missing `inj_type`
+
+We have the following measurements files with measurements without inj_type or `NULL.
+
+```{r}
+toc %>%
+  filter(inj_type == "") %>%
+  group_by(filename) %>%
+  summarise(n = n()) %>% 
+  collect() %>%
+  knitr::kable()
+```
+
+These can be filtered out
+
+```{r}
+before <- nrow(toc)
+toc <- toc %>%
+  filter(inj_type != "")
+after <- nrow(toc)
+cat("Before : ", before, "\n")
+cat("Removed: ", before - after, "\n")
+cat("After  : ", after, "\n")
+```
+
+## Rows where `conc == 0`, `conc_1 == 0` or `conc_2 == 0`
+
+Here it gets tricky. There are cases, where `conc_1 == 0` exclusive or `conc_2 == 0`, but `conc_3 != 0`, which results in a valid measurement, i.e. `conc != 0`. I would suggest to remova all rows, in which `conc == 0`
+
+```{r}
+toc %>%
+  filter(conc == 0) %>%
+  group_by(filename) %>%
+  summarise(n = n()) %>% 
+  collect() %>%
+  knitr::kable()
+```
+
+```{r}
+before <- nrow(toc)
+toc <- toc %>%
+  filter(conc > 0)
+after <- nrow(toc)
+cat("Before : ", before, "\n")
+cat("Removed: ", before - after, "\n")
+cat("After  : ", after, "\n")
+```
+
+## Apply the filters
+
+```{r}
+#| eval: FALSE
+conn <- DBI::dbConnect(
+  drv = RSQLite::SQLite(),
+  db = db
+)
+
+DBI::dbBegin(conn)
+DBI::dbWriteTable(
+  conn,
+  name = "toc__toc",
+  value = toc,
+  overwrite = TRUE,
+  append = FALSE
+)
+DBI::dbCommit(conn)
+
+DBI::dbDisconnect(conn)
+```
 
 ## Check timestamp / id / Filename
 
-Not more than two timestamps in one file.
-
-## Exclude zero in raw data / extraction stage
-
-## 
+In each file, there should be a maximum of 2 timestamps, and none should be 1 or 2.
 
 ```{r}
-#| echo: false
-db_read_table(table = "toc__toc") %>%
-  # filter(identification != "") %>%
-  group_by(timestamp, bottle, identification) %>%
-  summarise(n = n()) %>% filter(n > 2) %>%
-  collect()
-
+toc %>%
+  select(filename, timestamp, identification, inj_type) %>%
+  filter(identification != "H2O" & identification != "2.5mg/lIC") %>%
+  group_by(filename, timestamp) %>%
+  summarise(timestamps_count = n()) %>%
+  group_by(filename) %>%
+  summarise(number_of_timestamps = n()) %>%
+  arrange(desc(number_of_timestamps)) %>%
+  knitr::kable()
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+Looks OK for me. **NB: LEEF_21_11_12 has a differenmt Analysis Name `LEEF_21_11_12 und 21_15_10A`.**
+
+## Number of measurements per `timestamp`, `bottle` and `inj_type`
+
+We have to look if there are any duplicate measurements. 
+
+```{r}
+toc %>%
+  group_by(timestamp, bottle, inj_type) %>%
+  summarise(count = n(), min_conc = min(conc), max_conc = max(conc)) %>%
+  filter(count > 1 & count < 10) %>%  
+  mutate(diff = max_conc - min_conc) %>%
+  arrange(inj_type, diff) %>%
+  knitr::kable()
+```
+
+
+
+
+## Distribution of the individual values per `inj_type`
+Calculate the densities
+```{r}
+x <- toc %>%
+  filter
+conc <- list(
+  tc = list(
+    original = toc_original$conc[toc$inj_type == "TC" | !is.null(toc$bottle)] |> density(bw = 0.1, na.rm = TRUE),
+    removed  = toc$conc[toc$inj_type == "TC" | !is.null(toc$bottle)] |> density(bw = 0.1)
+  ),
+  toc = list(
+    original = toc_original$conc[toc$inj_type == "TOC" | !is.null(toc$bottle)] |> density(bw = 0.1, na.rm = TRUE),
+    removed  = toc$conc[toc$inj_type == "TOC" | !is.null(toc$bottle)] |> density(bw = 0.1)
+  ),
+  ic = list(
+    original = toc_original$conc[toc$inj_type == "IC" | !is.null(toc$bottle)] |> density(bw = 0.1, na.rm = TRUE),
+    removed  = toc$conc[toc$inj_type == "IC" | !is.null(toc$bottle)] |> density(bw = 0.1)
+  ),  
+  tn = list(
+    original = toc_original$conc[toc$inj_type == "TN" | !is.null(toc$bottle)] |> density(bw = 0.1, na.rm = TRUE),
+    removed  = toc$conc[toc$inj_type == "TN" | !is.null(toc$bottle)] |> density(bw = 0.1)
+  )
+)
+```
+
+### TC
+
+```{r}
+plot(conc$tc$removed, col = "red")
+lines(conc$tc$original)
+```
+
+### TOC
+
+```{r}
+plot(conc$toc$removed, col = "red")
+lines(conc$toc$original)
+```
+
+### IC
+
+```{r}
+plot(conc$tc$removed, col = "red")
+lines(conc$tc$original)
+```
+
+### TN
+
+```{r}
+plot(conc$tn$removed, col = "red")
+lines(conc$tn$original)
+```
+
+
+
+## Calculate TOC based on `TC - IC` and plot the distribution of the deviation
+
+```{r}
+inj_type <- list(
+  tc = toc %>%
+    filter(inj_type == "TC" & bottle != "") %>%
+    select(filename, timestamp, bottle, conc_tc = conc),
+  ic = toc %>%
+    filter(inj_type == "IC" & bottle != "") %>%
+    select(filename, timestamp, bottle, conc_ic = conc),
+  toc = toc%>%
+    filter(inj_type == "TOC" & bottle != "") %>%
+    select(filename, timestamp, bottle, conc_toc = conc),
+  tn = toc%>%
+    filter(inj_type == "TN" & bottle != "") %>%
+    select(filename, timestamp, bottle, conc_tn = conc)
+)
+x <- merge(inj_type$tc, inj_type$ic, all = TRUE)
+x <- merge(x, inj_type$toc, all = TRUE)
+x <- merge(x, inj_type$tn, all = TRUE)
+x$TOC <- x$conc_tc - x$conc_ic
+sapply(x$TOC, is.na) |> sum(na.rm = TRUE)
+sapply(x$conc_toc, is.na) |> sum(na.rm = TRUE)
+```
+There are **17** `TOC` values which can not be calculated as either `IC` or `TC` is missing, but there is only **1** missing in the "measured" `TOC` measurements.
+My suggestion would be to calculate the `TOC` based on the measured individual measurements, and therefore we could also obtain a cv. Otherwise, we have to delete the `TOC` values for which no valid `IC` or `TC` measurements exist.
+
