@@ -18,6 +18,7 @@ editor: source
 #| eval: true
 library(LEEF.analysis)
 library(dplyr)
+library(ggplot2)
 options(dplyr.summarise.inform = FALSE)
 
 db <- "~/Desktop/9.backend/toc.sqlite"
@@ -131,10 +132,18 @@ toc %>%
   knitr::kable()
 ```
 
-Fixwd two typos. Now, it looks OK for me. 
+Fixed two typos. Now, it looks OK for me. 
 
 - `LEEF_21_11_12`: "Analysis Name","LEEF_21_11_12 und 21_15_10A.adb"
 - `LEEF_22_01_19 und 22_01_21A`: All analysis for 22_01_21 are not valid
+
+## TOC plot from the Diagnostic Plots
+Applying all the filters, the TOC Plots from the Diagnostic Plot lokk as folows:
+
+```{r}
+plot_tocs_per_bottle_per_timestamp(type = c("TC", "TOC"))
+plot_tocs_per_bottle_per_timestamp(type = c("IC", "TN"))
+```
 
 
 ## Number of measurements per `timestamp`, `bottle` and `inj_type`
@@ -169,6 +178,26 @@ ids <- dat %>%
 ids <- c(ids$`min(id)`, ids$`max(id)`) |>
   unique()
 
+x <- dat %>% filter(id %in% ids) %>%
+  group_by(day, timestamp, bottle, type) %>%
+  summarise(timestamp, bottle, type, mic = min(concentration), mac = max(concentration)) %>%
+  mutate(mdiff = mac - mic)
+x %>%  
+  ggplot2::ggplot(ggplot2::aes(x = day, y = mic, colour = type)) +
+  ggplot2::geom_point() +
+  ggplot2::facet_grid(rows = vars(type), scales = "free_y") +
+  ggplot2::scale_colour_manual(values = 1:40) +
+  ggplot2::xlab("Day of Experiment") +
+  ggplot2::ylab("concentration") +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
+ 
+x %>%  
+  ggplot2::ggplot(ggplot2::aes(x = mic, y = mac, colour = type)) +
+  ggplot2::geom_point() +
+  ggplot2::xlab("Smaler concentration Value") +
+  ggplot2::ylab("Larger concentration Value")
+
+table(x$mic)
 ```
 
 
