@@ -16,7 +16,7 @@
 #' @examples
 plot_tocs_per_bottle_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  type = c("TOC", "TN", "IC", "TN")
+  type = c("IC", "TC", "TN", "TOC")
 ){
   options(dplyr.summarise.inform = FALSE)
 
