@@ -7,7 +7,8 @@
 db_read_toc(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   from_timestamp = 20210920,
-  to_timestamp = 21000101
+  to_timestamp = 21000101,
+  duplicates = mean
 )
 }
 \arguments{
@@ -17,6 +18,9 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 \item{from_timestamp}{\code{integer}. Earliest timestamp to return. Default: \code{20210920}}
 
 \item{to_timestamp}{\code{integer}. Latest timestamp to return. Default: \code{21000101}}
+
+\item{duplicates}{function which will be used to combine duplicates. If \code{NULL}, co summarising is done.
+Default is `mean`.}
 }
 \value{
 Link to the table \code{density} in the RRD to be used with \code{dplyr} and friends

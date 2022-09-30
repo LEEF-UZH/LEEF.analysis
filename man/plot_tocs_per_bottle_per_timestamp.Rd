@@ -6,7 +6,7 @@
 \usage{
 plot_tocs_per_bottle_per_timestamp(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  type = c("TOC", "TN", "IC", "TN")
+  type = c("IC", "TC", "TN", "TOC")
 )
 }
 \arguments{
