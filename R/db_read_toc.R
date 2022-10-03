@@ -16,7 +16,7 @@
 #'
 #' @importFrom DBI dbConnect
 #' @importFrom RSQLite SQLite SQLITE_RO
-#' @importFrom dplyr tbl
+#' @importFrom dplyr tbl ungroup group_by summarise
 #'
 #' @export
 #'
@@ -36,7 +36,8 @@ db_read_toc <- function(
   if (!is.null(duplicates)) {
     data <- data %>%
       group_by(timestamp, day, type, bottle, temperature, richness, composition, incubator) %>%
-      summarise(concentration = mean(concentration), cv = NA, n = n())
+      summarise(concentration = mean(concentration), cv = NA, n = n()) %>%
+      ungroup()
   }
   return(data)
 }
