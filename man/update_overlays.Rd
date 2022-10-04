@@ -8,10 +8,13 @@ update_overlays(
   params = list(cores = 7, input_dir = "~/reclassification/", archive_dir =
     "/Volumes/LEEF/", extracted_dir =
     "/Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/", avi_url =
-    "https://cloud.s3it.uzh.ch:8080/v1/AUTH_0ac1f146d16c4aa8aee335872ef84aed/LEEF.archived.data/LEEF/3.archived.data/pre_processed/")
+    "https://cloud.s3it.uzh.ch:8080/v1/AUTH_0ac1f146d16c4aa8aee335872ef84aed/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"),
+  overwrite = FALSE
 )
 }
 \arguments{
+\item{overwrite}{if `TRUE`, existing overlays will be ov erwritten. Default is `FALSE`}
+
 \item{extracted_dir}{directory with extracted data to be used}
 
 \item{avi_url}{url in which all avis are in the subdirectories.}

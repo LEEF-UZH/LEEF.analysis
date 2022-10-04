@@ -220,6 +220,7 @@ pbmcapply::pbmclapply(
 
 ```{r overlays, eval = FALSE}
 update_overlays(
-  params = params
+  params = params,
+  overwrite = FALSE
 )
 ```

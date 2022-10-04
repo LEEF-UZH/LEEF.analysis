@@ -17,7 +17,8 @@ overlays_from_folders(
   circle_size = 120,
   crf = 23,
   gamma = 2,
-  mc_cores = 1
+  mc_cores = 1,
+  overwrite = FALSE
 )
 }
 \arguments{
@@ -51,6 +52,8 @@ nearly visually lossless, 51 is worst quality. Default value is 23}
 
 \item{mc_cores}{number of cores toi be used for parallel execution.
 Defaults to \code{par_mc.cores()}}
+
+\item{overwrite}{if \code{TRUE}, existing overlays will be ov erwritten. Default is \code{FALSE}}
 }
 \description{
 This is a wrapper around the function \code{bemovi.LEEF::create_overlays_subtitle_directory()}

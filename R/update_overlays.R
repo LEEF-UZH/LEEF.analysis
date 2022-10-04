@@ -2,6 +2,7 @@
 #'
 #' @param extracted_dir directory with extracted data to be used
 #' @param avi_url url in which all avis are in the subdirectories.
+#' @param overwrite if `TRUE`, existing overlays will be ov erwritten. Default is `FALSE`
 #'
 #' @return
 #'
@@ -15,7 +16,8 @@ update_overlays <- function(
       archive_dir = "/Volumes/LEEF/",
       extracted_dir = "/Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/",
       avi_url = "https://cloud.s3it.uzh.ch:8080/v1/AUTH_0ac1f146d16c4aa8aee335872ef84aed/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
-    )
+    ),
+    overwrite = FALSE
 ){
   avi_url <- params$avi_url
   if (substr(avi_url, nchar(avi_url), nchar(avi_url)) != "/") {
@@ -69,11 +71,9 @@ update_overlays <- function(
           temp_overlay_folder <- file.path( params$extracted_dir, bemovi_dir, bc$temp.overlay.folder)
           overlay_folder <- file.path( params$extracted_dir, bemovi_dir, bc$overlay.folder)
 
-          unlink(overlay_folder, recursive = TRUE, force = TRUE)
-          dir.create(overlay_folder, recursive = TRUE)
-
-          unlink(temp_overlay_folder, recursive = TRUE, force = TRUE)
+          dir.create(overlay_folder, recursive = TRUE, showWarnings = FALSE)
           dir.create(temp_overlay_folder, recursive = TRUE)
+
           overlays_from_folders(
             traj_data_file = file.path( params$extracted_dir, bemovi_dir, bc$merged.data.folder, bc$master ),
             avi_url = paste0(avi_url, bemovi_dir),
@@ -87,7 +87,8 @@ update_overlays <- function(
             circle_size = 120,
             crf = 23,
             gamma = 2,
-            mc_cores = params$cores
+            mc_cores = params$cores,
+            overwrite = overwrite
           )
 
         },

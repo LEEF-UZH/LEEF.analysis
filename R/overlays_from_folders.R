@@ -24,6 +24,7 @@
 #'   \url{https://ffmpeg.org/ffmpeg-filters.html#eq} for further info
 #' @param mc_cores number of cores toi be used for parallel execution.
 #'   Defaults to \code{par_mc.cores()}
+#' @param overwrite if `TRUE`, existing overlays will be ov erwritten. Default is `FALSE`
 #'
 #' @return
 #'
@@ -46,7 +47,8 @@ overlays_from_folders <- function(
     circle_size = 120,
     crf = 23,
     gamma = 2,
-    mc_cores = 1
+    mc_cores = 1,
+    overwrite = FALSE
 ){
   if (substr(avi_url, nchar(avi_url), nchar(avi_url)) != "/") {
     avi_url <- paste0(avi_url, "/")
@@ -55,58 +57,74 @@ overlays_from_folders <- function(
   traj_data <- readRDS(traj_data_file)
   avi_files <- unique(traj_data$file)
 
-  avi_files <- paste0(avi_url, avi_files, ".avi")
 
-
-  tmpdir <- tempfile()
-  dir.create(tmpdir)
-  on.exit(
-    unlink(tmpdir, recursive = TRUE)
-  )
-
-  message("Downloading ", length(avi_files), " avi files...")
-  pbapply::pblapply(
-    avi_files,
-    function(avi_file){
-      download.file(
-        url = avi_file,
-        destfile = file.path(tmpdir, basename(avi_file)),
-        quiet = TRUE
-      )
+  if (overwrite){
+    unlink(overlay_folder, recursive = TRUE)
+    dir.create(overlay_folder)
+    unlink(temp_overlay_folder, recursive = TRUE)
+    dir.create(temp_overlay_folder)
+  } else {
+    ex_ov <- list.files(overlay_folder)
+    if (length(ex_ov) > 0){
+      ex_ov <- tools::file_path_sans_ext(ex_ov)
+      avi_files <- avi_files[!(avi_files %in% ex_ov)]
     }
-  )
+  }
 
-  result <- pbmcapply::pbmclapply(
-    basename(avi_files),
-    function(avi_file) {
-      message("Generating Overlay ", avi_file, "...")
-      result <- -999
-      try(
-        {
-          result <- suppressMessages(
-            bemovi.LEEF::create_overlays_subtitle_single(
-              traj_data = traj_data,
-              avi_file = file.path(tmpdir, avi_file),
-              crop = yaml::read_yaml(bemovi_extract_yml_file)$crop,
-              temp_overlay_folder = temp_overlay_folder,
-              overlay_folder = overlay_folder,
-              overlay_type = overlay_type,
-              label = label,
-              ffmpeg = ffmpeg,
-              font_size = font_size,
-              circle_size = circle_size,
-              crf = crf,
-              gamma = gamma
+  if (length(avi_files > 0)){
+    avi_files <- paste0(avi_url, avi_files, ".avi")
+
+    tmpdir <- tempfile()
+    dir.create(tmpdir)
+    on.exit(
+      unlink(tmpdir, recursive = TRUE)
+    )
+
+    message("Downloading ", length(avi_files), " avi files...")
+    pbapply::pblapply(
+      avi_files,
+      function(avi_file){
+        download.file(
+          url = avi_file,
+          destfile = file.path(tmpdir, basename(avi_file)),
+          quiet = TRUE
+        )
+      }
+    )
+
+    result <- pbmcapply::pbmclapply(
+      basename(avi_files),
+      function(avi_file) {
+        message("Generating Overlay ", avi_file, "...")
+        result <- -999
+        try(
+          {
+            result <- suppressMessages(
+              bemovi.LEEF::create_overlays_subtitle_single(
+                traj_data = traj_data,
+                avi_file = file.path(tmpdir, avi_file),
+                crop = yaml::read_yaml(bemovi_extract_yml_file)$crop,
+                temp_overlay_folder = temp_overlay_folder,
+                overlay_folder = overlay_folder,
+                overlay_type = overlay_type,
+                label = label,
+                ffmpeg = ffmpeg,
+                font_size = font_size,
+                circle_size = circle_size,
+                crf = crf,
+                gamma = gamma
+              )
             )
-          )
-        }
-      )
-      return(result)
-    },
-    mc.allow.recursive = FALSE,
-    mc.cores = mc_cores
-  )
-  names(result) <- avi_files
-
+          }
+        )
+        return(result)
+      },
+      mc.allow.recursive = FALSE,
+      mc.cores = mc_cores
+    )
+    names(result) <- avi_files
+  } else {
+    result <- NULL
+  }
   return(result)
 }
