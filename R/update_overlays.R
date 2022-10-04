@@ -51,7 +51,7 @@ update_overlays <- function(
   }
 
   message("Generating list off ymls to be used...")
-  ymls <- bemovi_ymls(bemovi_dir = bemovi_dirs())
+  ymls <- bemovi_ymls(bemovi_dirs = bemovi_dirs())
 
   # saveRDS(ymls, "ymls.rds")
 
