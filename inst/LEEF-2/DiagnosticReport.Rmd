@@ -1,0 +1,347 @@
+---
+title: "Diagnostic plots for the LEEF-2 RRD `r params$db`"
+author: "Rainer M Krug"
+date: | 
+  | Last `timestamp`: `r LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(timestamp) FROM density WHERE timestamp < 30000000')`
+  | Sampling `day`: `r LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(day) FROM density WHERE day < 1000')`
+  | `LEEF.analysis` package version: `r packageVersion('LEEF.analysis')`
+output:
+  html_document:
+    dev: png
+    fig_width: 10
+    fig_height: 12
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    code_folding: hide
+  pdf_document:
+    dev: pdf
+    fig_width: 10
+    fig_height: 12
+  word_document: 
+    dev: png
+    fig_width: 10
+    fig_height: 12
+params:
+  db: ~/Desktop/9.backend/LEEF-2.RRD.sqlite
+  lastDays: 7
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(LEEF.analysis)
+```
+## Invocation from commandline
+The report can be generated from the command line by using
+
+```{bash info_invocation, eval = FALSE}
+Rscript -e "library(LEEF.analysis); db <- '~/Desktop/9.backend/LEEF.RRD.sqlite'; LEEF_2_report_diagnostic(db = 'DATABASE PATH',  format = 'html', lastDays = 7);"
+```
+
+\pagebreak
+
+## Response  variable in the last timestap
+
+```{r response_per_timestamp, fig.height = 26}
+LEEF_2_plot_response_incubator(params$db)
+```
+
+\pagebreak
+
+## Check Bottles per Measurement per Timestep
+
+This plot shows, if a `bottle` is present for the `measurement` for the timestamps analysed. Each `measurement` is a panes. Missing dots indicate missing datapoints for the `bottle` at the `measurement` for the `timestamp`.
+
+```{r bottles_per_timestamp}
+plot_bottles_per_timestamp(params$db, lastDays = params$lastDays)
+```
+
+\pagebreak
+
+## Density of Species per bottle as measured by measurement over time
+
+\pagebreak
+
+### Bemovi Magnification 16
+```{r dens_species_b_16_raw, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_16",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25
+```{r dens_species_b_25_raw, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_25",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25 non_cropped
+```{r dens_species_b_25_non_crop_raw, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_25_non_cropped",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25 cropped
+```{r dens_species_b_25_crop_raw, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_25_cropped",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Flowcam Algae
+```{r dens_species_fcam_al_raw, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_algae"
+)
+```
+
+\pagebreak
+
+### Flowcam Ciliates
+```{r dens_species_fcam_cil_raw, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_ciliates"
+)
+```
+
+\pagebreak
+
+### Flowcam Rest
+```{r dens_species_fcam_rest_raw, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_rest"
+)
+```
+
+
+\pagebreak
+
+### Flowcytometer
+```{r dens_species_fcyt_raw, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcytometer",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Manualcount
+```{r dens_species_mc_raw, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "manualcount",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Percent O~2~
+
+```{r percent_o2_raw, fig.height = 32}
+LEEF_2_plot_o2s_per_bottle_per_timestamp(
+  params$db
+)
+```
+
+\pagebreak
+
+### TOC and TC
+
+```{r toc_raw_1_1, fig.height = 32}
+# plot_tocs_per_bottle_per_timestamp(
+#   params$db,
+#   type = c("TOC", "TC")
+# )
+```
+
+\pagebreak
+
+### IC and TN
+
+
+```{r toc_raw_2_1, fig.height = 32}
+# plot_tocs_per_bottle_per_timestamp(
+#   params$db,
+#   type = c("IC", "TN")
+# )
+```
+
+## 4^th^ root Density of Species per bottle as measured by measurement over time
+
+\pagebreak
+
+### Bemovi Magnification 16
+```{r dens_species_b_16, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "bemovi_mag_16",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25
+```{r dens_species_b_25, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "bemovi_mag_25",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25 non cropped
+```{r dens_species_b_25_non_crop, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "bemovi_mag_25_non_cropped",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25 cropped
+```{r dens_species_b_25_crop, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "bemovi_mag_25_cropped",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Flowcam Algae
+```{r dens_species_fcam_al, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_algae"
+)
+```
+
+\pagebreak
+
+### Flowcam Ciliates
+```{r dens_species_fcam_cil, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_ciliates"
+)
+```
+
+\pagebreak
+
+### Flowcam Rest
+```{r dens_species_fcam_rest, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_rest"
+)
+```
+
+
+\pagebreak
+
+### Flowcytometer
+```{r dens_species_fcyt, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "flowcytometer",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Manualcount
+```{r dens_species_mc, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = TRUE, 
+  measurement = "manualcount",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Percent O~2~
+
+```{r percent_o2, fig.height = 32}
+LEEF_2_plot_o2s_per_bottle_per_timestamp(
+  params$db
+)
+```
+
+\pagebreak
+
+### TOC and TC
+
+```{r toc_raw_1_2, fig.height = 32}
+# plot_tocs_per_bottle_per_timestamp(
+#   params$db,
+#   type = c("TOC", "TC")
+# )
+```
+
+\pagebreak
+
+### IC and TN
+
+
+```{r toc_raw_2_2, fig.height = 32}
+# plot_tocs_per_bottle_per_timestamp(
+#   params$db,
+#   type = c("IC", "TN")
+# )
+```
