@@ -1,6 +1,7 @@
 #' Report for checking pipeline and sampling
 #'
 #' @param db fully qualified path to the sqlite database. The report will be saved to the same directory.
+#' @param template Template to be used for report. At the moment only \code{"LEEF_1} and \code{"LEEF_2} supported.
 #' @param suffix suffix for the file name
 #' @param format the format of the report as a character vector of length 1.
 #'     Supported are at the moment: \code{html} (the default), \code{pdf} and \code{word}.
@@ -13,7 +14,7 @@
 #' @export
 #'
 #' @examples
-report_diagnostic <- function(db, suffix = "", format = "html", lastDays = 7) {
+report_diagnostic <- function(db, template = "LEEF_1", suffix = "", format = "html", lastDays = 7) {
   name <- ifelse(
     suffix == "",
     "Diagnostic_Report",
@@ -39,8 +40,14 @@ report_diagnostic <- function(db, suffix = "", format = "html", lastDays = 7) {
     },
     stop("Unsupported format. Use 'html', 'pdf' or 'word'")
   )
+
+  rmd <- switch (template,
+    "LEEF_1" = system.file("DiagnosticReport.Rmd", package = "LEEF.analysis"),
+    "LEEF_2" = system.file("LEEF-2", "DiagnosticReport.Rmd", package = "LEEF.analysis"),
+    stop("Unsupprted report template!")
+  )
   report <- rmarkdown::render(
-    input = system.file("DiagnosticReport.Rmd", package = "LEEF.analysis"),
+    input = rmd,
     output_format = output_format,
     params = list(db = db, lastDays = lastDays),
     output_file = output_file

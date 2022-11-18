@@ -4,10 +4,18 @@
 \alias{report_diagnostic}
 \title{Report for checking pipeline and sampling}
 \usage{
-report_diagnostic(db, suffix = "", format = "html", lastDays = 7)
+report_diagnostic(
+  db,
+  template = "LEEF_1",
+  suffix = "",
+  format = "html",
+  lastDays = 7
+)
 }
 \arguments{
 \item{db}{fully qualified path to the sqlite database. The report will be saved to the same directory.}
+
+\item{template}{Template to be used for report. At the moment only \code{"LEEF_1} and \code{"LEEF_2} supported.}
 
 \item{suffix}{suffix for the file name}
 

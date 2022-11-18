@@ -61,54 +61,23 @@ species_set <- function(species_set_id = NULL){
       "Debris",
       "DigestedAlgae",
       "Small_unidentified"
-    )
-  )
-  if (is.null(species_set_id)) {
-    return(names(sets))
-  } else {
-    return(sets[[species_set_id]])
-  }
-}
-
-
-#' Defines sets of species for LEEF-2
-#'
-#' @param species_set_id if \code{NULL}, return the names of the species sets defined.
-#'   If the name or the index of a specific set, return that set.
-#'
-#' @return Names of sets or the set itself
-#' @export
-#'
-#' @examples
-LEEF_2_species_set <- function(species_set_id = NULL){
-  sets <- list(
-    flowcam_algae = c(
+    ),
+    LEEF_2_flowcam_algae = c(
       "Chlamydomonas",
-      "Cosmarium",
       "Cryptomonas",
-      "Desmodesmus",
-      "Monoraphidium",
-      "Staurastrum1",
-      "Staurastrum2"
-    ),
-    flowcam_ciliates = c(
-      "Coleps_irchel",
-      "Coleps_viridis",
-      "Colpidium",
-      "Dexiostoma",
-      "Loxocephallus",
-      "OtherCiliates",
-      "Tetrahymena",
-      "OtherCiliate"
-    ),
-    flowcam_rest = c(
-      "airbubbles",
       "ChlamydomonasClumps",
-      "ColpidiumVacuoles",
       "DividingChlamydomonas",
+      "Small_unidentified",
+      "DigestedAlgae"
+    ),
+    LEEF_2_flowcam_rest = c(
+      "Loxocephallus",
+      "airbubbles",
+      "ColpidiumVacuoles",
       "Debris",
-      "DigestedAlgae",
-      "Small_unidentified"
+      "OtherCiliate",
+      "Coleps_irchel",
+      "Colpidium"
     )
   )
   if (is.null(species_set_id)) {
@@ -117,3 +86,6 @@ LEEF_2_species_set <- function(species_set_id = NULL){
     return(sets[[species_set_id]])
   }
 }
+
+
+

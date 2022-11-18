@@ -35,7 +35,7 @@ library(LEEF.analysis)
 The report can be generated from the command line by using
 
 ```{bash info_invocation, eval = FALSE}
-Rscript -e "library(LEEF.analysis); db <- '~/Desktop/9.backend/LEEF.RRD.sqlite'; LEEF_2_report_diagnostic(db = 'DATABASE PATH',  format = 'html', lastDays = 7);"
+Rscript -e "library(LEEF.analysis); LEEF_2_report_diagnostic(db = 'DATABASE PATH',  template = 'LEEF_2', format = 'html', lastDays = 7);"
 ```
 
 \pagebreak
@@ -110,28 +110,28 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 
 \pagebreak
 
+### Flowcam Everything
+```{r dens_species_fcam_all_raw, fig.height = 32}
+LEEF_2_plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcam",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
 ### Flowcam Algae
 ```{r dens_species_fcam_al_raw, fig.height = 32}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "flowcam",
-  species_set_id = "flowcam_algae"
+  species_set_id = "LEEF_2_flowcam_algae"
 )
 ```
-
-\pagebreak
-
-### Flowcam Ciliates
-```{r dens_species_fcam_cil_raw, fig.height = 32}
-LEEF_2_plot_density_species_per_bottle_per_timestamp(
-  params$db, 
-  transform_density_4throot = FALSE, 
-  measurement = "flowcam",
-  species_set_id = "flowcam_ciliates"
-)
-```
-
+`
 \pagebreak
 
 ### Flowcam Rest
@@ -140,7 +140,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "flowcam",
-  species_set_id = "flowcam_rest"
+  species_set_id = "LEEF_2_flowcam_rest"
 )
 ```
 
@@ -260,19 +260,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "flowcam",
-  species_set_id = "flowcam_algae"
-)
-```
-
-\pagebreak
-
-### Flowcam Ciliates
-```{r dens_species_fcam_cil, fig.height = 32}
-LEEF_2_plot_density_species_per_bottle_per_timestamp(
-  params$db, 
-  transform_density_4throot = TRUE, 
-  measurement = "flowcam",
-  species_set_id = "flowcam_ciliates"
+  species_set_id = "LEEF_2_flowcam_algae"
 )
 ```
 
@@ -284,7 +272,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "flowcam",
-  species_set_id = "flowcam_rest"
+  species_set_id = "LEEF_flowcam_rest"
 )
 ```
 

@@ -23,7 +23,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp <- function(
 ){
   options(dplyr.summarise.inform = FALSE)
 
-  spid <- LEEF_2_species_set(species_set_id)
+  spid <- species_set(species_set_id)
   data <- db_read_density(db) %>%
     dplyr::filter(measurement == !!measurement) %>%
     dplyr::filter(
