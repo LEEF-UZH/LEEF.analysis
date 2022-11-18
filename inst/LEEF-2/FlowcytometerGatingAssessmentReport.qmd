@@ -5,12 +5,11 @@ format:
     toc: true
     toc-location: left
     code-fold: true
-    standalone: true
+    embed-resources: true
 execute:
-  cache: true
+  cache: false
 params:
   extracted_dir: ~/Desktop/2.extracted.data/flowcytometer
-
 ---
 
 ```{r}
