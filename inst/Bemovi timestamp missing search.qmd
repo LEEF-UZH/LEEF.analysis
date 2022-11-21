@@ -1,0 +1,97 @@
+---
+title: "Bemovi timestamp missing search"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    embed-resources: true
+---
+
+## Read timestamps from different stages of the reclassification
+
+```{r}
+ts <- list(
+  mag_16 = list(
+    extracted =  list.files("~/Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data/extracted/", "LEEF.bemovi.mag.16.bemovi") |>
+      gsub(pattern = "LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.", replacement = "") |>
+      unique(),
+    morph_old = list.files("~/reclassification/bemovi_mag_16 old/", "morph_mvt") |>
+      gsub(pattern = "morph_mvt\\.|\\.rds|morph_mvt_non_cropped\\.|morph_mvt_cropped\\.", replacement = "") |>
+      unique(),
+    dens_old = list.files("~/reclassification/bemovi_mag_16 old/", "mean_density") |>
+      gsub(pattern = "mean_density_per_ml\\.|\\.rds|mean_density_per_ml_non_cropped\\.|mean_density_per_ml_cropped\\.", replacement = "") |>
+      unique(),
+    morph_1 = list.files("~/reclassification/bemovi_mag_16 1/", "morph_mvt") |>
+      gsub(pattern = "morph_mvt\\.|\\.rds|morph_mvt_non_cropped\\.|morph_mvt_cropped\\.", replacement = "") |>
+      unique(),
+    dens_1 = list.files("~/reclassification/bemovi_mag_16 1/", "mean_density") |>
+      gsub(pattern = "mean_density_per_ml\\.|\\.rds|mean_density_per_ml_non_cropped\\.|mean_density_per_ml_cropped\\.", replacement = "") |>
+      unique(),
+    morph_2 = list.files("~/reclassification/bemovi_mag_16 2/", "morph_mvt") |>
+      gsub(pattern = "morph_mvt\\.|\\.rds|morph_mvt_non_cropped\\.|morph_mvt_cropped\\.", replacement = "") |>
+      unique(),
+    dens_2 = list.files("~/reclassification/bemovi_mag_16 2/", "mean_density") |>
+      gsub(pattern = "mean_density_per_ml\\.|\\.rds|mean_density_per_ml_non_cropped\\.|mean_density_per_ml_cropped\\.", replacement = "") |>
+      unique(),
+    extracted_LEEF =  list.files("/Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/", "LEEF.bemovi.mag.16.bemovi") |>
+      gsub(pattern = "LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.", replacement = "") |>
+      unique()
+  ),
+  mag_25 = list(
+    extracted =  list.files("~/Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data/extracted/", "LEEF.bemovi.mag.25.bemovi") |>
+      gsub(pattern = "LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.", replacement = "") |>
+      unique(),
+    morph_old = list.files("~/reclassification/bemovi_mag_25 old/", "morph_mvt") |>
+      gsub(pattern = "morph_mvt\\.|\\.rds|morph_mvt_non_cropped\\.|morph_mvt_cropped\\.", replacement = "") |>
+      unique(),
+    dens_old = list.files("~/reclassification/bemovi_mag_25 old/", "mean_density") |>
+      gsub(pattern = "mean_density_per_ml\\.|\\.rds|mean_density_per_ml_non_cropped\\.|mean_density_per_ml_cropped\\.", replacement = "") |>
+      unique(),
+    morph_1 = list.files("~/reclassification/bemovi_mag_25 1/", "morph_mvt") |>
+      gsub(pattern = "morph_mvt\\.|\\.rds|morph_mvt_non_cropped\\.|morph_mvt_cropped\\.", replacement = "") |>
+      unique(),
+    dens_1 = list.files("~/reclassification/bemovi_mag_25 1/", "mean_density") |>
+      gsub(pattern = "mean_density_per_ml\\.|\\.rds|mean_density_per_ml_non_cropped\\.|mean_density_per_ml_cropped\\.", replacement = "") |>
+      unique(),
+    morph_2 = list.files("~/reclassification/bemovi_mag_25 2/", "morph_mvt") |>
+      gsub(pattern = "morph_mvt\\.|\\.rds|morph_mvt_non_cropped\\.|morph_mvt_cropped\\.", replacement = "") |>
+      unique(),
+    dens_2 = list.files("~/reclassification/bemovi_mag_25 2/", "mean_density") |>
+      gsub(pattern = "mean_density_per_ml\\.|\\.rds|mean_density_per_ml_non_cropped\\.|mean_density_per_ml_cropped\\.", replacement = "") |>
+      unique()
+  )
+)
+```
+
+## Show the number of timestamps in each magnifiction and stage
+
+
+```{r}
+str(ts)
+```
+
+## Which mag_16 ones are missing
+
+```{r}
+c( 
+  morph_old = ts$mag_16$extracted[!(ts$mag_16$extracted %in% ts$mag_16$morph_old)],
+  dens_old = ts$mag_16$extracted[!(ts$mag_16$extracted %in% ts$mag_16$dens_old)],
+  morph_1 = ts$mag_16$extracted[!(ts$mag_16$extracted %in% ts$mag_16$morph_1)],
+  dens_1 = ts$mag_16$extracted[!(ts$mag_16$extracted %in% ts$mag_16$dens_1)],
+  morph_2 = ts$mag_16$extracted[!(ts$mag_16$extracted %in% ts$mag_16$morph_2)],
+  dens_2 = ts$mag_16$extracted[!(ts$mag_16$extracted %in% ts$mag_16$dens_2)]
+)
+```
+## Which mag_25 ones are missing
+
+```{r}
+c( 
+  morph_old = ts$mag_25$extracted[!(ts$mag_25$extracted %in% ts$mag_25$morph_old)],
+  dens_old = ts$mag_25$extracted[!(ts$mag_25$extracted %in% ts$mag_25$dens_old)],
+  morph_1 = ts$mag_25$extracted[!(ts$mag_25$extracted %in% ts$mag_25$morph_1)],
+  dens_1 = ts$mag_25$extracted[!(ts$mag_25$extracted %in% ts$mag_25$dens_1)],
+  morph_1 = ts$mag_25$extracted[!(ts$mag_25$extracted %in% ts$mag_25$morph_2)],
+  dens_1 = ts$mag_25$extracted[!(ts$mag_25$extracted %in% ts$mag_25$dens_2)]
+)
+```

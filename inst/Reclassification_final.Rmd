@@ -177,7 +177,7 @@ if (!file.exists(out)) {
   )
 } else {
   message(
-    "Directory ", out, "exists\n",
+    "Directory ", out, " exists\n",
     "Skipping 'bemovi_extract.mag.16.'"
   )
 }
