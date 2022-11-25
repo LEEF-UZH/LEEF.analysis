@@ -96,11 +96,7 @@ FROM
 INNER JOIN
   (
    SELECT
-     bottle,
-     temperature,
-     richness,
-     composition,
-     incubator
+     *
    FROM
 	 experimetal_design
   )

@@ -181,6 +181,16 @@ LEEF_2_plot_o2s_per_bottle_per_timestamp(
 
 \pagebreak
 
+### Conductivity
+
+```{r conductivity_raw, fig.height = 32}
+LEEF_2_plot_conductivity_per_bottle_per_timestamp(
+  params$db
+)
+```
+
+\pagebreak
+
 ### TOC and TC
 
 ```{r toc_raw_1_1, fig.height = 32}
@@ -307,6 +317,16 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 
 ```{r percent_o2, fig.height = 32}
 LEEF_2_plot_o2s_per_bottle_per_timestamp(
+  params$db
+)
+```
+
+\pagebreak
+
+### Conductivity
+
+```{r conductivity, fig.height = 32}
+LEEF_2_plot_conductivity_per_bottle_per_timestamp(
   params$db
 )
 ```

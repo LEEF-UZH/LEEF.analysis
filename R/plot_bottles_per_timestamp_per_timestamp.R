@@ -29,15 +29,23 @@ plot_bottles_per_timestamp <- function(
     # dplyr::summarise(n = dplyr::n()) %>%
     dplyr::collect()
 
-  if(nrow(density) == 0 & nrow(o2) == 0){
-    data <- NULL
-  } else if (nrow(density) == 0){
-    data <- o2
-  } else if (nrow(o2) == 0) {
-    data <- density
-  } else {
-    data <- dplyr::bind_rows(collect(density), o2)
-  }
+  conductivity <- db_read_conductivity(db) %>%
+    dplyr::select(timestamp, day, bottle, measurement) %>%
+    dplyr::filter(day >= (max(day, na.rm=TRUE) - lastDays)) %>%
+    # dplyr::group_by(timestamp, day, bottle, measurement) %>%
+    # dplyr::summarise(n = dplyr::n()) %>%
+    dplyr::collect()
+
+  # if(nrow(density) == 0 & nrow(o2) == 0){
+  #   data <- NULL
+  # } else if (nrow(density) == 0){
+  #   data <- o2
+  # } else if (nrow(o2) == 0) {
+  #   data <- density
+  # } else {
+  #   data <- dplyr::bind_rows(collect(density), o2)
+  # }
+  data <- dplyr::bind_rows(collect(density), o2, conductivity)
 
   if (is.null(data)) {
     warning("No data available!")

@@ -17,8 +17,8 @@ make_views <- function(
   overwrite = FALSE
 ){
   try(make_view_density(db = db, start_date = start_date, overwrite = overwrite))
-  try(make_view_light_decline(db = db, start_date = start_date, overwrite = overwrite))
   try(make_view_o2(db = db, start_date = start_date, overwrite = overwrite))
   try(make_view_toc(db = db, start_date = start_date, overwrite = overwrite))
+  try(make_view_conductivity(db = db, start_date = start_date, overwrite = overwrite))
   invisible(NULL)
 }

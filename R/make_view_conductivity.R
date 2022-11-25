@@ -1,4 +1,4 @@
-#' Create \code{toc} view wich contains selected fields from the toc__toc measurement
+#' Create \code{o2} view wgich contains selected fields from the conductivity measurement
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
@@ -10,14 +10,14 @@
 #' @export
 #'
 #' @examples
-make_view_toc <- function(
+make_view_conductivity <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   start_date = "2021-09-20",
   overwrite = FALSE
 ){
   sql <- paste0(
 "
-CREATE VIEW toc
+CREATE VIEW conductivity
 AS
 SELECT
   *
@@ -30,20 +30,17 @@ FROM
           julianday('", start_date, "') AS integer
      ) AS day,
      bottle,
-     inj_type AS 'type',
-	 conc AS 'concentration',
-	 cv AS 'cv'
+     conductivity,
+     'conductivity' AS measurement
    FROM
-     toc__toc
-   WHERE
-	 bottle IS NOT NULL
-	)
+     conductivity__conductivity
+  )
 INNER JOIN
   (
    SELECT
      *
    FROM
-	   experimetal_design
+	 experimetal_design
   )
 USING
   (bottle);
@@ -59,7 +56,7 @@ USING
   if (overwrite) {
     DBI::dbExecute(
       con,
-      "DROP VIEW toc"
+      "DROP VIEW conductivity"
     )
   }
   DBI::dbExecute(

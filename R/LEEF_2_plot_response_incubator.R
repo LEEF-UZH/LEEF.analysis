@@ -38,17 +38,27 @@ LEEF_2_plot_response_incubator <- function(
     dplyr::mutate(density = replace(density, density == "---", NA)) %>%
     dplyr::mutate(density = as.numeric(density))
 
+  conductivity <- db_read_conductivity(db) %>%
+    dplyr::filter(timestamp == max(timestamp, na.rm = TRUE)) %>%
+    dplyr::rename(density = conductivity) %>%
+    dplyr::mutate(mxs = measurement) %>%
+    dplyr::mutate(treatment = paste0("t: ", temperature, "; r: ", resources, "; s: ", salinity)) %>%
+    dplyr::select(timestamp, bottle, treatment, incubator, density, mxs) %>%
+    dplyr::collect() %>%
+    dplyr::mutate(density = replace(density, density == "---", NA)) %>%
+    dplyr::mutate(density = as.numeric(density))
 
 
-  if(nrow(density) == 0 & nrow(o2) == 0){
-    data <- NULL
-  } else if (nrow(density) == 0){
-    data <- o2
-  } else if (nrow(o2) == 0) {
-    data <- density
-  } else {
-    data <- dplyr::bind_rows(collect(density), o2)
-  }
+  # if(nrow(density) == 0 & nrow(o2) == 0){
+  #   data <- NULL
+  # } else if (nrow(density) == 0){
+  #   data <- o2
+  # } else if (nrow(o2) == 0) {
+  #   data <- density
+  # } else {
+  #   data <- dplyr::bind_rows(collect(density), o2)
+  # }
+  data <- dplyr::bind_rows(collect(density), o2, conductivity)
 
   if (!is.null(data)){
     p <- data %>%
