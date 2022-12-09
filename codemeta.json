@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/LEEF-UZH/LEEF.analysis",
   "issueTracker": "https://github.com/LEEF-UZH/LEEF.analysis/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -213,5 +213,5 @@
     },
     "SystemRequirements": null
   },
-  "fileSize": "241.974KB"
+  "fileSize": "258.314KB"
 }
