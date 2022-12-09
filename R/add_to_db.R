@@ -74,27 +74,28 @@ add_to_db <- function(
         dat$timestamp <- as.character(dat$timestamp)
       }
 
-      timestamps <- unlist(
-        DBI::dbGetQuery(conn, paste("SELECT DISTINCT timestamp FROM", tables[i]))
-      )
-
-      if (check_timestamps & any(unique(dat$timestamp) %in% timestamps)) {
-        msg <- paste0("'", fns[i], "' not added as timestamp already present in table '", tables[i], "'.")
-        message(msg)
-        warning(msg)
-        return <- FALSE
-      } else {
-        DBI::dbBegin(conn)
-        DBI::dbWriteTable(
-          conn,
-          name = tables[i],
-          value = as.data.frame(dat),
-          overwrite = FALSE,
-          append = TRUE
+      if (check_timestamps) {
+        timestamps <- unlist(
+          DBI::dbGetQuery(conn, paste("SELECT DISTINCT timestamp FROM", tables[i]))
         )
-        DBI::dbCommit(conn)
-        return(TRUE)
+
+        if (any(unique(dat$timestamp) %in% timestamps)) {
+          msg <- paste0("'", fns[i], "' not added as timestamp already present in table '", tables[i], "'.")
+          message(msg)
+          warning(msg)
+          return <- FALSE
+        }
       }
+      DBI::dbBegin(conn)
+      DBI::dbWriteTable(
+        conn,
+        name = tables[i],
+        value = as.data.frame(dat),
+        overwrite = FALSE,
+        append = TRUE
+      )
+      DBI::dbCommit(conn)
+      return(TRUE)
     }
   )
 
