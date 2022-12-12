@@ -29,24 +29,11 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp <- function(
   } else {
     data <- data %>%
       dplyr::mutate(bottle = fix_bottle(bottle)) %>%
-      # dplyr::mutate(
-      #   density = if (transform_density_4throot) {
-      #     exp(log(density)/4)
-      #   } else {
-      #     density
-      #   }
-      # ) %>%
-      group_by(day, bottle, type, salinity, resources, temperature) # %>%
-    # summarise(density = mean(density))
-
-    data$temperature[data$temperature == "increasing"] <- "decreasing light"
-    data$temperature[data$temperature == "constant"]   <- "constant light"
-
-    ls <- db_read_light_decline(db) %>% collect()
+      group_by(day, bottle, type, salinity, resources, temperature)
 
     p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$concentration)) +
       ggplot2::geom_line(ggplot2::aes(y = .data$concentration, colour = .data$type)) +
-      ggplot2::facet_grid(rows = vars(composition), cols = vars(temperature), scales = "free_y") +
+      ggplot2::facet_wrap(facets = vars(bottle), ncol = 3, scales = "free_y") +
       ggplot2::geom_text(
         data = data,
         ggplot2::aes(x = -Inf, y = Inf, label = bottle, group = bottle),
@@ -57,8 +44,8 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp <- function(
       ggplot2::scale_colour_manual(values = 1:40) +
       ggplot2::xlab("Day of Experiment") +
       ggplot2::ylab("concentration") +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45)) +
-      geom_vline(xintercept = range(ls$day), colour = "lightgrey")
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45)) # +
+      # geom_vline(xintercept = range(ls$day), colour = "lightgrey")
     p
   }
 }

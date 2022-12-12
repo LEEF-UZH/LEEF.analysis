@@ -37,6 +37,7 @@ db_read_toc <- function(
     result <- NULL
     try(
       {
+        ## LEEF-1
         result <- data %>%
           group_by(timestamp, day, type, bottle, temperature, richness, composition, incubator) %>%
           summarise(concentration = mean(concentration), cv = NA, n = n()) %>%
@@ -45,6 +46,7 @@ db_read_toc <- function(
       silent = TRUE
     )
     if (is.null(result)){
+      ## LEEF-2
       result <- data %>%
         group_by(timestamp, day, type, bottle, temperature, salinity, resources, incubator) %>%
         summarise(concentration = mean(concentration), cv = NA, n = n()) %>%
@@ -52,5 +54,5 @@ db_read_toc <- function(
 
     }
   }
-  return(data)
+  return(result)
 }
