@@ -53,6 +53,7 @@ db_read_toc <- function(
         ungroup()
 
     }
+    data <- result
   }
-  return(result)
+  return(data)
 }
