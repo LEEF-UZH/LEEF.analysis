@@ -3,7 +3,7 @@
 #' This function calls the other \code{make_view_...()} functions, wrapped in individual \code{try()} blocks.
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
-#' @param start_date the start date of the experiment
+#' @param start_date the start date of the experiment in the format \code{YYYY-MM-DD}
 #' @param overwrite if \code{TRUE}, overwrite existing view
 #'
 #' @return invisibly \code{NULL}

@@ -52,7 +52,7 @@ classify_flowcam_files <- function(
     dat <- readRDS(file.path(datadir, algae_traits_name))
     dat <- dat[dat$bottle == bottle,]
   } else {
-    dat <- readRDS(tmp_algae_traits)
+    dat <- readRDS(file.path(datadir, algae_traits_name))
   }
 
 # The classification ------------------------------------------------------
