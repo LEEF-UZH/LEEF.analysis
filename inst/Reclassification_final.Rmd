@@ -336,7 +336,7 @@ rm(pdir, compositions, experimental_design)
 ```
 
 # Reclassification of individual bottles and possibly timestamps
-## Flowcam Bottle `b_05`
+## Flowcam Bottle `b_02`
 Bottle `b_02` was contaminated and needs to be classified separately. All timestamps will be classified using the same classifier.
 
 ### Set Bottle and range of timestamps
