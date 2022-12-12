@@ -34,10 +34,23 @@ db_read_toc <- function(
     filter (as.integer(timestamp) <= as.integer(to_timestamp))
 
   if (!is.null(duplicates)) {
-    data <- data %>%
-      group_by(timestamp, day, type, bottle, temperature, richness, composition, incubator) %>%
-      summarise(concentration = mean(concentration), cv = NA, n = n()) %>%
-      ungroup()
+    result <- NULL
+    try(
+      {
+        result <- data %>%
+          group_by(timestamp, day, type, bottle, temperature, richness, composition, incubator) %>%
+          summarise(concentration = mean(concentration), cv = NA, n = n()) %>%
+          ungroup()
+      },
+      silent = TRUE
+    )
+    if (is.null(result)){
+      result <- data %>%
+        group_by(timestamp, day, type, bottle, temperature, salinity, resources, incubator) %>%
+        summarise(concentration = mean(concentration), cv = NA, n = n()) %>%
+        ungroup()
+
+    }
   }
   return(data)
 }

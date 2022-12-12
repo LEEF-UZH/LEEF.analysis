@@ -36,7 +36,7 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp <- function(
       #     density
       #   }
       # ) %>%
-      group_by(day, bottle, type, composition, temperature) # %>%
+      group_by(day, bottle, type, salinity, resources, temperature) # %>%
     # summarise(density = mean(density))
 
     data$temperature[data$temperature == "increasing"] <- "decreasing light"
