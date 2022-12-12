@@ -289,7 +289,7 @@ system.time(
 ```
 
 ## Add experiment specific tables
-```{r addExptables}
+```{r addExptables, eval=FALSE, include=FALSE}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
