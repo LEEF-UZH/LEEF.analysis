@@ -11,7 +11,7 @@
 #' @export
 #'
 #' @examples
-plot_bottles_per_timestamp <- function(
+LEEF_2_plot_bottles_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   lastDays = 7
 ){
@@ -29,6 +29,13 @@ plot_bottles_per_timestamp <- function(
     # dplyr::summarise(n = dplyr::n()) %>%
     dplyr::collect()
 
+  conductivity <- db_read_conductivity(db) %>%
+    dplyr::select(timestamp, day, bottle, measurement) %>%
+    dplyr::filter(day >= (max(day, na.rm=TRUE) - lastDays)) %>%
+    # dplyr::group_by(timestamp, day, bottle, measurement) %>%
+    # dplyr::summarise(n = dplyr::n()) %>%
+    dplyr::collect()
+
   # if(nrow(density) == 0 & nrow(o2) == 0){
   #   data <- NULL
   # } else if (nrow(density) == 0){
@@ -38,7 +45,7 @@ plot_bottles_per_timestamp <- function(
   # } else {
   #   data <- dplyr::bind_rows(collect(density), o2)
   # }
-  data <- dplyr::bind_rows(collect(density), o2)
+  data <- dplyr::bind_rows(collect(density), o2, conductivity)
 
   if (is.null(data)) {
     warning("No data available!")

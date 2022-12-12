@@ -12,7 +12,7 @@ output:
     toc_collapsed: true
     code_folding: hide
 params:
-  output_dir: ~/reclassification/
+  output_dir: ~/RRD.Reclassification_final/
 ---
 
 ```{r setup_reclass, include=FALSE}
@@ -480,12 +480,14 @@ To vacuum the sqlite database, i.e. recover the space from the deletion of rows,
 ```{r echo = FALSE}
 db_vac <- gsub("\\.sqlite$", ".vacuumed.sqlite", db)
 paste0("sqlite3 \"./", basename(db), "\" 'VACUUM main INTO \"", basename(db_vac), "\"'")
+
 ```
 
 # Create Diagnostic Report
 ```{r createDiagReport}
 report_diagnostic(
-  db = db, 
+  db = db,  
+  template = "LEEF_1",
   suffix = "reclassified", 
   format = "html"
 )
