@@ -12,7 +12,11 @@ output:
     toc_collapsed: true
     code_folding: hide
 params:
-  output_dir: ~/RRD.Reclassification_final/
+  output_dir: "~/RRD.Reclassification_final/"
+  base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/v1.6.1/"
+  db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
+  archive_dir: "/Volumes/LEEF/"
+  cores: 7
 ---
 
 ```{r setup_reclass, include=FALSE}
@@ -29,7 +33,7 @@ library("LEEF.analysis")
 ## Set Base to use
 This reclassification is based on the classifiers as in the repo at the base URL which speicifies the repo and the reference / tag which should be used for this reclassification
 ```{r}
-base <- paste0("https://github.com/LEEF-UZH/LEEF.parameter/raw/", "v1.6.1", "/")
+base <- params$base
 ```
 
 ## Set output path
@@ -40,7 +44,7 @@ dir.create(output, recursive = TRUE, showWarnings = FALSE)
 
 ## Set database
 ```{r output_path}
-db <- file.path(output, "LEEF.RRD.reclassified.sqlite")
+db <- params$db
 ```
 
 ## Set Archive Directory
@@ -48,7 +52,7 @@ Make sure, that the S3 LEEF archive is mounted and you know the path to the arch
 
 ```{r setArchive}
 # archive_dir <- "~/Duck/LEEFSwift3/"
-archive_dir <- "/Volumes/LEEF/"
+archive_dir <- params$archive_dir
 if (!file.exists(archive_dir)){
   stop(
     "Archive directory '", archive_dir, "' does not exist.\n",
@@ -57,10 +61,6 @@ if (!file.exists(archive_dir)){
 }
 ```
 
-## Set number of cores to be used
-```{r setCores}
-cores <- 7
-```
 
 ## Set timestamps
 All available data will be reclassified. Therefore, the timestamps are determined for each method below based on the archived data.
@@ -111,7 +111,7 @@ if (!file.exists(out)) {
       classifier_increasing_name = class_increasing, 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/flowcam/flowcam.yml"))$species_tracked,
       output = out,
-      mc.cores = cores
+      mc.cores = params$cores
     )
   )
 } else {
@@ -172,7 +172,7 @@ if (!file.exists(out)) {
       bemovi_extract_name = "bemovi_extract.mag.16.yml", 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.16/bemovi_extract.mag.16.yml"))$species_tracked,
       output = out,
-      mc.cores = cores
+      mc.cores = params$cores
     )
   )
 } else {
@@ -232,7 +232,7 @@ if (!file.exists(out)) {
       bemovi_extract_name = "bemovi_extract.mag.25.yml", 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.yml"))$species_tracked,
       output = out,
-      mc.cores = cores
+      mc.cores = params$cores
     )
   )
   system.time(
@@ -245,7 +245,7 @@ if (!file.exists(out)) {
       bemovi_extract_name = "bemovi_extract.mag.25.non_cropped.yml", 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.non_cropped.yml"))$species_tracked,
       output = out,
-      mc.cores = cores
+      mc.cores = params$cores
     )
   )
   system.time(
@@ -258,7 +258,7 @@ if (!file.exists(out)) {
       bemovi_extract_name = "bemovi_extract.mag.25.cropped.yml", 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.cropped.yml"))$species_tracked,
       output = out,
-      mc.cores = cores
+      mc.cores = params$cores
     )
   )
 } else {
@@ -401,7 +401,7 @@ if (!file.exists(out)) {
       classifier_increasing_name = class_increasing, 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/flowcam/flowcam.yml"))$species_tracked,
       output = out,
-      mc.cores = cores,
+      mc.cores = params$cores,
       bottle = bott
     )
   )
@@ -426,12 +426,12 @@ message("Deleting entries...")
 delete_density_sql <- paste0(
   "DELETE ",
   "FROM flowcam__algae_density ", 
-  "WHERE bottle = '", bott, "' AND timestamp > ", format(after, scientific = FALSE), " AND timestamp < ", format(until, scientific = FALSE)
+  "WHERE bottle = '", bott, "' AND timestamp >= ", format(after, scientific = FALSE), " AND timestamp <= ", format(until, scientific = FALSE)
 )
 delete_traits_sql <- paste0(
   "DELETE ",
   "FROM flowcam__algae_traits ", 
-  "WHERE bottle = '", bott, "' AND timestamp > ", format(after, scientific = FALSE), " AND timestamp < ", format(until, scientific = FALSE)
+  "WHERE bottle = '", bott, "' AND timestamp >= ", format(after, scientific = FALSE), " AND timestamp <= ", format(until, scientific = FALSE)
 )
 
 conn <- DBI::dbConnect(
@@ -479,7 +479,7 @@ To vacuum the sqlite database, i.e. recover the space from the deletion of rows,
 
 ```{r echo = FALSE}
 db_vac <- gsub("\\.sqlite$", ".vacuumed.sqlite", db)
-paste0("sqlite3 \"./", basename(db), "\" 'VACUUM main INTO \"", basename(db_vac), "\"'")
+cat(paste0("sqlite3 \"./", basename(db), "\" 'VACUUM main INTO \"", basename(db_vac), "\"'"))
 
 ```
 
