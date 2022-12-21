@@ -9,14 +9,18 @@ format:
 execute:
   cache: false
 params:
-  extracted_dir: ~/Desktop/2.extracted.data/flowcytometer
+  db: "/Volumes/LEEF/0.RRD/LEEF-2.RRD.20221209.sqlite"
+  extracted_dir: "~/Desktop/2.extracted.data/flowcytometer"
 ---
 
 ```{r}
 #| label: setup
+library(LEEF.analysis)
+
 library(flowViz)
 library(ggcyto)
 library(ggplot2)
+
 ```
 ## Read Data
 ```{r}

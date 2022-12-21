@@ -472,6 +472,13 @@ system.time(
 rm(out)
 ```
 
+# Merge flowcam classifications into consistent files
+```{r label = "merge_flowcam}
+
+flowcam <- file.path(output, paste0("flowcam_", bott, "_", format(after, scientific = FALSE), "_", format(until, scientific = FALSE)))
+
+flowcam_2 <- file.path(output, paste0("flowcam_", bott, "_", format(after, scientific = FALSE), "_", format(until, scientific = FALSE)))
+```
 # Do a final vacuuming into new database
 Vacuuming the database will take some time!
 

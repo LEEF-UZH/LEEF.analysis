@@ -23,7 +23,7 @@ output:
     fig_width: 10
     fig_height: 12
 params:
-  db: ~/Desktop/9.backend/LEEF-2.RRD.sqlite
+  db: ~/Desktop/LEEF-2.RRD.20221209.sqlite
   lastDays: 7
 ---
 
@@ -80,18 +80,6 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "bemovi_mag_25",
-  species_set_id = NULL
-)
-```
-
-\pagebreak
-
-### Bemovi Magnification 25 non_cropped
-```{r dens_species_b_25_non_crop_raw, fig.height = 32}
-LEEF_2_plot_density_species_per_bottle_per_timestamp(
-  params$db, 
-  transform_density_4throot = FALSE, 
-  measurement = "bemovi_mag_25_non_cropped",
   species_set_id = NULL
 )
 ```
@@ -194,10 +182,10 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp(
 ### TOC and TC
 
 ```{r toc_raw_1_1, fig.height = 32}
-# plot_tocs_per_bottle_per_timestamp(
-#   params$db,
-#   type = c("TOC", "TC")
-# )
+plot_tocs_per_bottle_per_timestamp(
+  params$db,
+  type = c("TOC", "TC")
+)
 ```
 
 \pagebreak
@@ -206,10 +194,10 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp(
 
 
 ```{r toc_raw_2_1, fig.height = 32}
-# plot_tocs_per_bottle_per_timestamp(
-#   params$db,
-#   type = c("IC", "TN")
-# )
+plot_tocs_per_bottle_per_timestamp(
+  params$db,
+  type = c("IC", "TN")
+)
 ```
 
 ## 4^th^ root Density of Species per bottle as measured by measurement over time
@@ -234,18 +222,6 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "bemovi_mag_25",
-  species_set_id = NULL
-)
-```
-
-\pagebreak
-
-### Bemovi Magnification 25 non cropped
-```{r dens_species_b_25_non_crop, fig.height = 32}
-LEEF_2_plot_density_species_per_bottle_per_timestamp(
-  params$db, 
-  transform_density_4throot = TRUE, 
-  measurement = "bemovi_mag_25_non_cropped",
   species_set_id = NULL
 )
 ```
@@ -336,10 +312,10 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp(
 ### TOC and TC
 
 ```{r toc_raw_1_2, fig.height = 32}
-# plot_tocs_per_bottle_per_timestamp(
-#   params$db,
-#   type = c("TOC", "TC")
-# )
+plot_tocs_per_bottle_per_timestamp(
+  params$db,
+  type = c("TOC", "TC")
+)
 ```
 
 \pagebreak
@@ -348,8 +324,8 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp(
 
 
 ```{r toc_raw_2_2, fig.height = 32}
-# plot_tocs_per_bottle_per_timestamp(
-#   params$db,
-#   type = c("IC", "TN")
-# )
+plot_tocs_per_bottle_per_timestamp(
+  params$db,
+  type = c("IC", "TN")
+)
 ```
