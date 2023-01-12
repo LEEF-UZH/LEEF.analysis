@@ -9,8 +9,8 @@ format:
 execute:
   cache: false
 params:
-  db: "/Volumes/LEEF/0.RRD/LEEF-2.RRD.20221209.sqlite"
-  extracted_dir: "~/Desktop/2.extracted.data/flowcytometer"
+  timestamp: "20230106"
+  extracted_base_dir: "~/Duck/LEEFSwift3/LEEF_2.archived.data/LEEF/3.archived.data/extracted/"
 ---
 
 ```{r}
@@ -20,19 +20,20 @@ library(LEEF.analysis)
 library(flowViz)
 library(ggcyto)
 library(ggplot2)
-
 ```
 ## Read Data
 ```{r}
 #| label: read_data
+extracted_dir <- file.path( params$extracted_base_dir, paste0("LEEF.flowcytometer.flowcytometer.", params$timestamp) )
+
 fsa <- list(
-  readRDS(file.path(params$extracted_dir, "flowcytometer_fsa_ungated.p_1.rds")),
-  readRDS(file.path(params$extracted_dir, "flowcytometer_fsa_ungated.p_2.rds"))
+  readRDS(file.path(extracted_dir, "flowcytometer_fsa_ungated.p_1.rds")),
+  readRDS(file.path(extracted_dir, "flowcytometer_fsa_ungated.p_2.rds"))
 )  
 
 gates <- list(
-  readRDS(file.path(params$extracted_dir, "flowcytometer_gates.p_1.rds")),
-  readRDS(file.path(params$extracted_dir, "flowcytometer_gates.p_2.rds"))
+  readRDS(file.path(extracted_dir, "flowcytometer_gates.p_1.rds")),
+  readRDS(file.path(extracted_dir, "flowcytometer_gates.p_2.rds"))
 )
 ```
 
