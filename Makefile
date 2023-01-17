@@ -78,25 +78,25 @@ clean_vignettes:
 
 ####
 
-build: docs
+build:
 	cd ..;\
 	R CMD build $(PKGSRC)
 
 ####
 
-drat: docs build
+drat:
 	cd
 	@Rscript -e "drat::insertPackage('./../$(PKGNAME)_$(PKGVERS).tar.gz', repodir = './../../drat/', commit = TRUE)"
 
 ####
 
-build-cran: docs
+build-cran:
 	cd ..;\
 	R CMD build $(PKGSRC)
 
 ####
 
-install: build
+install:
 	cd ..;\
 	R CMD INSTALL $(PKGNAME)_$(PKGVERS).tar.gz
 

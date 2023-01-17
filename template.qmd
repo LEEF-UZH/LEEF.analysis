@@ -1,0 +1,18 @@
+---
+title: "Test"
+format: html
+---
+
+## Set a variable
+
+```{r}
+OK <- FALSE
+```
+
+## Running Code depending on value of `OK`
+
+```{r}
+#| eval: !expr OK
+print("OK is TRUE - otherwise you won't see anything here.")
+```
+

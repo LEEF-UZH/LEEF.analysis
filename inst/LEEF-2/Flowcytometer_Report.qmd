@@ -1,5 +1,5 @@
 ---
-title: "Flowcytometer Assessment Report"
+title: "Flowcytometer Assessment Report LEEF-2"
 format: 
   html:
     toc: true
@@ -10,7 +10,6 @@ execute:
   cache: false
 params:
   timestamp: "20230106"
-  db: "/Volumes/LEEF-1/0.RRD/LEEF-2.RRD.20230113.sqlite"
   extracted_base_dir: "~/Duck/LEEFSwift3/LEEF_2.archived.data/LEEF/3.archived.data/extracted/"
 ---
 
@@ -24,16 +23,6 @@ library(ggcyto)
 library(ggplot2)
 ```
 
-## Difference between plates
-See if there e differences between the plates in measurements.
-
-```{r}
-#| label: plates
-#| fig-width: 10
-#| fig-height: 30
-
-print(LEEF_2_plot_flowcytometer_individual_per_bottle_per_timestamp(db = params$db))
-```
 
 ## Read Data
 ```{r}

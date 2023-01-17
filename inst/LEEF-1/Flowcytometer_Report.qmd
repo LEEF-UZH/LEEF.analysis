@@ -1,0 +1,172 @@
+---
+title: "Flowcytometer Assessment Report LEEF-1"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    embed-resources: true
+execute:
+  cache: false
+params:
+  timestamp: "20220103"
+  extracted_base_dir: "~/Duck/LEEFSwift3/LEEF.archived.data/LEEF/3.archived.data/extracted/"
+---
+
+```{r}
+#| label: setup
+#| echo: false
+
+library(LEEF.analysis)
+library(flowViz)
+library(ggcyto)
+library(ggplot2)
+```
+
+## Helper function
+here we need a helper function to calculate the gates from the co-ordinates as these are no=t saved in LEEF-1
+```{r}
+#| label: helper_function
+#| 
+
+gates <- function(
+    input_dir
+){
+  input <- "~/Desktop/0.raw.data/"
+  
+  gates_coordinates <- utils::read.csv(file.path(input_dir, "gates_coordinates.csv"))
+  
+  gates <- list()
+  
+  # bacteria gate
+  polyGate_bacteria <- as.matrix(gates_coordinates[1:4, 1:2])
+  colnames(polyGate_bacteria) <- c("FL1-A", "FL3-A")
+  bacteria_gate <- flowCore::polygonGate(filterId = "Bacteria", .gate = polyGate_bacteria)
+  
+  # gate for different size classes of bacteria
+  LNA_coordinates <- as.matrix(gates_coordinates[, 3])
+  LNA_coordinates <- na.omit(LNA_coordinates)
+  colnames(LNA_coordinates) <- c("FL1-A")
+  
+  MNA_coordinates <- as.matrix(gates_coordinates[, 4])
+  MNA_coordinates <- na.omit(MNA_coordinates)
+  colnames(MNA_coordinates) <- c("FL1-A")
+  
+  HNA_coordinates <- as.matrix(gates_coordinates[, 5])
+  HNA_coordinates <- na.omit(HNA_coordinates)
+  colnames(HNA_coordinates) <- c("FL1-A")
+  
+  rg_LNA <- flowCore::rectangleGate("FL1-A" = LNA_coordinates, filterId = "LNA")
+  rg_MNA <- flowCore::rectangleGate("FL1-A" = MNA_coordinates, filterId = "MNA")
+  rg_HNA <- flowCore::rectangleGate("FL1-A" = HNA_coordinates, filterId = "HNA")
+  
+  gates$bacteria <- list(
+    bacteria_gate = bacteria_gate,
+    rg_LNA = rg_LNA,
+    rg_MNA = rg_MNA,
+    rg_HNA = rg_HNA
+  )
+  
+  # algae gate
+  polyGate_algae <- as.matrix(gates_coordinates[1:4, 6:7])
+  colnames(polyGate_algae) <- c("FL1-A", "FL4-A")
+  algae_gate <- flowCore::polygonGate(filterId = "Algae", .gate = polyGate_algae)
+  
+  gates$algae <- list(
+    algae_gate = algae_gate
+  )
+  
+  return(gates)
+}
+```
+
+
+## Read Data
+```{r}
+#| label: read_data
+extracted_dir <- file.path( params$extracted_base_dir, paste0("LEEF.fast.flowcytometer.", params$timestamp) )
+
+fsa <- readRDS(file.path(extracted_dir, "flowcytometer_fsa_ungated.rds"))
+
+gates <- gates(extracted_dir)
+```
+
+## Determine sort Order
+```{r}
+#| label: sort
+i <- data.frame(
+  id = 1:length(fsa), 
+  name = sampleNames(fsa)
+)
+i$letter <- substr(i$name, 1, 1)
+i$number <- substr(i$name, 2, 3)
+i$order <- order(i$number, i$letter)
+wells <- i[i$order, "id"]
+
+rm(i)
+```
+
+## Old Plots
+
+```{r}
+#| label: flowViz_plots
+#| warning: false
+#| layout-ncol: 3
+for (i in wells){
+  print(
+    flowViz::xyplot(
+      `FL3-A` ~ `FL1-A`, 
+      data = fsa[[i]], 
+      filter = gates$bacteria$bacteria_gate, 
+      main=paste0("p_", p, " ", flowCore::description(fsa[[i]])$GUID)
+    )
+  )
+  print(
+    flowViz::densityplot(
+      ~ `FL1-A`, 
+      data = fsa[[i]], 
+      filter = gates$bacteria$rg_LNA, 
+      main=paste0("p_", p, " ", flowCore::description(fsa[[i]])$GUID)
+    )
+  )
+  print(
+    flowViz::xyplot(
+      `FL4-A` ~ `FL1-A`, 
+      data = fsa[[i]], 
+      filter = gates$algae$algae_gate, 
+      main=paste0("p_", p, " ",  main = flowCore::description(fsa[[i]])$GUID)
+    )
+  )
+}
+```
+
+
+
+## New plots 
+
+```{r}
+#| label: ggcyto_plots
+#| warning: false
+#| layout-ncol: 3
+for (i in wells){
+  print(
+    ggcyto::autoplot(fsa[[i]], "FL1-A", "FL3-A") + 
+      ggcyto::geom_gate(gates$bacteria$bacteria_gate) + 
+      ggplot2::ggtitle(paste0("p_", p, " ", flowCore::description(fsa[[i]])$GUID))
+  )
+  print(
+    ggcyto::autoplot(fsa[[i]], "FL1-A") + 
+      ggcyto::geom_gate( gates$bacteria$rg_LNA) + 
+      ggcyto::geom_gate( gates$bacteria$rg_MNA) + 
+      ggcyto::geom_gate( gates$bacteria$rg_HNA) + 
+      ggplot2::ggtitle(paste0("p_", p, " ", flowCore::description(fsa[[i]])$GUID))
+  )
+  print(
+    ggcyto::autoplot(fsa[[i]], "FL1-A", "FL4-A") + 
+      ggcyto::geom_gate(gates$algae$algae_gate) + 
+      ggplot2::ggtitle(paste0("p_", p, " ", flowCore::description(fsa[[i]])$GUID))
+  )
+}
+```
+
+
