@@ -32,7 +32,7 @@ READMEHTML = Readme.html
 
 #############
 
-all: readme docs vignettes build
+all: docs build drat install
 
 #############
 
