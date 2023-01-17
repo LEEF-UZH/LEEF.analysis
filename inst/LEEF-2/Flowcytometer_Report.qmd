@@ -1,0 +1,205 @@
+---
+title: "Flowcytometer Assessment Report"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    embed-resources: true
+execute:
+  cache: false
+params:
+  timestamp: "20230106"
+  db: "/Volumes/LEEF-1/0.RRD/LEEF-2.RRD.20230113.sqlite"
+  extracted_base_dir: "~/Duck/LEEFSwift3/LEEF_2.archived.data/LEEF/3.archived.data/extracted/"
+---
+
+```{r}
+#| label: setup
+
+
+library(LEEF.analysis)
+library(flowViz)
+library(ggcyto)
+library(ggplot2)
+```
+
+## Difference between plates
+See if there e differences between the plates in measurements.
+
+```{r}
+#| label: plates
+#| fig-width: 10
+#| fig-height: 30
+
+print(LEEF_2_plot_flowcytometer_individual_per_bottle_per_timestamp(db = params$db))
+```
+
+## Read Data
+```{r}
+#| label: read_data
+extracted_dir <- file.path( params$extracted_base_dir, paste0("LEEF.flowcytometer.flowcytometer.", params$timestamp) )
+
+fsa <- list(
+  readRDS(file.path(extracted_dir, "flowcytometer_fsa_ungated.p_1.rds")),
+  readRDS(file.path(extracted_dir, "flowcytometer_fsa_ungated.p_2.rds"))
+)  
+
+gates <- list(
+  readRDS(file.path(extracted_dir, "flowcytometer_gates.p_1.rds")),
+  readRDS(file.path(extracted_dir, "flowcytometer_gates.p_2.rds"))
+)
+```
+
+## Determine sort Order
+```{r}
+#| label: sort
+wells <- list()
+
+p <-  1
+i <- data.frame(
+  id = 1:length(fsa[[p]]), 
+  name = sampleNames(fsa[[p]])
+)
+i$letter <- substr(i$name, 1, 1)
+i$number <- substr(i$name, 2, 3)
+i$order <- order(i$number, i$letter)
+wells$p_1 <- i[i$order, "id"]
+
+p <-  2
+i <- data.frame(
+  id = 1:length(fsa[[p]]), 
+  name = sampleNames(fsa[[p]])
+)
+i$letter <- substr(i$name, 1, 1)
+i$number <- substr(i$name, 2, 3)
+i$order <- order(i$number, i$letter)
+wells$p_2 <- i[i$order, "id"]
+
+rm(i)
+```
+
+## Old Plots
+### p_1
+```{r}
+#| label: flowViz_plots_p_1
+#| warning: false
+#| layout-ncol: 3
+p <- 1
+for (i in wells[[p]]){
+  print(
+    flowViz::xyplot(
+      `FL3-A` ~ `FL1-A`, 
+      data = fsa[[p]][[i]], 
+      filter = gates[[p]]$bacteria$bacteria_gate, 
+      main=paste0("p_", p, " ", flowCore::description(fsa[[p]][[i]])$GUID)
+    )
+  )
+  print(
+    flowViz::densityplot(
+      ~ `FL1-A`, 
+      data = fsa[[p]][[i]], 
+      filter = gates[[p]]$bacteria$rg_LNA, 
+      main=paste0("p_", p, " ", flowCore::description(fsa[[p]][[i]])$GUID)
+    )
+  )
+  print(
+    flowViz::xyplot(
+      `FL4-A` ~ `FL1-A`, 
+      data = fsa[[p]][[i]], 
+      filter = gates[[p]]$algae$algae_gate, 
+      main=paste0("p_", p, " ",  main = flowCore::description(fsa[[p]][[i]])$GUID)
+    )
+  )
+}
+```
+### p_2
+
+```{r}
+#| label: flowViz_plots_p_2
+#| warning: false
+#| layout-ncol: 3
+p <- 2
+for (i in wells[[p]]){
+  print(
+    flowViz::xyplot(
+      `FL3-A` ~ `FL1-A`, 
+      data = fsa[[p]][[i]], 
+      filter = gates[[p]]$bacteria$bacteria_gate, 
+      main=paste0("p_", p, " ", flowCore::description(fsa[[p]][[i]])$GUID)
+    )
+  )
+  print(
+    flowViz::densityplot(
+      ~ `FL1-A`, 
+      data = fsa[[p]][[i]], 
+      filter = gates[[p]]$bacteria$rg_LNA, 
+      main=paste0("p_", p, " ", flowCore::description(fsa[[p]][[i]])$GUID)
+    )
+  )
+  print(
+    flowViz::xyplot(
+      `FL4-A` ~ `FL1-A`, 
+      data = fsa[[p]][[i]], 
+      filter = gates[[p]]$algae$algae_gate, 
+      main=paste0("p_", p, " ",  main = flowCore::description(fsa[[p]][[i]])$GUID)
+    )
+  )
+}
+```
+
+
+## New plots 
+### p_1
+```{r}
+#| label: ggcyto_plots_p1
+#| warning: false
+#| layout-ncol: 3
+p <- 1
+for (i in wells[[p]]){
+  print(
+    ggcyto::autoplot(fsa[[p]][[i]], "FL1-A", "FL3-A") + 
+      ggcyto::geom_gate(gates[[p]]$bacteria$bacteria_gate) + 
+      ggplot2::ggtitle(paste0("p_", p, " ", flowCore::description(fsa[[p]][[i]])$GUID))
+  )
+  print(
+    ggcyto::autoplot(fsa[[p]][[i]], "FL1-A") + 
+      ggcyto::geom_gate( gates[[p]]$bacteria$rg_LNA) + 
+      ggcyto::geom_gate( gates[[p]]$bacteria$rg_MNA) + 
+      ggcyto::geom_gate( gates[[p]]$bacteria$rg_HNA) + 
+      ggplot2::ggtitle(paste0("p_", p, " ", flowCore::description(fsa[[p]][[i]])$GUID))
+  )
+  print(
+    ggcyto::autoplot(fsa[[p]][[i]], "FL1-A", "FL4-A") + 
+      ggcyto::geom_gate(gates[[p]]$algae$algae_gate) + 
+      ggplot2::ggtitle(paste0("p_", p, " ", flowCore::description(fsa[[p]][[i]])$GUID))
+  )
+}
+```
+
+### p_2
+```{r}
+#| label: ggcyto_plots_p2
+#| warning: false
+#| layout-ncol: 3
+p <- 2
+for (i in wells[[p]]){
+  print(
+    ggcyto::autoplot(fsa[[p]][[i]], "FL1-A", "FL3-A") + 
+      ggcyto::geom_gate(gates[[p]]$bacteria$bacteria_gate) + 
+      ggplot2::ggtitle(paste0("p_", p, " ", flowCore::description(fsa[[p]][[i]])$GUID))
+  )
+  print(
+    ggcyto::autoplot(fsa[[p]][[i]], "FL1-A") + 
+      ggcyto::geom_gate( gates[[p]]$bacteria$rg_LNA) + 
+      ggcyto::geom_gate( gates[[p]]$bacteria$rg_MNA) + 
+      ggcyto::geom_gate( gates[[p]]$bacteria$rg_HNA) + 
+      ggplot2::ggtitle(paste0("p_", p, " ", flowCore::description(fsa[[p]][[i]])$GUID))
+  )
+  print(
+    ggcyto::autoplot(fsa[[p]][[i]], "FL1-A", "FL4-A") + 
+      ggcyto::geom_gate(gates[[p]]$algae$algae_gate) + 
+      ggplot2::ggtitle(paste0("p_", p, " ", flowCore::description(fsa[[p]][[i]])$GUID))
+  )
+}
+```

@@ -9,20 +9,21 @@ report_flowcytometer(
   extracted_base_dir =
     "~/Duck/LEEFSwift3/LEEF_2.archived.data/LEEF/3.archived.data/extracted/",
   output_dir = ".",
-  format = "html"
+  format = "html",
+  browse = TRUE
 )
 }
 \arguments{
+\item{timestamp}{timestamp to be plotted}
+
+\item{extracted_base_dir}{directory in which the extracted data can be found with filenames as in the archive}
+
+\item{output_dir}{output directory of the fil=nal report}
+
 \item{format}{the format of the report as a character vector of length 1.
 Supported are at the moment: \code{html} (the default), \code{pdf} and \code{word}.}
 
-\item{db}{fully qualified path to the sqlite database. The report will be saved to the same directory.}
-
-\item{template}{Template to be used for report. At the moment only \code{"LEEF_1} and \code{"LEEF_2} supported.}
-
-\item{suffix}{suffix for the file name}
-
-\item{lastDays}{number of last days to be included in graph 2. Default: 7}
+\item{browse}{if \code{TRUE} (the default) opr=en the report in the appropriate program.}
 }
 \value{
 the fully qualified file name to the created report.
