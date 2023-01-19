@@ -28,7 +28,8 @@ options(RRDdb = "/Volumes/LEEF/0.RRD/LEEF-1/LEEF.RRD.sqlite")
 #| 
 toc <- db_read_table(table = "toc__toc") %>% 
   collect() %>%
-  left_join(db_read_table(table = "experimetal_design") %>% collect())
+  left_join(db_read_table(table = "experimetal_design") %>% collect()) %>% 
+  filter(!is.na(temperature))
 ```
 ### Plot 
 
@@ -37,11 +38,19 @@ toc <- db_read_table(table = "toc__toc") %>%
 #| 
 
 toc  %>% 
-  mutate(treatment = paste(temperature, composition, sep = " & ")) %>%
-  filter(!is.na(temperature)) %>%
   ggplot(aes(x = position, y = conc, col = composition)) +
-  geom_boxplot(notch = TRUE) +
+  geom_point() +
   facet_grid(cols = vars(temperature), rows = vars(inj_type), scales = "free")
   
 ```
 
+```{r}
+#| label: pos
+#| 
+
+toc  %>% 
+  group_by(bottle, position) %>%
+  summarise(n = n()) %>%
+  ggplot(aes(x = bottle, y = position, size = n)) +
+  geom_point()
+```
