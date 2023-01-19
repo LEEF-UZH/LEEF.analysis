@@ -1,0 +1,47 @@
+---
+title: "Differences Bottles LEEF 1"
+author: "R M Krug"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    embed-resources: true
+---
+```{r}
+#| label: setup
+#| echo: false
+#| 
+
+library(dplyr)
+devtools::load_all()
+
+options(RRDdb = "/Volumes/LEEF/0.RRD/LEEF-1/LEEF.RRD.sqlite")
+```
+
+
+## TOC data
+
+### Read TOC data
+```{r}
+#| label: read_toc
+#| 
+toc <- db_read_table(table = "toc__toc") %>% 
+  collect() %>%
+  left_join(db_read_table(table = "experimetal_design") %>% collect())
+```
+### Plot 
+
+```{r}
+#| label: plot_comp
+#| 
+
+toc  %>% 
+  mutate(treatment = paste(temperature, composition, sep = " & ")) %>%
+  filter(!is.na(temperature)) %>%
+  ggplot(aes(x = position, y = conc, col = composition)) +
+  geom_boxplot(notch = TRUE) +
+  facet_grid(cols = vars(temperature), rows = vars(inj_type), scales = "free")
+  
+```
+
