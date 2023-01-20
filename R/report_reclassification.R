@@ -6,6 +6,7 @@
 #'   - `system.file(Reclassification_2022.01.10.Rmd, package = "LEEF.analysis")`
 #'   - `system.file(Reclassification_20220105_20220221_flowcam.Rmd, package = "LEEF.analysis")`
 #'   - `system.file(Reclassification_20220506.Rmd, package = "LEEF.analysis")`
+#' @param leef LEEF study - allowed are `"LEEF-1` and `"LEEF-2"`
 #' @param output_dir directory of the output of the reclassification and the report
 #' @param output_name The name of the final report, without extension.
 #' @param format the format of the report as a character vector of length 1.
@@ -20,7 +21,8 @@
 #'
 #' @examples
 report_reclassification <- function(
-  reclassification_report = system.file("Reclassification_20220105.Rmd", package = "LEEF.analysis"),
+  reclassification_report = system.file(leef, "Reclassification_20220105.Rmd", package = "LEEF.analysis"),
+  leef = "LEEF-1",
   output_dir =  normalizePath(file.path("~", "Reclassification_20220105")),
   output_name = "Reclassification_20220105",
   format = "html"

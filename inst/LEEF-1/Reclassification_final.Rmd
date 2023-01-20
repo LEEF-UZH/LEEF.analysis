@@ -13,10 +13,10 @@ output:
     code_folding: hide
 params:
   output_dir: "~/RRD.Reclassification_final/"
-  base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/v1.6.1/"
+  base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/v1.7.1/"
   db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
-  archive_dir: "/Volumes/LEEF/"
-  cores: 7
+  archive_dir: "/Volumes/LEEF-1_archive/"
+  cores: 1
 ---
 
 ```{r setup_reclass, include=FALSE}
@@ -51,11 +51,18 @@ db <- params$db
 Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
 
 ```{r setArchive}
-# archive_dir <- "~/Duck/LEEFSwift3/"
+
 archive_dir <- params$archive_dir
 if (!file.exists(archive_dir)){
   stop(
-    "Archive directory '", archive_dir, "' does not exist.\n",
+    "Archive directory '", archive_dir, "' does not exist!\n",
+    "Probably not mounted?" 
+  )
+}
+if (!file.exists(file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"))){
+  stop(
+    "Archive directory is not valid! \n",
+    "It does not contain the folder '", file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived_data", "extracted"), "'.\n",
     "Probably not mounted?" 
   )
 }
@@ -76,14 +83,14 @@ dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
 class_constant <- file.path(pdir, "class_constant.rds")
 download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_20220710_MergedData.rds"), 
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_20221226_MergedData.rds"), 
   destfile = class_constant,
   mode = "wb"
 )
 
 class_increasing <- file.path(pdir, "class_increasing.rds")
 download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_20220710_MergedData.rds"), 
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_20221226_MergedData.rds"), 
   destfile = class_increasing,
   mode = "wb"
 )
