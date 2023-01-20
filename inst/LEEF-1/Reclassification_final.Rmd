@@ -16,7 +16,7 @@ params:
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/v1.7.1/"
   db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
-  cores: 7
+  cores: 14
 ---
 
 ```{r setup_reclass, include=FALSE}
@@ -289,7 +289,7 @@ system.time(
   add_reclassified_to_db(
     path = output, 
     db = db, 
-    remove_timestamps = timestamps,
+    remove_timestamps = NULL, #timestamps,
     backup_removed = FALSE
   )
 )

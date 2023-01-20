@@ -5,8 +5,9 @@
 \title{Do the reclassification and create a report}
 \usage{
 report_reclassification(
-  reclassification_report = system.file("Reclassification_20220105.Rmd", package =
+  reclassification_report = system.file(leef, "Reclassification_20220105.Rmd", package =
     "LEEF.analysis"),
+  leef = "LEEF-1",
   output_dir = normalizePath(file.path("~", "Reclassification_20220105")),
   output_name = "Reclassification_20220105",
   format = "html"
@@ -20,6 +21,8 @@ Included reclassification reports are:
 \item \code{system.file(Reclassification_20220105_20220221_flowcam.Rmd, package = "LEEF.analysis")}
 \item \code{system.file(Reclassification_20220506.Rmd, package = "LEEF.analysis")}
 }}
+
+\item{leef}{LEEF study - allowed are \verb{"LEEF-1} and \code{"LEEF-2"}}
 
 \item{output_dir}{directory of the output of the reclassification and the report}
 
