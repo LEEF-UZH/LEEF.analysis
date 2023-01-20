@@ -16,7 +16,7 @@ params:
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/v1.7.1/"
   db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
-  cores: 1
+  cores: 7
 ---
 
 ```{r setup_reclass, include=FALSE}
@@ -38,7 +38,7 @@ base <- params$base
 
 ## Set output path
 ```{r output_path}
-output <-  params$output
+output <-  params$output_dir
 dir.create(output, recursive = TRUE, showWarnings = FALSE)
 ```
 

@@ -50,8 +50,8 @@ classify_flowcam_archive <- function(
         )
         message("###############################################")
         message("Classifying timestamp ", timestamp, "...")
-        suppressMessages(
-          {
+        # suppressMessages(
+        #   {
             classified <- NULL
             try(
               expr = {
@@ -66,8 +66,8 @@ classify_flowcam_archive <- function(
                 )
               }
             )
-          }
-        )
+        #   }
+        # )
 
         if (!is.null(classified)) {
           message("Saving timestamp ", timestamp, "...")

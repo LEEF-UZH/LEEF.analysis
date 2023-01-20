@@ -55,8 +55,12 @@ classify_flowcam_files <- function(
     dat <- readRDS(file.path(datadir, algae_traits_name))
   }
 
-# The classification ------------------------------------------------------
+# This is needed for the v1.7.1 of the parameter --------------------------
 
+  names(dat) <- tolower(names(dat))
+  names(dat)[which(names(dat) == "date_flowcam")] <- "Date_Flowcam"
+
+# The classification ------------------------------------------------------
 
   classified <- LEEF.measurement.flowcam::classify(
     algae_traits = dat,
