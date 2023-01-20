@@ -382,14 +382,14 @@ dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
 class_constant <- file.path(pdir, "class_constant.rds")
 download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_after_20220504_20220710_MergedData.rds"), 
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_20221226_MergedData.rds"), 
   destfile = class_constant,
   mode = "wb"
 )
 
 class_increasing <- file.path(pdir, "class_increasing.rds")
 download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_after_20220504_20220710_MergedData.rds"), 
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_20221226_MergedData.rds"), 
   destfile = class_increasing,
   mode = "wb"
 )
