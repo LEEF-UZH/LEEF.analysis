@@ -26,12 +26,13 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp <- function(
     dplyr::mutate(bottle = fix_bottle(bottle))
 
   if (nrow(data) > 0) {
+    data$label <- paste0("t: ", data$temperature, "; r: ", data$resources, "; s: ", data$salinity)
     p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$conductivity)) +
       ggplot2::geom_line(ggplot2::aes(y = .data$conductivity)) +
       ggplot2::facet_grid(rows = vars(bottle), scales = "free_y") +
       ggplot2::geom_text(
         data = data,
-        ggplot2::aes(x = -Inf, y = Inf, label = bottle, group = bottle),
+        ggplot2::aes(x = -Inf, y = Inf, label = label, group = bottle),
         hjust = -0.5,
         vjust = 1.4,
         size = 3
