@@ -47,21 +47,22 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp <- function(
           }
         ) %>%
         group_by(day, bottle, species) %>%
-        summarise(density = mean(density), temperature, resources, salinity)
+        summarise(density = mean(density), temperature, resources, salinity, replicate)
 
       # data$temperature[data$temperature == "increasing"] <- "decreasing light"
       # data$temperature[data$temperature == "constant"]   <- "constant light"
 
       # ls <- db_read_light_decline(db) %>% collect()
 
-      data$label <- paste0("t: ", data$temperature, "; r: ", data$resources, "; s: ", data$salinity)
+      data$label <- paste0("t: ", data$temperature, "\n r: ", data$resources, "\n s: ", data$salinity)
+
       p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$density)) +
         ggplot2::geom_line(ggplot2::aes(y = .data$density, colour = .data$species)) +
         # ggplot2::facet_wrap(~bottle, ncol = 3, scales = "free_y")  +
-        ggplot2::facet_grid(rows = vars(bottle), scales = "free_y") +
+        ggplot2::facet_grid(rows = vars(replicate), cols = vars(label), scales = "free_y") +
         ggplot2::geom_text(
           data = data,
-          ggplot2::aes(x = -Inf, y = Inf, label = label, group = bottle),
+          ggplot2::aes(x = -Inf, y = Inf, label = bottle, group = bottle),
           hjust = -0.5,
           vjust = 1.4,
           size = 3

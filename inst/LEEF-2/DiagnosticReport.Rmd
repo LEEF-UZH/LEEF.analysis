@@ -23,7 +23,7 @@ output:
     fig_width: 10
     fig_height: 12
 params:
-  db: ~/Desktop/LEEF-2.RRD.20221209.sqlite
+  db: ~/Desktop/9.backend/LEEF-2.RRD.sqlite
   lastDays: 7
 ---
 
@@ -63,7 +63,7 @@ LEEF_2_plot_bottles_per_timestamp(params$db, lastDays = params$lastDays)
 \pagebreak
 
 ### Bemovi Magnification 16
-```{r dens_species_b_16_raw, fig.height = 32}
+```{r dens_species_b_16_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
@@ -75,7 +75,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Bemovi Magnification 25
-```{r dens_species_b_25_raw, fig.height = 32}
+```{r dens_species_b_25_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
@@ -87,7 +87,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Bemovi Magnification 25 cropped
-```{r dens_species_b_25_crop_raw, fig.height = 32}
+```{r dens_species_b_25_crop_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
@@ -99,7 +99,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Flowcam Everything
-```{r dens_species_fcam_all_raw, fig.height = 32}
+```{r dens_species_fcam_all_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
@@ -111,7 +111,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Flowcam Algae
-```{r dens_species_fcam_al_raw, fig.height = 32}
+```{r dens_species_fcam_al_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
@@ -123,7 +123,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Flowcam Rest
-```{r dens_species_fcam_rest_raw, fig.height = 32}
+```{r dens_species_fcam_rest_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
@@ -136,7 +136,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Flowcytometer
-```{r dens_species_fcyt_raw, fig.height = 32}
+```{r dens_species_fcyt_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
@@ -148,7 +148,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Manualcount
-```{r dens_species_mc_raw, fig.height = 32}
+```{r dens_species_mc_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
@@ -161,7 +161,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 
 ### Percent O~2~
 
-```{r percent_o2_raw, fig.height = 32}
+```{r percent_o2_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_o2s_per_bottle_per_timestamp(
   params$db
 )
@@ -171,7 +171,7 @@ LEEF_2_plot_o2s_per_bottle_per_timestamp(
 
 ### Conductivity
 
-```{r conductivity_raw, fig.height = 32}
+```{r conductivity_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_conductivity_per_bottle_per_timestamp(
   params$db
 )
@@ -205,7 +205,7 @@ plot_tocs_per_bottle_per_timestamp(
 \pagebreak
 
 ### Bemovi Magnification 16
-```{r dens_species_b_16, fig.height = 32}
+```{r dens_species_b_16, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
@@ -217,7 +217,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Bemovi Magnification 25
-```{r dens_species_b_25, fig.height = 32}
+```{r dens_species_b_25, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
@@ -229,7 +229,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Bemovi Magnification 25 cropped
-```{r dens_species_b_25_crop, fig.height = 32}
+```{r dens_species_b_25_crop, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
@@ -241,7 +241,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Flowcam Algae
-```{r dens_species_fcam_al, fig.height = 32}
+```{r dens_species_fcam_al, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
@@ -253,7 +253,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Flowcam Rest
-```{r dens_species_fcam_rest, fig.height = 32}
+```{r dens_species_fcam_rest, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
@@ -266,7 +266,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Flowcytometer
-```{r dens_species_fcyt, fig.height = 32}
+```{r dens_species_fcyt, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
@@ -278,7 +278,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 \pagebreak
 
 ### Manualcount
-```{r dens_species_mc, fig.height = 32}
+```{r dens_species_mc, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
@@ -291,7 +291,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 
 ### Percent O~2~
 
-```{r percent_o2, fig.height = 32}
+```{r percent_o2, fig.height = 10, fig.width = 15}
 LEEF_2_plot_o2s_per_bottle_per_timestamp(
   params$db
 )
@@ -301,7 +301,7 @@ LEEF_2_plot_o2s_per_bottle_per_timestamp(
 
 ### Conductivity
 
-```{r conductivity, fig.height = 32}
+```{r conductivity, fig.height = 10, fig.width = 15}
 LEEF_2_plot_conductivity_per_bottle_per_timestamp(
   params$db
 )

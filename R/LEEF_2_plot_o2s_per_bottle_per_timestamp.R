@@ -29,13 +29,13 @@ LEEF_2_plot_o2s_per_bottle_per_timestamp <- function(
 
 
   if (nrow(data) > 0) {
-    data$label <- paste0("t: ", data$temperature, "; r: ", data$resources, "; s: ", data$salinity)
+    data$label <- paste0("t: ", data$temperature, "\n r: ", data$resources, "\n s: ", data$salinity)
     p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$percent_o2)) +
       ggplot2::geom_line(ggplot2::aes(y = .data$percent_o2, colour = .data$sensor)) +
-      ggplot2::facet_grid(rows = vars(bottle), scales = "free_y") +
+      ggplot2::facet_grid(rows = vars(replicate), cols = vars(label),scales = "free_y") +
       ggplot2::geom_text(
         data = data,
-        ggplot2::aes(x = -Inf, y = Inf, label = label, group = bottle),
+        ggplot2::aes(x = -Inf, y = Inf, label = bottle, group = bottle),
         hjust = -0.5,
         vjust = 1.4,
         size = 3
