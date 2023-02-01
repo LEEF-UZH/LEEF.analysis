@@ -2,9 +2,8 @@
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
-#' @param measurement the measurement to be plotted. If \code{NULL},
-#'   the default, they are plotted by temperature treatment (constant & increasing)
-#' @param transform_density_4throot if \code{TRUE}, density is transformed using 4th root transformation.
+#' @param treatment_begin_day begin of treatment (vertical red line in plot). If \code{NULL} none is plotted.
+#' @param treatment_end_day end of treatment (vertical red line in plot). If \code{NULL} none is plotted.
 #'
 #' @return \code{ggplot} object of the plot
 #'
@@ -16,7 +15,9 @@
 #'
 #' @examples
 LEEF_2_plot_conductivity_per_bottle_per_timestamp <- function(
-  db = getOption("RRDdb", "LEEF.RRD.sqlite")
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  treatment_begin_day = 70,
+  treatment_end_day = NULL
 ){
 
   data <- db_read_conductivity(db) %>%
@@ -41,6 +42,12 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp <- function(
       ggplot2::xlab("Day of Experiment") +
       ggplot2::ylab(expression("Conductivity (S/m)")) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
+    if (!is.null(treatment_begin_day)) {
+      p <- p + geom_vline(xintercept = range(treatment_begin_day), colour = "red")
+    }
+    if (!is.null(treatment_end_day)) {
+      p <- p + geom_vline(xintercept = range(treatment_end_day), colour = "red")
+    }
     p
   } else {
     warning("No data for available!")

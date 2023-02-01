@@ -8,7 +8,9 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   transform_density_4throot = TRUE,
   measurement = "bemovi_mag_16",
-  species_set_id = NULL
+  species_set_id = NULL,
+  treatment_begin_day = 70,
+  treatment_end_day = NULL
 )
 }
 \arguments{
@@ -19,6 +21,10 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 
 \item{measurement}{the measurement to be plotted. If \code{NULL},
 the default, they are plotted by temperature treatment (constant & increasing)}
+
+\item{treatment_begin_day}{begin of treatment (vertical red line in plot). If \code{NULL} none is plotted.}
+
+\item{treatment_end_day}{end of treatment (vertical red line in plot). If \code{NULL} none is plotted.}
 }
 \value{
 \code{ggplot} object of the plot

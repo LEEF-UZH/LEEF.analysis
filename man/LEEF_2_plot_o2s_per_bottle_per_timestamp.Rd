@@ -5,17 +5,18 @@
 \title{Plot diagnostic plot to check number of species per timestamp}
 \usage{
 LEEF_2_plot_o2s_per_bottle_per_timestamp(
-  db = getOption("RRDdb", "LEEF.RRD.sqlite")
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  treatment_begin_day = 70,
+  treatment_end_day = NULL
 )
 }
 \arguments{
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
 
-\item{measurement}{the measurement to be plotted. If \code{NULL},
-the default, they are plotted by temperature treatment (constant & increasing)}
+\item{treatment_begin_day}{begin of treatment (vertical red line in plot). If \code{NULL} none is plotted.}
 
-\item{transform_density_4throot}{if \code{TRUE}, density is transformed using 4th root transformation.}
+\item{treatment_end_day}{end of treatment (vertical red line in plot). If \code{NULL} none is plotted.}
 }
 \value{
 \code{ggplot} object of the plot

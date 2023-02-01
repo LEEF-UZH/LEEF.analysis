@@ -5,7 +5,7 @@
 #' @param start_date the start date of the experiment
 #' @param overwrite if \code{TRUE}, overwrite existing view
 #'
-#' @return the result of the execution of the ecreatiuon of the view.
+#' @return the result of the execution of the creation of the view.
 #'
 #' @export
 #'

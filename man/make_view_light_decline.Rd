@@ -19,7 +19,7 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 \item{overwrite}{if \code{TRUE}, overwrite existing view}
 }
 \value{
-the result of the execution of the ecreatiuon of the view.
+the result of the execution of the creation of the view.
 }
 \description{
 Create \code{light_decline} view which adds the experimental day
