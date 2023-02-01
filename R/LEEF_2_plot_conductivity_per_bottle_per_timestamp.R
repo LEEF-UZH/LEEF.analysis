@@ -39,7 +39,7 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp <- function(
       ) +
       ggplot2::scale_colour_manual(values = 1:40) +
       ggplot2::xlab("Day of Experiment") +
-      ggplot2::ylab(expression("% O"[2])) +
+      ggplot2::ylab(expression("Conductivity (S/m)")) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45))
     p
   } else {
