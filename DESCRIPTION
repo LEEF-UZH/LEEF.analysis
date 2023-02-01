@@ -29,7 +29,8 @@ Imports:
   rlang,
   tibble,
   pbapply,
-  pbmcapply
+  pbmcapply,
+  quarto
 RoxygenNote: 7.2.3
 Suggests: 
     knitr

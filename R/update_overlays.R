@@ -1,7 +1,6 @@
 #' Just a function to update the overlays.
 #'
-#' @param extracted_dir directory with extracted data to be used
-#' @param avi_url url in which all avis are in the subdirectories.
+#' @param params list of parameter
 #' @param overwrite if `TRUE`, existing overlays will be ov erwritten. Default is `FALSE`
 #'
 #' @return

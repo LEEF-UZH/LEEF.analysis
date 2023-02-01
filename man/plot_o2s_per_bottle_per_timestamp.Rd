@@ -9,11 +9,6 @@ plot_o2s_per_bottle_per_timestamp(db = getOption("RRDdb", "LEEF.RRD.sqlite"))
 \arguments{
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
-
-\item{measurement}{the measurement to be plotted. If \code{NULL},
-the default, they are plotted by temperature treatment (constant & increasing)}
-
-\item{transform_density_4throot}{if \code{TRUE}, density is transformed using 4th root transformation.}
 }
 \value{
 \code{ggplot} object of the plot

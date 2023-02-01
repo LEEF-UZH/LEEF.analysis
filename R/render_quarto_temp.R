@@ -1,9 +1,12 @@
 #' Render a quarto file in a temporary directory and copy the resulting files back to the working directory
 #'
-#' @param qmd
-#' @param ...
+#' @param input the input qmd file
+#' @param output_format the output format
+#' @param ... additional arguments for \code{quarto::quarto_render()}
 #'
 #' @return
+#'
+#' @importFrom quarto quarto_render
 #'
 #' @examples
 render_quarto_temp <- function(

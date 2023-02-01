@@ -7,7 +7,11 @@
 render_quarto_temp(input, output_format = "html", ...)
 }
 \arguments{
-\item{...}{}
+\item{input}{the input qmd file}
+
+\item{output_format}{the output format}
+
+\item{...}{additional arguments for \code{quarto::quarto_render()}}
 }
 \description{
 Render a quarto file in a temporary directory and copy the resulting files back to the working directory

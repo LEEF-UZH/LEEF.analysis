@@ -13,11 +13,9 @@ update_overlays(
 )
 }
 \arguments{
+\item{params}{list of parameter}
+
 \item{overwrite}{if `TRUE`, existing overlays will be ov erwritten. Default is `FALSE`}
-
-\item{extracted_dir}{directory with extracted data to be used}
-
-\item{avi_url}{url in which all avis are in the subdirectories.}
 }
 \description{
 Just a function to update the overlays.

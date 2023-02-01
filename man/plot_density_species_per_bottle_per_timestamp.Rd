@@ -19,6 +19,8 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 
 \item{measurement}{the measurement to be plotted. If \code{NULL},
 the default, they are plotted by temperature treatment (constant & increasing)}
+
+\item{species_set_id}{name of the set of species}
 }
 \value{
 \code{ggplot} object of the plot

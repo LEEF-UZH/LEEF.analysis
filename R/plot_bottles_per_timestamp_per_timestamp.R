@@ -2,6 +2,7 @@
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
+#' @param lastDays last days for which to plot
 #'
 #' @return \code{ggplot} object of the plot
 #'
