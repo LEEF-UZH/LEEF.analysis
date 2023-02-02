@@ -481,7 +481,7 @@ rm(out)
 
 # Set species to 0 which were mis-classified
 
-Developed by Uriah
+This section has been devaloped by Uriah 
 
 ## Setup
 ```{r species_to_0_setup}
