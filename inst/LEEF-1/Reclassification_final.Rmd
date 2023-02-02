@@ -479,13 +479,376 @@ system.time(
 rm(out)
 ```
 
-# Merge flowcam classifications into consistent files
-```{r label = "merge_flowcam}
+# Set species to 0 which were mis-classified
 
-flowcam <- file.path(output, paste0("flowcam_", bott, "_", format(after, scientific = FALSE), "_", format(until, scientific = FALSE)))
+Developed by Uriah
 
-flowcam_2 <- file.path(output, paste0("flowcam_", bott, "_", format(after, scientific = FALSE), "_", format(until, scientific = FALSE)))
+## Setup
+```{r species_to_0_setup}
+
+# Inf --------------------------------------------------------------------
+
+# Developed by Uriah
+
+# Setup -------------------------------------------------------------------
+
+
+### Density data and co.
+
+options(RRDdb = db)
+densities <- db_read_table(table = "density") %>%
+  dplyr::filter(day < 1000,
+                !(species %in% c("Didinium","airbubbles","Debris",
+                                 "DigestedAlgae","OtherCiliate", "HNA", "LNA", "MNA", "algae",
+                                 "Small_unidentified","ColpidiumVacuoles", "Debris_and_other")),
+                !(species=="Cryptomonas" & measurement!="flowcam"),
+                !(species=="Dexiostoma" & measurement=="flowcam"),
+                !(species=="Coleps_irchel" & measurement=="flowcam"),
+                !(species=="Colpidium" & measurement=="flowcam"),
+                !(species=="Loxocephallus" & measurement=="flowcam"),
+                !(species=="Tetrahymena" & measurement=="flowcam"),
+  ) %>%
+  dplyr::collect() %>%
+  dplyr::arrange(day)
+
+exp_design <- db_read_table(table = "experimetal_design") %>% dplyr::collect()
+compositions <- db_read_table(table = "composition") %>% dplyr::collect()
+
+
 ```
+
+## bemovi
+
+In the code below the videos the remove are defined. They are then removed
+in the various morph_mvt tables and the densities are recalculated. Species
+that could be present but are not are set to 0.
+These densities are then used to overwrite the previous densities values.
+This is done at 25x and 16x
+
+Note --------------------------------------------------------------------
+
+After this also the video ciliate traits should be overwritten in the RRD
+after filtering out the videos
+I haven't done it here, can you do it?
+
+
+
+The code to read in and filter should be something like this:
+
+```{r, eval = FALSE}
+bemovi_mag_25__morph_mvt <- db_read_table(table = "bemovi_mag_25__morph_mvt") %>%
+  dplyr::filter(!(file %in% videos_movingback))
+
+bemovi_mag_25__morph_mvt_cropped <- db_read_table(table = "bemovi_mag_25__morph_mvt_cropped") %>%
+  dplyr::filter(!(file %in% videos_movingback))
+
+bemovi_mag_25__morph_mvt_non_cropped <- db_read_table(table = "bemovi_mag_25__morph_mvt_non_cropped") %>%
+  dplyr::filter(!(file %in% videos_movingback))
+
+bemovi_mag_16__morph_mvt <- db_read_table(table = "bemovi_mag_16__morph_mvt") %>%
+  dplyr::filter(!(file %in% videos_to_remove_16)) ##note the different file!!!
+```
+
+
+### Preparation 25x
+```{r species_to_0_bemovi_25}
+
+videos_movingback <- c("20211013_00058", "20211103_00037", "20211105_00066",
+                       "20211117_00016", "20211124_00007", "20211210_00031",
+                       "20211210_00085", "20220105_00034", "20220119_00058",
+                       "20220119_00070", "20220119_00088", "20220124_00085",
+                       "20220131_00013", "20220131_00034", "20220131_00043",
+                       "20220131_00082", "20220131_00085", "20220131_00088",
+                       "20220207_00013", "20220228_00004", "20220228_00019",
+                       "20220228_00067", "20220304_00034", "20220408_00088",
+                       "20220413_00052", "20220502_00076", "20220509_00086",
+                       "20220516_00076", "20220523_00058", "20220601_00064",
+                       "20220617_00082", "20220620_00076", "20220622_00076",
+                       "20220624_00055", "20220629_00082", "20210924_00001",
+                       "20210929_00001", "20210929_00064", "20211001_00012",
+                       "20211001_00028", "20211008_00021", "20211013_00076",
+                       "20211015_00077", "20211022_00088", "20211105_00022",
+                       "20211105_00024", "20211203_00016", "20211203_00040",
+                       "20211203_00061", "20211215_00043", "20220107_00054",
+                       "20220119_00010", "20220126_00025", "20220131_00079",
+                       "20220202_00043", "20220204_00061", "20220204_00067",
+                       "20220207_00010", "20220207_00022", "20220304_00076",
+                       "20220427_00061", "20220525_00010", "20220530_00016",
+                       "20220601_00050", "20220620_00010", "20220620_00073",
+                       "20220622_00010", "20220622_00073", "20220704_00055",
+                       "20211129_00077", "20211203_00003", "20211203_00009",
+                       "20211208_00002", "20220126_00046", "20220126_00049",
+                       "20220204_00002", "20220207_00020", "20220207_00052",
+                       "20211001_00054", "20211001_00066", "20211001_00069",
+                       "20211001_00079", "20211022_00042", "20211022_00067",
+                       "20211027_00007", "20211101_00081", "20211129_00001",
+                       "20211203_00050", "20211220_00035", "20220126_00054",
+                       "20220126_00067", "20220126_00068", "20220207_00031",
+                       "20220207_00043", "20220207_00054")
+
+bottle <- strsplit(videos_movingback, split='_', fixed=TRUE)
+bottle <- as.numeric(unlist(purr::map(bottle, 2)))
+bottle <- ceiling(bottle/3)
+bottle <- ifelse(bottle<10, paste0("b_0",bottle), paste0("b_",bottle))
+
+timestamp_movingback <- unlist(purr::map(strsplit(videos_movingback, split='_', fixed=TRUE),1))
+
+moving_background <- data.frame(bottle = bottle,
+                                timestamp = (timestamp_movingback))
+```
+
+### Preparation 16x
+```{r species_to_0_bemovi_16}
+
+videos_to_remove_16 <- c("20210924_00108", "20211020_00133", "20211025_00140",
+                         "20211101_00151", "20211105_00129", "20211108_00121",
+                         "20220131_00156" ,"20220525_00135")
+
+timestamp_movingback16 <- unlist(purr::map(strsplit(videos_to_remove_16, split='_', fixed=TRUE),1))
+
+bottle16 <- strsplit(videos_to_remove_16, split='_', fixed=TRUE)
+bottle16 <- as.numeric(unlist(purr::map(bottle16, 2))) - 90
+bottle16 <- ceiling(bottle16/3)
+bottle16 <- ifelse(bottle16<10, paste0("b_0",bottle16), paste0("b_",bottle16))
+
+moving_background16 <- data.frame(bottle = bottle16,
+                                  timestamp = (timestamp_movingback16))
+
+```
+
+### Removing videos, recalculating densities and overwriting ######
+
+#### bemovi_mag_25__morph_mvt ######
+
+```{r species_to_0_bemovi_25_morph_mvt}
+
+species.tracked <- c(
+  "Paramecium_bursaria", 
+  "Coleps_irchel",
+  "Colpidium",
+  "Paramecium_caudatum", 
+  "Euplotes",
+  "Stylonychia2"
+)
+meas <- "bemovi_mag_25"
+extrapolation.factor <- 23.367
+cropping.factor <- 1
+
+morph25_list <- apply(moving_background, 1, function(row){
+  sql = paste0("
+                SELECT *
+                FROM 'bemovi_mag_25__morph_mvt'
+                WHERE timestamp == '", row["timestamp"],
+               "' AND bottle == '", row["bottle"], "';")
+
+  read_sql(sql = sql)
+})
+
+morph25 <- do.call("rbind", morph25_list) %>%
+  dplyr::filter(!(file %in% videos_movingback))
+
+morph25_density <- CalculateDensities(morph25, meas)
+morph25_density <- SetNotFoundSpeciesTo0(morph25_density, moving_background, meas, exp_design, compositions, species.tracked)
+```
+
+#### bemovi_mag_25__morph_mvt_cropped ######
+
+```{r species_to_0_bemovi_25_morph_mvt_cropped}
+
+species.tracked <- c(
+  "Dexiostoma",
+  "Tetrahymena",
+  "Loxocephallus"
+)
+meas <- "bemovi_mag_25_cropped"
+extrapolation.factor <- 23.367
+cropping.factor <- 4
+
+morph25_cropped_list <- apply(moving_background, 1, function(row){
+  sql = paste0("
+                SELECT *
+                FROM 'bemovi_mag_25__morph_mvt_cropped'
+                WHERE timestamp == '", row["timestamp"],
+               "' AND bottle == '", row["bottle"], "';")
+
+  read_sql(sql = sql)
+})
+
+morph25_cropped <- do.call("rbind", morph25_cropped_list) %>%
+  dplyr::filter(!(file %in% videos_movingback))
+
+morph25_cropped_density <- CalculateDensities(morph25_cropped, meas)
+morph25_cropped_density <- SetNotFoundSpeciesTo0(
+  morph25_cropped_density, 
+  moving_background, 
+  meas, exp_design, 
+  compositions, 
+  species.tracked
+)
+```
+
+
+### bemovi_mag_25__morph_mvt_non_cropped ######
+
+```{r species_to_0_bemovi_25_morph_mvt_non_cropped}
+species.tracked <- c("Dexiostoma","Tetrahymena","Loxocephallus")
+meas <- "bemovi_mag_25_non_cropped"
+extrapolation.factor <- 23.367
+cropping.factor <- 1
+
+morph25_non_cropped_list <- apply(moving_background, 1, function(row){
+  sql = paste0("
+                SELECT *
+                FROM 'bemovi_mag_25__morph_mvt_non_cropped'
+                WHERE timestamp == '", row["timestamp"],
+               "' AND bottle == '", row["bottle"], "';")
+
+  read_sql(sql = sql)
+})
+
+morph25_non_cropped <- do.call("rbind", morph25_non_cropped_list) %>%
+  dplyr::filter(!(file %in% videos_movingback))
+
+morph25_non_cropped_density <- CalculateDensities(morph25_non_cropped, meas)
+morph25_non_cropped_density <- SetNotFoundSpeciesTo0(
+  morph25_non_cropped_density, 
+  moving_background, 
+  meas, exp_design, 
+  compositions, 
+  species.tracked
+)
+```
+
+### bemovi_mag_16__morph_mvt ######
+
+```{r species_to_0_bemovi_16_morph_mvt}
+species.tracked <- c("Paramecium_bursaria", "Coleps_irchel","Colpidium","Paramecium_caudatum", "Euplotes","Stylonychia2")
+meas <- "bemovi_mag_16"
+extrapolation.factor <- 10.044
+cropping.factor <- 1
+
+morph16_list <- apply(moving_background16, 1, function(row){
+  sql = paste0("
+                SELECT *
+                FROM 'bemovi_mag_16__morph_mvt'
+                WHERE timestamp == '", row["timestamp"],
+               "' AND bottle == '", row["bottle"], "';")
+
+  read_sql(sql = sql)
+})
+
+morph16 <- do.call("rbind", morph16_list) %>%
+  dplyr::filter(!(file %in% videos_to_remove_16))
+
+morph16_density <- CalculateDensities(morph16, meas)
+morph16_density <- SetNotFoundSpeciesTo0(
+  morph16_density, 
+  moving_background16, 
+  meas, 
+  exp_design, 
+  compositions, 
+  species.tracked
+)
+```
+
+### bind new densities together ######
+
+```{r species_to_0_bemovi_bind}
+
+new_densities <- rbind(morph25_density,morph25_cropped_density,morph25_non_cropped_density, morph16_density) %>%
+  dplyr::filter(!(species %in% c("Cryptomonas", "Debris_and_other")))
+```
+### overwrite the new densities in the main density data.frame ######
+
+```{r species_to_0_bemovi_densities}
+
+densities$rownumber <- 1:nrow(densities)
+
+old_densities <- right_join(densities,new_densities[,-4])
+
+rownumbers <- old_densities$rownumber
+
+densities[rownumbers,"density"] <- NA
+
+densities <- full_join(densities,new_densities,
+                       by = c("timestamp", "bottle", "measurement", "species", "composition")) %>%
+  mutate(density.x = case_when(is.na(density.x)~density.y,
+                               T ~ density.x)) %>%
+  rename(density=density.x) %>%
+  select(-density.y)
+```
+
+
+
+## Flowcam
+
+The code below recalculates the densities after filtering Stau1 so that only
+particles are kept with high confidence that they are indeed Stau1.
+What is not done but needs to be done is to also overwrite the algae_traits
+table so that these particles are excluded there. I haven't done it because
+the table is so big and it takes a while to load it. Can you do it?
+The code to read and filter should simply be (commented out):
+
+```{r, eval = FALSE}
+algae_traits <- db_read_table(table = "flowcam__algae_traits") %>%
+  filter(case_when(species=="Staurastrum1" ~ species_probability > 0.9,
+                   T ~ species_probability > 0))
+```
+
+```{r species_to_0_bemovi_25_morph_mvt}
+timestamps <- sort(as.character(unique(densities$timestamp)))
+
+stau1traits <- mclapply(timestamps, function(ts){
+  sql = paste0("
+             SELECT *
+             FROM 'flowcam__algae_traits'
+             WHERE timestamp == '", ts,
+               "' AND species == '", "Staurastrum1", "';")
+
+  read_sql(sql = sql)
+}, mc.cores = detectCores()-2)
+
+stau1traits <- do.call("rbind", stau1traits)
+
+stau1traits <- stau1traits %>%
+  group_by(bottle) %>%
+  filter(species_probability > 0.9)
+
+extrapolation.factor <- 1/0.3 # I think 0.3ml were imaged
+
+densityStau1 <- stau1traits %>%
+  group_by(timestamp, bottle, species) %>%
+  summarize(count=n()) %>%
+  mutate(density = count * extrapolation.factor)
+
+temp <- expand_grid(timestamp = timestamps,
+                    bottle = unique(stau1traits$bottle),
+                    species = "Staurastrum1")
+
+densityStau1 <- full_join(densityStau1, temp) %>%
+  mutate(count = ifelse(is.na(count),0,count),
+         density = ifelse(is.na(density),0,density))
+
+densities <- densities %>%
+  mutate(density = ifelse(species=="Staurastrum1", NA, density))
+
+densities <- full_join(densities,densityStau1,
+                       by = c("timestamp", "bottle", "species")) %>%
+  mutate(density.x = case_when(is.na(density.x)~density.y,
+                               T ~ density.x)) %>%
+  rename(density=density.x) %>%
+  select(-density.y, -count)
+```
+
+
+
+
+
+
+
+
+
+
 # Do a final vacuuming into new database
 Vacuuming the database will take some time!
 

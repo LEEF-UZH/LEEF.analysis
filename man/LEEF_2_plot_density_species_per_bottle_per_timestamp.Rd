@@ -22,6 +22,8 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 \item{measurement}{the measurement to be plotted. If \code{NULL},
 the default, they are plotted by temperature treatment (constant & increasing)}
 
+\item{species_set_id}{id of species set to use for filtering}
+
 \item{treatment_begin_day}{begin of treatment (vertical red line in plot). If \code{NULL} none is plotted.}
 
 \item{treatment_end_day}{end of treatment (vertical red line in plot). If \code{NULL} none is plotted.}

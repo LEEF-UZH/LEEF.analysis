@@ -1,15 +1,11 @@
 #' Classify algae_traits data.frame
 #'
-#' @param root_dir directory containes the archive. It contains the following directories:
-#' - LEEF.archived.data
-#' - LEEF.archived.data_segments
-#' - LEEF.backend.data
-#' - LEEF.backend.data_segments
+#' @param archive_dir
 #' @param timestamps `character` vector containing the timestamps to be classified
+#' @param algae_traits_name
 #' @param classifier_constant_name the classifier for temperature treatment **constant**
 #' @param classifier_increasing_name the classifier for temperature treatment **increasing**
-#' @param species_tracked names of the species tracked as a character vector.
-#'   If `NULL` it will be read from the original configuration file in the `datadir`.
+#' @param species_tracked names of the species tracked as a character vector. If `NULL` it will be read from the original configuration file in the `datadir`.
 #' @param output path to which the classified data will be saved as `rds`
 #' @param mc.cores number of cores to be used. Defaults to 1
 #' @param bottle if not 'NULL' (default) only classify this bottle. Needs to be a single bottle!

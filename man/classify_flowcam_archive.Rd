@@ -23,22 +23,13 @@ classify_flowcam_archive(
 
 \item{classifier_increasing_name}{the classifier for temperature treatment \strong{increasing}}
 
-\item{species_tracked}{names of the species tracked as a character vector.
-If \code{NULL} it will be read from the original configuration file in the \code{datadir}.}
+\item{species_tracked}{names of the species tracked as a character vector. If \code{NULL} it will be read from the original configuration file in the \code{datadir}.}
 
 \item{output}{path to which the classified data will be saved as \code{rds}}
 
 \item{mc.cores}{number of cores to be used. Defaults to 1}
 
 \item{bottle}{if not 'NULL' (default) only classify this bottle. Needs to be a single bottle!}
-
-\item{root_dir}{directory containes the archive. It contains the following directories:
-\itemize{
-\item LEEF.archived.data
-\item LEEF.archived.data_segments
-\item LEEF.backend.data
-\item LEEF.backend.data_segments
-}}
 }
 \value{
 invisible \code{NULL}

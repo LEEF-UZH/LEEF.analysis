@@ -1,23 +1,21 @@
 #' Create overlays
 #'
-#' @param timestamp the timestamp of the sampling day
+#' @param archive_dir
+#' @param classification_dir
 #' @param magnification the magnification of the bemovi method
-#' @param cropped if \code{TRUE}, the cropped measurement should be used
-#' @param label column to be used to label the particle. Default
-#'   \code{"pecies"}.
-#' @param overlay.type Overlays can either be shown as "label", "circle" or
-#'   "both". Default: \code{"both"}
+#' @param yml_postfix
+#' @param timestamp the timestamp of the sampling day
+#' @param overlay_folder
+#' @param overlay_type
+#' @param label column to be used to label the particle. Default \code{ffmpeg}
+#' @param ffmpeg command to run ffmpeg. It can include a path. Default
+#' @param font_size
+#' @param circle_size
 #' @param crf integer value between 1 to 51, where 1 means lossless, 17 is
 #'   nearly visually lossless, 51 is worst quality. Default value is 23
-#' @param gamma increase video dynamic range. Value between 0.1 and 10. Default
+#' @param gamma increase video dynamic range. Value between 0.1 and 10. Default \code{"pecies"}
 #'   2. see \url{https://ffmpeg.org/ffmpeg-filters.html#eq} for further info
-#' @param ffmpeg command to run ffmpeg. It can include a path. Default
-#'   \code{ffmpeg}
-#' @param mc.cores number of cores to be used for parallel execution. Defaults
-#'   to 1
-#' @param from_current_to_archive_dir path from the current directory to the
-#'   archived data can be found and the folders \code{extracted} and
-#'   \code{pre-processed}
+#' @param mc_cores number of cores to use. Default \code{1}
 #'
 #' @return
 #'

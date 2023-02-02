@@ -11,8 +11,9 @@ plot_bottles_per_timestamp(
 }
 \arguments{
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
-If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
-@param lastDays last days for which to plot}
+If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
+
+\item{lastDays}{last days for which to plot}
 }
 \value{
 \code{ggplot} object of the plot

@@ -13,6 +13,8 @@ LEEF_2_plot_bottles_per_timestamp(
 \arguments{
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
+
+\item{lastDays}{last days to plot. Defaoult \code{7}}
 }
 \value{
 \code{ggplot} object of the plot

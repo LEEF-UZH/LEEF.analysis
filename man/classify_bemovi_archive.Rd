@@ -17,36 +17,21 @@ classify_bemovi_archive(
 )
 }
 \arguments{
-\item{magnification}{the magnification or the bemovi videos to be
-reclassified}
+\item{magnification}{the magnification or the bemovi videos to be reclassified}
 
-\item{bemovi_extract_name}{the name of the \code{.yml} containing the parameter
-for the analysis in the directory of the data. The directory depends on the
-\code{root_dir}, \code{magnification} and \code{timestamp}}
+\item{bemovi_extract_name}{the name of the \code{.yml} containing the parameter for the analysis in the directory of the data. The directory depends on the \code{root_dir}, \code{magnification} and \code{timestamp}}
 
-\item{species_tracked}{names of the species tracked as a character vector.
-If \code{NULL} the species tracked from the \code{bemovi_extract_file}  will be used.}
+\item{species_tracked}{names of the species tracked as a character vector. If \code{NULL} the species tracked from the \code{bemovi_extract_file}  will be used.}
 
-\item{timestamps}{\code{character} vector containing the timestamps to be
-classified}
+\item{timestamps}{\code{character} vector containing the timestamps to be classified}
 
-\item{classifier_constant_name}{\code{character} vector of name of the classifier
-for temperature treatment \strong{constant} including path}
+\item{classifier_constant_name}{\code{character} vector of name of the classifier for temperature treatment \strong{constant} including path}
 
-\item{classifier_increasing_name}{\code{character} vector of name of the
-classifier for temperature treatment \strong{increasing} including path}
+\item{classifier_increasing_name}{\code{character} vector of name of the  classifier for temperature treatment \strong{increasing} including path}
 
 \item{output}{path to which the classified data will be saved as \code{rds}}
 
 \item{mc.cores}{number of cores to be used. Defaults to 1}
-
-\item{root_dir}{directory containing the archive. It contains the following directories:
-\itemize{
-\item LEEF.archived.data
-\item LEEF.archived.data_segments
-\item LEEF.backend.data
-\item LEEF.backend.data_segments
-}}
 }
 \value{
 invisible \code{NULL}

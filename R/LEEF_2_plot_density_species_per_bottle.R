@@ -2,9 +2,10 @@
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
+#' @param transform_density_4throot if \code{TRUE}, density is transformed using 4th root transformation.
 #' @param measurement the measurement to be plotted. If \code{NULL},
 #'   the default, they are plotted by temperature treatment (constant & increasing)
-#' @param transform_density_4throot if \code{TRUE}, density is transformed using 4th root transformation.
+#' @param species_set_id id of species set to use for filtering
 #' @param treatment_begin_day begin of treatment (vertical red line in plot). If \code{NULL} none is plotted.
 #' @param treatment_end_day end of treatment (vertical red line in plot). If \code{NULL} none is plotted.
 #'

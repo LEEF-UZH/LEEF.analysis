@@ -20,10 +20,10 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 
 \item{remove_timestamps}{vector of timestamps to be removed.}
 
-\item{backup_removed}{if \code{TRUE} data which will be replaced will be backed up.}
-
-\item{check_timestamps.}{If `TRUE`, the data will ony be added when timestamp does not exist in db yet. If `FALSE`,
+\item{check_timestamps}{If `TRUE`, the data will ony be added when timestamp does not exist in db yet. If `FALSE`,
 it will always be added. Usually this should **NOT** be done.#'}
+
+\item{backup_removed}{if \code{TRUE} data which will be replaced will be backed up.}
 }
 \description{
 Title

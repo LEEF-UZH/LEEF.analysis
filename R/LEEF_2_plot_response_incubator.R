@@ -2,13 +2,6 @@
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
-#' @param measurement the measurement to be plotted. If \code{NULL},
-#'   the default, they are plotted by temperature treatment (constant & increasing)
-#' @param transform_density_4throot if \code{TRUE}, density is transformed using 4th root transformation.
-#' Plot diagnostic plot to check bottles per timestamp
-#'
-#' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
-#'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
 #'
 #' @return \code{ggplot} object of the plot
 #'

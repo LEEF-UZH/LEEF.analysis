@@ -16,6 +16,7 @@
 #' @importFrom DBI dbConnect dbListTables dbDisconnect
 #' @importFrom RSQLite SQLite SQLITE_RO
 #' @importFrom dplyr tbl
+#' @import dbplyr
 #'
 #' @export
 #'

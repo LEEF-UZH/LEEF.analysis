@@ -9,6 +9,7 @@
 #' - LEEF.archived.data_segments
 #' - LEEF.backend.data
 #' - LEEF.backend.data_segments
+#' @param copy_locally_first
 #'
 #' @return
 #'

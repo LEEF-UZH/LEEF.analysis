@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/LEEF-UZH/LEEF.analysis",
   "issueTracker": "https://github.com/LEEF-UZH/LEEF.analysis/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "0.5.14",
+  "version": "0.5.15",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -129,18 +129,6 @@
     },
     "9": {
       "@type": "SoftwareApplication",
-      "identifier": "dbplyr",
-      "name": "dbplyr",
-      "provider": {
-        "@id": "https://cran.r-project.org",
-        "@type": "Organization",
-        "name": "Comprehensive R Archive Network (CRAN)",
-        "url": "https://cran.r-project.org"
-      },
-      "sameAs": "https://CRAN.R-project.org/package=dbplyr"
-    },
-    "10": {
-      "@type": "SoftwareApplication",
       "identifier": "dplyr",
       "name": "dplyr",
       "provider": {
@@ -150,6 +138,18 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=dplyr"
+    },
+    "10": {
+      "@type": "SoftwareApplication",
+      "identifier": "dbplyr",
+      "name": "dbplyr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=dbplyr"
     },
     "11": {
       "@type": "SoftwareApplication",
@@ -223,7 +223,24 @@
       },
       "sameAs": "https://CRAN.R-project.org/package=quarto"
     },
+    "17": {
+      "@type": "SoftwareApplication",
+      "identifier": "data.table",
+      "name": "data.table",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=data.table"
+    },
+    "18": {
+      "@type": "SoftwareApplication",
+      "identifier": "stats",
+      "name": "stats"
+    },
     "SystemRequirements": null
   },
-  "fileSize": "280.572KB"
+  "fileSize": "281.909KB"
 }

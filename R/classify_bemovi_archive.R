@@ -1,25 +1,15 @@
 #' Classify bemovi data by using the archived data
 #'
-#' @param root_dir directory containing the archive. It contains the following directories:
-#' - LEEF.archived.data
-#' - LEEF.archived.data_segments
-#' - LEEF.backend.data
-#' - LEEF.backend.data_segments
-#' @param magnification the magnification or the bemovi videos to be
-#'   reclassified
-#' @param bemovi_extract_name the name of the `.yml` containing the parameter
-#'   for the analysis in the directory of the data. The directory depends on the
-#'   `root_dir`, `magnification` and `timestamp`
-#' @param species_tracked names of the species tracked as a character vector.
-#'   If `NULL` the species tracked from the `bemovi_extract_file`  will be used.
-#' @param timestamps `character` vector containing the timestamps to be
-#'   classified
-#' @param classifier_constant_name `character` vector of name of the classifier
-#'   for temperature treatment **constant** including path
-#' @param classifier_increasing_name `character` vector of name of the
-#'   classifier for temperature treatment **increasing** including path
+#' @param archive_dir
+#' @param magnification the magnification or the bemovi videos to be reclassified
+#' @param bemovi_extract_name the name of the `.yml` containing the parameter for the analysis in the directory of the data. The directory depends on the `root_dir`, `magnification` and `timestamp`
+#' @param species_tracked names of the species tracked as a character vector. If `NULL` the species tracked from the `bemovi_extract_file`  will be used.
+#' @param timestamps `character` vector containing the timestamps to be classified
+#' @param classifier_constant_name `character` vector of name of the classifier for temperature treatment **constant** including path
+#' @param classifier_increasing_name `character` vector of name of the  classifier for temperature treatment **increasing** including path
 #' @param output path to which the classified data will be saved as `rds`
 #' @param mc.cores number of cores to be used. Defaults to 1
+#'
 #' @return invisible `NULL`
 #'
 #' @importFrom  parallel mclapply

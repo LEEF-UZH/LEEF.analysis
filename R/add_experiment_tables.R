@@ -3,7 +3,7 @@
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
 #' @param composition fully qualified path to the \code{csv} file with the composition data
-#' @param composition fully qualified path to the \code{csv} file with the composition data
+#' @param experimetal_design fully qualified path to the \code{csv} file with the experimental design table
 #' @param light_decline_schedule fully qualified path to the \code{csv} file with the light decline dates
 #' @param immigration_schedule fully qualified path to the \code{csv} file with the immigration event dates
 #' @param overwrite if \code{TRUE}, the existing tables will be overwritten. There is actually no need for this.

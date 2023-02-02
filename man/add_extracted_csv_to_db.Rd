@@ -27,6 +27,8 @@ add_extracted_csv_to_db(
 - LEEF.archived.data_segments
 - LEEF.backend.data
 - LEEF.backend.data_segments}
+
+\item{copy_locally_first}{}
 }
 \description{
 Title

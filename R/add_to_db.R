@@ -10,7 +10,7 @@
 #' @param remove_timestamps vector of timestamps to be removed.
 #' @param check_timestamps. If `TRUE`, the data will ony be added when timestamp does not exist in db yet. If `FALSE`,
 #'   it will always be added. Usually this should **NOT** be done.
-#'   @param backup_removed if 'TRUE` data which will be replaced will be backed up.
+#' @param backup_removed if 'TRUE` data which will be replaced will be backed up.
 #'
 #' @return vector of length of `fns` with `TRUE` if the data has been added,
 #'   `FALSE` otherwise

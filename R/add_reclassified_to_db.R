@@ -4,7 +4,7 @@
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
 #' @param remove_timestamps vector of timestamps to be removed.
-#' @param check_timestamps. If `TRUE`, the data will ony be added when timestamp does not exist in db yet. If `FALSE`,
+#' @param check_timestamps If `TRUE`, the data will ony be added when timestamp does not exist in db yet. If `FALSE`,
 #'   it will always be added. Usually this should **NOT** be done.#'
 #' @param backup_removed if \code{TRUE} data which will be replaced will be backed up.
 #'

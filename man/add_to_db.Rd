@@ -26,9 +26,10 @@ the same index should be added to.
 
 \item{remove_timestamps}{vector of timestamps to be removed.}
 
+\item{backup_removed}{if 'TRUE` data which will be replaced will be backed up.}
+
 \item{check_timestamps.}{If \code{TRUE}, the data will ony be added when timestamp does not exist in db yet. If \code{FALSE},
-it will always be added. Usually this should \strong{NOT} be done.
-@param backup_removed if 'TRUE` data which will be replaced will be backed up.}
+it will always be added. Usually this should \strong{NOT} be done.}
 }
 \value{
 vector of length of \code{fns} with \code{TRUE} if the data has been added,
