@@ -13,11 +13,21 @@ output:
     code_folding: hide
 params:
   output_dir: "~/RRD.Reclassification_final/"
-  base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/v1.7.1/"
+  version_tag: "v1.7.1"
+  base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
   db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
   cores: 14
 ---
+
+# Preparation
+1. Set Base to use
+This reclassification is based on the classifiers as in the repo at the base URL which speicifies the repo and the reference / tag which should be used for this reclassification
+2. Set output path
+3. Set database
+4. Set Archive Directory
+Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
+
 
 ```{r setup_reclass, include=FALSE}
 knitr::opts_chunk$set(
@@ -27,40 +37,38 @@ knitr::opts_chunk$set(
   warning = TRUE
 )
 library("LEEF.analysis")
-```
+library(dplyr)
 
-# Preparation
-## Set Base to use
-This reclassification is based on the classifiers as in the repo at the base URL which speicifies the repo and the reference / tag which should be used for this reclassification
-```{r}
-base <- params$base
-```
+## 1.
+base <- paste0(params$base, params$version_tag, "/")
 
-## Set output path
-```{r output_path}
+## 2.
 output <-  params$output_dir
 dir.create(output, recursive = TRUE, showWarnings = FALSE)
-```
 
-## Set database
-```{r output_path}
+## 3.
 db <- params$db
-```
+org_db <- db
+reclass_db <- gsub(".sqlite", paste0(".", params$version_tag, ".reclass,sqlite"), org_db)
+bemovi_reclass_db <- gsub(".sqlite", paste0(".bemovi.sqlite"), reclass_db)
+flowcam_reclass_db <- gsub(".sqlite", paste0(".flowcam.sqlite"), bemovi_reclass_db)
+filter_db <- gsub(".sqlite", paste0(".filter.sqlite"), flowcam_reclass_db)
+bemovi_filter_db <- gsub(".sqlite", paste0(".bemovi.sqlite"), filter_db)
+flowcam_filter_db <- gsub(".sqlite", paste0(".flowcam.sqlite"), bemovi_filter_db)
 
-## Set Archive Directory
-Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
 
-```{r setArchive}
-
+## 4.
 archive_dir <- params$archive_dir
 if (!file.exists(archive_dir)){
   stop(
+    "This is not a problem when not reclassifying! \n",
     "Archive directory '", archive_dir, "' does not exist!\n",
     "Probably not mounted?" 
   )
 }
 if (!file.exists(file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"))){
   stop(
+    "This is not a problem when not reclassifying! \n",
     "Archive directory is not valid! \n",
     "It does not contain the folder '", file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived_data", "extracted"), "'.\n",
     "Probably not mounted?" 
@@ -68,11 +76,7 @@ if (!file.exists(file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archive
 }
 ```
 
-
-## Set timestamps
-All available data will be reclassified. Therefore, the timestamps are determined for each method below based on the archived data.
-
-# Reclassification of all timestamps
+# DONE - Reclassification of all timestamps
 
 ## Flowcam
 
@@ -285,10 +289,11 @@ rm(pdir, class_constant, class_increasing, out, species_tracked)
 ## Add to database
 Old timestamps will be removed and not be backed up.
 ```{r addRRD}
+file.copy(org_db, bemovi_reclass_db)
 system.time(
   add_reclassified_to_db(
     path = output, 
-    db = db, 
+    db = bemovi_reclass_db, 
     remove_timestamps = NULL, #timestamps,
     backup_removed = FALSE
   )
@@ -342,7 +347,7 @@ unlink(pdir)
 rm(pdir, compositions, experimental_design)
 ```
 
-# Reclassification of individual bottles and possibly timestamps
+# DONE - Reclassification of individual bottles and possibly timestamps
 ## Flowcam Bottle `b_02`
 Bottle `b_02` was contaminated and needs to be classified separately. All timestamps will be classified using the same classifier.
 
@@ -429,6 +434,8 @@ rm(class_constant, class_increasing)
 ### Add to database
 #### Delete entries from database
 ```{r}
+file.copy(bemovi_reclass_db, flowcam_reclass_db)
+
 message("Deleting entries...")
 delete_density_sql <- paste0(
   "DELETE ",
@@ -443,8 +450,9 @@ delete_traits_sql <- paste0(
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = db
+  db = flowcam_reclass_db
 )
+
 message("Executing query '", delete_density_sql, "`...")
 rd <- DBI::dbExecute(conn, delete_density_sql)
 message("   ", rd, " rows deleted.")
@@ -452,6 +460,7 @@ message("   ", rd, " rows deleted.")
 message("Executing query '", delete_traits_sql, "`...")
 rd <- DBI::dbExecute(conn, delete_traits_sql)
 message("   ", rd, " rows deleted.")
+
 DBI::dbDisconnect(conn)
 ```
 
@@ -470,7 +479,7 @@ system.time(
   add_to_db(
     fns = files,
     tables = tables,
-    db = db,
+    db = flowcam_reclass_db,
     remove_timestamps = NULL,
     check_timestamps = FALSE,
     backup_removed = FALSE
@@ -479,11 +488,11 @@ system.time(
 rm(out)
 ```
 
-# Set species to 0 which were mis-classified
+# TODO - Set species to 0 which were mis-classified
 
 This section has been devaloped by Uriah 
 
-## Setup
+## Preparations
 ```{r species_to_0_setup}
 
 # Inf --------------------------------------------------------------------
@@ -495,26 +504,27 @@ This section has been devaloped by Uriah
 
 ### Density data and co.
 
-options(RRDdb = db)
-densities <- db_read_table(table = "density") %>%
-  dplyr::filter(day < 1000,
-                !(species %in% c("Didinium","airbubbles","Debris",
-                                 "DigestedAlgae","OtherCiliate", "HNA", "LNA", "MNA", "algae",
-                                 "Small_unidentified","ColpidiumVacuoles", "Debris_and_other")),
-                !(species=="Cryptomonas" & measurement!="flowcam"),
-                !(species=="Dexiostoma" & measurement=="flowcam"),
-                !(species=="Coleps_irchel" & measurement=="flowcam"),
-                !(species=="Colpidium" & measurement=="flowcam"),
-                !(species=="Loxocephallus" & measurement=="flowcam"),
-                !(species=="Tetrahymena" & measurement=="flowcam"),
-  ) %>%
-  dplyr::collect() %>%
-  dplyr::arrange(day)
+file.copy(flowcam_reclass_db, bemovi_filter_db)
+
+options(RRDdb = bemovi_filter_db)
+
+# densities <- db_read_table(table = "density") %>%
+#   dplyr::filter(day < 1000,
+#                 !(species %in% c("Didinium","airbubbles","Debris",
+#                                  "DigestedAlgae","OtherCiliate", "HNA", "LNA", "MNA", "algae",
+#                                  "Small_unidentified","ColpidiumVacuoles", "Debris_and_other")),
+#                 !(species=="Cryptomonas" & measurement!="flowcam"),
+#                 !(species=="Dexiostoma" & measurement=="flowcam"),
+#                 !(species=="Coleps_irchel" & measurement=="flowcam"),
+#                 !(species=="Colpidium" & measurement=="flowcam"),
+#                 !(species=="Loxocephallus" & measurement=="flowcam"),
+#                 !(species=="Tetrahymena" & measurement=="flowcam"),
+#   ) %>%
+#   dplyr::collect() %>%
+#   dplyr::arrange(day)
 
 exp_design <- db_read_table(table = "experimetal_design") %>% dplyr::collect()
 compositions <- db_read_table(table = "composition") %>% dplyr::collect()
-
-
 ```
 
 ## bemovi
@@ -525,29 +535,7 @@ that could be present but are not are set to 0.
 These densities are then used to overwrite the previous densities values.
 This is done at 25x and 16x
 
-Note --------------------------------------------------------------------
 
-After this also the video ciliate traits should be overwritten in the RRD
-after filtering out the videos
-I haven't done it here, can you do it?
-
-
-
-The code to read in and filter should be something like this:
-
-```{r, eval = FALSE}
-bemovi_mag_25__morph_mvt <- db_read_table(table = "bemovi_mag_25__morph_mvt") %>%
-  dplyr::filter(!(file %in% videos_movingback))
-
-bemovi_mag_25__morph_mvt_cropped <- db_read_table(table = "bemovi_mag_25__morph_mvt_cropped") %>%
-  dplyr::filter(!(file %in% videos_movingback))
-
-bemovi_mag_25__morph_mvt_non_cropped <- db_read_table(table = "bemovi_mag_25__morph_mvt_non_cropped") %>%
-  dplyr::filter(!(file %in% videos_movingback))
-
-bemovi_mag_16__morph_mvt <- db_read_table(table = "bemovi_mag_16__morph_mvt") %>%
-  dplyr::filter(!(file %in% videos_to_remove_16)) ##note the different file!!!
-```
 
 
 ### Preparation 25x
@@ -587,11 +575,11 @@ videos_movingback <- c("20211013_00058", "20211103_00037", "20211105_00066",
                        "20220207_00043", "20220207_00054")
 
 bottle <- strsplit(videos_movingback, split='_', fixed=TRUE)
-bottle <- as.numeric(unlist(purr::map(bottle, 2)))
+bottle <- as.numeric(unlist(purrr::map(bottle, 2)))
 bottle <- ceiling(bottle/3)
 bottle <- ifelse(bottle<10, paste0("b_0",bottle), paste0("b_",bottle))
 
-timestamp_movingback <- unlist(purr::map(strsplit(videos_movingback, split='_', fixed=TRUE),1))
+timestamp_movingback <- unlist(purrr::map(strsplit(videos_movingback, split='_', fixed=TRUE),1))
 
 moving_background <- data.frame(bottle = bottle,
                                 timestamp = (timestamp_movingback))
@@ -604,10 +592,10 @@ videos_to_remove_16 <- c("20210924_00108", "20211020_00133", "20211025_00140",
                          "20211101_00151", "20211105_00129", "20211108_00121",
                          "20220131_00156" ,"20220525_00135")
 
-timestamp_movingback16 <- unlist(purr::map(strsplit(videos_to_remove_16, split='_', fixed=TRUE),1))
+timestamp_movingback16 <- unlist(purrr::map(strsplit(videos_to_remove_16, split='_', fixed=TRUE),1))
 
 bottle16 <- strsplit(videos_to_remove_16, split='_', fixed=TRUE)
-bottle16 <- as.numeric(unlist(purr::map(bottle16, 2))) - 90
+bottle16 <- as.numeric(unlist(purrr::map(bottle16, 2))) - 90
 bottle16 <- ceiling(bottle16/3)
 bottle16 <- ifelse(bottle16<10, paste0("b_0",bottle16), paste0("b_",bottle16))
 
@@ -616,9 +604,9 @@ moving_background16 <- data.frame(bottle = bottle16,
 
 ```
 
-### Removing videos, recalculating densities and overwriting ######
+### Calculating new densities
 
-#### bemovi_mag_25__morph_mvt ######
+#### bemovi_mag_25__morph_mvt
 
 ```{r species_to_0_bemovi_25_morph_mvt}
 
@@ -651,7 +639,7 @@ morph25_density <- CalculateDensities(morph25, meas)
 morph25_density <- SetNotFoundSpeciesTo0(morph25_density, moving_background, meas, exp_design, compositions, species.tracked)
 ```
 
-#### bemovi_mag_25__morph_mvt_cropped ######
+#### bemovi_mag_25__morph_mvt_cropped
 
 ```{r species_to_0_bemovi_25_morph_mvt_cropped}
 
@@ -688,7 +676,7 @@ morph25_cropped_density <- SetNotFoundSpeciesTo0(
 ```
 
 
-### bemovi_mag_25__morph_mvt_non_cropped ######
+#### bemovi_mag_25__morph_mvt_non_cropped
 
 ```{r species_to_0_bemovi_25_morph_mvt_non_cropped}
 species.tracked <- c("Dexiostoma","Tetrahymena","Loxocephallus")
@@ -719,7 +707,7 @@ morph25_non_cropped_density <- SetNotFoundSpeciesTo0(
 )
 ```
 
-### bemovi_mag_16__morph_mvt ######
+#### bemovi_mag_16__morph_mvt
 
 ```{r species_to_0_bemovi_16_morph_mvt}
 species.tracked <- c("Paramecium_bursaria", "Coleps_irchel","Colpidium","Paramecium_caudatum", "Euplotes","Stylonychia2")
@@ -751,100 +739,307 @@ morph16_density <- SetNotFoundSpeciesTo0(
 )
 ```
 
-### bind new densities together ######
 
-```{r species_to_0_bemovi_bind}
+### Update RRD
+#### Delete moving videos from `__morph_mvt` and `__mean_densities_per_ml...` tables in RRD database
 
-new_densities <- rbind(morph25_density,morph25_cropped_density,morph25_non_cropped_density, morph16_density) %>%
-  dplyr::filter(!(species %in% c("Cryptomonas", "Debris_and_other")))
+```{r delete_bemovi_moving, options}
+conn <- DBI::dbConnect(
+  drv = RSQLite::SQLite(),
+  db = bemovi_filter_db
+)
+DBI::dbBegin(conn)
+
+## morph_mvt
+
+message("Deleting bemovi 25 entries from morph_mvt ...")
+delete_sql <- paste0(
+  "DELETE ",
+  "FROM bemovi_mag_25__morph_mvt ", 
+  "WHERE file IN (", paste0('"', videos_movingback, '"', collapse = ", "), ");"
+)
+message("Executing query '", delete_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_sql)
+message("   ", rd, " rows deleted.")
+
+message("Deleting bemovi 25 entries from morph_mvt_cropped ...")
+delete_sql <- paste0(
+  "DELETE ",
+  "FROM bemovi_mag_25__morph_mvt_cropped ", 
+  "WHERE file IN (", paste0('"', videos_movingback, '"', collapse = ", "), ");"
+)
+message("Executing query '", delete_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_sql)
+message("   ", rd, " rows deleted.")
+
+message("Deleting bemovi 25 entries from morph_mvt_non_cropped ...")
+delete_sql <- paste0(
+  "DELETE ",
+  "FROM bemovi_mag_25__morph_mvt_non_cropped ", 
+  "WHERE file IN (", paste0('"', videos_movingback, '"', collapse = ", "), ");"
+)
+message("Executing query '", delete_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_sql)
+message("   ", rd, " rows deleted.")
+
+message("Deleting bemovi 16 entries from morph_mvt ...")
+delete_sql <- paste0(
+  "DELETE ",
+  "FROM bemovi_mag_16__morph_mvt ", 
+  "WHERE file IN (", paste0('"', videos_to_remove_16, '"', collapse = ", "), ");"
+)
+message("Executing query '", delete_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_sql)
+message("   ", rd, " rows deleted.")
+
+
+## density
+
+message("Deleting bemovi 25 entries from mean_density_per_ml ...")
+delete_sql <- paste0(
+  "DELETE ",
+  "FROM bemovi_mag_25__mean_density_per_ml",
+  " WHERE (",
+  paste0(
+    apply(
+      moving_background, 
+      1,
+      function(row){
+        paste0("timestamp == '", row["timestamp"],"' AND bottle == '", row["bottle"], "'")
+      }
+    ),
+    collapse = ") OR ("
+  ),
+  ")"
+)
+message("Executing query '", delete_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_sql)
+message("   ", rd, " rows deleted.")
+  
+message("Deleting bemovi 25 entries from mean_density_per_ml_cropped ...")
+delete_sql <- paste0(
+  "DELETE ",
+  "FROM bemovi_mag_25__mean_density_per_ml_cropped",
+  " WHERE (",
+  paste0(
+    apply(
+      moving_background, 
+      1,
+      function(row){
+        paste0("timestamp == '", row["timestamp"],"' AND bottle == '", row["bottle"], "'")
+      }
+    ),
+    collapse = ") OR ("
+  ),
+  ")"
+)
+message("Executing query '", delete_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_sql)
+message("   ", rd, " rows deleted.")
+
+message("Deleting bemovi 25 entries from mean_density_per_ml_non_cropped ...")
+delete_sql <- paste0(
+  "DELETE ",
+  "FROM bemovi_mag_25__mean_density_per_ml_non_cropped",
+  " WHERE (",
+  paste0(
+    apply(
+      moving_background, 
+      1,
+      function(row){
+        paste0("timestamp == '", row["timestamp"],"' AND bottle == '", row["bottle"], "'")
+      }
+    ),
+    collapse = ") OR ("
+  ),
+  ")"
+)
+message("Executing query '", delete_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_sql)
+message("   ", rd, " rows deleted.")
+
+message("Deleting bemovi 16 entries from mean_density_per_ml ...")
+delete_sql <- paste0(
+  "DELETE ",
+  "FROM bemovi_mag_16__mean_density_per_ml",
+  " WHERE (",
+  paste0(
+    apply(
+      moving_background, 
+      1,
+      function(row){
+        paste0("timestamp == '", row["timestamp"],"' AND bottle == '", row["bottle"], "'")
+      }
+    ),
+    collapse = ") OR ("
+  ),
+  ")"
+)
+message("Executing query '", delete_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_sql)
+message("   ", rd, " rows deleted.")
+
+## close
+
+DBI::dbCommit(conn)
+DBI::dbDisconnect(conn)
 ```
-### overwrite the new densities in the main density data.frame ######
 
-```{r species_to_0_bemovi_densities}
+#### Add updated densities to RRD database
+```{r delete_bemovi_moving}
+conn <- DBI::dbConnect(
+  drv = RSQLite::SQLite(),
+  db = bemovi_filter_db
+)
 
-densities$rownumber <- 1:nrow(densities)
 
-old_densities <- right_join(densities,new_densities[,-4])
+DBI::dbBegin(conn)
 
-rownumbers <- old_densities$rownumber
+DBI::dbWriteTable(
+  conn,
+  name = "bemovi_mag_25__mean_density_per_ml",
+  value = morph25_density[,-which(names(morph25_density) == "numberOfVideos")],
+  overwrite = FALSE,
+  append = TRUE
+)
 
-densities[rownumbers,"density"] <- NA
+DBI::dbWriteTable(
+  conn,
+  name = "bemovi_mag_25__mean_density_per_ml_cropped",
+  value = morph25_cropped_density[,-which(names(morph25_cropped_density) == "numberOfVideos")],
+  overwrite = FALSE,
+  append = TRUE
+)
 
-densities <- full_join(densities,new_densities,
-                       by = c("timestamp", "bottle", "measurement", "species", "composition")) %>%
-  mutate(density.x = case_when(is.na(density.x)~density.y,
-                               T ~ density.x)) %>%
-  rename(density=density.x) %>%
-  select(-density.y)
+DBI::dbWriteTable(
+  conn,
+  name = "bemovi_mag_25__mean_density_per_ml_non_cropped",
+  value = morph25_non_cropped_density[,-which(names(morph25_non_cropped_density) == "numberOfVideos")],
+  overwrite = FALSE,
+  append = TRUE
+)
+
+DBI::dbWriteTable(
+  conn,
+  name = "bemovi_mag_16__mean_density_per_ml",
+  value = morph16_density[,-which(names(morph16_density) == "numberOfVideos")],
+  overwrite = FALSE,
+  append = TRUE
+)
+
+
+DBI::dbCommit(conn)
+      
+## close
+
+DBI::dbDisconnect(conn)
 ```
-
 
 
 ## Flowcam
 
 The code below recalculates the densities after filtering Stau1 so that only
 particles are kept with high confidence that they are indeed Stau1.
-What is not done but needs to be done is to also overwrite the algae_traits
-table so that these particles are excluded there. I haven't done it because
-the table is so big and it takes a while to load it. Can you do it?
-The code to read and filter should simply be (commented out):
 
-```{r, eval = FALSE}
-algae_traits <- db_read_table(table = "flowcam__algae_traits") %>%
-  filter(case_when(species=="Staurastrum1" ~ species_probability > 0.9,
-                   T ~ species_probability > 0))
-```
 
 ```{r species_to_0_bemovi_25_morph_mvt}
-timestamps <- sort(as.character(unique(densities$timestamp)))
+file.copy(bemovi_filter_db, flowcam_filter_db)
 
-stau1traits <- mclapply(timestamps, function(ts){
-  sql = paste0("
-             SELECT *
-             FROM 'flowcam__algae_traits'
-             WHERE timestamp == '", ts,
-               "' AND species == '", "Staurastrum1", "';")
+options(RRDdb = flowcam_filter_db)
 
-  read_sql(sql = sql)
-}, mc.cores = detectCores()-2)
+sql <-  paste0(
+  "
+    SELECT *
+    FROM 'flowcam__algae_traits'
+    WHERE species == 'Staurastrum1' AND species_probability > 0.9;
+  "
+)
+  
+stau1traits <- read_sql(sql = sql) %>%
+  group_by(bottle)
 
-stau1traits <- do.call("rbind", stau1traits)
-
-stau1traits <- stau1traits %>%
-  group_by(bottle) %>%
-  filter(species_probability > 0.9)
-
-extrapolation.factor <- 1/0.3 # I think 0.3ml were imaged
+# extrapolation.factor <- 1/0.3 # I think 0.3ml were imaged
 
 densityStau1 <- stau1traits %>%
-  group_by(timestamp, bottle, species) %>%
+  group_by(
+    date_flowcam,
+    species,
+    bottle,
+    composition,
+    temperature,
+    incubator,
+    volume_imaged,
+    dilution_factor,
+    richness,
+    timestamp
+  ) %>%
   summarize(count=n()) %>%
-  mutate(density = count * extrapolation.factor)
+  mutate(density = count * (dilution_factor / volume_imaged))
 
-temp <- expand_grid(timestamp = timestamps,
-                    bottle = unique(stau1traits$bottle),
-                    species = "Staurastrum1")
+# Set not found to 0
+
+temp <- tidyr::expand_grid(
+  timestamp = unique(stau1traits$timestamp),
+  bottle = unique(stau1traits$bottle),
+  species = "Staurastrum1"
+)
 
 densityStau1 <- full_join(densityStau1, temp) %>%
-  mutate(count = ifelse(is.na(count),0,count),
-         density = ifelse(is.na(density),0,density))
-
-densities <- densities %>%
-  mutate(density = ifelse(species=="Staurastrum1", NA, density))
-
-densities <- full_join(densities,densityStau1,
-                       by = c("timestamp", "bottle", "species")) %>%
-  mutate(density.x = case_when(is.na(density.x)~density.y,
-                               T ~ density.x)) %>%
-  rename(density=density.x) %>%
-  select(-density.y, -count)
+  mutate(
+    count = ifelse(is.na(count),0,count),
+    density = ifelse(is.na(density),0,density)
+  )
 ```
 
 
+### Update RRD
+Delete from traits and add re-calcul;ated ones.
+
+```{r label, eval=FALSE}
+
+conn <- DBI::dbConnect(
+  drv = RSQLite::SQLite(),
+  db = db
+)
+DBI::dbBegin(conn)
 
 
+message("Deleting flowcam entries from flowcam__algae_traits ...")
+delete_sql <- paste0(
+  "DELETE ",
+  "FROM flowcam__algae_traits ",
+  "WHERE (species == \"Staurastrum1\" AND species_probability <= 0.9)"
+)
+message("Executing query '", delete_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_sql)
+message("   ", rd, " rows deleted.")
+
+message("Deleting flowcam densities from RRD ...")
+delete_sql <- paste0(
+  "DELETE ",
+  "FROM flowcam__algae_density ",
+  "WHERE (species == \"Staurastrum1\"); "
+)
+message("Executing query '", delete_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_sql)
+message("   ", rd, " rows deleted.")
 
 
+message("Adding flowcam densities to RRD ...")
+DBI::dbWriteTable(
+  conn,
+  name = "flowcam__algae_density",
+  value = densityStau1,
+  overwrite = FALSE,
+  append = TRUE
+)
+message("   ", nrow(densityStau1), " rows added")
+
+## close
+
+DBI::dbCommit(conn)
+DBI::dbDisconnect(conn)
+```
 
 
 
@@ -863,7 +1058,7 @@ cat(paste0("sqlite3 \"./", basename(db), "\" 'VACUUM main INTO \"", basename(db_
 # Create Diagnostic Report
 ```{r createDiagReport}
 report_diagnostic(
-  db = db,  
+  db = flowcam_filter_db,  
   template = "LEEF_1",
   suffix = "reclassified", 
   format = "html"

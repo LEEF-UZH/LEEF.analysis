@@ -48,6 +48,11 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=knitr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "putrrr",
+      "name": "putrrr"
     }
   ],
   "softwareRequirements": {
@@ -240,7 +245,19 @@
       "identifier": "stats",
       "name": "stats"
     },
+    "19": {
+      "@type": "SoftwareApplication",
+      "identifier": "tidyr",
+      "name": "tidyr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=tidyr"
+    },
     "SystemRequirements": null
   },
-  "fileSize": "294.325KB"
+  "fileSize": "298.318KB"
 }

@@ -41,9 +41,8 @@ SetNotFoundSpeciesTo0 <- function(
     }
     df <- data.frame(timestamp=timestamp,
                      bottle=bot,
-                     composition=comp,
+                     composition_id=comp,
                      species=specs,
-                     measurement=meas,
                      row.names = NULL)
   })
   temp <- do.call("rbind", temp) %>% dplyr::distinct()

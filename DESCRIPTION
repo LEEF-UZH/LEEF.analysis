@@ -1,7 +1,7 @@
 Package: LEEF.analysis
 Type: Package
 Title: Access Functions, Tests and Basic Analysis of the RRD Data from the LEEF Project
-Version: 0.5.15
+Version: 0.5.16
 Authors@R: c(
   person(given = "Rainer M.", family = "Krug", email = "Rainer.Krug@uzh.ch", role = c("aut", "cre")),
   person("SNF Project 310030_188431", role = "fnd")
@@ -32,8 +32,10 @@ Imports:
   pbmcapply,
   quarto,
   data.table,
-  stats
+  stats,
+  tidyr
 RoxygenNote: 7.2.3
 Suggests: 
-    knitr
+    knitr,
+    putrrr
 VignetteBuilder: knitr

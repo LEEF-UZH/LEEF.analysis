@@ -11,18 +11,16 @@
 #' @export
 #'
 #' @examples
-CalculateDensities <- function(
-    morph,
-    meas
-    ){
+CalculateDensities <- function(morph, meas){
   density <- morph %>%
-    dplyr::group_by(timestamp, bottle, species, file) %>%
-    dplyr::summarize(count=sum(n_frames)) %>%
+    group_by(timestamp, bottle, species, file, date, temperature_treatment, magnification, sample) %>%
+    summarize(count=sum(n_frames)) %>%
     # summarize(count=sum(N_frames)) %>%
-    dplyr::mutate(dens.ml = count * extrapolation.factor * cropping.factor) %>%
-    stats::na.omit() %>%
-    dplyr::group_by(timestamp, bottle, species) %>%
-    dplyr::summarize(density = sum(dens.ml)/(3*125)) %>%
-    dplyr::mutate(measurement=meas)
+    mutate(dens.ml = count * extrapolation.factor * cropping.factor) %>%
+    na.omit() %>%
+    group_by(timestamp, date, species, bottle, temperature_treatment, magnification, sample) %>%
+    summarise(numberOfVideos = length(unique(file)),
+              density = sum(dens.ml)/(numberOfVideos*125))
   return(density)
 }
+
