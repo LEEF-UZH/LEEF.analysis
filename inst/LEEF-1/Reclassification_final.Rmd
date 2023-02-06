@@ -49,12 +49,14 @@ dir.create(output, recursive = TRUE, showWarnings = FALSE)
 ## 3.
 db <- params$db
 org_db <- db
-reclass_db <- gsub(".sqlite", paste0(".", params$version_tag, ".reclass,sqlite"), org_db)
-bemovi_reclass_db <- gsub(".sqlite", paste0(".bemovi.sqlite"), reclass_db)
-flowcam_reclass_db <- gsub(".sqlite", paste0(".flowcam.sqlite"), bemovi_reclass_db)
-filter_db <- gsub(".sqlite", paste0(".filter.sqlite"), flowcam_reclass_db)
-bemovi_filter_db <- gsub(".sqlite", paste0(".bemovi.sqlite"), filter_db)
+
+reclass_db <- gsub(".sqlite", paste0(".", params$version_tag, ".reclass.sqlite"), org_db)
+
+reclass_bottle_db <- gsub(".sqlite", paste0(".bottle.sqlite"), reclass_db)
+
+bemovi_filter_db <- gsub(".sqlite", paste0(".bemovi.sqlite"), reclass_bottle_db)
 flowcam_filter_db <- gsub(".sqlite", paste0(".flowcam.sqlite"), bemovi_filter_db)
+
 
 
 ## 4.
@@ -289,7 +291,8 @@ rm(pdir, class_constant, class_increasing, out, species_tracked)
 ## Add to database
 Old timestamps will be removed and not be backed up.
 ```{r addRRD}
-file.copy(org_db, bemovi_reclass_db)
+file.copy(org_db, "tmp.reclass.sqlite")
+
 system.time(
   add_reclassified_to_db(
     path = output, 
@@ -298,6 +301,8 @@ system.time(
     backup_removed = FALSE
   )
 )
+
+file.rename("tmp.reclass.sqlite", reclass_db)
 ```
 
 ## Add experiment specific tables
@@ -434,7 +439,7 @@ rm(class_constant, class_increasing)
 ### Add to database
 #### Delete entries from database
 ```{r}
-file.copy(bemovi_reclass_db, flowcam_reclass_db)
+file.copy(reclass_db, "tmp.bottle.sqlite")
 
 message("Deleting entries...")
 delete_density_sql <- paste0(
@@ -450,7 +455,7 @@ delete_traits_sql <- paste0(
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = flowcam_reclass_db
+  db = "tmp.bottle.sqlite"
 )
 
 message("Executing query '", delete_density_sql, "`...")
@@ -479,13 +484,16 @@ system.time(
   add_to_db(
     fns = files,
     tables = tables,
-    db = flowcam_reclass_db,
+    db = "tmp.bottle.sqlite",
     remove_timestamps = NULL,
     check_timestamps = FALSE,
     backup_removed = FALSE
   )
 )
 rm(out)
+
+file.rename("tmp.bottle.sqlite", reclass_bottle_db)
+
 ```
 
 # TODO - Set species to 0 which were mis-classified
@@ -743,10 +751,13 @@ morph16_density <- SetNotFoundSpeciesTo0(
 ### Update RRD
 #### Delete moving videos from `__morph_mvt` and `__mean_densities_per_ml...` tables in RRD database
 
+
 ```{r delete_bemovi_moving, options}
+file.copy(reclass_bottle_db, "tmp_filter_bemovi.sqlite")
+
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = bemovi_filter_db
+  db = "tmp_filter_bemovi.sqlite"
 )
 DBI::dbBegin(conn)
 
@@ -889,7 +900,7 @@ DBI::dbDisconnect(conn)
 ```{r delete_bemovi_moving}
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = bemovi_filter_db
+  db = "tmp_filter_bemovi.sqlite"
 )
 
 
@@ -933,6 +944,8 @@ DBI::dbCommit(conn)
 ## close
 
 DBI::dbDisconnect(conn)
+
+file.rename("tmp_filter_bemovi.sqlite", bemovi_filter_db)
 ```
 
 
@@ -996,10 +1009,11 @@ densityStau1 <- full_join(densityStau1, temp) %>%
 Delete from traits and add re-calcul;ated ones.
 
 ```{r label, eval=FALSE}
+file.copy(bemovi_filter_db, "tmp_filter_flowcam.sqlite")
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = db
+  db = "tmp_filter_flowcam.sqlite"
 )
 DBI::dbBegin(conn)
 
@@ -1039,6 +1053,8 @@ message("   ", nrow(densityStau1), " rows added")
 
 DBI::dbCommit(conn)
 DBI::dbDisconnect(conn)
+
+file.rename("tmp_filter_flowcam.sqlite", flowcam_filter_db)
 ```
 
 
@@ -1050,8 +1066,8 @@ Vacuuming the database will take some time!
 To vacuum the sqlite database, i.e. recover the space from the deletion of rows, please run the following command in the directory where the database is located:
 
 ```{r echo = FALSE}
-db_vac <- gsub("\\.sqlite$", ".vacuumed.sqlite", db)
-cat(paste0("sqlite3 \"./", basename(db), "\" 'VACUUM main INTO \"", basename(db_vac), "\"'"))
+db_vac <- gsub("\\.sqlite$", ".vacuumed.sqlite", flowcam_filter_db)
+cat(paste0("sqlite3 \"./", basename(flowcam_filter_db), "\" 'VACUUM main INTO \"", basename(db_vac), "\"'"))
 
 ```
 
@@ -1060,7 +1076,7 @@ cat(paste0("sqlite3 \"./", basename(db), "\" 'VACUUM main INTO \"", basename(db_
 report_diagnostic(
   db = flowcam_filter_db,  
   template = "LEEF_1",
-  suffix = "reclassified", 
+  suffix = "reclassified_final", 
   format = "html"
 )
 ```
