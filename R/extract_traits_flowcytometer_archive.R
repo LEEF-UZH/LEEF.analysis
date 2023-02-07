@@ -22,7 +22,7 @@ TODO!!!!!
 
 extract_traits_flowcytometer_archive <- function(
   extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
-  gates_coordinates,
+  particles = "bacteria",
   timestamps,
   output,
   mc.cores = 1
@@ -44,20 +44,19 @@ extract_traits_flowcytometer_archive <- function(
       function(timestamp){
         datadir <- file.path(
           extracted_dir,
-          paste0("LEEF.fast.flowcytometer.", as.character(timestamp))
+          paste0("LEEF.flowcytometer.flowcytometer.", as.character(timestamp))
         )
         message("###############################################")
-        message("Gating timestamp ", timestamp, "...")
+        message("Extracting timestamp ", timestamp, "...")
 
         suppressMessages(
           {
             densities <- NULL
             try(
               expr = {
-                densities <- LEEF.measurement.flowcytometer::gating(
-                  gates_coordinates = gates_coordinates,
-                  fsa = readRDS(file.path(file.path(datadir, "flowcytometer_fsa_ungated.rds"))),
-                  flow.data = read.csv(file.path(file.path(datadir, "flowcytometer_ungated.csv")))
+                traits <- LEEF.measurement.flowcytometer::extract_traits(
+                  input = datadir,
+                  particles = particles
                 )
               }
             )
@@ -69,7 +68,7 @@ extract_traits_flowcytometer_archive <- function(
 
           dir.create(file.path(output))
           saveRDS(
-            object = densities$flow.data,
+            object = traits$batceria,
             file = file.path(output, paste0("flowcytometer_density.", timestamp, ".rds"))
           )
 
