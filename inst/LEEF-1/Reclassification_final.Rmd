@@ -13,13 +13,13 @@ output:
     code_folding: hide
 params:
   output_dir: "~/RRD.Reclassification_final/"
-  version_tag: "v1.7.1"
+  version_tag: "v1.8.1"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
   db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
   pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
   extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
-  cores: 14
+  cores: 7
 ---
 
 # Preparation
@@ -1057,6 +1057,55 @@ file.rename("tmp_filter_flowcam.sqlite", flowcam_filter_db)
 ```
 
 
+# Flowcytometer
+
+## Re-gating
+
+```{r regating}
+
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+
+gate_flowcytometer_archive(
+  extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
+  gates_coordinates = read.csv(paste0(base, "parameter/flowcytometer/gates_coordinates.csv")),
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer"),
+  mc.cores = params$cores
+)
+
+```
+
+## Biomass calculation
+
+```{r biomass}
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+
+TODO!!!!!
+
+# extract_traits_flowcytometer_archive(
+#   extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
+#   gates_coordinates = read.csv(paste0(base, "parameter/flowcytometer/gates_coordinates.csv")),
+#   timestamps = timestamps,
+#   output = file.path(params$output_dir, "flowcytometer"),
+#   mc.cores = params$cores
+# )
+```
 
 
 # Do a final vacuuming into new database
