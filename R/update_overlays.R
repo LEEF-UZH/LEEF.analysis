@@ -11,19 +11,12 @@
 update_overlays <- function(
     params = list(
       cores = 7,
-      input_dir = "~/reclassification/",
-      archive_dir = "/Volumes/LEEF/",
-      extracted_dir = "/Volumes/LEEF/LEEF.archived.data/LEEF/3.archived.data/extracted/",
-      avi_url = "https://cloud.s3it.uzh.ch:8080/v1/AUTH_0ac1f146d16c4aa8aee335872ef84aed/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
+      pre_processed_folder = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/",
+      extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
+      output_dir = "./overlays/"
     ),
     overwrite = FALSE
 ){
-  avi_url <- params$avi_url
-  if (substr(avi_url, nchar(avi_url), nchar(avi_url)) != "/") {
-    avi_url <- paste0(avi_url, "/")
-  }
-
-
   bemovi_dirs <- function(
   ){
     bemovis <- list.files(
@@ -67,15 +60,15 @@ update_overlays <- function(
         function(bemovi_config, bemovi_dir){
           bc <- yaml::read_yaml(file.path(params$extracted_dir, bemovi_dir, bemovi_config))
 
-          temp_overlay_folder <- file.path( params$extracted_dir, bemovi_dir, bc$temp.overlay.folder)
-          overlay_folder <- file.path( params$extracted_dir, bemovi_dir, bc$overlay.folder)
+          temp_overlay_folder <- file.path( params$output_dir, bemovi_dir, bc$temp.overlay.folder)
+          overlay_folder <- file.path( params$output_dir, bemovi_dir, bc$overlay.folder)
 
+          dir.create(temp_overlay_folder, recursive = TRUE, showWarnings = FALSE)
           dir.create(overlay_folder, recursive = TRUE, showWarnings = FALSE)
-          dir.create(temp_overlay_folder, recursive = TRUE)
 
           overlays_from_folders(
             traj_data_file = file.path( params$extracted_dir, bemovi_dir, bc$merged.data.folder, bc$master ),
-            avi_url = paste0(avi_url, bemovi_dir),
+            avi_folder = file.path( params$pre_processed_folder, bemovi_dir),
             bemovi_extract_yml_file = file.path(params$extracted_dir, bemovi_dir, bemovi_config),
             temp_overlay_folder = temp_overlay_folder,
             overlay_folder = overlay_folder,

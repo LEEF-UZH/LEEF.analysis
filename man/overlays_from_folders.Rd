@@ -6,7 +6,7 @@
 \usage{
 overlays_from_folders(
   traj_data_file,
-  avi_url,
+  avi_folder,
   bemovi_extract_yml_file,
   temp_overlay_folder,
   overlay_folder,
@@ -24,7 +24,7 @@ overlays_from_folders(
 \arguments{
 \item{traj_data_file}{file name of the file containing the trajectory data (usually from the Master file)}
 
-\item{avi_url}{url containing the input \code{.avi} files}
+\item{avi_folder}{folder containing the input \code{.avi} files}
 
 \item{bemovi_extract_yml_file}{name of the \code{bemovi_extract.yml} config file}
 
@@ -53,7 +53,7 @@ nearly visually lossless, 51 is worst quality. Default value is 23}
 \item{mc_cores}{number of cores toi be used for parallel execution.
 Defaults to \code{par_mc.cores()}}
 
-\item{overwrite}{if \code{TRUE}, existing overlays will be ov erwritten. Default is \code{FALSE}}
+\item{overwrite}{if \code{TRUE}, existing overlays will be overwritten. Default is \code{FALSE}}
 }
 \description{
 This is a wrapper around the function \code{bemovi.LEEF::create_overlays_subtitle_directory()}

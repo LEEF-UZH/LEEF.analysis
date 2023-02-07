@@ -17,6 +17,8 @@ params:
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
   db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
+  pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
+  extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
   cores: 14
 ---
 
@@ -43,8 +45,7 @@ library(dplyr)
 base <- paste0(params$base, params$version_tag, "/")
 
 ## 2.
-output <-  params$output_dir
-dir.create(output, recursive = TRUE, showWarnings = FALSE)
+dir.create(params$output_dir, recursive = TRUE, showWarnings = FALSE)
 
 ## 3.
 db <- params$db
@@ -58,21 +59,19 @@ bemovi_filter_db <- gsub(".sqlite", paste0(".bemovi.sqlite"), reclass_bottle_db)
 flowcam_filter_db <- gsub(".sqlite", paste0(".flowcam.sqlite"), bemovi_filter_db)
 
 
-
 ## 4.
-archive_dir <- params$archive_dir
-if (!file.exists(archive_dir)){
+if (!file.exists(params$archive_dir)){
   stop(
     "This is not a problem when not reclassifying! \n",
-    "Archive directory '", archive_dir, "' does not exist!\n",
+    "Archive directory '", params$archive_dir, "' does not exist!\n",
     "Probably not mounted?" 
   )
 }
-if (!file.exists(file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"))){
+if (!file.exists(params$extracted_dir)){
   stop(
     "This is not a problem when not reclassifying! \n",
     "Archive directory is not valid! \n",
-    "It does not contain the folder '", file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived_data", "extracted"), "'.\n",
+    "It does not contain the folder '", params$extracted_dir, "'.\n",
     "Probably not mounted?" 
   )
 }
@@ -102,7 +101,7 @@ download.file(
 )
 
 timestamps <- list.files(
-  path = file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"), 
+  path = params$extracted_dir, 
   pattern = "^LEEF\\.fast\\.flowcam\\.",
   recursive = FALSE, 
   full.names = FALSE
@@ -112,12 +111,12 @@ timestamps <- gsub("^LEEF\\.fast\\.flowcam\\.", "", timestamps)
 
 ### Classify Flowcam
 ```{r classify_flowcam}
-out <- file.path(output, "flowcam")
+out <- file.path(params$output_dir, "flowcam")
 if (!file.exists(out)) {
   message("Classifying flowcam...")
   system.time(
     classify_flowcam_archive(
-      archive_dir = archive_dir, 
+      archive_dir = params$archive_dir, 
       timestamps = timestamps, 
       algae_traits_name = "algae_traits_filtered.rds", 
       classifier_constant_name = class_constant, 
@@ -162,7 +161,7 @@ download.file(
 )
 
 timestamps <- list.files(
-  path = file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"), 
+  path = params$extracted_dir, 
   pattern = "^LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.",
   recursive = FALSE, 
   full.names = FALSE
@@ -172,13 +171,13 @@ timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.", "", timestamps)
 
 ### Classify `bemovi_extract.mag.16.yml`
 ```{r classify_bemovi_16}
-out <- file.path(output, "bemovi_mag_16")
+out <- file.path(params$output_dir, "bemovi_mag_16")
 if (!file.exists(out)) {
   message("Classifying bemovi_extract.mag.16")
   system.time(
     classify_bemovi_archive( 
       timestamps = timestamps, 
-      archive_dir = archive_dir, 
+      archive_dir = params$archive_dir, 
       magnification = 16, 
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
@@ -223,7 +222,7 @@ download.file(
 )
 
 timestamps <- list.files(
-  path = file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"), 
+  path = params$extracted_dir, 
   pattern = "^LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.",
   recursive = FALSE, 
   full.names = FALSE
@@ -233,12 +232,12 @@ timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.", "", timestamps)
 
 ### Classify `bemovi_mag.25` 
 ```{r classify_bemovi_25}
-out <- file.path(output, "bemovi_mag_25")
+out <- file.path(params$output_dir, "bemovi_mag_25")
 if (!file.exists(out)) {
   system.time(
     classify_bemovi_archive( 
       timestamps = timestamps, 
-      archive_dir = archive_dir, 
+      archive_dir = params$archive_dir, 
       magnification = 25, 
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
@@ -251,7 +250,7 @@ if (!file.exists(out)) {
   system.time(
     classify_bemovi_archive( 
       timestamps = timestamps, 
-      archive_dir = archive_dir, 
+      archive_dir = params$archive_dir, 
       magnification = 25, 
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
@@ -264,7 +263,7 @@ if (!file.exists(out)) {
   system.time(
     classify_bemovi_archive( 
       timestamps = timestamps, 
-      archive_dir = archive_dir, 
+      archive_dir = params$archive_dir, 
       magnification = 25, 
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
@@ -295,7 +294,7 @@ file.copy(org_db, "tmp.reclass.sqlite")
 
 system.time(
   add_reclassified_to_db(
-    path = output, 
+    path = params$output_dir, 
     db = bemovi_reclass_db, 
     remove_timestamps = NULL, #timestamps,
     backup_removed = FALSE
@@ -372,7 +371,7 @@ out <- file.path(output, paste0("flowcam_", bott, "_", format(after, scientific 
 All available after `20220504` data will be reclassified and are determined below based on the archived data.
 ```{r prepare_flowcam_b}
 timestamps <- list.files(
-  path = file.path(archive_dir, "LEEF.archived.data", "LEEF", "3.archived.data", "extracted"), 
+  path = params$extracted_dir, 
   pattern = "^LEEF\\.fast\\.flowcam\\.",
   recursive = FALSE, 
   full.names = FALSE
@@ -411,7 +410,7 @@ if (!file.exists(out)) {
   message("Classifying flowcam...")
   system.time(
     classify_flowcam_archive(
-      archive_dir = archive_dir, 
+      archive_dir = params$archive_dir, 
       timestamps = timestamps, 
       algae_traits_name = "algae_traits_filtered.rds", 
       classifier_constant_name = class_constant, 
@@ -1081,3 +1080,10 @@ report_diagnostic(
 )
 ```
 
+# Create Overlays
+```{r overlays}
+update_overlays(
+  params = params,
+  overwrite = FALSE
+)
+```
