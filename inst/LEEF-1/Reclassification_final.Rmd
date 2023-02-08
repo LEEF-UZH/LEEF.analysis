@@ -1074,7 +1074,7 @@ timestamps <- list.files(
 timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
 
 gate_flowcytometer_archive(
-  extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
+  extracted_dir = params$extracted_dir,
   gates_coordinates = read.csv(paste0(base, "parameter/flowcytometer/gates_coordinates.csv")),
   timestamps = timestamps,
   output = file.path(params$output_dir, "flowcytometer"),
