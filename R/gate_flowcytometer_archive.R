@@ -69,7 +69,7 @@ gate_flowcytometer_archive <- function(
           )
 
         } else {
-          message("ERROR in classifying timestamp ", timestamp)
+          message("ERROR in gating in timestamp ", timestamp)
         }
 
 

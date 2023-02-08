@@ -7,6 +7,7 @@
 #' @param check_timestamps If `TRUE`, the data will ony be added when timestamp does not exist in db yet. If `FALSE`,
 #'   it will always be added. Usually this should **NOT** be done.#'
 #' @param backup_removed if \code{TRUE} data which will be replaced will be backed up.
+#' @param method method to be added. If \code{NULL}, method will be determined by the sub-directories.
 #'
 #' @return
 #' @export
@@ -17,16 +18,19 @@ add_reclassified_to_db <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   remove_timestamps = NULL,
   check_timestamps = TRUE,
-  backup_removed = TRUE
+  backup_removed = TRUE,
+  method = NULL
 ){
   if (!file.exists(db)){
     LEEF.backend.sqlite::new_RRD(db)
   }
 
-  methods <- list.dirs(
-    path,
-    recursive = FALSE
-  )
+  if (is.null(methods)) {
+    methods <- list.dirs(
+      path,
+      recursive = FALSE
+    )
+  }
 
   for (method in methods) {
     files <- list.files(method, full.names = TRUE)

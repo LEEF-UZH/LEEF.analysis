@@ -9,7 +9,8 @@ add_reclassified_to_db(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   remove_timestamps = NULL,
   check_timestamps = TRUE,
-  backup_removed = TRUE
+  backup_removed = TRUE,
+  method = NULL
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 it will always be added. Usually this should **NOT** be done.#'}
 
 \item{backup_removed}{if \code{TRUE} data which will be replaced will be backed up.}
+
+\item{method}{method to be added. If \code{NULL}, method will be determined by the sub-directories.}
 }
 \description{
 Title
