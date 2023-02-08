@@ -12,10 +12,10 @@ output:
     toc_collapsed: true
     code_folding: hide
 params:
-  output_dir: "~/RRD.Reclassification_final/"
+  output_dir: "/Volumes/Documents/RRD.Reclassification_final/"
   version_tag: "v1.8.1"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
-  db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
+  db: "/Volumes/Documents/RRD.Reclassification_final/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
   pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
   extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
@@ -51,10 +51,14 @@ dir.create(params$output_dir, recursive = TRUE, showWarnings = FALSE)
 db <- params$db
 
 db_org <- db
-db_1 <- gsub(".sqlite", paste0(".", params$version_tag, ".1.sqlite"), db_org)
-db_2 <- gsub(".sqlite", paste0(".", params$version_tag, ".2.sqlite"), db_org)
-db_3 <- gsub(".sqlite", paste0(".", params$version_tag, ".3.sqlite"), db_org)
-db_4 <- gsub(".sqlite", paste0(".", params$version_tag, ".4.sqlite"), db_org)
+db_1 <- gsub(".sqlite", paste0(".", params$version_tag, "_1.sqlite"), db_org)
+db_1_tmp <- paste0(db_1, ".tmp")
+db_2 <- gsub(".sqlite", paste0(".", params$version_tag, "_2.sqlite"), db_org)
+db_2_tmp <- paste0(db_2, ".tmp")
+db_3 <- gsub(".sqlite", paste0(".", params$version_tag, "_3.sqlite"), db_org)
+db_3_tmp <- paste0(db_3, ".tmp")
+db_4 <- gsub(".sqlite", paste0(".", params$version_tag, "_4.sqlite"), db_org)
+db_4_tmp <- paste0(db_4, ".tmp")
 
 db_final <- gsub(".sqlite", paste0(".", params$version_tag, ".final.sqlite"), db_org)
 
@@ -335,7 +339,7 @@ extract_traits_flowcytometer_archive(
 ## Add to database
 Old timestamps will be removed and not be backed up.
 ```{r addRRD}
-file.copy(db_org, "tmp.1.sqlite")
+file.copy(db_org, db_1_tmp)
 
 system.time(
   add_reclassified_to_db(
@@ -347,7 +351,7 @@ system.time(
   )
 )
 
-file.rename("tmp.1.sqlite", db_1)
+file.rename(db_1_tmp, db_1)
 ```
 # 2. DONE - Re-calculations of individual bottles and timestamps
 ## Flowcam Bottle `b_02`
@@ -436,7 +440,12 @@ rm(class_constant, class_increasing)
 ### Add to database
 #### Delete entries from database
 ```{r}
-file.copy(db_1, "tmp.2.sqlite")
+file.copy(db_1, db_2_tmp)
+
+conn <- DBI::dbConnect(
+  drv = RSQLite::SQLite(),
+  db = db_2_tmp
+)
 
 message("Deleting entries...")
 delete_density_sql <- paste0(
@@ -444,24 +453,20 @@ delete_density_sql <- paste0(
   "FROM flowcam__algae_density ", 
   "WHERE bottle = '", bott, "' AND timestamp >= ", format(after, scientific = FALSE), " AND timestamp <= ", format(until, scientific = FALSE)
 )
+message("Executing query '", delete_density_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_density_sql)
+message("   ", rd, " rows deleted.")
+
+
 delete_traits_sql <- paste0(
   "DELETE ",
   "FROM flowcam__algae_traits ", 
   "WHERE bottle = '", bott, "' AND timestamp >= ", format(after, scientific = FALSE), " AND timestamp <= ", format(until, scientific = FALSE)
 )
-
-conn <- DBI::dbConnect(
-  drv = RSQLite::SQLite(),
-  db = "tmp.2.sqlite"
-)
-
-message("Executing query '", delete_density_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_density_sql)
-message("   ", rd, " rows deleted.")
-
 message("Executing query '", delete_traits_sql, "`...")
 rd <- DBI::dbExecute(conn, delete_traits_sql)
 message("   ", rd, " rows deleted.")
+
 
 DBI::dbDisconnect(conn)
 ```
@@ -477,19 +482,19 @@ tables <- paste0(
 )
 names(tables) <- NULL
 
-system.time(
-  add_to_db(
-    fns = files,
-    tables = tables,
-    db = "tmp.bottle.sqlite",
-    remove_timestamps = NULL,
-    check_timestamps = FALSE,
-    backup_removed = FALSE
-  )
+
+add_to_db(
+  fns = files,
+  tables = tables,
+  db = db_2_tmp,
+  remove_timestamps = NULL,
+  check_timestamps = FALSE,
+  backup_removed = FALSE
 )
+
 rm(out)
 
-file.rename("tmp.2.sqlite", db_2)
+file.rename(db_2_tmp, db_2)
 
 ```
 
@@ -509,9 +514,7 @@ This section has been devaloped by Uriah
 
 ### Density data and co.
 
-file.copy(flowcam_reclass_db, bemovi_filter_db)
-
-options(RRDdb = bemovi_filter_db)
+options(RRDdb = db_2)
 
 # densities <- db_read_table(table = "density") %>%
 #   dplyr::filter(day < 1000,
@@ -606,7 +609,6 @@ bottle16 <- ifelse(bottle16<10, paste0("b_0",bottle16), paste0("b_",bottle16))
 
 moving_background16 <- data.frame(bottle = bottle16,
                                   timestamp = (timestamp_movingback16))
-
 ```
 
 ### Calculating new densities
@@ -750,11 +752,11 @@ morph16_density <- SetNotFoundSpeciesTo0(
 
 
 ```{r delete_bemovi_moving, options}
-file.copy(db_2, "tmp.3.sqlite")
+file.copy(db_2, db_3_tmp)
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = "tmp.3.sqlite"
+  db = db_3_tmp
 )
 DBI::dbBegin(conn)
 
@@ -770,6 +772,7 @@ message("Executing query '", delete_sql, "`...")
 rd <- DBI::dbExecute(conn, delete_sql)
 message("   ", rd, " rows deleted.")
 
+
 message("Deleting bemovi 25 entries from morph_mvt_cropped ...")
 delete_sql <- paste0(
   "DELETE ",
@@ -780,6 +783,7 @@ message("Executing query '", delete_sql, "`...")
 rd <- DBI::dbExecute(conn, delete_sql)
 message("   ", rd, " rows deleted.")
 
+
 message("Deleting bemovi 25 entries from morph_mvt_non_cropped ...")
 delete_sql <- paste0(
   "DELETE ",
@@ -789,6 +793,7 @@ delete_sql <- paste0(
 message("Executing query '", delete_sql, "`...")
 rd <- DBI::dbExecute(conn, delete_sql)
 message("   ", rd, " rows deleted.")
+
 
 message("Deleting bemovi 16 entries from morph_mvt ...")
 delete_sql <- paste0(
@@ -893,7 +898,7 @@ DBI::dbCommit(conn)
 ```
 
 ##### Add updated densities to RRD database
-```{r delete_bemovi_moving}
+```{r add_bemovi_moving}
 
 DBI::dbBegin(conn)
 
@@ -936,20 +941,19 @@ DBI::dbCommit(conn)
 
 DBI::dbDisconnect(conn)
 
-file.rename("tmp.3.sqlite", db_3)
+file.rename(db_3_tmp, db_3)
 ```
 
 
-## 4. Flowcam
+# 4. Flowcam
 
 The code below recalculates the densities after filtering Stau1 so that only
 particles are kept with high confidence that they are indeed Stau1.
 
-### Calculate new densities
+## Calculate new densities
 ```{r species_to_0_bemovi_25_morph_mvt}
-file.copy(bemovi_filter_db, flowcam_filter_db)
 
-options(RRDdb = flowcam_filter_db)
+options(RRDdb = db_3)
 
 sql <-  paste0(
   "
@@ -996,15 +1000,15 @@ densityStau1 <- full_join(densityStau1, temp) %>%
 ```
 
 
-### Update RRD
+## VERIFY - Update RRD
 Delete from traits and add re-calcul;ated ones.
 
 ```{r label, eval=FALSE}
-file.copy(db_3, "tmp.4.sqlite")
+file.copy(db_3, db_4_tmp)
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = "tmp.4.sqlite"
+  db = db_4_tmp
 )
 DBI::dbBegin(conn)
 
@@ -1045,7 +1049,7 @@ message("   ", nrow(densityStau1), " rows added")
 DBI::dbCommit(conn)
 DBI::dbDisconnect(conn)
 
-file.rename("tmp.4.sqlite", db_final)
+file.rename(db_4_tmp, db_final)
 ```
 
 
