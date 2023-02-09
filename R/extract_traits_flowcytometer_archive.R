@@ -43,7 +43,7 @@ extract_traits_flowcytometer_archive <- function(
       function(timestamp){
         datadir <- file.path(
           extracted_dir,
-          paste0("LEEF.flowcytometer.flowcytometer.", as.character(timestamp))
+          paste0("LEEF.fast.flowcytometer.", as.character(timestamp))
         )
         message("###############################################")
         message("Extracting traits from ", timestamp, "...")
