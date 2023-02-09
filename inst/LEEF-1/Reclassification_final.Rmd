@@ -313,29 +313,6 @@ gate_flowcytometer_archive(
 
 ```
 
-
-## TODO - Trait Extraction Flowcytometer
-
-```{r biomass}
-## Select all timestamps
-
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
-
-extract_traits_flowcytometer_archive(
-  extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
-  timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer_traits"),
-  mc.cores = params$cores
-)
-```
-
-
 ## Add to database
 Old timestamps will be removed and not be backed up.
 ```{r addRRD}
@@ -353,6 +330,32 @@ system.time(
 
 file.rename(db_1_tmp, db_1)
 ```
+
+
+## TODO - Trait Extraction Flowcytometer and Volume Calculation
+
+```{r biomass}
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+
+extract_traits_flowcytometer_archive(
+  extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer_traits"),
+  mc.cores = 1 # params$cores
+)
+
+
+```
+
+
 # 2. DONE - Re-calculations of individual bottles and timestamps
 ## Flowcam Bottle `b_02`
 Bottle `b_02` was contaminated and needs to be classified separately. All timestamps will be classified using the same classifier.
@@ -366,7 +369,7 @@ until <- 30000000
 
 ### Set output path
 ```{r output_path_b}
-out <- file.path(output, paste0("flowcam_", bott, "_", format(after, scientific = FALSE), "_", format(until, scientific = FALSE)))
+out <- file.path(params$output_dir, paste0("flowcam_", bott, "_", format(after, scientific = FALSE), "_", format(until, scientific = FALSE)))
 ```
 
 ### Determine timestamps

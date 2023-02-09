@@ -7,12 +7,17 @@
 #' @param timestamps `character` vector containing the timestamps to be
 #'   classified
 #' @param output path to which the classified data will be saved as `rds`
+#' @param length_slope slope of the linear regression of FSC.A and size ( lm(mean_FSC.A ~ diameter_micrometer )
+#' @param length_intercept intercept of the linear regression of FSC.A and size ( lm(mean_FSC.A ~ diameter_micrometer )
 #' @param mc.cores number of cores to be used. Defaults to 1
 #'
 #' @return invisible `NULL`
 #'
-#' @importFrom  parallel mclapply
+#' @importFrom pbmcapply pbmclapply
 #' @importFrom yaml read_yaml write_yaml
+#' @importFrom magrittr %>%
+#' @importFrom dplyr
+#'
 #' @export
 #'
 #' @md
@@ -24,8 +29,14 @@ extract_traits_flowcytometer_archive <- function(
   particles = "bacteria",
   timestamps,
   output,
+  length_slope = 201615.1,
+  length_intercept = -39861.52,
   mc.cores = 1
 ){
+  if (length(particles) > 1){
+    stop("Argument particles has to be a character vector of length 1!")
+  }
+
   dir.create(
     output,
     showWarnings = FALSE,
@@ -38,8 +49,9 @@ extract_traits_flowcytometer_archive <- function(
   # do the stuff -------------------------------------------------------
 
   return(
-    pbmcapply::pbmclapply(
-      timestamps,
+    # pbmcapply::pbmclapply(
+    parallel::mclapply(
+        timestamps,
       function(timestamp){
         datadir <- file.path(
           extracted_dir,
@@ -55,7 +67,8 @@ extract_traits_flowcytometer_archive <- function(
               expr = {
                 traits <- LEEF.measurement.flowcytometer::extract_traits(
                   input = datadir,
-                  particles = particles
+                  particles = particles,
+                  metadata_flowcytometer = read.csv(file.path(datadir, "metadata_flowcytometer.csv"))
                 )
               }
             )
@@ -65,9 +78,16 @@ extract_traits_flowcytometer_archive <- function(
         if (!is.null(traits)) {
           message("Saving timestamp ", timestamp, "...")
 
+          traits[[particles]]$length <- traits[[particles]]$FSC.A/length_slope - length_intercept/length_slope
+          traits[[particles]]$volume <-4/9 * pi * traits[[particles]]$length^3
+
+          traits_sum <- traits %>% dplyr::group_by(bottle) %>%
+            dplyr::summarise(n = n(), mean = mean(length), sd = sd(length), median = median(length))
+
+
           dir.create(file.path(output))
           saveRDS(
-            object = traits$batceria,
+            object = traits$bacteria,
             file = file.path(output, paste0("flowcytometer_traits_bacteria.", timestamp, ".rds"))
           )
 
