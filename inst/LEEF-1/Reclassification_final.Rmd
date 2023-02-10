@@ -725,15 +725,19 @@ meas <- "bemovi_mag_16"
 extrapolation.factor <- 10.044
 cropping.factor <- 1
 
-morph16_list <- apply(moving_background16, 1, function(row){
-  sql = paste0("
+morph16_list <- apply(
+  moving_background16, 
+  1, 
+  function(row){
+    sql <- paste0("
                 SELECT *
                 FROM 'bemovi_mag_16__morph_mvt'
                 WHERE timestamp == '", row["timestamp"],
-               "' AND bottle == '", row["bottle"], "';")
-
-  read_sql(sql = sql)
-})
+                "' AND bottle == '", row["bottle"], "';")
+    
+    read_sql(sql = sql)
+  }
+)
 
 morph16 <- do.call("rbind", morph16_list) %>%
   dplyr::filter(!(file %in% videos_to_remove_16))
@@ -881,7 +885,7 @@ delete_sql <- paste0(
   " WHERE (",
   paste0(
     apply(
-      moving_background, 
+      moving_background16, 
       1,
       function(row){
         paste0("timestamp == '", row["timestamp"],"' AND bottle == '", row["bottle"], "'")
@@ -948,7 +952,7 @@ file.rename(db_3_tmp, db_3)
 ```
 
 
-# 4. Flowcam
+# 4. VERIFY - Flowcam Stau1
 
 The code below recalculates the densities after filtering Stau1 so that only
 particles are kept with high confidence that they are indeed Stau1.
@@ -962,7 +966,7 @@ sql <-  paste0(
   "
     SELECT *
     FROM 'flowcam__algae_traits'
-    WHERE species == 'Staurastrum1' AND species_probability > 0.9;
+    WHERE species == 'Staurastrum1' AND species_probability > 0.95;
   "
 )
   
@@ -1003,7 +1007,7 @@ densityStau1 <- full_join(densityStau1, temp) %>%
 ```
 
 
-## VERIFY - Update RRD
+## Update RRD
 Delete from traits and add re-calcul;ated ones.
 
 ```{r label, eval=FALSE}
