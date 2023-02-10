@@ -29,8 +29,8 @@ extract_traits_flowcytometer_archive <- function(
   particles = "bacteria",
   timestamps,
   output,
-  length_slope = 201615.1,
-  length_intercept = -39861.52,
+  length_slope = 4.933e-06,
+  length_intercept = 2.216e-01,
   mc.cores = 1
 ){
   if (length(particles) > 1){
@@ -81,8 +81,8 @@ extract_traits_flowcytometer_archive <- function(
           traits[[particles]]$length <- traits[[particles]]$FSC.A/length_slope - length_intercept/length_slope
           traits[[particles]]$volume <-4/9 * pi * traits[[particles]]$length^3
 
-          traits_sum <- traits %>% dplyr::group_by(bottle) %>%
-            dplyr::summarise(n = n(), mean = mean(length), sd = sd(length), median = median(length))
+          traits_sum <- traits[[particles]] %>% dplyr::group_by(bottle) %>%
+            dplyr::summarise(n = n(), mean = mean(FSC.A), sd = sd(FSC.A), median = median(FSC.A))
 
 
           dir.create(file.path(output))
