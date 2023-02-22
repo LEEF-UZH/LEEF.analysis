@@ -1,0 +1,89 @@
+---
+title: "TMP - Add FIXED / EAWAG to DB"
+format: html
+params:
+  db: "~/Desktop/flowcytometer.EAWAG/LEEF.RRD.v1.8.1.final.EAWAG.sqlite"
+  datadir: "~/Desktop/flowcytometer.EAWAG/LEEF.EAWAG.archived.data/"
+---
+
+
+## Setup
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+#| label: setup
+library(LEEF.analysis)
+
+timestamps <-  c("20220404", "20220406", "20220408", "20220411", "20220413", "20220415", "20220418", "20220420", "20220422", "20220425", "20220427")
+
+FROM <- 20220404
+UNTIL <- 20220427
+```
+
+## Add to database
+
+### Delete entries from database
+
+```{r}
+#| label: delete
+
+
+conn <- DBI::dbConnect(
+  drv = RSQLite::SQLite(),
+  db = params$db
+)
+
+delete_flowcytometr_density_sql <- paste0(
+  "DELETE ",
+  "FROM flowcytometer__flowcytometer_density ", 
+  "WHERE  timestamp >= ", format(FROM, scientific = FALSE), " AND timestamp <= ", format(UNTIL, scientific = FALSE)
+)
+message("Executing query '", delete_flowcytometr_density_sql, "`...")
+rd <- DBI::dbExecute(conn, delete_flowcytometr_density_sql)
+message("   ", rd, " rows deleted.")
+```
+
+### Add new entries to database 
+
+```{r}
+#| label: add
+
+fns <- list.files(
+  path = params$datadir, 
+  pattern = "flowcytometer_density.csv", 
+  full.names = TRUE, 
+  recursive = TRUE
+)
+
+message("Adding densities to the database")
+
+sapply(
+  fns,
+  function(fn){
+    DBI::dbWriteTable(
+      conn,
+      name = "flowcytometer__flowcytometer_density",
+      value = utils::read.csv(fn),
+      overwrite = FALSE,
+      append = TRUE
+    )
+  }
+)
+
+## close
+
+DBI::dbDisconnect(conn)
+
+```
+
+## Diagnostic report
+```{r}
+#| label: diagnostic_report
+
+report_diagnostic(
+  db = params$db, 
+  template = "LEEF_1"
+)
+
+```
