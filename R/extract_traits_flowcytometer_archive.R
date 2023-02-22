@@ -25,12 +25,12 @@
 #'
 
 extract_traits_flowcytometer_archive <- function(
-  extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
+  extracted_dir = "~/Desktop/flowcytometer.FIXED/LEEF.FIXED.archived.data/LEEF/3.archived.data/extracted/", # "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
   particles = "bacteria",
   timestamps,
   output,
-  length_slope = 201615 , # 4.933e-06,
-  length_intercept = -39861.52, #0.2216,
+  length_slope = 4.933e-06, # ,201615
+  length_intercept = 0.2216, #-39861.52,
   mc.cores = 1
 ){
   stop("There is something still wrong here - calculation of langth and volume!!!!!!!")
@@ -81,7 +81,7 @@ extract_traits_flowcytometer_archive <- function(
           message("Saving timestamp ", timestamp, "...")
 
           stop("There is something still wrong here!!!")
-          traits[[particles]]$length <- (10^(traits[[particles]]$FSC.A)) / length_slope - length_intercept/length_slope
+          traits[[particles]]$length <- (10^(traits[[particles]]$FSC.A)) * length_slope + length_intercept
           traits[[particles]]$volume <-4/9 * pi * traits[[particles]]$length^3
 
           traits_sum <- traits[[particles]] %>% dplyr::group_by(bottle) %>%
