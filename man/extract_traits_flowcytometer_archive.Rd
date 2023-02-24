@@ -6,10 +6,12 @@
 \usage{
 extract_traits_flowcytometer_archive(
   extracted_dir =
-    "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
+    "~/Desktop/flowcytometer.FIXED/LEEF.FIXED.archived.data/LEEF/3.archived.data/extracted/",
   particles = "bacteria",
   timestamps,
   output,
+  length_slope = 4.933e-06,
+  length_intercept = 0.2216,
   mc.cores = 1
 )
 }
@@ -22,6 +24,10 @@ for details.}
 classified}
 
 \item{output}{path to which the classified data will be saved as \code{rds}}
+
+\item{length_slope}{slope of the linear regression of FSC.A and size ( lm(mean_FSC.A ~ diameter_micrometer )}
+
+\item{length_intercept}{intercept of the linear regression of FSC.A and size ( lm(mean_FSC.A ~ diameter_micrometer )}
 
 \item{mc.cores}{number of cores to be used. Defaults to 1}
 }
