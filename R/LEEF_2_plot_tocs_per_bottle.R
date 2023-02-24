@@ -27,13 +27,14 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp <- function(
   if (nrow(data) < 1) {
     warning("No data for available!")
   } else {
+    data$label <- paste0("t: ", data$temperature, "\n r: ", data$resources, "\n s: ", data$salinity)
     data <- data %>%
       dplyr::mutate(bottle = fix_bottle(bottle)) %>%
-      group_by(day, bottle, type, salinity, resources, temperature)
+      group_by(day, bottle, type, salinity, resources, temperature, replicate)
 
     p <- ggplot2::ggplot(data, ggplot2::aes(x = .data$day, y = .data$concentration)) +
       ggplot2::geom_line(ggplot2::aes(y = .data$concentration, colour = .data$type)) +
-      ggplot2::facet_wrap(facets = vars(bottle), ncol = 3, scales = "free_y") +
+      ggplot2::facet_grid(rows = vars(replicate), cols = vars(label),scales = "free_y") +
       ggplot2::geom_text(
         data = data,
         ggplot2::aes(x = -Inf, y = Inf, label = bottle, group = bottle),

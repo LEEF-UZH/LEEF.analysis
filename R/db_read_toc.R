@@ -48,7 +48,7 @@ db_read_toc <- function(
     if (is.null(result)){
       ## LEEF-2
       result <- data %>%
-        group_by(timestamp, day, type, bottle, temperature, salinity, resources, incubator) %>%
+        group_by(timestamp, day, bottle, type, temperature, salinity, resources, incubator, replicate) %>%
         summarise(concentration = mean(concentration), cv = NA, n = n()) %>%
         ungroup()
 
