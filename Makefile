@@ -32,7 +32,7 @@ READMEHTML = Readme.html
 
 #############
 
-all: doc metadata build install
+all: doc metadata build install drat
 
 #############
 
@@ -65,10 +65,10 @@ metadata:
 	Rscript -e "codemetar::write_codemeta()"
 
 
-docs: doc
-
 doc:
 	Rscript -e "devtools::document(roclets = c('rd', 'collate', 'namespace', 'vignette'))"
+
+docs: doc metadata
 
 ####
 
