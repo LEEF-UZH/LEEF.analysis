@@ -181,7 +181,7 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp(
 
 ### TOC and TC
 
-```{r toc_raw_1_1, fig.height = 32, eval = TRUE}
+```{r toc_raw_1_1, fig.height = 10, fig.width = 15}
 LEEF_2_plot_tocs_per_bottle_per_timestamp(
   params$db,
   type = c("TOC", "TC")
@@ -193,7 +193,7 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp(
 ### IC and TN
 
 
-```{r toc_raw_2_1, fig.height = 32, eval = TRUE}
+```{r toc_raw_2_1, fig.height = 10, fig.width = 15}
 LEEF_2_plot_tocs_per_bottle_per_timestamp(
   params$db,
   type = c("IC", "TN")
@@ -311,7 +311,7 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp(
 
 ### TOC and TC
 
-```{r toc_raw_1_2, fig.height = 32, eval = TRUE}
+```{r toc_raw_1_2, fig.height = 10, fig.width = 15}
 LEEF_2_plot_tocs_per_bottle_per_timestamp(
   params$db,
   type = c("TOC", "TC")
@@ -323,7 +323,7 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp(
 ### IC and TN
 
 
-```{r toc_raw_2_2, fig.height = 32, eval = TRUE}
+```{r toc_raw_2_2, fig.height = 10, fig.width = 15}
 LEEF_2_plot_tocs_per_bottle_per_timestamp(
   params$db,
   type = c("IC", "TN")

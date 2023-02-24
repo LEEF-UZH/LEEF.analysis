@@ -4,6 +4,8 @@
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
 #' @param type the type of the measurement which should be displayed. A vector with the types.
 #'   Possible values are: "TOC", "TN", "IC", "TN", "".
+#' @param treatment_begin_day begin of treatment (vertical red line in plot). If \code{NULL} none is plotted.
+#' @param treatment_end_day end of treatment (vertical red line in plot). If \code{NULL} none is plotted.
 #'
 #' @return \code{ggplot} object of the plot
 #'
@@ -16,7 +18,9 @@
 #' @examples
 LEEF_2_plot_tocs_per_bottle_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  type = c("IC", "TC", "TN", "TOC")
+  type = c("IC", "TC", "TN", "TOC"),
+  treatment_begin_day = 70,
+  treatment_end_day = NULL
 ){
   options(dplyr.summarise.inform = FALSE)
 
@@ -47,6 +51,12 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp <- function(
       ggplot2::ylab("concentration") +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45)) # +
       # geom_vline(xintercept = range(ls$day), colour = "lightgrey")
+    if (!is.null(treatment_begin_day)) {
+      p <- p + geom_vline(xintercept = range(treatment_begin_day), colour = "red")
+    }
+    if (!is.null(treatment_end_day)) {
+      p <- p + geom_vline(xintercept = range(treatment_end_day), colour = "red")
+    }
     p
   }
 }
