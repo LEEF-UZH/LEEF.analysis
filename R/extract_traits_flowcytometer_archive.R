@@ -29,12 +29,10 @@ extract_traits_flowcytometer_archive <- function(
   particles = "bacteria",
   timestamps,
   output,
-  length_slope = 4.933e-06, # ,201615
-  length_intercept = 0.2216, #-39861.52,
+  length_slope = 4.933454e-06, # ,201615
+  length_intercept = 2.215799e-01, #-39861.52,
   mc.cores = 1
 ){
-  stop("There is something still wrong here - calculation of langth and volume!!!!!!!")
-
   if (length(particles) > 1){
     stop("Argument particles has to be a character vector of length 1!")
   }

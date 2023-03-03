@@ -1,0 +1,133 @@
+---
+title: "Flowcytometer Biomass Calculation"
+author: "Rainer M Krug & Romana Limberger"
+format: html
+params:
+  pre_processed_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
+  extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
+  output_dir: "~/Desktop/flowcytometer_raw"
+  timestamp: 20220309
+  particles: "bacteria"
+  length_slope: 4.933454e-06
+  length_intercept: 2.215799e-01
+---
+
+
+## Introduction
+
+Details the calculation of the biomass and the problem occuring with `FSC.A == 0`
+
+```{r}
+#| label: setup
+
+library(LEEF.analysis)
+library(LEEF.measurement.flowcytometer)
+```
+
+## Calculate  measurements
+
+The gates are redefined, so that nothing is excluded by gating for bacteria.
+```{r}
+#| label: extract_FSC_A_raw
+
+dir.create(file.path(params$output_dir, "pre_processed"), showWarnings = FALSE, recursive = TRUE)
+
+file.copy(
+  file.path(params$pre_processed_dir, paste0("LEEF.fast.flowcytometer.", as.character(params$timestamp))),
+  file.path(params$output_dir, "pre_processed"),
+  recursive = TRUE,
+  copy.mode = FALSE
+)
+
+file.rename(
+  from = file.path(params$output, "pre_processed", paste0("LEEF.fast.flowcytometer.", as.character(params$timestamp))),
+  to   = file.path(params$output, "pre_processed", "flowcytometer")
+)
+
+write.csv(
+  data.frame(
+    bacteria1 = c(0, 0, 100000000, 100000000), 
+    bacteria2 = c(0, 100000000, 100000000, 0), 
+    LNA = c(3,4.579784, NA, NA), 
+    MNA = c(4.579785, 4.954243, NA, NA), 
+    HNA = c(4.954244, 7, NA, NA), 
+    algae1 = c(3, 3, 7, 7), 
+    algae2 = c(4, 7, 7, 4)
+  ), 
+  file = file.path(params$output, "pre_processed", "flowcytometer", "gates_coordinates.csv")
+)
+
+dir.create(file.path(params$output_dir, "extracted_raw"), showWarnings = FALSE, recursive = TRUE)
+
+LEEF.measurement.flowcytometer::extractor_flowcytometer(
+  input = file.path(params$output, "pre_processed"),
+  output = file.path(params$output_dir, "extracted_raw"),
+  raw = TRUE
+)
+
+dir.create(file.path(params$output_dir, "extracted_log10"), showWarnings = FALSE, recursive = TRUE)
+
+LEEF.measurement.flowcytometer::extractor_flowcytometer(
+  input = file.path(params$output, "pre_processed"),
+  output = file.path(params$output_dir, "extracted_log10"),
+  raw = FALSE
+)
+
+```
+
+## Read Data
+
+### Size Standard
+```{r}
+#| label: get_ss
+
+ss <- data.frame(
+  diameter_micrometer = c(1L, 3L, 10L), 
+  mean_FSC.A = c(102045L, 641752L, 1959230L), 
+  log_mean_FSC.A = c(5.008792, 5.807367, 6.292085)
+)
+```
+
+
+### Log10 transformed
+```{r}
+#| label: get_FSC_A_log10
+
+datadir <- file.path(params$output_dir, "extracted_log10", "flowcytometer")
+
+traits_log10 <- LEEF.measurement.flowcytometer::extract_traits(
+  input = datadir,
+  particles = params$particles,
+  metadata_flowcytometer = read.csv(file.path(datadir, "metadata_flowcytometer.csv"))
+)
+```
+
+### Non-log10 transformed
+```{r}
+#| label: label
+
+datadir <- file.path(params$output_dir, "extracted_raw", "flowcytometer")
+
+traits_raw <- LEEF.measurement.flowcytometer::extract_traits(
+  input = datadir,
+  particles = params$particles,
+  metadata_flowcytometer = read.csv(file.path(datadir, "metadata_flowcytometer.csv"))
+)
+```
+
+
+
+
+```{r}
+#| label: plot_size_standard
+#| 
+
+plot(ss$mean_FSC.A, ss$diameter_micrometer, xlim = c(0, 3000000), ylim = c(0, 20))
+abline(a = params$length_intercept, b = params$length_slope)
+abline(v = min(traits_raw[[1]]$FSC.A))
+abline(v = max(traits_raw[[1]]$FSC.A))
+abline(h = 0)
+
+```
+
+
