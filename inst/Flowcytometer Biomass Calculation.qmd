@@ -218,6 +218,8 @@ scattermoreplot(traits_log10[[1]]$FSC.A, x, xlab = "log10(FSC.A)", ylab = "log10
 ```
 
 
+### And some more density plots
+
 #### Raw FSC.A and FSC.H
 
 ```{r}
@@ -334,5 +336,22 @@ traits_raw[[1]]$Width[i1] |> density(to = 500, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$Width[!i0] |> density(to = 500, bw = 1) |> lines(col = "green")
 ```
 
+
+## Now to the sizes
+
+```{r}
+#| label: size
+#|
+
+i <- traits_log10[[1]]$FSC.A != 0
+
+traits_log10[[1]]$length[i] <- 10^(traits_log10[[1]]$FSC.A[i]) * params$length_slope + params$length_intercept
+traits_log10[[1]]$volume <- 4/9 * pi * traits_log10[[1]]$length^3
+
+traits_log10[[1]]$length |> density(na.rm = TRUE) |> plot(main = "length in micro meter")
+traits_log10[[1]]$length |> density(na.rm = TRUE, from = 1) |> plot(main = "length in micro meter (l > 1")
+traits_log10[[1]]$length |> density(na.rm = TRUE, from = 1, to = 30) |> plot(main = "length in micro meter (1 < l < 30_")
+
+```
 
 
