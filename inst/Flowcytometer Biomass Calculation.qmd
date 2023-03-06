@@ -9,8 +9,7 @@ format:
     embed-resources: true
 params:
   pre_processed_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
-  extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
-  output_dir: "~/Desktop/flowcytometer_raw"
+  output_dir: "~/Desktop/flowcytometer_biomass/"
   timestamp: 20220309
   particles: "all"
   length_slope: 4.933454e-06
@@ -27,6 +26,7 @@ Details the calculation of the biomass and the problem occuring with `FSC.A == 0
 
 library(LEEF.analysis)
 library(LEEF.measurement.flowcytometer)
+library(scattermore)
 ```
 
 ## Calculate  measurements
@@ -151,7 +151,18 @@ traits_raw[[1]]$FSC.A |> table() |> head()
 
 ## Some Plots
 
-The Size standard and the extrapolation
+
+```{r}
+#| label: define_is
+#| 
+
+i0 <- traits_raw[[1]]$FSC.A == 0
+i1 <- traits_raw[[1]]$FSC.A == 1
+```
+
+
+
+### The Size standard and the extrapolation
 ```{r}
 #| label: plot_size_standard
 #| 
@@ -163,98 +174,165 @@ abline(v = max(traits_raw[[1]]$FSC.A))
 abline(h = 0)
 ```
 
-## Density distribution of raw and log10 transformed
+### Scatterplots
 
-### SSC.A
+#### FSC-A auf der x-Achse und SSC-A auf der y-Achse
+
+
 ```{r}
-#| label: table
-#| 
+scattermoreplot(traits_raw[[1]]$FSC.A, traits_raw[[1]]$SSC.A, xlab = "FSC.A", ylab = "SSC.A")
+x <- traits_log10[[1]]$FSC.H
+x[x==0] <- 1
+x <- log10(x)
+scattermoreplot(traits_log10[[1]]$FSC.A, x, xlab = "log10(FSC.A)", ylab = "log10(SSC.A)")
+```
 
-i0 <- traits_raw[[1]]$FSC.A == 0
-i1 <- traits_raw[[1]]$FSC.A == 1
+#### FSC-A auf der x-Achse und FL1-A auf der y-Achse
 
+```{r}
+scattermoreplot(traits_raw[[1]]$FSC.A, traits_raw[[1]]$FL1.A, xlab = "FSC.A", ylab = "FL1.A")
+x <- traits_log10[[1]]$FL1.A
+x[x==0] <- 1
+x <- log10(x)
+scattermoreplot(traits_log10[[1]]$FSC.A, x, xlab = "log10(FSC.A)", ylab = "log10(FL1.A)")
+```
+
+#### FSC-A auf der x-Achse und FL3-A auf der y-Achse
+
+```{r}
+scattermoreplot(traits_raw[[1]]$FSC.A, traits_raw[[1]]$FL3.A, xlab = "FSC.A", ylab = "FL3.A")
+x <- traits_log10[[1]]$FL3.A
+x[x==0] <- 1
+x <- log10(x)
+scattermoreplot(traits_log10[[1]]$FSC.A, x, xlab = "log10(FSC.A)", ylab = "log10(FL3.A)")
+```
+
+#### FSC-A auf der x-Achse und FSC-H auf der y-Achse
+
+```{r}
+scattermoreplot(traits_raw[[1]]$FSC.A, traits_raw[[1]]$FSC.H, xlab = "FSC.A", ylab = "FSC.H")
+x <- traits_log10[[1]]$FSC.H
+x[x==0] <- 1
+x <- log10(x)
+scattermoreplot(traits_log10[[1]]$FSC.A, x, xlab = "log10(FSC.A)", ylab = "log10(FSC.H)")
+```
+
+
+#### Raw FSC.A and FSC.H
+
+```{r}
+#| label: densities_raw
+
+traits_raw[[1]]$FSC.A |> density(bw = 10, to = 5000) |> plot(main = "FSC.A")
+traits_raw[[1]]$FSC.H |> density(bw = 10, to = 10000) |> plot(main = "FSC.H")
+```
+
+
+#### log10 FSC.A and FSC.H
+
+```{r}
+#| label: densities_log
+
+traits_log10[[1]]$FSC.A |> density(bw = 0.02) |> plot(main = "log10(FSC.A)")
+x <- traits_log10[[1]]$FSC.H
+x[x==0] <- 1
+x |> log10() |> density(bw = 0.02) |> plot(main = "log10(FSC.H)")
+```
+
+
+
+
+
+- BLACK Line: All particles with `FSC.A == 0` (will tbe transformed to `0` using log10)
+- RED Line: All particles with `FSC.A == 1` (will tbe transformed to `0` using log10)
+- Black Line: All particles with `FSC.A != 0`
+
+#### SSC.A
+```{r}
 traits_raw[[1]]$SSC.A[i0] |> density(to = 10000, bw = 1) |> plot()
 traits_raw[[1]]$SSC.A[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$SSC.A[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
 ```
 
-### FL1.A
+#### FL1.A
 ```{r}
 traits_raw[[1]]$FL1.A[i0] |> density(to = 10000, bw = 1) |> plot()
 traits_raw[[1]]$FL1.A[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$FL1.A[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
 ```
 
-### FL1.A
-```{r}
-traits_raw[[1]]$FL1.A[i0] |> density(to = 10000, bw = 1) |> plot()
-traits_raw[[1]]$FL2.A[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
-traits_raw[[1]]$FL2.A[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
-```
-
-### FL3.A
-```{r}
-traits_raw[[1]]$FL3.A[i0] |> density(to = 10000, bw = 1) |> plot()
-traits_raw[[1]]$FL3.A[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
-traits_raw[[1]]$FL3.A[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
-```
-
-### FL4.A
-```{r}
-traits_raw[[1]]$FL4.A[i0] |> density(to = 2000, bw = 1) |> plot()
-traits_raw[[1]]$FL4.A[i1] |> density(to = 2000, bw = 1) |> lines(col = "red")
-traits_raw[[1]]$FL4.A[!i0] |> density(to = 2000, bw = 1) |> lines(col = "green")
-```
-
-### FL2.A
+#### FL2.A
 ```{r}
 traits_raw[[1]]$FL2.A[i0] |> density(to = 10000, bw = 1) |> plot()
 traits_raw[[1]]$FL2.A[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$FL2.A[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
 ```
 
-### FSC.H
+#### FL3.A
+```{r}
+traits_raw[[1]]$FL3.A[i0] |> density(to = 10000, bw = 1) |> plot()
+traits_raw[[1]]$FL3.A[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
+traits_raw[[1]]$FL3.A[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
+```
+
+#### FL4.A
+```{r}
+traits_raw[[1]]$FL4.A[i0] |> density(to = 2000, bw = 1) |> plot()
+traits_raw[[1]]$FL4.A[i1] |> density(to = 2000, bw = 1) |> lines(col = "red")
+traits_raw[[1]]$FL4.A[!i0] |> density(to = 2000, bw = 1) |> lines(col = "green")
+```
+
+#### FL2.A
+```{r}
+traits_raw[[1]]$FL2.A[i0] |> density(to = 10000, bw = 1) |> plot()
+traits_raw[[1]]$FL2.A[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
+traits_raw[[1]]$FL2.A[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
+```
+
+#### FSC.H
 ```{r}
 traits_raw[[1]]$FSC.H[i0] |> density(to = 10000, bw = 1) |> plot()
 traits_raw[[1]]$FSC.H[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$FSC.H[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
 ```
 
-### SSC.H
+#### SSC.H
 ```{r}
 traits_raw[[1]]$SSC.H[i0] |> density(to = 10000, bw = 1) |> plot()
 traits_raw[[1]]$SSC.H[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$SSC.H[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
 ```
 
-### FL1.H
+#### FL1.H
 ```{r}
 traits_raw[[1]]$FL1.H[i0] |> density(to = 10000, bw = 1) |> plot()
 traits_raw[[1]]$FL1.H[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$FL1.H[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
 ```
-### FL2.H
+#### FL2.H
 ```{r}
 traits_raw[[1]]$FL2.H[i0] |> density(to = 10000, bw = 1) |> plot()
 traits_raw[[1]]$FL2.H[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$FL2.H[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
 ```
-### FL3.H
+#### FL3.H
 ```{r}
 traits_raw[[1]]$FL3.H[i0] |> density(to = 10000, bw = 1) |> plot()
 traits_raw[[1]]$FL3.H[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$FL3.H[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
 ```
-### FL4.H
+#### FL4.H
 ```{r}
 traits_raw[[1]]$FL4.H[i0] |> density(to = 10000, bw = 1) |> plot()
 traits_raw[[1]]$FL4.H[i1] |> density(to = 10000, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$FL4.H[!i0] |> density(to = 10000, bw = 1) |> lines(col = "green")
 ```
-### Width
+#### Width
 ```{r}
 traits_raw[[1]]$Width[i0] |> density(to = 500, bw = 1) |> plot()
 traits_raw[[1]]$Width[i1] |> density(to = 500, bw = 1) |> lines(col = "red")
 traits_raw[[1]]$Width[!i0] |> density(to = 500, bw = 1) |> lines(col = "green")
 ```
+
+
 
