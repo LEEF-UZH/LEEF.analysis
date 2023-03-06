@@ -1008,7 +1008,7 @@ densityStau1 <- full_join(densityStau1, temp) %>%
 
 
 ## Update RRD
-Delete from traits and add re-calcul;ated ones.
+Delete from traits and add re-calculated ones.
 
 ```{r label, eval=FALSE}
 file.copy(db_3, db_4_tmp)
