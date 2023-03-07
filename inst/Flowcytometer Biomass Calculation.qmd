@@ -4,6 +4,7 @@ author: "Rainer M Krug & Romana Limberger"
 format: 
   html:
     toc: true
+    toc-depth: 5
     toc-location: left
     code-fold: true
     embed-resources: true
@@ -11,9 +12,7 @@ params:
   pre_processed_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
   output_dir: "~/Desktop/flowcytometer_biomass/"
   timestamp: 20220309
-  particles: "all"
-  length_slope: 4.933454e-06
-  length_intercept: 2.215799e-01
+  particles: "bacteria"
 ---
 
 
@@ -78,12 +77,38 @@ if (!dir.exists(file.path(params$output_dir, "extracted_log10"))){
 ```{r}
 #| label: get_ss
 
-ss <- data.frame(
+ss_replacement <- list()
+ss_replacement$data <- data.frame(
+  diameter_micrometer = c(1L, 3L, 10L), 
+  mean_FSC.A = c(96374L, 653207L, 1855322L), 
+  mean_FSC.H = c(100606L, 661955L, 1252168)
+)
+
+ss_replacement$fit.A <- lm(ss_replacement$data$diameter_micrometer ~ ss_replacement$data$mean_FSC.A)
+ss_replacement$slope_A <- ss_replacement$fit.A$coefficients[[2]]
+ss_replacement$intercept_A <- ss_replacement$fit.A$coefficients[[1]]
+
+ss_replacement$fit.H <- lm(ss_replacement$data$diameter_micrometer ~ ss_replacement$data$mean_FSC.H)
+ss_replacement$slope_H <- ss_replacement$fit.H$coefficients[[2]]
+ss_replacement$intercept_H <- ss_replacement$fit.H$coefficients[[1]]
+
+
+ss_repaired <- list()
+ss_repaired$data <- data.frame(
   diameter_micrometer = c(1L, 3L, 10L), 
   mean_FSC.A = c(102045L, 641752L, 1959230L), 
-  log_mean_FSC.A = c(5.008792, 5.807367, 6.292085)
+  mean_FSC.H = c(106576L, 648403L, 1303073L)
 )
+
+ss_repaired$fit.A <- lm(ss_repaired$data$diameter_micrometer ~ ss_repaired$data$mean_FSC.A)
+ss_repaired$slope_A <- ss_repaired$fit.A$coefficients[[2]]
+ss_repaired$intercept_A <- ss_repaired$fit.A$coefficients[[1]]
+
+ss_repaired$fit.H <- lm(ss_repaired$data$diameter_micrometer ~ ss_repaired$data$mean_FSC.H)
+ss_repaired$slope_H <- ss_repaired$fit.H$coefficients[[2]]
+ss_repaired$intercept_H <- ss_repaired$fit.H$coefficients[[1]]
 ```
+
 
 
 ### Log10 transformed
@@ -92,18 +117,19 @@ ss <- data.frame(
 
 datadir <- file.path(params$output_dir, "extracted_log10", "flowcytometer")
 
-# write.csv(
-#   data.frame(
-#     bacteria1 = c(0, 10000000, 10000000, 0),
-#     bacteria2 = c(0, 0,        10000000, 10000000),
-#     LNA = c(3,4.579784, NA, NA),
-#     MNA = c(4.579785, 4.954243, NA, NA),
-#     HNA = c(4.954244, 7, NA, NA),
-#     algae1 = c(3, 3, 7, 7),
-#     algae2 = c(4, 7, 7, 4)
-#   ),
-#   file = file.path(datadir, "gates_coordinates.csv")
-# )
+write.csv(
+  data.frame(
+    bacteria1 = c(3.477121255, 3.477121255, 7.204119983, 7.204119983),
+    bacteria2 = c(0,           3.301029996, 6.447158031, 0),
+    LNA = c(3,4.579784, NA, NA),
+    MNA = c(4.579785, 4.954243, NA, NA),
+    HNA = c(4.954244, 7, NA, NA),
+    algae1 = c(3, 3, 7, 7),
+    algae2 = c(4, 7, 7, 4)
+  ),
+  row.names = FALSE,
+  file = file.path(datadir, "gates_coordinates.csv")
+)
 
 traits_log10 <- LEEF.measurement.flowcytometer::extract_traits(
   input = datadir,
@@ -122,18 +148,19 @@ traits_log10[[1]]$FSC.A |> table() |> head()
 
 datadir <- file.path(params$output_dir, "extracted_raw", "flowcytometer")
 
-# write.csv(
-#   x = data.frame(
-#     bacteria1 = c(0, 15000000, 15000000, 0   ),
-#     bacteria2 = c(0, 0,    15000000, 15000000),
-#     LNA = c(3,4.579784, NA, NA),
-#     MNA = c(4.579785, 4.954243, NA, NA),
-#     HNA = c(4.954244, 7, NA, NA),
-#     algae1 = c(3, 3, 7, 7),
-#     algae2 = c(4, 7, 7, 4)
-#   ),
-#   file = file.path(datadir, "gates_coordinates.csv")
-# )
+write.csv(
+  data.frame(
+    bacteria1 = 10^c(3.477121255, 3.477121255, 7.204119983, 7.204119983),
+    bacteria2 = 10^c(0,           3.301029996, 6.447158031, 0),
+    LNA = c(3,4.579784, NA, NA),
+    MNA = c(4.579785, 4.954243, NA, NA),
+    HNA = c(4.954244, 7, NA, NA),
+    algae1 = c(3, 3, 7, 7),
+    algae2 = c(4, 7, 7, 4)
+  ),
+  row.names = FALSE,
+  file = file.path(datadir, "gates_coordinates.csv")
+)
 
 
 traits_raw <- LEEF.measurement.flowcytometer::extract_traits(
@@ -162,15 +189,65 @@ i1 <- traits_raw[[1]]$FSC.A == 1
 
 
 
-### The Size standard and the extrapolation
+### Size Standards
+
+#### Repaired
 ```{r}
-#| label: plot_size_standard
+#| label: plot_ss_repaired
 #| 
 
-plot(ss$mean_FSC.A, ss$diameter_micrometer, xlim = c(0, 3000000), ylim = c(0, 20))
-abline(a = params$length_intercept, b = params$length_slope)
+plot(
+  ss_repaired$data$mean_FSC.A, 
+  ss_repaired$data$diameter_micrometer, 
+  xlim = c(0, 3000000), 
+  ylim = c(0, 20),
+  main = "Repaired - FSC.A"
+)
+abline(a = ss_repaired$intercept_A, b = ss_repaired$slope_A)
 abline(v = min(traits_raw[[1]]$FSC.A))
 abline(v = max(traits_raw[[1]]$FSC.A))
+abline(h = 0)
+
+plot(
+  ss_repaired$data$mean_FSC.H, 
+  ss_repaired$data$diameter_micrometer, 
+  xlim = c(0, 1500000), 
+  ylim = c(0, 20),
+  main = "Repaired - FSC.H"
+)
+abline(a = ss_repaired$intercept_H, b = ss_repaired$slope_H)
+abline(v = min(traits_raw[[1]]$FSC.H))
+abline(v = max(traits_raw[[1]]$FSC.H))
+abline(h = 0)
+```
+
+#### Replacement
+```{r}
+#| label: plot_ss_replacement
+#| 
+
+plot(
+  ss_replacement$data$mean_FSC.A, 
+  ss_replacement$data$diameter_micrometer, 
+  xlim = c(0, 3000000),
+  ylim = c(0, 20),
+  main = "Replacement - FSC.A"
+)
+abline(a = ss_replacement$intercept_A, b = ss_replacement$slope_A)
+abline(v = min(traits_raw[[1]]$FSC.A))
+abline(v = max(traits_raw[[1]]$FSC.A))
+abline(h = 0)
+
+plot(
+  ss_replacement$data$mean_FSC.H, 
+  ss_replacement$data$diameter_micrometer, 
+  xlim = c(0, 1500000), 
+  ylim = c(0, 20),
+  main = "Replacement - FSC.H"
+)
+abline(a = ss_replacement$intercept_H, b = ss_replacement$slope_H)
+abline(v = min(traits_raw[[1]]$FSC.H))
+abline(v = max(traits_raw[[1]]$FSC.H))
 abline(h = 0)
 ```
 
@@ -339,19 +416,45 @@ traits_raw[[1]]$Width[!i0] |> density(to = 500, bw = 1) |> lines(col = "green")
 
 ## Now to the sizes
 
+#### FSC.A based
 ```{r}
-#| label: size
+#| label: size_A
 #|
 
-i <- traits_log10[[1]]$FSC.A != 0
+i <- traits_log10[[1]]$FSC.A > 1
 
-traits_log10[[1]]$length[i] <- 10^(traits_log10[[1]]$FSC.A[i]) * params$length_slope + params$length_intercept
-traits_log10[[1]]$volume <- 4/9 * pi * traits_log10[[1]]$length^3
+traits_log10[[1]]$length_A[i] <- 10^(traits_log10[[1]]$FSC.A[i]) * ss_repaired$slope_A + ss_repaired$intercept_A
+traits_log10[[1]]$volume_A <- 4/9 * pi * traits_log10[[1]]$length_A^3
 
-traits_log10[[1]]$length |> density(na.rm = TRUE) |> plot(main = "length in micro meter")
-traits_log10[[1]]$length |> density(na.rm = TRUE, from = 1) |> plot(main = "length in micro meter (l > 1")
-traits_log10[[1]]$length |> density(na.rm = TRUE, from = 1, to = 30) |> plot(main = "length in micro meter (1 < l < 30_")
-
+traits_log10[[1]]$length_A |> density(na.rm = TRUE) |> plot(main = "FSC.A - length in micro meter")
+traits_log10[[1]]$length_A |> density(na.rm = TRUE, to = 0.5) |> plot(main = "FSC.A - length in micro meter (l < 0.5")
+traits_log10[[1]]$length_A |> density(na.rm = TRUE, to = 0.3) |> plot(main = "FSC.A - length in micro meter (l < 0.2)")
 ```
 
+#### FSC.H based
+```{r}
+#| label: size_H
+#|
+
+i <- traits_log10[[1]]$FSC.H != 0
+
+traits_log10[[1]]$length_H <- traits_log10[[1]]$FSC.H * ss_repaired$slope_H + ss_repaired$intercept_H
+traits_log10[[1]]$volume_H <- 4/9 * pi * traits_log10[[1]]$length_H^3
+
+traits_log10[[1]]$length_H |> density(na.rm = TRUE) |> plot(main = "FSC.H - length in micro meter")
+traits_log10[[1]]$length_H |> density(na.rm = TRUE, to = 2) |> plot(main = "FSC.H - length in micro meter (l < 2)")
+traits_log10[[1]]$length_H |> density(na.rm = TRUE, to = 0.5) |> plot(main = "FSC.H - length in micro meter (l < 0.5)")
+```
+
+
+```{r}
+(traits_log10[[1]]$length_H - traits_log10[[1]]$length_A) |>
+  density(na.rm = TRUE) |>
+  plot(main = "length_H - length_A")
+
+(traits_log10[[1]]$length_H - traits_log10[[1]]$length_A) |>
+  density(na.rm = TRUE, from = -1, to = 1) |>
+  plot(main = "length_H - length_A")
+
+```
 
