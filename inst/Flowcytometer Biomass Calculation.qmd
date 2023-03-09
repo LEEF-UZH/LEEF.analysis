@@ -124,6 +124,7 @@ ss_repaired$intercept_H <- ss_repaired$fit.H$coefficients[[1]]
 ### Raw 
 ```{r}
 #| label: get_raw
+#| eval: false
 
 datadir <- file.path(params$output_dir, "extracted_raw", "flowcytometer")
 
