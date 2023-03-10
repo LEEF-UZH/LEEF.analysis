@@ -1,0 +1,83 @@
+---
+title: "Assessment Size Standard"
+format: 
+  html:
+    toc: true
+    toc-depth: 5
+    toc-location: left
+    code-fold: true
+    embed-resources: true
+---
+
+## Assessment of Size Standards
+
+ADD HOW CALCULATED / EXTRACTED
+
+```{r}
+#| label: setup
+#| 
+#| 
+
+library(ggplot2)
+library(LEEF.analysis)
+```
+
+```{r}
+
+dir.create("./flowcytometer")
+fsa <- readRDS("~/Desktop/size_check_beads/20220718_beads/flowcytometer/flowcytometer_fsa_ungated.rds")
+  
+# log transform everything which had not been transformed in the pipeline
+fsa <- flowCore::transform(
+  fsa,
+  flowCore::transformList(
+    c("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"),
+    flowCore::truncateTransform("truncate at 1")
+  )
+)
+fsa <- flowCore::transform(
+  fsa,
+  flowCore::transformList(
+    c("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"), 
+    "log10"
+  )
+)
+
+metadata <- utils::read.csv("~/Desktop/size_check_beads/20220718_beads/flowcytometer/sample_metadata.yml")
+
+gates_coordinates <- data.frame(
+  bacteria1 = c(3.301029996, 3.301029996, 7.204119983, 7.204119983), 
+  bacteria2 = c(0,           3.301029996, 6.301029996, 0.         ), 
+  LNA =       c(3.301029996, 4.579784,    NA,          NA         ), 
+  MNA =       c(4.579785,    4.954243,    NA,          NA         ), 
+  HNA =       c(4.954244,    7.204119983, NA,          NA         ), 
+  algae1 =    c(3,           3,           7.204119983, 7.204119983), 
+  algae2 =    c(3.301029996, 7.204119983, 7.204119983, 3.301029996)
+)
+
+traits <- LEEF.measurement.flowcytometer::extract_traits(
+  particles = "all",
+  metadata_flowcytometer = metadata,
+  use_H = FALSE, 
+  excl_FSCA_0 = FALSE,
+  timestamp = 99999999,
+  gates_coordinates = gates_coordinates,
+  fsa = fsa
+)[[1]]
+
+
+traits <- readRDS("~/Desktop/size_check_beads/20220718_beads/traits.rds")
+```
+
+
+### Plots
+#### Density distribution of FSC.A
+Horizontal lines indicate the mean_FSC.A as in the size standards 1 - 3 - 10, left to right.
+
+```{r}
+traits |> ggplot(aes( x = FSC.A)) + ggplot2::geom_density(bounds = c(0, 8)) + geom_vline(xintercept = c(log10(96374L), log10(653207L), log10(1855322L)))
+traits |> ggplot(aes( x = FSC.A)) + ggplot2::geom_density(bounds = c(4.5, 6.5)) + geom_vline(xintercept = c(log10(96374L), log10(653207L), log10(1855322L)))
+```
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).

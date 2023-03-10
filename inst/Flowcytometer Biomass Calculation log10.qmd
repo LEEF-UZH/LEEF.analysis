@@ -108,14 +108,14 @@ fsa <- readRDS(
 fsa <- flowCore::transform(
   fsa,
   flowCore::transformList(
-    c("FL2-A", "FL1-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"),
+    c("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"),
     flowCore::truncateTransform("truncate at 1")
   )
 )
 fsa <- flowCore::transform(
   fsa,
   flowCore::transformList(
-    c("FL2-A", "FL1-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"), 
+    c("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"), 
     "log10"
   )
 )
@@ -172,8 +172,8 @@ traits$FSC.A |> table() |> head()
 plot(
   ss_repaired$data$mean_FSC.A, 
   ss_repaired$data$diameter_micrometer, 
-  xlim = c(0, 16777215), 
-  ylim = c(0, 100),
+  #xlim = c(0, 16777215), 
+  #ylim = c(0, 100),
   main = "Repaired - FSC.A"
 )
 abline(a = ss_repaired$intercept_A, b = ss_repaired$slope_A)
