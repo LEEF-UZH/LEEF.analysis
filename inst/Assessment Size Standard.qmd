@@ -23,50 +23,71 @@ library(LEEF.analysis)
 ```
 
 ```{r}
-
-dir.create("./flowcytometer")
-fsa <- readRDS("~/Desktop/size_check_beads/20220718_beads/flowcytometer/flowcytometer_fsa_ungated.rds")
-  
 # log transform everything which had not been transformed in the pipeline
-fsa <- flowCore::transform(
-  fsa,
-  flowCore::transformList(
-    c("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"),
-    flowCore::truncateTransform("truncate at 1")
+if (file.exists("~/Desktop/size_check_beads/20220718_beads/traits.rds")) {
+  traits <- readRDS("~/Desktop/size_check_beads/20220718_beads/traits.rds")
+} else {
+  dir.create("./flowcytometer")
+  fsa <- readRDS("~/Desktop/size_check_beads/20220718_beads/flowcytometer/flowcytometer_fsa_ungated.rds")
+  fsa <- flowCore::transform(
+    fsa,
+    flowCore::transformList(
+      c("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"),
+      flowCore::truncateTransform("truncate at 1")
+    )
   )
-)
-fsa <- flowCore::transform(
-  fsa,
-  flowCore::transformList(
-    c("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"), 
-    "log10"
+  fsa <- flowCore::transform(
+    fsa,
+    flowCore::transformList(
+      c("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"), 
+      "log10"
+    )
   )
+  
+  metadata <- utils::read.csv("~/Desktop/size_check_beads/20220718_beads/flowcytometer/metadata_flowcytometer.csv")
+  
+  gates_coordinates <- data.frame(
+    bacteria1 = c(3.301029996, 3.301029996, 7.204119983, 7.204119983), 
+    bacteria2 = c(0,           3.301029996, 6.301029996, 0.         ), 
+    LNA =       c(3.301029996, 4.579784,    NA,          NA         ), 
+    MNA =       c(4.579785,    4.954243,    NA,          NA         ), 
+    HNA =       c(4.954244,    7.204119983, NA,          NA         ), 
+    algae1 =    c(3,           3,           7.204119983, 7.204119983), 
+    algae2 =    c(3.301029996, 7.204119983, 7.204119983, 3.301029996)
+  )
+  
+  traits <- LEEF.measurement.flowcytometer::extract_traits(
+    particles = "all",
+    metadata_flowcytometer = metadata,
+    use_H = FALSE, 
+    excl_FSCA_0 = FALSE,
+    timestamp = 99999999,
+    gates_coordinates = gates_coordinates,
+    fsa = fsa
+  )[[1]]
+  
+  saveRDS(traits, "~/Desktop/size_check_beads/20220718_beads/traits.rds")
+}
+```
+
+## The one from the Means
+```{r}
+#| label: ss_means
+#| 
+ss_repaired <- list()
+ss_repaired$data <- data.frame(
+  diameter_micrometer = c(1L, 3L, 10L), 
+  mean_FSC.A = c(102045L, 641752L, 1959230L), 
+  mean_FSC.H = c(106576L, 648403L, 1303073L)
 )
 
-metadata <- utils::read.csv("~/Desktop/size_check_beads/20220718_beads/flowcytometer/metadata_flowcytometer.csv")
+ss_repaired$fit.A <- lm(ss_repaired$data$diameter_micrometer ~ ss_repaired$data$mean_FSC.A)
+ss_repaired$slope_A <- ss_repaired$fit.A$coefficients[[2]]
+ss_repaired$intercept_A <- ss_repaired$fit.A$coefficients[[1]]
 
-gates_coordinates <- data.frame(
-  bacteria1 = c(3.301029996, 3.301029996, 7.204119983, 7.204119983), 
-  bacteria2 = c(0,           3.301029996, 6.301029996, 0.         ), 
-  LNA =       c(3.301029996, 4.579784,    NA,          NA         ), 
-  MNA =       c(4.579785,    4.954243,    NA,          NA         ), 
-  HNA =       c(4.954244,    7.204119983, NA,          NA         ), 
-  algae1 =    c(3,           3,           7.204119983, 7.204119983), 
-  algae2 =    c(3.301029996, 7.204119983, 7.204119983, 3.301029996)
-)
-
-traits <- LEEF.measurement.flowcytometer::extract_traits(
-  particles = "all",
-  metadata_flowcytometer = metadata,
-  use_H = FALSE, 
-  excl_FSCA_0 = FALSE,
-  timestamp = 99999999,
-  gates_coordinates = gates_coordinates,
-  fsa = fsa
-)[[1]]
-
-# saveRDS(traits, "~/Desktop/size_check_beads/20220718_beads/traits.rds")
-# traits <- readRDS("~/Desktop/size_check_beads/20220718_beads/traits.rds")
+ss_repaired$fit.H <- lm(ss_repaired$data$diameter_micrometer ~ ss_repaired$data$mean_FSC.H)
+ss_repaired$slope_H <- ss_repaired$fit.H$coefficients[[2]]
+ss_repaired$intercept_H <- ss_repaired$fit.H$coefficients[[1]]
 ```
 
 
@@ -84,6 +105,80 @@ traits |> ggplot(aes( x = FSC.A)) +
   geom_vline(xintercept = c(log10(96374L), log10(653207L), log10(1855322L)), col = "green") +
   geom_vline(xintercept = c(0.30103, 7.22472), col = "red")
 ```
+
+
+```{r}
+#| label: peaks
+#| 
+
+traits.fit <- traits
+
+traits.fit$length <- NA
+
+r1 <- c(4.88, 5.05)
+r3 <- c(5.7, 5.9)
+r10 <- c(6.15, 6.35)
+  
+traits.fit$length[(traits.fit$FSC.A >= r1[1]) & (traits.fit$FSC.A <= r1[2])] <- 1
+traits.fit$length[(traits.fit$FSC.A >= r3[1]) & (traits.fit$FSC.A <= r3[2])] <- 3
+traits.fit$length[(traits.fit$FSC.A >= r10[1]) & (traits.fit$FSC.A <= r10[2])] <- 10
+
+# traits.fit$length[(traits.fit$FSC.A >= 4.8) & (traits.fit$FSC.A <= 5.2)] <- 1
+# traits.fit$length[(traits.fit$FSC.A >= 5.6) & (traits.fit$FSC.A <= 6.0)] <- 3
+# traits.fit$length[(traits.fit$FSC.A >= 6.1) & (traits.fit$FSC.A <= 6.5)] <- 10
+
+traits.fit <- traits.fit[!is.na(traits.fit$length),]
+traits.fit$FSC.A.raw <- 10^traits.fit$FSC.A
+traits.fit$FSC.H.raw <- 10^traits.fit$FSC.H
+
+traits.fit |> ggplot(aes( x = FSC.A)) + 
+  ggplot2::geom_density() + 
+  geom_vline(xintercept = c(log10(96374L), log10(653207L), log10(1855322L)), col = "green") +
+  geom_vline(xintercept = c(r1, r3, r10), col = "yellow")
+
+
+ss <- list()
+ss$fit.A <- lm(length ~ FSC.A.raw, data = traits.fit)
+ss$slope_A <- ss$fit.A$coefficients[[2]]
+ss$intercept_A <- ss$fit.A$coefficients[[1]]
+
+# ss$fit.H <- lm(traits.fit$length ~ traits.fit$FSC.H.raw)
+# ss$slope_H <- ss$fit.H$coefficients[[2]]
+# ss$intercept_H <- ss$fit.H$coefficients[[1]]
+
+
+scattermore::scattermoreplot(
+  traits.fit$FSC.A.raw, 
+  traits.fit$length,
+  xlim = c(0, 3000000), 
+  ylim = c(0, 10),
+  xlab = "FSC.A raw",
+  ylab = "length in micrometer"
+)
+abline(ss$fit.A)
+abline(h = 0, v = 0)
+
+points(
+  ss_repaired$data$mean_FSC.A, 
+  ss_repaired$data$diameter_micrometer,
+  col = "blue"
+)
+abline(ss_repaired$fit.A, col = "blue")
+
+
+
+scattermore::scattermoreplot(
+  traits.fit$FSC.A.raw, 
+  traits.fit$length,
+  xlim = c(0, 17700000), 
+  ylim = c(0, 90),
+  xlab = "FSC.A raw",
+  ylab = "length in micrometer"
+)
+abline(ss$fit.A)
+abline(h = 0, v = 0)
+abline(v = 10^c(0.30103, 7.22472), col = "red")
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+
