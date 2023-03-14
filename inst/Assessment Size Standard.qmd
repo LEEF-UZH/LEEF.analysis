@@ -68,6 +68,8 @@ if (file.exists("~/Desktop/size_check_beads/20220718_beads/traits.rds")) {
   
   saveRDS(traits, "~/Desktop/size_check_beads/20220718_beads/traits.rds")
 }
+
+traits <- traits[traits$sample == "A05",]
 ```
 
 ## The one from the Means
