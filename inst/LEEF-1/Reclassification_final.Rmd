@@ -1024,7 +1024,7 @@ message("Deleting flowcam entries from flowcam__algae_traits ...")
 delete_sql <- paste0(
   "DELETE ",
   "FROM flowcam__algae_traits ",
-  "WHERE (species == \"Staurastrum1\" AND species_probability <= 0.9)"
+  "WHERE (species == \"Staurastrum1\" AND species_probability <= 0.95)"
 )
 message("Executing query '", delete_sql, "`...")
 rd <- DBI::dbExecute(conn, delete_sql)
