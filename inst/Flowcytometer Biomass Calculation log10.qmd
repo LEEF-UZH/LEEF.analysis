@@ -293,9 +293,6 @@ traits$FSC.H |> log10() |> density(bw = 0.02) |> plot(main = "log10(FSC.H)")
 
 traits$length_A <- 10^(traits$FSC.A) * ss_repaired$slope_A + ss_repaired$intercept_A
 traits$volume_A <- 4/9 * pi * traits$length_A^3
-
-traits$length_H <- 10^traits$FSC.H * ss_repaired$slope_H + ss_repaired$intercept_H
-traits$volume_H <- 4/9 * pi * traits$length_H^3
 ```
 
 ### And some Plots
@@ -312,24 +309,5 @@ scattermoreplot(x, y, xlab = "length_A (micro m)", ylab = "proportion", main = "
 abline(h = 0.99, col = "red")
 ```
 
-### FSC.H based (just for info)
-```{r}
-#| label: size_H
-#| eval: false
 
-traits$length_H |> density(na.rm = TRUE) |> plot(main = "FSC.H - length in micro meter")
-traits$length_H |> density(na.rm = TRUE, to = 2) |> plot(main = "FSC.H - length in micro meter (l < 2)")
-traits$length_H |> density(na.rm = TRUE, to = 0.5) |> plot(main = "FSC.H - length in micro meter (l < 0.5)")
-```
-
-
-```{r}
-(traits$length_H - traits$length_A) |>
-  density(na.rm = TRUE) |>
-  plot(main = "length_H - length_A")
-
-(traits$length_H - traits$length_A) |>
-  density(na.rm = TRUE, from = -1, to = 1) |>
-  plot(main = "length_H - length_A")
-```
 
