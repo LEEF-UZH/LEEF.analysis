@@ -115,12 +115,23 @@ traits |> ggplot(aes( x = FSC.A)) +
 
 traits.fit <- traits
 
+r1 <- c(4.6, 5.2)
+r3 <- c(5.5, 6.02)
+r10 <- c(6.03, 6.6)
+
+traits.fit |> ggplot(aes( x = FSC.A)) + 
+  ggplot2::geom_density(bw = 0.00001) + 
+  geom_vline(xintercept = c(log10(96374L), log10(653207L), log10(1855322L)), col = "green") +
+  geom_vline(xintercept = c(r1, r3, r10), col = "yellow")
+
+traits.fit |> ggplot(aes( x = FSC.A)) + 
+  ggplot2::geom_density(bounds = range(c(r1, r3, r10))) + 
+  geom_vline(xintercept = c(log10(96374L), log10(653207L), log10(1855322L)), col = "green") +
+  geom_vline(xintercept = c(r1, r3, r10), col = "yellow")
+
+
 traits.fit$length <- NA
 
-r1 <- c(4.88, 5.05)
-r3 <- c(5.7, 5.9)
-r10 <- c(6.15, 6.35)
-  
 traits.fit$length[(traits.fit$FSC.A >= r1[1]) & (traits.fit$FSC.A <= r1[2])] <- 1
 traits.fit$length[(traits.fit$FSC.A >= r3[1]) & (traits.fit$FSC.A <= r3[2])] <- 3
 traits.fit$length[(traits.fit$FSC.A >= r10[1]) & (traits.fit$FSC.A <= r10[2])] <- 10
@@ -179,6 +190,7 @@ scattermore::scattermoreplot(
 )
 abline(ss$fit.A)
 abline(h = 0, v = 0)
+abline(ss_repaired$fit.A, col = "blue")
 abline(v = 10^c(0.30103, 7.22472), col = "red")
 
 ```
