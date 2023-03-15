@@ -20,6 +20,7 @@ ADD HOW CALCULATED / EXTRACTED
 
 library(ggplot2)
 library(LEEF.analysis)
+
 ```
 
 ```{r}
@@ -92,9 +93,8 @@ ss_repaired$slope_H <- ss_repaired$fit.H$coefficients[[2]]
 ss_repaired$intercept_H <- ss_repaired$fit.H$coefficients[[1]]
 ```
 
-
-### Plots
-#### Density distribution of FSC.A
+## The one from all points
+### Density distribution of FSC.A
 Horizontal lines indicate the mean_FSC.A as in the size standards 1 - 3 - 10, left to right.
 
 ```{r}
@@ -108,27 +108,22 @@ traits |> ggplot(aes( x = FSC.A)) +
   geom_vline(xintercept = c(0.30103, 7.22472), col = "red")
 ```
 
-
+### Equidistand borders
 ```{r}
 #| label: peaks
 #| 
 
+d <- 0.24
+r1 <- log10(ss_repaired$data$mean_FSC.A[[1]]) + c(-d, d)
+r3 <- log10(ss_repaired$data$mean_FSC.A[[2]]) + c(-d, d)
+r10 <- log10(ss_repaired$data$mean_FSC.A[[3]]) + c(-d, d)
+rl <- c(r1, r3, r10)
+
+```
+
+```{r}
+#| label: do_fit
 traits.fit <- traits
-
-r1 <- c(4.6, 5.2)
-r3 <- c(5.5, 6.02)
-r10 <- c(6.03, 6.6)
-
-traits.fit |> ggplot(aes( x = FSC.A)) + 
-  ggplot2::geom_density(bw = 0.00001) + 
-  geom_vline(xintercept = c(log10(96374L), log10(653207L), log10(1855322L)), col = "green") +
-  geom_vline(xintercept = c(r1, r3, r10), col = "yellow")
-
-traits.fit |> ggplot(aes( x = FSC.A)) + 
-  ggplot2::geom_density(bounds = range(c(r1, r3, r10))) + 
-  geom_vline(xintercept = c(log10(96374L), log10(653207L), log10(1855322L)), col = "green") +
-  geom_vline(xintercept = c(r1, r3, r10), col = "yellow")
-
 
 traits.fit$length <- NA
 
@@ -136,28 +131,29 @@ traits.fit$length[(traits.fit$FSC.A >= r1[1]) & (traits.fit$FSC.A <= r1[2])] <- 
 traits.fit$length[(traits.fit$FSC.A >= r3[1]) & (traits.fit$FSC.A <= r3[2])] <- 3
 traits.fit$length[(traits.fit$FSC.A >= r10[1]) & (traits.fit$FSC.A <= r10[2])] <- 10
 
-# traits.fit$length[(traits.fit$FSC.A >= 4.8) & (traits.fit$FSC.A <= 5.2)] <- 1
-# traits.fit$length[(traits.fit$FSC.A >= 5.6) & (traits.fit$FSC.A <= 6.0)] <- 3
-# traits.fit$length[(traits.fit$FSC.A >= 6.1) & (traits.fit$FSC.A <= 6.5)] <- 10
-
 traits.fit <- traits.fit[!is.na(traits.fit$length),]
 traits.fit$FSC.A.raw <- 10^traits.fit$FSC.A
-traits.fit$FSC.H.raw <- 10^traits.fit$FSC.H
-
-traits.fit |> ggplot(aes( x = FSC.A)) + 
-  ggplot2::geom_density() + 
-  geom_vline(xintercept = c(log10(96374L), log10(653207L), log10(1855322L)), col = "green") +
-  geom_vline(xintercept = c(r1, r3, r10), col = "yellow")
 
 
 ss <- list()
 ss$fit.A <- lm(length ~ FSC.A.raw, data = traits.fit)
 ss$slope_A <- ss$fit.A$coefficients[[2]]
 ss$intercept_A <- ss$fit.A$coefficients[[1]]
+```
 
-# ss$fit.H <- lm(traits.fit$length ~ traits.fit$FSC.H.raw)
-# ss$slope_H <- ss$fit.H$coefficients[[2]]
-# ss$intercept_H <- ss$fit.H$coefficients[[1]]
+```{r}
+#| label: plot_fit
+#| 
+
+traits |> ggplot(aes( x = FSC.A)) + 
+  ggplot2::geom_density(bw = 0.00001) + 
+  geom_vline(xintercept = log10(ss_repaired$data$mean_FSC.A), col = "green") +
+  geom_vline(xintercept = rl, col = "yellow")
+
+traits |> ggplot(aes( x = FSC.A)) + 
+  ggplot2::geom_density(bw = 0.00001, bounds = range(c(r1, r3, r10))) + 
+  geom_vline(xintercept = log10(ss_repaired$data$mean_FSC.A), col = "green") +
+  geom_vline(xintercept = rl, col = "yellow")
 
 
 scattermore::scattermoreplot(
@@ -166,7 +162,12 @@ scattermore::scattermoreplot(
   xlim = c(0, 3000000), 
   ylim = c(0, 10),
   xlab = "FSC.A raw",
-  ylab = "length in micrometer"
+  ylab = "length in micrometer",
+  main = c(
+    paste("Means: slope = ", format(ss_repaired$slope_A, scientific = TRUE, digits = 3), "  intercept = ",format(ss_repaired$intercept_A, scientific = TRUE, digits = 3)),
+    paste("All  : slope = ", format(ss$slope_A, scientific = TRUE, digits = 3), "  intercept = ",format(ss$intercept_A, scientific = TRUE, digits = 3))
+  )    
+  
 )
 abline(ss$fit.A)
 abline(h = 0, v = 0)
@@ -186,13 +187,33 @@ scattermore::scattermoreplot(
   xlim = c(0, 17700000), 
   ylim = c(0, 90),
   xlab = "FSC.A raw",
-  ylab = "length in micrometer"
+  ylab = "length in micrometer",
+  main = c(
+    paste("Means: slope = ", format(ss_repaired$slope_A, scientific = TRUE, digits = 3), "  intercept = ",format(ss_repaired$intercept_A, scientific = TRUE, digits = 3)),
+    paste("All  : slope = ", format(ss$slope_A, scientific = TRUE, digits = 3), "  intercept = ",format(ss$intercept_A, scientific = TRUE, digits = 3))
+  )    
 )
 abline(ss$fit.A)
 abline(h = 0, v = 0)
 abline(ss_repaired$fit.A, col = "blue")
 abline(v = 10^c(0.30103, 7.22472), col = "red")
-
 ```
 
+### Individual borders
+```{r}
+#| label: peaks_2
+#| 
+
+r1 <- c(4.6, 5.2)
+r3 <- c(5.5, 6.02)
+r10 <- c(6.03, 6.6)
+rl <- c(r1, r3, r10)
+
+
+<<do_fit>>
+```
+
+```{r}
+<<plot_fit>>
+```
 
