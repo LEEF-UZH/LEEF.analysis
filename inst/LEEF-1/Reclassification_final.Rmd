@@ -20,6 +20,8 @@ params:
   pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
   extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
   cores: 7
+  length_slope:
+  length_intercept:
 ---
 
 # Setup
@@ -59,6 +61,8 @@ db_3 <- gsub(".sqlite", paste0(".", params$version_tag, "_3.sqlite"), db_org)
 db_3_tmp <- paste0(db_3, ".tmp")
 db_4 <- gsub(".sqlite", paste0(".", params$version_tag, "_4.sqlite"), db_org)
 db_4_tmp <- paste0(db_4, ".tmp")
+db_5 <- gsub(".sqlite", paste0(".", params$version_tag, "_5.sqlite"), db_org)
+db_5_tmp <- paste0(db_5, ".tmp")
 
 db_final <- gsub(".sqlite", paste0(".", params$version_tag, ".final.sqlite"), db_org)
 
@@ -80,7 +84,7 @@ if (!file.exists(params$extracted_dir)){
 }
 ```
 
-# 1. Re-calculations for all timestamps
+# 1. DONE - Re-calculations for all timestamps
 ## DONE - Reclassification of Flowcam
 
 ### Prepare Flowcam
@@ -289,29 +293,7 @@ unlink(pdir)
 rm(pdir, class_constant, class_increasing, out, species_tracked)
 ```
 
-## DONE - Regating of Flowcytometer
 
-```{r regating}
-
-## Select all timestamps
-
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
-
-gate_flowcytometer_archive(
-  extracted_dir = params$extracted_dir,
-  gates_coordinates = read.csv(paste0(base, "parameter/flowcytometer/gates_coordinates.csv")),
-  timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer"),
-  mc.cores = params$cores
-)
-
-```
 
 ## Add to database
 Old timestamps will be removed and not be backed up.
@@ -322,9 +304,9 @@ system.time(
   add_reclassified_to_db(
     path = params$output_dir, 
     db = "tmp.1.sqlite", 
-    remove_timestamps = NULL, #timestamps,
+    remove_timestamps = timestamps,
     backup_removed = FALSE,
-    method = c("flowcam", "bemovi_mag_16", "bemovi_mag_25", "flowcytometer")
+    method = c("flowcam", "bemovi_mag_16", "bemovi_mag_25")
   )
 )
 
@@ -332,28 +314,6 @@ file.rename(db_1_tmp, db_1)
 ```
 
 
-## TODO - Trait Extraction Flowcytometer and Volume Calculation
-
-```{r biomass}
-## Select all timestamps
-
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
-
-extract_traits_flowcytometer_archive(
-  extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
-  timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer_traits"),
-  mc.cores = 1 # params$cores
-)
-
-
-```
 
 
 # 2. DONE - Re-calculations of individual bottles and timestamps
@@ -501,7 +461,7 @@ file.rename(db_2_tmp, db_2)
 
 ```
 
-# 3. VERIFY - Set species to 0 which were mis-classified
+# 3. DONE - Set species to 0 which were mis-classified
 
 This section has been devaloped by Uriah 
 
@@ -952,7 +912,7 @@ file.rename(db_3_tmp, db_3)
 ```
 
 
-# 4. VERIFY - Flowcam Stau1
+# 4. DONE - Flowcam Stau1
 
 The code below recalculates the densities after filtering Stau1 so that only
 particles are kept with high confidence that they are indeed Stau1.
@@ -1058,6 +1018,80 @@ DBI::dbDisconnect(conn)
 
 file.rename(db_4_tmp, db_final)
 ```
+
+# 5. TODO - Flowcytometer
+## TODO - Flowcytometer densities
+
+Regate using H and re-calculate the densities
+
+```{r regating}
+
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+
+density_flowcytometer_archive <- function(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(paste0(base, "parameter/flowcytometer/gates_coordinates.csv")),
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer"),
+  use_H = TRUE,
+  excl_FSCA_0 = TRUE,
+  log10_all = TRUE,
+  mc.cores = params$cores
+)
+```
+
+## TODO Add to database
+Old timestamps will be removed and not be backed up.
+```{r addRRD}
+file.copy(db_4, db_5_tmp)
+
+system.time(
+  add_reclassified_to_db(
+    path = params$output_dir, 
+    db = "tmp.1.sqlite", 
+    remove_timestamps = timestamps,
+    backup_removed = FALSE,
+    method = c("flowcytometer")
+  )
+)
+
+file.rename(db_5_tmp, db_5)
+```
+
+## TODO - Trait Extraction Flowcytometer and Volume Calculation
+
+```{r biomass}
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+
+extract_traits_flowcytometer_archive(
+  extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
+  particles = "bacteria",
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer_traits"),
+  length_slope = 4.933454e-06, # ,201615
+  length_intercept = 2.215799e-01, #-39861.52,
+  mc.cores = params$cores
+)
+
+
+```
+
 
 
 # Do a final vacuuming into new database

@@ -10,8 +10,8 @@ extract_traits_flowcytometer_archive(
   particles = "bacteria",
   timestamps,
   output,
-  length_slope = 4.933e-06,
-  length_intercept = 0.2216,
+  length_slope = 4.933454e-06,
+  length_intercept = 0.2215799,
   mc.cores = 1
 )
 }
