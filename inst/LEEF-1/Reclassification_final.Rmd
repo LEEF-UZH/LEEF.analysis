@@ -1088,11 +1088,18 @@ extract_traits_flowcytometer_archive(
   length_intercept = 2.215799e-01, #-39861.52,
   mc.cores = params$cores
 )
-
-
 ```
 
 
+# Create Indices and rename species
+```{r}
+#| label: indices_rename
+file.copy(db_5, db_final)
+
+RRD_LEEF_1_create_indices(db = db_final)
+RRD_LEEF_1_rename(db = db_final)
+
+```
 
 # Do a final vacuuming into new database
 Vacuuming the database will take some time!
