@@ -19,7 +19,7 @@ add_reclassified_to_db <- function(
   remove_timestamps = NULL,
   check_timestamps = TRUE,
   backup_removed = TRUE,
-  method = NULL
+  methods = NULL
 ){
   if (!file.exists(db)){
     LEEF.backend.sqlite::new_RRD(db)
@@ -33,7 +33,7 @@ add_reclassified_to_db <- function(
   }
 
   for (method in methods) {
-    files <- list.files(method, full.names = TRUE)
+    files <- list.files(file.path(path, method), full.names = TRUE)
     files <- grep("trajectories", files, invert = TRUE, value = TRUE)
     tables <- paste0(
       basename(method), "__",

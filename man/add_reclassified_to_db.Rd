@@ -10,7 +10,7 @@ add_reclassified_to_db(
   remove_timestamps = NULL,
   check_timestamps = TRUE,
   backup_removed = TRUE,
-  method = NULL
+  methods = NULL
 )
 }
 \arguments{

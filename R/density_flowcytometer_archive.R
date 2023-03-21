@@ -76,7 +76,7 @@ density_flowcytometer_archive <- function(
                     )
                   )
                 }
-                densities <- flowcytometer_density <- LEEF.measurement.flowcytometer::extractor_flowcytometer_density(
+                densities <- LEEF.measurement.flowcytometer::extractor_flowcytometer_density(
                   gates_coordinates = gates_coordinates,
                   fsa = fsa,
                   flow.data = read.csv(file.path(file.path(datadir, "flowcytometer_ungated.csv"))),
