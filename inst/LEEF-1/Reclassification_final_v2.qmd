@@ -14,7 +14,7 @@ input:
     code_folding: hide  
 params:
   output_dir: "/Volumes/Documents/RRD.Reclassification_final/"
-  version_tag: "v1.8.1"
+  version_tag: "v1.8.2b"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
   db: "/Volumes/Documents/RRD.Reclassification_final/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
@@ -22,8 +22,6 @@ params:
   extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
   toc: "/Volumes/LEEF/0.TOC/LEEF-1/toc.rds"
   cores: 7
-  length_slope: 1
-  length_intercept: 1
 ---
 
 # Setup
@@ -87,7 +85,7 @@ if (!file.exists(params$extracted_dir)){
 if (file.exists(params$db)) {
   stop(params$db, " exists and will not be overwritten!\n", "If you want to re-generate, please rename the database or delete it!")
 }
-RRD_new(db_org, LEEF = "LEEF-1")
+RRD_new(params$db, LEEF = "LEEF-1")
 ```
 
 # 1. DONE - Re-calculations for all timestamps
@@ -322,10 +320,10 @@ download.file(
 )
 
 
-size_standard <- file.path(pdir, "size_standard.csv")
+conv_FSCA_length <- file.path(pdir, "conv_FSCA_length")
 download.file(
-  paste0(base, "parameter/flowcytometer/size_standard.csv"), 
-  destfile = size_standard,
+  paste0(base, "parameter/flowcytometer/conv_FSCA_length"), 
+  destfile = conv_FSCA_length,
   mode = "wb"
 )
 ```
@@ -378,8 +376,8 @@ extract_traits_flowcytometer_archive(
   particles = "bacteria",
   timestamps = timestamps,
   output = file.path(params$output_dir, "flowcytometer_traits"),
-  length_slope = 4.933454e-06, # ,201615
-  length_intercept = 2.215799e-01, #-39861.52,
+  length_slope = conv_FSCA_length$slope,
+  length_intercept = conv_FSCA_length$intercept,
   mc.cores = params$cores
 )
 ```
@@ -387,7 +385,7 @@ extract_traits_flowcytometer_archive(
 ### VERIFY Clean Up Adding
 ```{r cleanup_flowcytometer}
 unlink(pdir)
-rm(gates_coordinates, metadata_flowcytometer, size_standard)
+rm(gates_coordinates, metadata_flowcytometer, intercept)
 ```
 
 ## Add to database and create indices
