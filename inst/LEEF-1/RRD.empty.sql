@@ -33,7 +33,7 @@ CREATE TABLE `flowcytometer__flowcytometer_traits` (
   `dilution_factor` INTEGER,
   `length` REAL,
   `volume` REAL
-)
+);
 CREATE TABLE `flowcytometer__flowcytometer_density` (
   `timestamp` TEXT,
   `filename` TEXT,
