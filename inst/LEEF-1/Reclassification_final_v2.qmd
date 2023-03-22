@@ -52,25 +52,20 @@ base <- paste0(params$base, params$version_tag, "/")
 dir.create(params$output_dir, recursive = TRUE, showWarnings = FALSE)
 
 ## 3.
-db <- params$db
 
-db_org <- db
-db_1 <- gsub(".sqlite", paste0(".", params$version_tag, "_1.sqlite"), db_org)
-db_1_tmp <- paste0(db_1, ".tmp")
-db_2 <- gsub(".sqlite", paste0(".", params$version_tag, "_2.sqlite"), db_org)
-db_2_tmp <- paste0(db_2, ".tmp")
-db_3 <- gsub(".sqlite", paste0(".", params$version_tag, "_3.sqlite"), db_org)
-db_3_tmp <- paste0(db_3, ".tmp")
-db_4 <- gsub(".sqlite", paste0(".", params$version_tag, "_4.sqlite"), db_org)
-db_4_tmp <- paste0(db_4, ".tmp")
-db_5 <- gsub(".sqlite", paste0(".", params$version_tag, "_5.sqlite"), db_org)
-db_5_tmp <- paste0(db_5, ".tmp")
-db_6 <- gsub(".sqlite", paste0(".", params$version_tag, "_6.sqlite"), db_org)
-db_6_tmp <- paste0(db_6, ".tmp")
-db_7 <- gsub(".sqlite", paste0(".", params$version_tag, "_7.sqlite"), db_org)
-db_7_tmp <- paste0(db_7, ".tmp")
 
-db_final <- gsub(".sqlite", paste0(".", params$version_tag, ".final.sqlite"), db_org)
+db_name <- function(
+    iteration,
+    db_org = params$db,
+    version_tag = params$version_tag,
+    temp = FALSE
+){
+  db_name <- gsub(".sqlite", paste0(".", version_tag, "_", iteration, ".sqlite"), db_org)
+  if (temp){
+    db_name <- paste0(db_name, ".tmp")
+  }
+  return(db_name)
+}
 
 ## 4.
 if (!file.exists(params$archive_dir)){
@@ -89,8 +84,8 @@ if (!file.exists(params$extracted_dir)){
   )
 }
 
-if (file.exists(db_org)) {
-  stop(db_org, " exists and will not be overwritten!\n", "If you want to re-generate, please rename the database or delete it!")
+if (file.exists(params$db)) {
+  stop(params$db, " exists and will not be overwritten!\n", "If you want to re-generate, please rename the database or delete it!")
 }
 RRD_new(db_org, LEEF = "LEEF-1")
 ```
@@ -305,25 +300,153 @@ rm(pdir, class_constant, class_increasing, out, species_tracked)
 ```
 
 
+## VERFIFY - Flowcytometer
+
+### Prepare Flowcytometer
+```{r prepare_flowcytometer}
+pdir <- tempfile()
+dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
+
+gates_coordinates <- file.path(pdir, "gates_coordinates.csv")
+download.file(
+  paste0(base, "parameter/flowcytometer/gates_coordinates.csv"), 
+  destfile = gates_coordinates,
+  mode = "wb"
+)
+
+metadata_flowcytometer <- file.path(pdir, "metadata_flowcytometer.csv")
+download.file(
+  paste0(base, "parameter/flowcytometer/metadata_flowcytometer.csv"), 
+  destfile = metadata_flowcytometer,
+  mode = "wb"
+)
+
+
+size_standard <- file.path(pdir, "size_standard.csv")
+download.file(
+  paste0(base, "parameter/flowcytometer/size_standard.csv"), 
+  destfile = size_standard,
+  mode = "wb"
+)
+```
+
+### VERIFY - Flowcytometer densities
+
+Regate using H and re-calculate the densities
+
+```{r regating}
+
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+
+density_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer"),
+  use_H = TRUE,
+  excl_FSCA_0 = TRUE,
+  log10_all = TRUE,
+  mc.cores = params$cores
+)
+```
+
+
+
+### VERIFY - Trait Extraction Flowcytometer and Volume Calculation
+
+```{r biomass}
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+
+extract_traits_flowcytometer_archive(
+  extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
+  particles = "bacteria",
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer_traits"),
+  length_slope = 4.933454e-06, # ,201615
+  length_intercept = 2.215799e-01, #-39861.52,
+  mc.cores = params$cores
+)
+```
+
+### VERIFY Clean Up Adding
+```{r cleanup_flowcytometer}
+unlink(pdir)
+rm(gates_coordinates, metadata_flowcytometer, size_standard)
+```
 
 ## Add to database and create indices
 Old timestamps will be removed and not be backed up.
+
 ```{r addRRD}
-file.copy(db_org, db_1_tmp)
+file.copy(params$db, db_name(1, temp = TRUE))
+
+## Bemovi and flowcam
 
 system.time(
   add_reclassified_to_db(
     path = params$output_dir, 
-    db = db_1_tmp, 
+    db = db_name(1, temp = TRUE), 
     remove_timestamps = NULL,
     backup_removed = FALSE,
     methods = c("flowcam", "bemovi_mag_16", "bemovi_mag_25")
   )
 )
 
-RRD_create_indices(db_1_tmp)
+## Flowcytometer Densities
 
-file.rename(db_1_tmp, db_1)
+fns_dens <- list.files(
+  path =  file.path(params$output_dir, "flowcytometer"), 
+  pattern = "^flowcytometer_density\\..*\\.rds",
+  recursive = FALSE, 
+  full.names = TRUE
+)
+
+add_to_db(
+  fns_dens,
+  db = db_name(1, temp = TRUE),
+  tables = rep("flowcytometer__flowcytometer_density", length(fns_dens)),
+  remove_timestamps = NULL,
+  check_timestamps = FALSE,
+  backup_removed = TRUE
+)
+
+## Flowcytometer Traits
+
+fns_traits <- list.files(
+  path =  file.path(params$output_dir, "flowcytometer_traits"), 
+  pattern = "^flowcytometer_traits_bacteria\\..*\\.rds",
+  recursive = FALSE, 
+  full.names = TRUE
+)
+
+add_to_db(
+  fns_traits,
+  db = db_name(1, temp = TRUE),
+  tables = rep("flowcytometer__flowcytometer_traits", length(fns_traits)),
+  remove_timestamps = NULL,
+  check_timestamps = FALSE,
+  backup_removed = TRUE
+)
+
+RRD_create_indices(db_name(1, temp = TRUE))
+
+file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
 ```
 
 
@@ -416,11 +539,11 @@ rm(class_constant, class_increasing)
 ### Add to database
 #### Delete entries from database
 ```{r}
-file.copy(db_1, db_2_tmp)
+file.copy(db_name(1, temp = FALSE), db_name(2, temp = TRUE))
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = db_2_tmp
+  db = db_name(2, temp = TRUE)
 )
 
 message("Deleting entries...")
@@ -462,7 +585,7 @@ names(tables) <- NULL
 add_to_db(
   fns = files,
   tables = tables,
-  db = db_2_tmp,
+  db = db_name(2, temp = TRUE),
   remove_timestamps = NULL,
   check_timestamps = FALSE,
   backup_removed = FALSE
@@ -470,7 +593,7 @@ add_to_db(
 
 rm(out)
 
-file.rename(db_2_tmp, db_2)
+file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
 
 ```
 
@@ -490,7 +613,7 @@ This section has been devaloped by Uriah
 
 ### Density data and co.
 
-options(RRDdb = db_2)
+options(RRDdb = db_name(2, temp = FALSE))
 
 # densities <- db_read_table(table = "density") %>%
 #   dplyr::filter(day < 1000,
@@ -732,11 +855,11 @@ morph16_density <- SetNotFoundSpeciesTo0(
 
 
 ```{r delete_bemovi_moving, options}
-file.copy(db_2, db_3_tmp)
+file.copy(db_name(2, temp = FALSE), db_name(3, temp = TRUE))
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = db_3_tmp
+  db = db_name(3, temp = TRUE)
 )
 DBI::dbBegin(conn)
 
@@ -921,7 +1044,7 @@ DBI::dbCommit(conn)
 
 DBI::dbDisconnect(conn)
 
-file.rename(db_3_tmp, db_3)
+file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
 ```
 
 
@@ -933,7 +1056,7 @@ particles are kept with high confidence that they are indeed Stau1.
 ## Calculate new densities
 ```{r species_to_0_bemovi_25_morph_mvt}
 
-options(RRDdb = db_3)
+options(RRDdb = db_name(3, temp = FALSE))
 
 sql <-  paste0(
   "
@@ -984,11 +1107,11 @@ densityStau1 <- full_join(densityStau1, temp) %>%
 Delete from traits and add re-calculated ones.
 
 ```{r label, eval=FALSE}
-file.copy(db_3, db_4_tmp)
+file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = db_4_tmp
+  db = db_name(4, temp = TRUE)
 )
 DBI::dbBegin(conn)
 
@@ -1029,130 +1152,10 @@ message("   ", nrow(densityStau1), " rows added")
 DBI::dbCommit(conn)
 DBI::dbDisconnect(conn)
 
-file.rename(db_4_tmp, db_final)
-```
-
-# 5. VERFIFY - Flowcytometer
-
-## Prepare Flowcytometer
-```{r prepare_flowcytometer}
-pdir <- tempfile()
-dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
-
-gates_coordinates <- file.path(pdir, "gates_coordinates.csv")
-download.file(
-  paste0(base, "parameter/flowcytometer/gates_coordinates.csv"), 
-  destfile = gates_coordinates,
-  mode = "wb"
-)
-
-metadata_flowcytometer <- file.path(pdir, "metadata_flowcytometer.csv")
-download.file(
-  paste0(base, "parameter/flowcytometer/metadata_flowcytometer.csv"), 
-  destfile = metadata_flowcytometer,
-  mode = "wb"
-)
-
-
-size_standard <- file.path(pdir, "size_standard.csv")
-download.file(
-  paste0(base, "parameter/flowcytometer/size_standard.csv"), 
-  destfile = size_standard,
-  mode = "wb"
-)
-```
-
-## VERIFY Do It
-### VERIFY - Flowcytometer densities
-
-Regate using H and re-calculate the densities
-
-```{r regating}
-
-## Select all timestamps
-
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
-
-density_flowcytometer_archive(
-  extracted_dir = params$extracted_dir,
-  gates_coordinates = read.csv(gates_coordinates),
-  timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer"),
-  use_H = TRUE,
-  excl_FSCA_0 = TRUE,
-  log10_all = TRUE,
-  mc.cores = params$cores
-)
+file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
 ```
 
 
-
-### VERIFY - Trait Extraction Flowcytometer and Volume Calculation
-
-```{r biomass}
-## Select all timestamps
-
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
-
-extract_traits_flowcytometer_archive(
-  extracted_dir = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
-  particles = "bacteria",
-  timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer_traits"),
-  length_slope = 4.933454e-06, # ,201615
-  length_intercept = 2.215799e-01, #-39861.52,
-  mc.cores = params$cores
-)
-```
-
-### VERIFY Add densities to database
-```{r add_flowcytometer}
-file.copy(db_4, db_5_tmp)
-
-fns_dens <- list.files(
-  path =  file.path(params$output_dir, "flowcytometer"), 
-  pattern = "^flowcytometer_density\\..*\\.rds",
-  recursive = FALSE, 
-  full.names = TRUE
-)
-
-add_to_db(
-  fns_dens,
-  db = db_5_tmp,
-  tables = rep("flowcytometer__flowcytometer_density", length(fns_dens)),
-  remove_timestamps = NULL,
-  check_timestamps = FALSE,
-  backup_removed = TRUE
-)
-
-fns_traits <- list.files(
-  path =  file.path(params$output_dir, "flowcytometer_traits"), 
-  pattern = "^flowcytometer_traits_bacteria\\..*\\.rds",
-  recursive = FALSE, 
-  full.names = TRUE
-)
-
-add_to_db(
-  fns_traits,
-  db = db_5_tmp,
-  tables = rep("flowcytometer__flowcytometer_traits", length(fns_traits)),
-  remove_timestamps = NULL,
-  check_timestamps = FALSE,
-  backup_removed = TRUE
-)
-```
 
 ## VERIFY Clean Up Flowcytometer
 ```{r cleanup_flowcytometer}
@@ -1160,7 +1163,7 @@ unlink(pdir)
 rm(gates_coordinates, metadata_flowcytometer, size_standard)
 ```
 
-# 6. TODO Add O2, Manualcount and TOC measuremnts and experimental tables
+# 5. TODO Add O2, Manualcount and TOC measuremnts and experimental tables
 ## TODO Prepare Adding
 ```{r prepare_adding}
 pdir <- tempfile()
@@ -1194,7 +1197,7 @@ download.file(
 #| label: add_data
 #| 
 
-file.copy(db_5, db_6_tmp)
+file.copy(db_name(4, temp = FALSE), db_name(5, temp = TRUE))
 
 fns_mc <- list.files(
   path = params$extracted_dir, 
@@ -1206,7 +1209,7 @@ fns_mc <- list.files(
 
 add_to_db(
   params$toc,
-  db = db_6_tmp,
+  db = db_name(5, temp = TRUE),
   tables = "toc__toc",
   remove_timestamps = NULL,
   check_timestamps = TRUE,
@@ -1224,7 +1227,7 @@ fns_o2 <- list.files(
 
 add_to_db(
   fns_o2,
-  db = db_6_tmp,
+  db = db_name(5, temp = TRUE),
   tables = rep("o2meter__o2meter", length(fns_o2)),
   remove_timestamps = NULL,
   check_timestamps = TRUE,
@@ -1234,7 +1237,7 @@ add_to_db(
 
 add_to_db(
   params$toc,
-  db = db_6_tmp,
+  db = db_name(5, temp = TRUE),
   tables = "toc__toc",
   remove_timestamps = NULL,
   check_timestamps = FALSE,
@@ -1248,25 +1251,21 @@ TODO:
   - Add experimental_design
   - Add light_decline_schedule
   
-file.rename(db_6_tmp, db_6)
+file.rename(db_name(5, temp = TRUE), db_name(5, temp = FALSE))
 ```
 
 
-## VERIFY Clean Up Adding
-```{r cleanup_flowcytometer}
-unlink(pdir)
-rm(gates_coordinates, metadata_flowcytometer, size_standard)
-```
 
-# 7. VERIFY Rename species and columns
+# 6. VERIFY Rename species and columns
 ```{r}
 #| label: indices_rename
-file.copy(db_5, db_7_tmp)
+file.copy(db_name(5, temp = FALSE), db_name(6, temp = TRUE))
 
-RRD_LEEF_1_rename(db = db_7_tmp)
+RRD_LEEF_1_rename(db = db_name(6, temp = TRUE))
 
-file.rename(db_7_tmp, db_7)
-file.copy(db_5, db_7_tmp)
+file.rename(db_name(6, temp = TRUE), db_name(6, temp = FALSE))
+
+file.copy(db_name(6, temp = FALSE), db_name("final", temp = FALSE))
 ```
 
 # Do a final vacuuming into new database
@@ -1275,15 +1274,17 @@ Vacuuming the database will take some time!
 To vacuum the sqlite database, i.e. recover the space from the deletion of rows, please run the following command in the directory where the database is located:
 
 ```{r echo = FALSE}
-db_vac <- gsub("\\.sqlite$", ".vacuumed.sqlite", db_final)
-cat(paste0("sqlite3 \"./", basename(db_final), "\" 'VACUUM main INTO \"", basename(db_final), "\"'"))
-
+cat(
+  paste0(
+    "sqlite3 \"./", basename(db_name("final", temp = FALSE)), "\" 'VACUUM main INTO \"", db_name("final_vacuumed", temp = FALSE), "\"'"
+    )
+)
 ```
 
 # Create Diagnostic Report
 ```{r createDiagReport}
 report_diagnostic(
-  db = db_final,  
+  db = db_name("final", temp = FALSE),  
   template = "LEEF_1",
   suffix = paste0("reclassified_", params$version_tag), 
   format = "html"
