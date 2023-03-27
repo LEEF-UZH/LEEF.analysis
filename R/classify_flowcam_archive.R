@@ -11,6 +11,8 @@
 #' @param bottle if not 'NULL' (default) only classify this bottle. Needs to be a single bottle!
 #'
 #' @return invisible `NULL`
+#'
+#' @importFrom pbmcapply pbmclapply
 #' @export
 #'
 #' @md
@@ -36,7 +38,8 @@ classify_flowcam_archive <- function(
   # do the stuff -------------------------------------------------------
 
   return(
-    parallel::mclapply(
+    pbmcapply::pbmclapply(
+    # parallel::mclapply(
       timestamps,
       function(timestamp){
         datadir <- file.path(

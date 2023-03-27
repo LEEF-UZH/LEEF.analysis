@@ -150,6 +150,83 @@ unlink(pdir)
 rm(class_constant, class_increasing, out)
 ```
 
+## Flowcam Bottle `b_02`
+Bottle `b_02` was contaminated and needs to be classified separately. All timestamps will be classified using the same classifier.
+
+### Set Bottle and range of timestamps
+```{r bot_after_until}
+bott <- "b_02"
+after <- 20220128
+until <- 30000000
+```
+
+### Set output path
+```{r output_path_b}
+out <- file.path(params$output_dir, "flowcam")
+```
+
+### Determine timestamps
+All available after `20220504` data will be reclassified and are determined below based on the archived data.
+```{r prepare_flowcam_b}
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcam\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcam\\.", "", timestamps)
+timestamps <- as.integer(timestamps)
+
+timestamps <- timestamps[(timestamps >= after) & (timestamps <= until)]
+timestamps
+```
+
+
+### Prepare Flowcam
+```{r prepare_flowcam}
+pdir <- tempfile()
+dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
+
+class_constant <- file.path(pdir, "class_constant.rds")
+download.file(
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_20221226_MergedData.rds"), 
+  destfile = class_constant,
+  mode = "wb"
+)
+
+class_increasing <- file.path(pdir, "class_increasing.rds")
+download.file(
+  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_20221226_MergedData.rds"), 
+  destfile = class_increasing,
+  mode = "wb"
+)
+```
+
+### Classify Flowcam
+```{r classify_flowcam}
+message("Classifying flowcam...")
+system.time(
+  classify_flowcam_archive(
+    archive_dir = params$archive_dir, 
+    timestamps = timestamps, 
+    algae_traits_name = "algae_traits_filtered.rds", 
+    classifier_constant_name = class_constant, 
+    classifier_increasing_name = class_increasing, 
+    species_tracked = yaml::read_yaml(paste0(base, "parameter/flowcam/flowcam.yml"))$species_tracked,
+    output = out,
+    mc.cores = 1, #params$cores,
+    bottle = bott
+  )
+)
+```
+
+### Clean Up Flowcam
+```{r cleanup_flowcam}
+unlink(pdir)
+rm(class_constant, class_increasing)
+```
+
+
 ## DONE - Reclassification of Bemovi magnification 16
 ### Prepare Bemovi 16
 ```{r prepare_bemovi_16}
@@ -460,7 +537,7 @@ invisible(
 )
 ```
 
-### Clean Up Adding
+### Clean Up EAWAG
 ```{r cleanup_flowcytometer}
 unlink(pdir)
 rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, conv_FSCA_length)
@@ -468,7 +545,7 @@ rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, c
 
 
 
-## Add to database and create indices
+## TODO - Add to database and create indices
 Old timestamps will be removed and not be backed up.
 
 ```{r addRRD}
@@ -522,7 +599,7 @@ add_to_db(
   backup_removed = TRUE
 )
 
-RRD_create_indices(db_name(1, temp = TRUE))
+RRD_create_indices(db_name(1, temp = TRUE), LEEF = "LEEF-1")
 
 file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
 ```
@@ -530,152 +607,7 @@ file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
 
 
 
-# 2. DONE - Re-calculations of individual bottles and timestamps
-## Flowcam Bottle `b_02`
-Bottle `b_02` was contaminated and needs to be classified separately. All timestamps will be classified using the same classifier.
-
-### Set Bottle and range of timestamps
-```{r bot_after_until}
-bott <- "b_02"
-after <- 20220128
-until <- 30000000
-```
-
-### Set output path
-```{r output_path_b}
-out <- file.path(params$output_dir, paste0("flowcam_", bott, "_", format(after, scientific = FALSE), "_", format(until, scientific = FALSE)))
-```
-
-### Determine timestamps
-All available after `20220504` data will be reclassified and are determined below based on the archived data.
-```{r prepare_flowcam_b}
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcam\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcam\\.", "", timestamps)
-timestamps <- as.integer(timestamps)
-
-timestamps <- timestamps[(timestamps >= after) & (timestamps <= until)]
-timestamps
-```
-
-
-### Prepare Flowcam
-```{r prepare_flowcam}
-pdir <- tempfile()
-dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
-
-class_constant <- file.path(pdir, "class_constant.rds")
-download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_20221226_MergedData.rds"), 
-  destfile = class_constant,
-  mode = "wb"
-)
-
-class_increasing <- file.path(pdir, "class_increasing.rds")
-download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_20221226_MergedData.rds"), 
-  destfile = class_increasing,
-  mode = "wb"
-)
-```
-
-### Classify Flowcam
-```{r classify_flowcam}
-if (!file.exists(out)) {
-  message("Classifying flowcam...")
-  system.time(
-    classify_flowcam_archive(
-      archive_dir = params$archive_dir, 
-      timestamps = timestamps, 
-      algae_traits_name = "algae_traits_filtered.rds", 
-      classifier_constant_name = class_constant, 
-      classifier_increasing_name = class_increasing, 
-      species_tracked = yaml::read_yaml(paste0(base, "parameter/flowcam/flowcam.yml"))$species_tracked,
-      output = out,
-      mc.cores = params$cores,
-      bottle = bott
-    )
-  )
-} else {
-  message(
-    "Directory ", out, "exists\n",
-    "skipping Flowcam."
-  )
-}
-```
-
-### Clean Up Flowcam
-```{r cleanup_flowcam}
-unlink(pdir)
-rm(class_constant, class_increasing)
-```
-
-### Add to database
-#### Delete entries from database
-```{r}
-file.copy(db_name(1, temp = FALSE), db_name(2, temp = TRUE))
-
-conn <- DBI::dbConnect(
-  drv = RSQLite::SQLite(),
-  db = db_name(2, temp = TRUE)
-)
-
-message("Deleting entries...")
-delete_density_sql <- paste0(
-  "DELETE ",
-  "FROM flowcam__algae_density ", 
-  "WHERE bottle = '", bott, "' AND timestamp >= ", format(after, scientific = FALSE), " AND timestamp <= ", format(until, scientific = FALSE)
-)
-message("Executing query '", delete_density_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_density_sql)
-message("   ", rd, " rows deleted.")
-
-
-delete_traits_sql <- paste0(
-  "DELETE ",
-  "FROM flowcam__algae_traits ", 
-  "WHERE bottle = '", bott, "' AND timestamp >= ", format(after, scientific = FALSE), " AND timestamp <= ", format(until, scientific = FALSE)
-)
-message("Executing query '", delete_traits_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_traits_sql)
-message("   ", rd, " rows deleted.")
-
-
-DBI::dbDisconnect(conn)
-```
-
-#### Add new entries to database 
-```{r addRRD}
-message("Adding directory '", basename(out), "' to the database")
-
-files <- list.files(out, full.names = TRUE)
-tables <- paste0(
-  basename("flowcam"), "__",
-  sapply( files, function(f) {strsplit(basename(f), "\\.")[[1]][[1]]})
-)
-names(tables) <- NULL
-
-
-add_to_db(
-  fns = files,
-  tables = tables,
-  db = db_name(2, temp = TRUE),
-  remove_timestamps = NULL,
-  check_timestamps = FALSE,
-  backup_removed = FALSE
-)
-
-rm(out)
-
-file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
-
-```
-
-# 3. DONE - Set species to 0 which were mis-classified
+# 2. DONE - Set species to 0 which were mis-classified
 
 This section has been devaloped by Uriah 
 
@@ -691,7 +623,7 @@ This section has been devaloped by Uriah
 
 ### Density data and co.
 
-options(RRDdb = db_name(2, temp = FALSE))
+options(RRDdb = db_name(1, temp = FALSE))
 
 # densities <- db_read_table(table = "density") %>%
 #   dplyr::filter(day < 1000,
@@ -933,11 +865,11 @@ morph16_density <- SetNotFoundSpeciesTo0(
 
 
 ```{r delete_bemovi_moving, options}
-file.copy(db_name(2, temp = FALSE), db_name(3, temp = TRUE))
+file.copy(db_name(1, temp = FALSE), db_name(2, temp = TRUE))
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = db_name(3, temp = TRUE)
+  db = db_name(2, temp = TRUE)
 )
 DBI::dbBegin(conn)
 
@@ -1122,11 +1054,11 @@ DBI::dbCommit(conn)
 
 DBI::dbDisconnect(conn)
 
-file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
+file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
 ```
 
 
-# 4. DONE - Flowcam Stau1
+# 3. DONE - Flowcam Stau1
 
 The code below recalculates the densities after filtering Stau1 so that only
 particles are kept with high confidence that they are indeed Stau1.
@@ -1134,7 +1066,7 @@ particles are kept with high confidence that they are indeed Stau1.
 ## Calculate new densities
 ```{r species_to_0_bemovi_25_morph_mvt}
 
-options(RRDdb = db_name(3, temp = FALSE))
+options(RRDdb = db_name(2, temp = FALSE))
 
 sql <-  paste0(
   "
@@ -1185,11 +1117,11 @@ densityStau1 <- full_join(densityStau1, temp) %>%
 Delete from traits and add re-calculated ones.
 
 ```{r label, eval=FALSE}
-file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
+file.copy(db_name(2, temp = FALSE), db_name(3, temp = TRUE))
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = db_name(4, temp = TRUE)
+  db = db_name(3, temp = TRUE)
 )
 DBI::dbBegin(conn)
 
@@ -1230,7 +1162,7 @@ message("   ", nrow(densityStau1), " rows added")
 DBI::dbCommit(conn)
 DBI::dbDisconnect(conn)
 
-file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
+file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
 ```
 
 
@@ -1241,7 +1173,7 @@ unlink(pdir)
 rm(gates_coordinates, metadata_flowcytometer, size_standard)
 ```
 
-# 5. TODO Add O2, Manualcount and TOC measuremnts and experimental tables
+# 4. TODO Add O2, Manualcount and TOC measuremnts and experimental tables
 ## TODO Prepare Adding
 ```{r prepare_adding}
 pdir <- tempfile()
@@ -1334,7 +1266,7 @@ file.rename(db_name(5, temp = TRUE), db_name(5, temp = FALSE))
 
 
 
-# 6. VERIFY Rename species and columns
+# 5. VERIFY Rename species and columns
 ```{r}
 #| label: indices_rename
 file.copy(db_name(5, temp = FALSE), db_name(6, temp = TRUE))

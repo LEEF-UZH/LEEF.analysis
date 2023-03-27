@@ -44,15 +44,14 @@ classify_flowcam_files <- function(
 # Filter for bottle -------------------------------------------------------
 
 
+  dat <- readRDS(file.path(datadir, algae_traits_name))
+  dat <- data.frame(dat)
   if (!is.null(bottle)){
-    tmp_algae_traits <- tempfile(
-      pattern = paste0("algae_traits_bottle_", bottle, "_"),
-      fileext = ".rds"
-    )
-    dat <- readRDS(file.path(datadir, algae_traits_name))
+    # tmp_algae_traits <- tempfile(
+    #   pattern = paste0("algae_traits_bottle_", bottle, "_"),
+    #   fileext = ".rds"
+    # )
     dat <- dat[dat$bottle == bottle,]
-  } else {
-    dat <- readRDS(file.path(datadir, algae_traits_name))
   }
 
 # This is needed for the v1.7.1 of the parameter --------------------------
