@@ -7,15 +7,22 @@
 extract_traits_flowcytometer_archive(
   extracted_dir =
     "~/Desktop/flowcytometer.FIXED/LEEF.FIXED.archived.data/LEEF/3.archived.data/extracted/",
+  gates_coordinates,
   particles = "bacteria",
   timestamps,
   output,
   length_slope = 4.933454e-06,
   length_intercept = 0.2215799,
-  mc.cores = 1
+  use_H,
+  excl_FSCA_0,
+  log10_all = FALSE,
+  mc.cores = 1,
+  wellid_keyword = "$WELLID"
 )
 }
 \arguments{
+\item{gates_coordinates}{the \code{gates_coordinates}}
+
 \item{particles}{particle class to extract. Mainly \code{bacteria} or
 \code{algae}, See \code{LEEF.measurement.flowcytometer::extract_traits()}
 for details.}
@@ -29,7 +36,17 @@ classified}
 
 \item{length_intercept}{intercept of the linear regression of FSC.A and size ( lm(mean_FSC.A ~ diameter_micrometer )}
 
+\item{use_H}{if \code{TRUE}, gating will be done using \code{height}, otherwie \code{area}}
+
+\item{excl_FSCA_0}{boolean. If \code{TRUE}, \code{FSA.A <= 0} will be filtered out by using
+a rectangular filter}
+
+\item{log10_all}{if \code{TRUE}, all data not yet log10 transformed will be log10 transformed
+("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H") in the same way as in the pipeline.}
+
 \item{mc.cores}{number of cores to be used. Defaults to 1}
+
+\item{wellid_keyword}{the kwyword which is used to identify the well ID. Usually "$WELLID" (default), but for the EAWAG Flowcytometer it is "$SMNO".}
 }
 \value{
 invisible \code{NULL}

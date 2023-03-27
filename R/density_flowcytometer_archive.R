@@ -60,7 +60,7 @@ density_flowcytometer_archive <- function(
               expr = {
                 # log transform everything which had not been transformed in the pipeline
                 fsa <- readRDS(file.path(file.path(datadir, "flowcytometer_fsa_ungated.rds")))
-                if (log10fsa) {
+                if (log10_all) {
                   fsa <- flowCore::transform(
                     fsa,
                     flowCore::transformList(
@@ -94,7 +94,7 @@ density_flowcytometer_archive <- function(
 
           dir.create(file.path(output))
           saveRDS(
-            object = densities$flow.data,
+            object = densities,
             file = file.path(output, paste0("flowcytometer_density.", timestamp, ".rds"))
           )
 
