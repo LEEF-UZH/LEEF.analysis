@@ -545,7 +545,7 @@ rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, c
 
 
 
-## TODO - Add to database and create indices
+## DONE - Add to database and create indices
 Old timestamps will be removed and not be backed up.
 
 ```{r addRRD}
@@ -599,13 +599,60 @@ add_to_db(
   backup_removed = TRUE
 )
 
-RRD_create_indices(db_name(1, temp = TRUE), LEEF = "LEEF-1")
+RRD_create_indices(
+  db_name(1, temp = TRUE), 
+  LEEF = "LEEF-1", 
+  continue_after_error = TRUE
+)
+
+```
+
+### Adding of General Parameter tables
+```{r prepare_gen_param}
+pdir <- tempfile()
+dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
+
+composition <- file.path(pdir, "compositions.csv")
+download.file(
+  paste0(base, "parameter/00.general.parameter/compositions.csv"), 
+  destfile = composition,
+  mode = "wb"
+)
+
+experimental_design <- file.path(pdir, "experimental_design.csv")
+download.file(
+  paste0(base, "parameter/00.general.parameter/experimental_design.csv"), 
+  destfile = experimental_design,
+  mode = "wb"
+)
+
+add_to_db(
+  fns = composition,
+  db = db_name(1, temp = TRUE),
+  tables = "composition",
+  remove_timestamps = NULL,
+  check_timestamps = FALSE,
+  backup_removed = TRUE
+)
+
+add_to_db(
+  fns = experimental_design,
+  db = db_name(1, temp = TRUE),
+  tables = "experimental_design",
+  remove_timestamps = NULL,
+  check_timestamps = FALSE,
+  backup_removed = TRUE
+)
+
+unlink(pdir)
+rm(composition, experimental_design)
+```
+
+```{r}
+#| label: close
 
 file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
 ```
-
-
-
 
 # 2. DONE - Set species to 0 which were mis-classified
 
@@ -640,7 +687,7 @@ options(RRDdb = db_name(1, temp = FALSE))
 #   dplyr::collect() %>%
 #   dplyr::arrange(day)
 
-exp_design <- db_read_table(table = "experimetal_design") %>% dplyr::collect()
+exp_design <- db_read_table(table = "experimental_design") %>% dplyr::collect()
 compositions <- db_read_table(table = "composition") %>% dplyr::collect()
 ```
 
@@ -751,8 +798,18 @@ morph25_list <- apply(moving_background, 1, function(row){
 morph25 <- do.call("rbind", morph25_list) %>%
   dplyr::filter(!(file %in% videos_movingback))
 
-morph25_density <- CalculateDensities(morph25, meas)
-morph25_density <- SetNotFoundSpeciesTo0(morph25_density, moving_background, meas, exp_design, compositions, species.tracked)
+morph25_density <- CalculateDensities(
+  morph25, 
+  meas
+)
+morph25_density <- SetNotFoundSpeciesTo0(
+  morph25_density, 
+  moving_background, 
+  meas, 
+  exp_design, 
+  compositions,
+  species.tracked
+)
 ```
 
 #### bemovi_mag_25__morph_mvt_cropped

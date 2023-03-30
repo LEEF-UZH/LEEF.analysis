@@ -2,6 +2,8 @@
 #'
 #' @param dbname the path and name of the database. Must exist!
 #' @param either "LEEF-1" or "LEEF-2"
+#' @param contimue_after_error Do not quit execution of sql statements when error
+#'   occurs but continue. \bold{Use with caution!} Default: \code{FALSE}
 #'
 #' @return
 #' @export
@@ -9,7 +11,8 @@
 #' @examples
 RRD_create_indices <- function(
     dbname,
-    LEEF = NULL
+    LEEF = NULL,
+    continue_after_error = FALSE
 ){
   if (!file.exists(dbname)) {
     stop(
@@ -37,7 +40,11 @@ RRD_create_indices <- function(
   result <- sapply(
     sql[[1]],
     function(s) {
-      DBI::dbExecute(conn, s)
+      if (continue_after_error) {
+        try(DBI::dbExecute(conn, s))
+      } else {
+        DBI::dbExecute(conn, s)
+      }
     }
   )
   invisible(result)

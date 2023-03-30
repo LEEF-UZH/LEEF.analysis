@@ -4,12 +4,15 @@
 \alias{RRD_create_indices}
 \title{Create indices in RRD database}
 \usage{
-RRD_create_indices(dbname, LEEF = NULL)
+RRD_create_indices(dbname, LEEF = NULL, continue_after_error = FALSE)
 }
 \arguments{
 \item{dbname}{the path and name of the database. Must exist!}
 
 \item{either}{"LEEF-1" or "LEEF-2"}
+
+\item{contimue_after_error}{Do not quit execution of sql statements when error
+occurs but continue. \bold{Use with caution!} Default: \code{FALSE}}
 }
 \description{
 Create indices in RRD database
