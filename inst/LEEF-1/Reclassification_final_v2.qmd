@@ -626,6 +626,21 @@ download.file(
   mode = "wb"
 )
 
+immigration_schedule <- file.path(pdir, "immigration_schedule.csv")
+download.file(
+  paste0(base, "treatment/immigration_schedule.csv"), 
+  destfile = immigration_schedule,
+  mode = "wb"
+)
+
+light_decline_schedule <- file.path(pdir, "light_decline_schedule.csv")
+download.file(
+  paste0(base, "treatment/light_decline_schedule.csv"), 
+  destfile = light_decline_schedule,
+  mode = "wb"
+)
+
+
 add_to_db(
   fns = composition,
   db = db_name(1, temp = TRUE),
@@ -644,8 +659,26 @@ add_to_db(
   backup_removed = TRUE
 )
 
+add_to_db(
+  fns = immigration_schedule,
+  db = db_name(1, temp = TRUE),
+  tables = "immigration_schedule",
+  remove_timestamps = NULL,
+  check_timestamps = FALSE,
+  backup_removed = TRUE
+)
+
+add_to_db(
+  fns = light_decline_schedule,
+  db = db_name(1, temp = TRUE),
+  tables = "light_decline_schedule",
+  remove_timestamps = NULL,
+  check_timestamps = FALSE,
+  backup_removed = TRUE
+)
+
 unlink(pdir)
-rm(composition, experimental_design)
+rm(composition, experimental_design, immigration_schedule, light_decline_schedule)
 ```
 
 ```{r}
@@ -1224,47 +1257,24 @@ file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
 
 
 
-## VERIFY Clean Up Flowcytometer
-```{r cleanup_flowcytometer}
-unlink(pdir)
-rm(gates_coordinates, metadata_flowcytometer, size_standard)
-```
+# 4. TODO Add O2, Manualcount and TOC measuremnts 
 
-# 4. TODO Add O2, Manualcount and TOC measuremnts and experimental tables
-## TODO Prepare Adding
-```{r prepare_adding}
-pdir <- tempfile()
-dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
-
-gates_coordinates <- file.path(pdir, "gates_coordinates.csv")
-download.file(
-  paste0(base, "parameter/flowcytometer/gates_coordinates.csv"), 
-  destfile = gates_coordinates,
-  mode = "wb"
-)
-
-metadata_flowcytometer <- file.path(pdir, "metadata_flowcytometer.csv")
-download.file(
-  paste0(base, "parameter/flowcytometer/metadata_flowcytometer.csv"), 
-  destfile = metadata_flowcytometer,
-  mode = "wb"
-)
-
-
-size_standard <- file.path(pdir, "size_standard.csv")
-download.file(
-  paste0(base, "parameter/flowcytometer/size_standard.csv"), 
-  destfile = size_standard,
-  mode = "wb"
-)
-```
-
-### Do the adding
+## Do the adding
 ```{r}
 #| label: add_data
 #| 
 
 file.copy(db_name(4, temp = FALSE), db_name(5, temp = TRUE))
+
+add_to_db(
+  params$toc,
+  db = db_name(5, temp = TRUE),
+  tables = "toc__toc",
+  remove_timestamps = NULL,
+  check_timestamps = TRUE,
+  backup_removed = TRUE
+)
+
 
 fns_mc <- list.files(
   path = params$extracted_dir, 
@@ -1275,9 +1285,9 @@ fns_mc <- list.files(
   file.path("manualcount_density.csv")
 
 add_to_db(
-  params$toc,
+  fns_mc,
   db = db_name(5, temp = TRUE),
-  tables = "toc__toc",
+  tables = rep("manualcount__manualcount_density", length(fns_mc)),
   remove_timestamps = NULL,
   check_timestamps = TRUE,
   backup_removed = TRUE
@@ -1301,23 +1311,6 @@ add_to_db(
   backup_removed = TRUE
 )
 
-
-add_to_db(
-  params$toc,
-  db = db_name(5, temp = TRUE),
-  tables = "toc__toc",
-  remove_timestamps = NULL,
-  check_timestamps = FALSE,
-  backup_removed = FALSE
-)
-
-
-TODO: 
-  - Add composition
-  - Add immigration_schedule
-  - Add experimental_design
-  - Add light_decline_schedule
-  
 file.rename(db_name(5, temp = TRUE), db_name(5, temp = FALSE))
 ```
 
