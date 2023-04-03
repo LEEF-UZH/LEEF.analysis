@@ -1,0 +1,26 @@
+---
+title: "FSC.A Densities"
+format: html
+---
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+trait_files <- list.files(
+  "/Volumes/rainer/RRD.Reclassification_final/flowcytometer_traits/",
+  full.names = TRUE
+)
+lapply(
+  trait_files,
+  function(fn){
+    traits <- read.rds(fn)
+    x$FSC.A |> 
+      density(bw = 0.00001) |>
+      plot( main = paste0("FSC.A ", basename(fn))) |>
+      abline( v = quantile(x$FSC.A, probs = c(0.05, 0.95), na.rm = TRUE) )
+  }
+)
+```
+
