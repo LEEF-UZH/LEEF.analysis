@@ -9,6 +9,7 @@ output:
     toc_float: true
     toc_collapsed: true
     code_folding: hide  
+    embed-resources: true
 ---
 
 
@@ -21,17 +22,56 @@ trait_files <- list.files(
   full.names = TRUE
 )
 
-invisible(
-  pbapply::pblapply(
-    trait_files,
-    function(fn){
-      traits <- readRDS(fn)
-      traits$FSC.A |> 
-        density(bw = 0.00001) |>
-        plot( main = paste0("FSC.A ", basename(fn))) |>
-        abline( v = quantile(traits$FSC.A, probs = c(0.05, 0.95), na.rm = TRUE) )
-    }
-  )
+dens <- lapply(
+  trait_files,
+  function(fn){
+    traits <- readRDS(fn)
+    
+    result <- list()
+    result$timestamp <- (fn |> basename() |> strsplit(split = "\\."))[[1]][[2]] |> as.numeric()
+    result$density <- density(traits$FSC.A, bw = 0.00001, na.rm = TRUE)
+    q <- quantile(traits$FSC.A, probs = c(0.025, 0.5, 0.975), na.rm = TRUE)
+    result$min <- q[[1]]
+    result$median <- q[[2]]
+    result$max <- q[[3]]
+    return(result)
+  }
 )
+saveRDS(dens, "dens.rds")
+
+q <- sapply(
+  dens,
+  function(x){
+    quantile(
+      x$density[[1]], 
+      probs = c(0.025, 0.5, 0.975)
+    )
+  }
+)
+
+
+timestamps <- sapply(dens, function(x){x$timestamp})
+plot(
+  x = 1:length(timestamps),
+  y = q[2,],
+  xlim = c(0, length(timestamps)),
+  ylim = range(q),
+  xlab = "measurements",
+  ylab = "0.025 - median - 0.975 - FSC.A"
+)
+lines(
+  x = 1:length(timestamps),
+  y = q[1,]
+)
+lines(
+  x = 1:length(timestamps),
+  y = q[3,]
+)
+
+plot(dens[[1]]$density, ylim = c(0, 1000))
+lines(dens[[1]]$density$x, dens[[50]]$density$y + 200)
+lines(dens[[1]]$density$x, dens[[100]]$density$y + 400)
+lines(dens[[1]]$density$x, dens[[123]]$density$y + 450)
+
 ```
 
