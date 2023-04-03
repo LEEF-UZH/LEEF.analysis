@@ -1,6 +1,14 @@
 ---
 title: "FSC.A Densities"
-format: html
+output:
+  html_document:
+    dev: png
+    fig_width: 10
+    fig_height: 12
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    code_folding: hide  
 ---
 
 
@@ -9,18 +17,21 @@ format: html
 library(dplyr)
 library(ggplot2)
 trait_files <- list.files(
-  "/Volumes/rainer/RRD.Reclassification_final/flowcytometer_traits/",
+  "~/RRD.Reclassification_final/flowcytometer_traits/",
   full.names = TRUE
 )
-lapply(
-  trait_files,
-  function(fn){
-    traits <- read.rds(fn)
-    x$FSC.A |> 
-      density(bw = 0.00001) |>
-      plot( main = paste0("FSC.A ", basename(fn))) |>
-      abline( v = quantile(x$FSC.A, probs = c(0.05, 0.95), na.rm = TRUE) )
-  }
+
+invisible(
+  pbapply::pblapply(
+    trait_files,
+    function(fn){
+      traits <- readRDS(fn)
+      traits$FSC.A |> 
+        density(bw = 0.00001) |>
+        plot( main = paste0("FSC.A ", basename(fn))) |>
+        abline( v = quantile(traits$FSC.A, probs = c(0.05, 0.95), na.rm = TRUE) )
+    }
+  )
 )
 ```
 
