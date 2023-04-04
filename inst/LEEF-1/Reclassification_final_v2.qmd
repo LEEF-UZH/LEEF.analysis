@@ -13,7 +13,7 @@ input:
     toc_collapsed: true
     code_folding: hide  
 params:
-  version_tag: "v1.8.4b"
+  version_tag: "v1.8.5"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
   output_dir: "~/RRD.Reclassification_final/"
   db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
@@ -443,7 +443,7 @@ invisible(
   )
 )
 ```
-#### EAWAG Samples
+#### TODO EAWAG Samples
 
 Now process the EAWAG samples. the previous ones will be replaced, if they exist.
 
@@ -494,7 +494,7 @@ invisible(
     particles = "bacteria",
     use_H = TRUE,
     excl_FSCA_0 = TRUE,
-    log10_all = TRUE,
+    log10_all = TRUE, 
     timestamps = timestamps,
     output = file.path(params$output_dir, "flowcytometer_traits"),
     length_slope =  read.csv(conv_FSCA_length)$slope,
@@ -504,7 +504,7 @@ invisible(
 )
 ```
 
-#### EAWAG Samples
+#### TODO EAWAG Samples
 
 Now process the EAWAG samples. the previous ones will be replaced, if they exist.
 ```{r biomass_EAWAG}

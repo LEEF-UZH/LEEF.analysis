@@ -111,8 +111,9 @@ extract_traits_flowcytometer_archive <- function(
 
         if (!is.null(traits)) {
           # stop("There is something still wrong here!!!")
-          traits[[particles]]$length <- (10^(traits[[particles]]$FSC.A)) * length_slope + length_intercept
-          traits[[particles]]$volume <-4/9 * pi * traits[[particles]]$length^3
+          traits[[particles]]$length <- traits[[particles]]$FSC.A * length_slope + length_intercept
+          traits[[particles]]$length[traits[[particles]]$length <= 0] <- NA
+          traits[[particles]]$volume <- 4/9 * pi * traits[[particles]]$length^3 # assumes second radius is equals length/3
 
           # traits_sum <- traits[[particles]] %>%
           #   dplyr::group_by(bottle) %>%
