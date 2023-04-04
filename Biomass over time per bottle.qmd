@@ -1,0 +1,125 @@
+---
+title: "Biomass over time per bottle"
+format: html
+---
+
+```{r}
+#| label: setup
+#| 
+
+library(LEEF.analysis)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+#| label: determine files
+#| 
+
+fns <- list.files("~/RRD.Reclassification_final/flowcytometer_traits/", full.names = TRUE)
+```
+
+```{r}
+#| label: length_less_zero
+#| 
+
+length_zero <- pbmcapply::pbmclapply(
+  fns,
+  function(fn){
+    result <- NULL
+    try(
+      {
+        timestamp <- strsplit(basename(fn), "\\.")[[1]][[2]]
+        result <- readRDS(fn) |> 
+          select(length, bottle) |> 
+          group_by(bottle) |> 
+          summarise(n = n(), n_smaller_0 = sum(length<0))
+        result$timestamp <- timestamp
+      }
+    )
+    return(result)
+  },
+  mc.cores = 7
+) |>
+  do.call(what = rbind)
+
+
+length_zero$samplingday <- length_zero$timestamp |> as.numeric() |> sort() |> factor() |> as.numeric()
+length_zero 
+
+length_zero |> mutate(p_smaller_0 = n_smaller_0 / n) |>
+  ggplot(aes(x = samplingday, y = p_smaller_0)) +
+  ggplot2::geom_line() +
+  scale_y_continuous(trans='log10') +
+  ggplot2::facet_wrap(vars(bottle), nrow = 4)
+
+```
+
+
+``{r}
+#| label: calc_mean_larger_0
+#| 
+
+length_zero <- pbmcapply::pbmclapply(
+  fns,
+  function(fn){
+    result <- NULL
+    try(
+      {
+        timestamp <- strsplit(basename(fn), "\\.")[[1]][[2]]
+        result <- readRDS(fn) |> 
+          select(length, bottle) |> 
+          group_by(bottle) |> 
+          summarise(n = n(), n_smaller_0 = sum(length<0))
+        result$timestamp <- timestamp
+      }
+    )
+    return(result)
+  },
+  mc.cores = 7
+) |>
+  do.call(what = rbind)
+
+
+length_zero$samplingday <- length_zero$timestamp |> as.numeric() |> sort() |> factor() |> as.numeric()
+length_zero 
+
+length_zero |> mutate(p_smaller_0 = n_smaller_0 / n) |>
+  ggplot(aes(x = samplingday, y = p_smaller_0)) +
+  ggplot2::geom_line() +
+  scale_y_continuous(trans='log10') +
+  ggplot2::facet_wrap(vars(bottle), nrow = 4)
+
+```
+
+
+```{r}
+#| label: calculation
+#| 
+vol <- pbmcapply::pbmclapply(
+  fns,
+  function(fn){
+    result <- NULL
+    try(
+      {
+        timestamp <- strsplit(basename(fn), "\\.")[[1]][[2]]
+        result <- readRDS(fn) |> filter(!is.na(length)) |> group_by(bottle) |> summarise(n = n(), biomass = sum(volume))
+        result$timestamp <- timestamp
+      }
+    )
+    return(result)
+  },
+  mc.cores = 7
+) |>
+  do.call(rbind, vol)
+
+
+vol$samplingday <- vol$timestamp |> as.numeric() |> sort() |> factor() |> as.numeric()
+
+vol |> ggplot(aes(x = samplingday, y = biomass)) +
+  ggplot2::geom_line() +
+  scale_y_continuous(trans='log10') +
+  ggplot2::facet_wrap(vars(bottle), nrow = 4)
+
+
+```

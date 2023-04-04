@@ -112,8 +112,21 @@ extract_traits_flowcytometer_archive <- function(
         if (!is.null(traits)) {
           # stop("There is something still wrong here!!!")
           traits[[particles]]$length <- traits[[particles]]$FSC.A * length_slope + length_intercept
-          traits[[particles]]$length[traits[[particles]]$length <= 0] <- NA
-          traits[[particles]]$volume <- 4/9 * pi * traits[[particles]]$length^3 # assumes second radius is equals length/3
+          # traits[[particles]]$length[traits[[particles]]$length <= 0] <- NA
+          ##
+          ## We assume the bacteria to have the shape of an ellipsoid of revolution
+          ## See e.g. https://en.wikipedia.org/wiki/Ellipsoid#Volume
+          ## The volume can be calculated as follows
+          ## V = 4/3 * pi * a * b * c
+          ## we assume, that :
+          ## a = length
+          ## b = c = 1/3 length
+          ## therefore we have:
+          ## V = 4/3 * pi * l * (l/3) * l/3)
+          ## V = 4/3 * pi * l^3 / 9
+          ## V = 4/27 * pi * l * l^3
+          ##
+          traits[[particles]]$volume <- 4/27 * pi * traits[[particles]]$length^3
 
           # traits_sum <- traits[[particles]] %>%
           #   dplyr::group_by(bottle) %>%
