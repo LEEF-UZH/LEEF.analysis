@@ -430,7 +430,24 @@ summary(m2)
 
 
 
+Now the same with log(FSC.A) (limited x range)
 
+```{r}
+
+ggplot(data = dd2, aes(raw_FSC.A, bead_size)) +
+  geom_jitter() +
+  xlim(0, 2e+5) + 
+  ylim(0, 2.5) +
+  geom_smooth(method = "lm", fullrange = TRUE)
+m2 <- lm(bead_size ~ FSC.A, dd2)
+
+## The model diagnostics are not too important, since we are not hypothesis testing and also because there is a lot of data, so even extreme data points can't be very influential.
+par(mfrow=c(2,2))
+plot(m2)
+
+## And the coefficients
+summary(m2)
+```
 
 
 # Save
