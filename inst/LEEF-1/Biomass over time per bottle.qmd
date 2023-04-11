@@ -61,6 +61,7 @@ if (file.exists("sum_stats.rds")) {
   ) |>
     do.call(what = rbind)
   ##
+  summ_stats$samplingday <- summ_stats$timestamp |> as.numeric() |> sort() |> factor() |> as.numeric()
   saveRDS(summ_stats, "sum_stats.rds")
 }
 
@@ -69,8 +70,6 @@ if (file.exists("sum_stats.rds")) {
 # Proportion of samples per sampling day per bottle < zero
 ```{r}
 #| label: p_less_zero
-summ_stats$samplingday <- summ_stats$timestamp |> as.numeric() |> sort() |> factor() |> as.numeric()
-
 summ_stats |> 
   mutate(p_smaller_0 = n_smaller_0 / n) |>
   ggplot(aes(x = samplingday, y = p_smaller_0)) +
