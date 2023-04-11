@@ -1,0 +1,93 @@
+---
+title: "FSC.A Densities"
+format:
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+if (file.exists("dens.rds")){
+  dens <- readRDS("dens.rds")
+} else {
+  
+  trait_files <- list.files(
+    "~/RRD.Reclassification_final/flowcytometer_traits/",
+    full.names = TRUE
+  )
+  
+  dens <- lapply(
+    trait_files,
+    function(fn){
+      traits <- readRDS(fn)
+      
+      result <- list()
+      result$timestamp <- (fn |> basename() |> strsplit(split = "\\."))[[1]][[2]] |> as.numeric()
+      result$density <- density(traits$FSC.A, bw = 0.00001, na.rm = TRUE)
+      q <- quantile(traits$FSC.A, probs = c(0.025, 0.5, 0.975), na.rm = TRUE)
+      result$q0025 <- q[[1]]
+      result$q05 <- q[[2]]
+      result$q0975 <- q[[3]]
+      result$median <- median(traits$FSC.A, na.rm = TRUE)
+      result$mean <- mean(traits$FSC.A, na.rm = TRUE)
+      return(result)
+    }
+  )
+  saveRDS(dens, "dens.rds")
+}
+
+timestamps <- sapply(dens, function(x){x$timestamp})
+q0025 <- sapply(dens, function(x){x$q0025})
+q05 <- sapply(dens, function(x){x$q05})
+q0975 <- sapply(dens, function(x){x$q0975})
+f_median <- sapply(dens, function(x){x$median})
+f_mean <- sapply(dens, function(x){x$mean})
+
+plot(
+  x = 1:length(timestamps),
+  y = f_mean,
+  xlim = c(0, length(timestamps)),
+  ylim = c(0, 7),
+  xlab = "measurements",
+  ylab = "0.025 - median - 0.975 - FSC.A",
+  col = "red"
+)
+
+lines(
+  x = 1:length(timestamps),
+  y = q0025,
+  col = "green"
+)
+lines(
+  x = 1:length(timestamps),
+  y = q05,
+  col = "green"
+)
+lines(
+  x = 1:length(timestamps),
+  y = q0975,
+  col = "green"
+)
+lines(
+  x = 1:length(timestamps),
+  y = f_median,
+  col = "green"
+)
+```
+
+
+Just for illustration: the density plots - the curves are staggered and arbitrary values a added (a = c(0, 200, 400, 423)) to the y values so that they do not overlap. Densities are from timestep 0, 50, 100, 150
+
+```{r}
+plot(dens[[1]]$density, ylim = c(0, 1000), ylab = "Density + a", xlab = "FSC.A - Bandwidth = 0.00001")
+lines(dens[[1]]$density$x, dens[[50]]$density$y + 200)
+lines(dens[[1]]$density$x, dens[[100]]$density$y + 400)
+lines(dens[[1]]$density$x, dens[[123]]$density$y + 450)
+
+```
+

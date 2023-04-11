@@ -1,0 +1,94 @@
+---
+title: "Biomass over time per bottle"
+format: 
+  html:
+    toc: true
+    toc-depth: 5
+    toc-location: left
+    code-fold: true
+    embed-resources: true
+---
+
+```{r}
+#| label: setup
+#| 
+
+library(LEEF.analysis)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+#| label: determine files
+#| 
+
+fns <- list.files("~/RRD.Reclassification_final/flowcytometer_traits/", full.names = TRUE)
+```
+
+# Calculations of summary stats
+```{r}
+#| label: calculations
+#| 
+if (file.exists("sum_stats.rds")) {
+  summ_stats <- readRDS("sum_stats.rds")
+} else {
+  summ_stats <- pbmcapply::pbmclapply(
+    fns,
+    function(fn){
+      result <- NULL
+      try(
+        {
+          traits <- readRDS(fn)
+          #
+          t1 <- traits |> 
+            select(length, bottle) |> 
+            group_by(bottle) |> 
+            summarise(n = n(), n_smaller_0 = sum(length<0)) |>
+            mutate(timestamp =  strsplit(basename(fn), "\\.")[[1]][[2]])
+          t2 <- traits |> 
+            select(length, bottle) |>
+            filter(length > 0) |>
+            group_by(bottle) |> 
+            summarise(mean_length = mean(length), sd_length = sd(length))
+          return(
+            dplyr::full_join(t1, t2, by = join_by(bottle))
+          )
+        }
+      )
+      return(result)
+    },
+    mc.cores = 7
+  ) |>
+    do.call(what = rbind)
+  ##
+  saveRDS(summ_stats, "sum_stats.rds")
+}
+
+```
+
+# Proportion of samples per sampling day per bottle < zero
+```{r}
+#| label: p_less_zero
+summ_stats$samplingday <- summ_stats$timestamp |> as.numeric() |> sort() |> factor() |> as.numeric()
+
+summ_stats |> 
+  mutate(p_smaller_0 = n_smaller_0 / n) |>
+  ggplot(aes(x = samplingday, y = p_smaller_0)) +
+  ggplot2::geom_line() +
+  scale_y_continuous(trans='log10') +
+  ggplot2::facet_wrap(vars(bottle), nrow = 4)
+
+```
+
+# Mean length of samles > 0
+
+```{r}
+#| label: mean_larger_0
+#| 
+
+summ_stats  |>
+  ggplot(aes(x = samplingday, y = mean_length)) +
+  ggplot2::geom_line() +
+  ggplot2::facet_wrap(vars(bottle), nrow = 4)
+
+```
