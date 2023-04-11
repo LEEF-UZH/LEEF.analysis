@@ -119,15 +119,17 @@ timestamps <- list.files(
 timestamps <- gsub("^LEEF\\.fast\\.flowcam\\.", "", timestamps)
 ```
 
-### Classify Flowcam
+### Classify Flowcam up to 20220704
 ```{r classify_flowcam}
+
+
 out <- file.path(params$output_dir, "flowcam")
 if (!file.exists(out)) {
   message("Classifying flowcam...")
   system.time(
     classify_flowcam_archive(
       archive_dir = params$archive_dir, 
-      timestamps = timestamps, 
+      timestamps = timestamps[as.numeric(timestamps) <= 20220704], 
       algae_traits_name = "algae_traits_filtered.rds", 
       classifier_constant_name = class_constant, 
       classifier_increasing_name = class_increasing, 
@@ -202,13 +204,13 @@ download.file(
 )
 ```
 
-### Classify Flowcam
+### Classify Flowcam up to 20220704
 ```{r classify_flowcam}
 message("Classifying flowcam...")
 system.time(
   classify_flowcam_archive(
     archive_dir = params$archive_dir, 
-    timestamps = timestamps, 
+    timestamps = timestamps[as.numeric(timestamps) <= 20220704], 
     algae_traits_name = "algae_traits_filtered.rds", 
     classifier_constant_name = class_constant, 
     classifier_increasing_name = class_increasing, 
@@ -317,13 +319,16 @@ timestamps <- list.files(
 timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.", "", timestamps)
 ```
 
-### Classify `bemovi_mag.25` 
+### Classify `bemovi_mag.25` excluding "20220622" (duplicates of "20220620")
+
 ```{r classify_bemovi_25}
+excl <- c("20220622")
+
 out <- file.path(params$output_dir, "bemovi_mag_25")
 if (!file.exists(out)) {
   system.time(
     classify_bemovi_archive( 
-      timestamps = timestamps, 
+      timestamps = timestamps[!(excl %in% timestamps)], 
       archive_dir = params$archive_dir, 
       magnification = 25, 
       classifier_constant_name = class_constant, 
