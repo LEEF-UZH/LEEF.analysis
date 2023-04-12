@@ -14,7 +14,7 @@ extract_traits_flowcytometer_archive(
   length_slope = 4.933454e-06,
   length_intercept = 0.2215799,
   use_H,
-  excl_FSCA_0,
+  min_FSC.A,
   log10_all = FALSE,
   mc.cores = 1,
   wellid_keyword = "$WELLID"
@@ -38,8 +38,9 @@ classified}
 
 \item{use_H}{if \code{TRUE}, gating will be done using \code{height}, otherwie \code{area}}
 
-\item{excl_FSCA_0}{boolean. If \code{TRUE}, \code{FSA.A <= 0} will be filtered out by using
-a rectangular filter}
+\item{min_FSC.A}{numeric. If \code{!NULL}, \code{FSA.A <= min_FSC.A} will be fitered out by using
+a rectangular filter
+\code{flowCore::rectangleGate(filterId="filter_out_0", "FSC-A" = c(min_FSC.A, +Inf))}}
 
 \item{log10_all}{if \code{TRUE}, all data not yet log10 transformed will be log10 transformed
 ("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H") in the same way as in the pipeline.}

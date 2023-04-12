@@ -5,8 +5,9 @@
 #' @param extracted_dir srchive directory of the extracted data
 #' @param gates_coordinates the \code{gates_coordinates}
 #' @param use_H if \code{TRUE}, gating will be done using \code{height}, otherwie \code{area}
-#' @param excl_FSCA_0 boolean. If \code{TRUE}, \code{FSA.A <= 0} will be filtered out by using
+#' @param min_FSC.A numeric. If \code{!NULL}, \code{FSA.A <= min_FSC.A} will be fitered out by using
 #'   a rectangular filter
+#'   \code{flowCore::rectangleGate(filterId="filter_out_0", "FSC-A" = c(min_FSC.A, +Inf))}
 #' @param log10_all if \code{TRUE}, all data not yet log10 transformed will be log10 transformed
 #'   ("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H") in the same way as in the pipeline.
 #' @param particles the particles, as defined in the gates file, to be extracted. Allowed are one or multiple of
@@ -29,7 +30,7 @@ traits_flowcytometer_archive <- function(
   timestamps,
   output,
   use_H,
-  excl_FSCA_0,
+  min_FSC.A,
   log10_all = FALSE,
   particles = c("bacteria", "algae"),
   mc.cores = 1
@@ -88,7 +89,7 @@ traits_flowcytometer_archive <- function(
                       "metadata_flowcytometer.csv")
                   ),
                   use_H = use_H,
-                  excl_FSCA_0 = excl_FSCA_0,
+                  min_FSC.A = min_FSC.A,
                   timestamp = timestamp,
                   gates_coordinates = gates_coordinates,
                   fsa = fsa

@@ -15,7 +15,7 @@ params:
   timestamp: 20220309
   particles: "bacteria"
   use_H: TRUE
-  excl_FSCA_0: TRUE
+  min_FSC.A: 0.0000001
 ---
 
 
@@ -134,7 +134,7 @@ flowcytometer_density <- LEEF.measurement.flowcytometer::extractor_flowcytometer
   fsa = fsa,
   flow.data = flow.data,
   use_H = params$use_H, 
-  excl_FSCA_0 = params$excl_FSCA_0,
+  min_FSC.A = params$min_FSC.A,
   dens_back = TRUE
 )
 
@@ -147,7 +147,7 @@ traits <- LEEF.measurement.flowcytometer::extract_traits(
       "metadata_flowcytometer.csv")
   ),
   use_H = params$use_H, 
-  excl_FSCA_0 = params$excl_FSCA_0,
+  min_FSC.A = params$min_FSC.A,
   timestamp = params$timestamp,
   gates_coordinates = gates_coordinates,
   fsa = fsa

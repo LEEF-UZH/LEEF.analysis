@@ -13,8 +13,9 @@
 #' @param log10_all if \code{TRUE}, all data not yet log10 transformed will be log10 transformed
 #'   ("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H") in the same way as in the pipeline.
 #' @param use_H if \code{TRUE}, gating will be done using \code{height}, otherwie \code{area}
-#' @param excl_FSCA_0 boolean. If \code{TRUE}, \code{FSA.A <= 0} will be filtered out by using
+#' @param min_FSC.A numeric. If \code{!NULL}, \code{FSA.A <= min_FSC.A} will be fitered out by using
 #'   a rectangular filter
+#'   \code{flowCore::rectangleGate(filterId="filter_out_0", "FSC-A" = c(min_FSC.A, +Inf))}
 #' @param wellid_keyword the kwyword which is used to identify the well ID. Usually "$WELLID" (default), but for the EAWAG Flowcytometer it is "$SMNO".
 #' @param mc.cores number of cores to be used. Defaults to 1
 #'
@@ -40,7 +41,7 @@ extract_traits_flowcytometer_archive <- function(
   length_slope = 4.933454e-06, # ,201615
   length_intercept = 2.215799e-01, #-39861.52,
   use_H,
-  excl_FSCA_0,
+  min_FSC.A,
   log10_all = FALSE,
   mc.cores = 1,
   wellid_keyword = "$WELLID"
@@ -100,7 +101,7 @@ extract_traits_flowcytometer_archive <- function(
                   metadata_flowcytometer = read.csv(file.path(datadir, "metadata_flowcytometer.csv")),
                   fsa = fsa,
                   gates_coordinates = gates_coordinates,
-                  excl_FSCA_0 = excl_FSCA_0,
+                  min_FSC.A = min_FSC.A,
                   use_H = use_H,
                   wellid_keyword = wellid_keyword
                 )

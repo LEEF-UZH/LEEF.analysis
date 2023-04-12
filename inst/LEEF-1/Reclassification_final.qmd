@@ -15,8 +15,8 @@ input:
 params:
   version_tag: "v1.8.5"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
-  output_dir: "~/RRD.Reclassification_final/"
-  db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
+  output_dir: "/Volumes/Documents/RRD.Reclassification_final/"
+  db: "/Volumes/Documents/RRD.Reclassification_final/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
   pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
   extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
@@ -442,7 +442,7 @@ invisible(
     timestamps = timestamps,
     output = file.path(params$output_dir, "flowcytometer"),
     use_H = TRUE,
-    excl_FSCA_0 = TRUE,
+    min_FSC.A = 2,
     log10_all = TRUE,
     mc.cores = params$cores
   )
@@ -471,7 +471,7 @@ invisible(
     timestamps = timestamps,
     output = file.path(params$output_dir, "flowcytometer"),
     use_H = TRUE,
-    excl_FSCA_0 = TRUE,
+    min_FSC.A = params$min_FSC.A,
     log10_all = TRUE,
     mc.cores = params$cores
   )
@@ -498,7 +498,7 @@ invisible(
     gates_coordinates = read.csv(gates_coordinates),
     particles = "bacteria",
     use_H = TRUE,
-    excl_FSCA_0 = TRUE,
+    min_FSC.A = params$min_FSC.A,
     log10_all = TRUE, 
     timestamps = timestamps,
     output = file.path(params$output_dir, "flowcytometer_traits"),
@@ -530,7 +530,7 @@ invisible(
     gates_coordinates = read.csv(gates_coordinates_EAWAG_samples),
     particles = "bacteria",
     use_H = TRUE,
-    excl_FSCA_0 = TRUE,
+    min_FSC.A = params$min_FSC.A,
     log10_all = TRUE,
     timestamps = timestamps,
     output = file.path(params$output_dir, "flowcytometer_traits"),

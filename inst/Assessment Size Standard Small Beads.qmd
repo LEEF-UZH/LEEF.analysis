@@ -73,7 +73,7 @@ traits <- lapply(
         particles = "all",
         metadata_flowcytometer = metadata,
         use_H = FALSE, 
-        excl_FSCA_0 = FALSE,
+        min_FSC.A = NULL,
         timestamp = 99999999,
         gates_coordinates = gates_coordinates,
         fsa = fsa
