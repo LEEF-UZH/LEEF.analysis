@@ -57,10 +57,10 @@ add_to_db <- function(
     )
   }
 
-  added <- sapply(
+  added <- pbapply::pbsapply(
     1:length(fns),
     function(i){
-      message("Adding '", basename(fns[i]), "' to '", tables[i], "'..."  )
+      message("\nAdding '", basename(fns[i]), "' to '", tables[i], "'..."  )
 
       if (grepl("\\.rds$", fns[i])) {
         dat <- readRDS(fns[i])
