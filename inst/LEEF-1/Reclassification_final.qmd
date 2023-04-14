@@ -549,6 +549,87 @@ rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, c
 ```
 
 
+## Exclusion of time series that are wrong classifications or only noise
+```{r}
+excl <- data.frame(
+  bottles = c("b_30", "b_02", "b_09", "b_02", "b_09", "b_14", 
+              "b_23", "b_04", "b_07", "b_13", "b_07", "b_13", 
+              "b_07", "b_13", "b_10", "b_21", "b_10", "b_21",
+              "b_01", "b_11", "b_01", "b_11", "b_20", "b_28",
+              "b_28", "b_22", "b_22", "b_27", "b_22", "b_22",
+              "b_27", "b_03", "b_03", "b_06" ,"b_03", "b_06", 
+              "b_03", "b_06", "b_03", "b_03", "b_06", "b_19", 
+              "b_29", "b_19", "b_29", "b_19", "b_29", "b_19", 
+              "b_29", "b_05", "b_24" ,"b_05", "b_24", "b_05",
+              "b_24", "b_05", "b_24", "b_15", "b_12", "b_15", 
+              "b_12", "b_15", "b_12", "b_15", "b_12", "b_15", 
+              "b_16", "b_26" ,"b_16", "b_26", "b_16", "b_26", 
+              "b_16", "b_16", "b_26", "b_05", "b_12", "b_15",
+              "b_16", "b_24", "b_26", "b_08", "b_06", "b_26"),
+  
+  species = c("Tetrahymena",   "Tetrahymena",   "Tetrahymena",   "Euplotes",
+              "Euplotes",      "Loxocephallus", "Euplotes",      "Colpidium",
+              "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",
+              "Euplotes",      "Euplotes",      "Colpidium",     "Colpidium",
+              "Loxocephallus", "Loxocephallus", "Tetrahymena",   "Tetrahymena",
+              "Loxocephallus", "Loxocephallus", "Tetrahymena",   "Tetrahymena",  
+              "Colpidium",     "Colpidium",     "Dexiostoma",    "Dexiostoma", 
+              "Stylonychia2",  "Euplotes",      "Euplotes",      "Staurastrum1",
+              "Tetrahymena",   "Tetrahymena",   "Colpidium",     "Colpidium",   
+              "Loxocephallus", "Loxocephallus", "Stylonychia2",  "Euplotes",   
+              "Euplotes",      "Colpidium",     "Colpidium",     "Loxocephallus",
+              "Loxocephallus", "Dexiostoma",    "Dexiostoma",    "Euplotes",    
+              "Euplotes",      "Tetrahymena",   "Tetrahymena",   "Colpidium",   
+              "Colpidium",     "Loxocephallus", "Loxocephallus", "Euplotes",   
+              "Euplotes",      "Staurastrum1",  "Colpidium",     "Colpidium",   
+              "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",  
+              "Euplotes",      "Euplotes",      "Colpidium",     "Colpidium",  
+              "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",  
+              "Stylonychia2",  "Euplotes",      "Euplotes",      "Staurastrum2", 
+              "Staurastrum2",  "Staurastrum2",  "Staurastrum2",  "Staurastrum2", 
+              "Staurastrum2",  "Tetrahymena",   "Stylonychia2",  "Stylonychia2") 
+)
+excl$bottle_species <- paste0(excl$bottles, "_", excl$species)
+
+fns <- c(
+  list.files(
+    path = file.path(params$output_dir, "bemovi_mag_16"),
+    pattern = "morph|density",
+    recursive = FALSE,
+    full.names = TRUE
+  ),
+  list.files(
+    path = file.path(params$output_dir, "bemovi_mag_25"),
+    pattern = "morph|density",
+    recursive = FALSE,
+    full.names = TRUE
+  ),
+  list.files(
+    path = file.path(params$output_dir, "flowcam"),
+    pattern = "morph|density",
+    recursive = FALSE,
+    full.names = TRUE
+  )
+)
+
+
+pbmcapply::pbmcmapply(
+  fns,
+  function(fn){
+    readRDS(fn) |>
+      dplyr::mutate(bottle_species = paste0(bottle, "_", species)) |>
+      dplyr::filter(!(bottle_species %in% excl$bottle_species)) |>
+      dplyr::select(-bottle_species) |>
+      saveRDS(file = fn)
+  },
+  mc.cores = params$cores, 
+  mc.preschedule = FALSE
+)
+
+
+rm(excl, fns)
+```
+
 
 ## DONE - Add to database and create indices
 Old timestamps will be removed and not be backed up.
