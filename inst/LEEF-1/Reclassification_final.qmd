@@ -15,8 +15,8 @@ input:
 params:
   version_tag: "v1.8.5"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
-  output_dir: "/Volumes/Documents/RRD.Reclassification_final/"
-  db: "/Volumes/Documents/RRD.Reclassification_final/LEEF.RRD.sqlite"
+  output_dir: "~/RRD.Reclassification_final/"
+  db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
   pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
   extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
@@ -1269,11 +1269,11 @@ file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
 #| label: add_data
 #| 
 
-file.copy(db_name(4, temp = FALSE), db_name(5, temp = TRUE))
+file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
 
 add_to_db(
   params$toc,
-  db = db_name(5, temp = TRUE),
+  db = db_name(4, temp = TRUE),
   tables = "toc__toc",
   remove_timestamps = NULL,
   check_timestamps = TRUE,
@@ -1291,7 +1291,7 @@ fns_mc <- list.files(
 
 add_to_db(
   fns_mc,
-  db = db_name(5, temp = TRUE),
+  db = db_name(4, temp = TRUE),
   tables = rep("manualcount__manualcount_density", length(fns_mc)),
   remove_timestamps = NULL,
   check_timestamps = TRUE,
@@ -1309,14 +1309,14 @@ fns_o2 <- list.files(
 
 add_to_db(
   fns_o2,
-  db = db_name(5, temp = TRUE),
+  db = db_name(4, temp = TRUE),
   tables = rep("o2meter__o2meter", length(fns_o2)),
   remove_timestamps = NULL,
   check_timestamps = TRUE,
   backup_removed = TRUE
 )
 
-file.rename(db_name(5, temp = TRUE), db_name(5, temp = FALSE))
+file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
 ```
 
 
@@ -1324,13 +1324,13 @@ file.rename(db_name(5, temp = TRUE), db_name(5, temp = FALSE))
 # 5. VERIFY Rename species and columns
 ```{r}
 #| label: indices_rename
-file.copy(db_name(5, temp = FALSE), db_name(6, temp = TRUE))
+file.copy(db_name(4, temp = FALSE), db_name(5, temp = TRUE))
 
-RRD_LEEF_1_rename(db = db_name(6, temp = TRUE))
+RRD_LEEF_1_rename(db = db_name(5, temp = TRUE))
 
-file.rename(db_name(6, temp = TRUE), db_name(6, temp = FALSE))
+file.rename(db_name(5, temp = TRUE), db_name(5, temp = FALSE))
 
-file.copy(db_name(6, temp = FALSE), db_name("final", temp = FALSE))
+file.copy(db_name(5, temp = FALSE), db_name("final", temp = FALSE))
 ```
 
 # Do a final vacuuming into new database

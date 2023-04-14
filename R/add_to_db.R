@@ -14,6 +14,7 @@
 #'
 #' @return vector of length of `fns` with `TRUE` if the data has been added,
 #'   `FALSE` otherwise
+#' @importFrom pbapply  pbsapply
 #' @export
 #'
 #' @md
