@@ -613,19 +613,20 @@ fns <- c(
 )
 
 
-pbmcapply::pbmcmapply(
-  fns,
-  function(fn){
-    readRDS(fn) |>
-      dplyr::mutate(bottle_species = paste0(bottle, "_", species)) |>
-      dplyr::filter(!(bottle_species %in% excl$bottle_species)) |>
-      dplyr::select(-bottle_species) |>
-      saveRDS(file = fn)
-  },
-  mc.cores = params$cores, 
-  mc.preschedule = FALSE
-)
-
+invisible(
+  pbmcapply::pbmclapply(
+    fns,
+    function(fn){
+      readRDS(fn) |>
+        dplyr::mutate(bottle_species = paste0(bottle, "_", species)) |>
+        dplyr::filter(!(bottle_species %in% excl$bottle_species)) |>
+        dplyr::select(-bottle_species) |>
+        saveRDS(file = fn)
+    },
+    mc.cores = params$cores, 
+    mc.preschedule = FALSE
+  )
+)  
 
 rm(excl, fns)
 ```
