@@ -401,7 +401,7 @@ CREATE TABLE `composition` (
   `Euplotes` INTEGER,
   `Didinium` INTEGER
 );
-CREATE TABLE `experimetal_design` (
+CREATE TABLE `experimental_design` (
   `bottle` TEXT,
   `temperature` TEXT,
   `richness` INTEGER,

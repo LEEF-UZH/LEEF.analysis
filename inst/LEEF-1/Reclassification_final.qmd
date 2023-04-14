@@ -551,6 +551,7 @@ rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, c
 
 ## Exclusion of time series that are wrong classifications or only noise
 ```{r}
+#| 
 excl <- data.frame(
   bottles = c("b_30", "b_02", "b_09", "b_02", "b_09", "b_14", 
               "b_23", "b_04", "b_07", "b_13", "b_07", "b_13", 
@@ -617,9 +618,11 @@ invisible(
   pbmcapply::pbmclapply(
     fns,
     function(fn){
-      readRDS(fn) |>
+      x <- readRDS(fn) |>
         dplyr::mutate(bottle_species = paste0(bottle, "_", species)) |>
-        dplyr::filter(!(bottle_species %in% excl$bottle_species)) |>
+        dplyr::filter(!(bottle_species %in% excl$bottle_species))
+        
+      x |>
         dplyr::select(-bottle_species) |>
         saveRDS(file = fn)
     },
@@ -630,7 +633,6 @@ invisible(
 
 rm(excl, fns)
 ```
-
 
 ## DONE - Add to database and create indices
 Old timestamps will be removed and not be backed up.
@@ -694,7 +696,7 @@ RRD_create_indices(
 
 ```
 
-### Adding of General Parameter tables
+## Adding of General Parameter tables
 ```{r prepare_gen_param}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
@@ -1346,15 +1348,79 @@ file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
 
 # 4. TODO Add O2, Manualcount and TOC measuremnts 
 
-## Do the adding
+## Prepare
 ```{r}
-#| label: add_data
+#| label: prepare_tab
+file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
+```
+
+### Add detrended TOC - Removing the linear trend in the water chemistry 
+```{r}
+#| label: add_toc
 #| 
 
-file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
+toc <- readRDS(params$toc) %>%
+  left_join(db_read_table(db = db_name(4, temp = TRUE), table = "experimental_design") %>% collect()) %>%
+  filter(!is.na(conc))
+
+colnames_toc <- colnames(toc)
+
+toc$day <- as.Date(as.character(toc$timestamp), "%Y%m%d") - min(as.Date(as.character(toc$timestamp), "%Y%m%d") )
+toc$day <- as.numeric(toc$day)
+
+toc$analysis_time2 <- lubridate::as_datetime(toc$anaysis_time, format="%Y-%m-%d %H:%M") # wrong time zones, but doesn't matter 
+toc$analysis_time2 <- sapply(toc$analysis_time2, function(d){
+  paste0(unlist(strsplit(as.character(d), "-")), collapse = "")
+})
+
+toc <- toc %>%
+  dplyr::mutate(
+    light_phase = case_when(
+      temperature =="constant" ~ "constant",
+      day < 93 ~ "constant before decrease",
+      day >= 93 & day < 198 ~ "decreasing",
+      day >= 198 ~ "constant after decrease"),
+    int = interaction(analysis_time2,light_phase
+    )
+  )  %>%
+  arrange(timestamp)
+
+toc_list <- split(
+  toc, 
+  f = toc$int, 
+  drop = T
+)
+
+toc_list <- pbmcapply::pbmclapply(
+  toc_list, 
+  function(df){
+    if(nrow(df) < 3*4) { # at least 3 bottles per type to do the detrending
+      df$concentration.detrended <- df$conc
+      return(df)
+    }
+    
+    df <- lapply(
+      c("IC", "TC", "TN", "TOC"), 
+      function(Type){
+        df2 <- df %>% filter(inj_type==Type)
+        m <- lm(conc ~ position, data = df2)
+        predict <- predict(m) - predict(m)[1]
+        df2$concentration.detrended <- df2$conc - predict
+        df2
+      }
+    )
+    do.call("rbind",df)
+  }, 
+  mc.cores = 7
+)
+
+toc <- do.call("rbind",toc_list)
+
+toc_det <- tempfile(fileext = ".rds")
+saveRDS(toc, toc_det)
 
 add_to_db(
-  params$toc,
+  toc_det,
   db = db_name(4, temp = TRUE),
   tables = "toc__toc",
   remove_timestamps = NULL,
@@ -1362,24 +1428,13 @@ add_to_db(
   backup_removed = TRUE
 )
 
+unlink(toc_det)
+```
 
-fns_mc <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.manualcount\\.",
-  recursive = FALSE, 
-  full.names = TRUE
-) |>
-  file.path("manualcount_density.csv")
-
-add_to_db(
-  fns_mc,
-  db = db_name(4, temp = TRUE),
-  tables = rep("manualcount__manualcount_density", length(fns_mc)),
-  remove_timestamps = NULL,
-  check_timestamps = TRUE,
-  backup_removed = TRUE
-)
-
+### Add O2
+```{r}
+#| label: add_o2
+#| 
 
 fns_o2 <- list.files(
   path = params$extracted_dir, 
@@ -1397,11 +1452,39 @@ add_to_db(
   check_timestamps = TRUE,
   backup_removed = TRUE
 )
-
-file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
 ```
 
 
+### Add manualcount
+```{r}
+#| label: add_manualcount
+#| 
+
+fns_mc <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.manualcount\\.",
+  recursive = FALSE, 
+  full.names = TRUE
+) |>
+  file.path("manualcount_density.csv")
+
+add_to_db(
+  fns_mc,
+  db = db_name(4, temp = TRUE),
+  tables = rep("manualcount__manualcount_density", length(fns_mc)),
+  remove_timestamps = NULL,
+  check_timestamps = TRUE,
+  backup_removed = TRUE
+)
+```
+
+
+## Finalize
+```{r}
+#| label: finalize_tab
+#| 
+file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
+```
 
 # 5. VERIFY Rename species and columns
 ```{r}
