@@ -12,7 +12,7 @@
 #'
 #' @return invisible `NULL`
 #'
-#' @importFrom  parallel mclapply
+#' @importFrom  pbmcapply  pbmclapply
 #' @importFrom yaml read_yaml write_yaml
 #' @export
 #'
@@ -43,7 +43,7 @@ classify_bemovi_archive <- function(
   # do the stuff -------------------------------------------------------
 
   return(
-    parallel::mclapply(
+    pbmcapply::pbmclapply(
       timestamps,
       function(timestamp){
         datadir <- file.path(
