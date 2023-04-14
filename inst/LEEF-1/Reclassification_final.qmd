@@ -1416,6 +1416,19 @@ toc_list <- pbmcapply::pbmclapply(
 
 toc <- do.call("rbind",toc_list)
 
+toc <- toc |>
+  select(
+    -c(
+      "temperature", 
+      "richness", 
+      "composition", 
+      "incubator", 
+      "day", 
+      "analysis_time2", 
+      "light_phase", 
+      "int", 
+      "concentration.detrended")
+  )
 toc_det <- tempfile(fileext = ".rds")
 saveRDS(toc, toc_det)
 
