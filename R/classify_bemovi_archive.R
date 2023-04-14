@@ -82,7 +82,6 @@ classify_bemovi_archive <- function(
         if (!is.null(classified)) {
           message("Saving timestamp ", timestamp, "...")
 
-          classified$morph_mvt <- cbind(timestamp = timestamp, classified$morph_mvt)
           classified$mean_density_per_ml <- cbind(timestamp = timestamp, classified$mean_density_per_ml)
 
           p <- yaml::read_yaml(file.path(datadir, bemovi_extract_name))
