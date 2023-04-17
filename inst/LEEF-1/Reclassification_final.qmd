@@ -665,8 +665,8 @@ sapply(
     ts <- strsplit(basename(fn), "\\.")[[1]][2] |>
       as.numeric()
     
+    x <- readRDS(fn)
     if (ts <= cont_timestamp) {
-      x <- readRDS(fn)
       templ <- x[x$bottle == cont_bottle,]
       templ$density <- 0
       
@@ -674,9 +674,11 @@ sapply(
       rbind(x, templ)
       templ$species <- "DesmodesmusClumps"
       rbind(x, templ)
-      
-      saveRDS(x, fn)
     }
+    {
+      # and =here goes the stuff fo the rest
+    }
+    saveRDS(x, fn)
   }
 )
 
