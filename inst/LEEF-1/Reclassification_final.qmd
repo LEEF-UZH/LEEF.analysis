@@ -549,47 +549,54 @@ rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, c
 ```
 
 
-## Exclusion of time series that are wrong classifications or only noise
+## TODO - Exclusion of time series that are wrong classifications or only noise
 ```{r}
 #| 
 excl <- data.frame(
-  bottles = c("b_30", "b_02", "b_09", "b_02", "b_09", "b_14", 
-              "b_23", "b_04", "b_07", "b_13", "b_07", "b_13", 
-              "b_07", "b_13", "b_10", "b_21", "b_10", "b_21",
-              "b_01", "b_11", "b_01", "b_11", "b_20", "b_28",
-              "b_28", "b_22", "b_22", "b_27", "b_22", "b_22",
-              "b_27", "b_03", "b_03", "b_06" ,"b_03", "b_06", 
-              "b_03", "b_06", "b_03", "b_03", "b_06", "b_19", 
-              "b_29", "b_19", "b_29", "b_19", "b_29", "b_19", 
-              "b_29", "b_05", "b_24" ,"b_05", "b_24", "b_05",
-              "b_24", "b_05", "b_24", "b_15", "b_12", "b_15", 
-              "b_12", "b_15", "b_12", "b_15", "b_12", "b_15", 
-              "b_16", "b_26" ,"b_16", "b_26", "b_16", "b_26", 
-              "b_16", "b_16", "b_26", "b_05", "b_12", "b_15",
-              "b_16", "b_24", "b_26", "b_08", "b_06", "b_26"),
+  bottles = c(
+    "b_30", "b_02", "b_09", "b_02", "b_09", "b_14", 
+    "b_23", "b_04", "b_07", "b_13", "b_07", "b_13", 
+    "b_07", "b_13", "b_10", "b_21", "b_10", "b_21",
+    "b_01", "b_11", "b_01", "b_11", "b_20", "b_28",
+    "b_28", "b_22", "b_22", "b_27", "b_22", "b_22",
+    "b_27", "b_03", "b_03", "b_06" ,"b_03", "b_06", 
+    "b_03", "b_06", "b_03", "b_03", "b_06", "b_19", 
+    "b_29", "b_19", "b_29", "b_19", "b_29", "b_19", 
+    "b_29", "b_05", "b_24" ,"b_05", "b_24", "b_05",
+    "b_24", "b_05", "b_24", "b_15", "b_12", "b_15", 
+    "b_12", "b_15", "b_12", "b_15", "b_12", "b_15", 
+    "b_16", "b_26" ,"b_16", "b_26", "b_16", "b_26", 
+    "b_16", "b_16", "b_26", "b_05", "b_12", "b_15",
+    "b_16", "b_24", "b_26", "b_08", "b_06", "b_26",
+    "b_14", "b_25"
+  ),
   
-  species = c("Tetrahymena",   "Tetrahymena",   "Tetrahymena",   "Euplotes",
-              "Euplotes",      "Loxocephallus", "Euplotes",      "Colpidium",
-              "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",
-              "Euplotes",      "Euplotes",      "Colpidium",     "Colpidium",
-              "Loxocephallus", "Loxocephallus", "Tetrahymena",   "Tetrahymena",
-              "Loxocephallus", "Loxocephallus", "Tetrahymena",   "Tetrahymena",  
-              "Colpidium",     "Colpidium",     "Dexiostoma",    "Dexiostoma", 
-              "Stylonychia2",  "Euplotes",      "Euplotes",      "Staurastrum1",
-              "Tetrahymena",   "Tetrahymena",   "Colpidium",     "Colpidium",   
-              "Loxocephallus", "Loxocephallus", "Stylonychia2",  "Euplotes",   
-              "Euplotes",      "Colpidium",     "Colpidium",     "Loxocephallus",
-              "Loxocephallus", "Dexiostoma",    "Dexiostoma",    "Euplotes",    
-              "Euplotes",      "Tetrahymena",   "Tetrahymena",   "Colpidium",   
-              "Colpidium",     "Loxocephallus", "Loxocephallus", "Euplotes",   
-              "Euplotes",      "Staurastrum1",  "Colpidium",     "Colpidium",   
-              "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",  
-              "Euplotes",      "Euplotes",      "Colpidium",     "Colpidium",  
-              "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",  
-              "Stylonychia2",  "Euplotes",      "Euplotes",      "Staurastrum2", 
-              "Staurastrum2",  "Staurastrum2",  "Staurastrum2",  "Staurastrum2", 
-              "Staurastrum2",  "Tetrahymena",   "Stylonychia2",  "Stylonychia2") 
+  species = c(
+    "Tetrahymena",   "Tetrahymena",   "Tetrahymena",   "Euplotes",
+    "Euplotes",      "Loxocephallus", "Euplotes",      "Colpidium",
+    "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",
+    "Euplotes",      "Euplotes",      "Colpidium",     "Colpidium",
+    "Loxocephallus", "Loxocephallus", "Tetrahymena",   "Tetrahymena",
+    "Loxocephallus", "Loxocephallus", "Tetrahymena",   "Tetrahymena",  
+    "Colpidium",     "Colpidium",     "Dexiostoma",    "Dexiostoma", 
+    "Stylonychia2",  "Euplotes",      "Euplotes",      "Staurastrum1",
+    "Tetrahymena",   "Tetrahymena",   "Colpidium",     "Colpidium",   
+    "Loxocephallus", "Loxocephallus", "Stylonychia2",  "Euplotes",   
+    "Euplotes",      "Colpidium",     "Colpidium",     "Loxocephallus",
+    "Loxocephallus", "Dexiostoma",    "Dexiostoma",    "Euplotes",    
+    "Euplotes",      "Tetrahymena",   "Tetrahymena",   "Colpidium",   
+    "Colpidium",     "Loxocephallus", "Loxocephallus", "Euplotes",   
+    "Euplotes",      "Staurastrum1",  "Colpidium",     "Colpidium",   
+    "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",  
+    "Euplotes",      "Euplotes",      "Colpidium",     "Colpidium",  
+    "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",  
+    "Stylonychia2",  "Euplotes",      "Euplotes",      "Staurastrum2", 
+    "Staurastrum2",  "Staurastrum2",  "Staurastrum2",  "Staurastrum2", 
+    "Staurastrum2",  "Tetrahymena",   "Stylonychia2",  "Stylonychia2",
+    "Euplotes", "Euplotes"
+  ) 
 )
+
 excl$bottle_species <- paste0(excl$bottles, "_", excl$species)
 
 fns <- c(
@@ -634,11 +641,11 @@ invisible(
 rm(excl, fns)
 ```
 
-## TODO - Manual correction of time series
-```{r man_correction}
+## TODO - Adding density=0 for some special cases
 
-fix_bottles <- c("b_14", "b_25")
-fix_species <- c("Euplotes", "Stylonychia2")
+```{r man_correction}
+cont_timestamp <- 20220128
+cont_bottle <- "b_02"
 
 fns <- list.dirs(path = params$output_dir, recursive = FALSE) |> 
   grep(
@@ -650,34 +657,30 @@ fns <- list.dirs(path = params$output_dir, recursive = FALSE) |>
     recursive = FALSE,
     full.names = TRUE
   ) |>
-  grep(pattern = "density|morph_mvt", value = TRUE)
+  grep(pattern = "density", value = TRUE)
 
 sapply(
   fns,
   function(fn){
-    x <- readRDS(fn)
-    if (grepl("morph_mvt", fn)){
-      i <- (x$species == fix_species[1]) & (x$bottle %in% fix_bottles)
-      x$species[i] <- fix_species[2] 
-      x$Euplotes_prob <- NA
-    } else if (grepl("mean_density", fn)) {
-      for (i in 1:length(fix_bottles)){
-        wci <- (x$species == fix_species[1]) & (x$bottle == fix_bottles[[i]])
-        if (any(wci)) {
-          cti <- (x$species == fix_species[2]) & (x$bottle == fix_bottles[[i]])
-          x$density[wci] <- sum(x$density[c(wci, cti)])
-          x <- x[-wci,]
-        }
-      }
+    ts <- strsplit(basename(fn), "\\.")[[1]][2] |>
+      as.numeric()
+    
+    if (ts <= cont_timestamp) {
+      x <- readRDS(fn)
+      templ <- x[x$bottle == cont_bottle,]
+      templ$density <- 0
+      
+      templ$species <- "Desmodesmus"
+      rbind(x, templ)
+      templ$species <- "DesmodesmusClumps"
+      rbind(x, templ)
+      
       saveRDS(x, fn)
-    } else {
-      stop("Serious error - non conform file name!!!!\n", "Check everything!!!!")
     }
   }
 )
 
 ```
-
 ## DONE - Add to database and create indices
 Old timestamps will be removed and not be backed up.
 
