@@ -634,6 +634,50 @@ invisible(
 rm(excl, fns)
 ```
 
+## TODO - Manual correction of time series
+```{r man_correction}
+
+fix_bottles <- c("b_14", "b_25")
+fix_species <- c("Euplotes", "Stylonychia2")
+
+fns <- list.dirs(path = params$output_dir, recursive = FALSE) |> 
+  grep(
+    pattern = "bemovi", 
+    value = TRUE
+  ) |>
+  list.files(
+    pattern = "[^(trajectories)]",
+    recursive = FALSE,
+    full.names = TRUE
+  ) |>
+  grep(pattern = "density|morph_mvt", value = TRUE)
+
+sapply(
+  fns,
+  function(fn){
+    x <- readRDS(fn)
+    if (grepl("morph_mvt", fn)){
+      i <- (x$species == fix_species[1]) & (x$bottle %in% fix_bottles)
+      x$species[i] <- fix_species[2] 
+      x$Euplotes_prob <- NA
+    } else if (grepl("mean_density", fn)) {
+      for (i in 1:length(fix_bottles)){
+        wci <- (x$species == fix_species[1]) & (x$bottle == fix_bottles[[i]])
+        if (any(wci)) {
+          cti <- (x$species == fix_species[2]) & (x$bottle == fix_bottles[[i]])
+          x$density[wci] <- sum(x$density[c(wci, cti)])
+          x <- x[-wci,]
+        }
+      }
+      saveRDS(x, fn)
+    } else {
+      stop("Serious error - non conform file name!!!!\n", "Check everything!!!!")
+    }
+  }
+)
+
+```
+
 ## DONE - Add to database and create indices
 Old timestamps will be removed and not be backed up.
 
