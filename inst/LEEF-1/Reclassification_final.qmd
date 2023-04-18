@@ -84,8 +84,9 @@ if (!file.exists(params$extracted_dir)){
 
 if (file.exists(params$db)) {
   stop(params$db, " exists and will not be overwritten!\n", "If you want to re-generate, please rename the database or delete it!")
+} else {
+  RRD_new(params$db, LEEF = "LEEF-1")
 }
-RRD_new(params$db, LEEF = "LEEF-1")
 ```
 
 # 1. DONE - Re-calculations for all timestamps
@@ -169,7 +170,7 @@ out <- file.path(params$output_dir, "flowcam")
 
 ### Determine timestamps
 All available after `20220504` data will be reclassified and are determined below based on the archived data.
-```{r prepare_flowcam_b}
+```{r flowcam_timestamps}
 timestamps <- list.files(
   path = params$extracted_dir, 
   pattern = "^LEEF\\.fast\\.flowcam\\.",
@@ -185,7 +186,7 @@ timestamps
 
 
 ### Prepare Flowcam
-```{r prepare_flowcam}
+```{r prepare_flowcam_2}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -205,7 +206,7 @@ download.file(
 ```
 
 ### Classify Flowcam up to 20220704
-```{r classify_flowcam}
+```{r classify_flowcam_1}
 message("Classifying flowcam...")
 system.time(
   classify_flowcam_archive(
@@ -223,7 +224,7 @@ system.time(
 ```
 
 ### Clean Up Flowcam
-```{r cleanup_flowcam}
+```{r cleanup_flowcam_1}
 unlink(pdir)
 rm(class_constant, class_increasing)
 ```
@@ -479,9 +480,9 @@ invisible(
 ```
 
 
-### DONE - Trait Extraction Flowcytometer and Volume Calculation
+## DONE - Trait Extraction Flowcytometer and Volume Calculation
 
-#### All Samples
+### All Samples
 ```{r biomass}
 ## Select all timestamps
 timestamps <- list.files(
@@ -551,7 +552,7 @@ rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, c
 
 ## TODO - Exclusion of time series that are wrong classifications or only noise
 ```{r}
-#| 
+
 excl <- data.frame(
   bottles = c(
     "b_30", "b_02", "b_09", "b_02", "b_09", "b_14", 
@@ -649,39 +650,68 @@ cont_bottle <- "b_02"
 
 fns <- list.dirs(path = params$output_dir, recursive = FALSE) |> 
   grep(
-    pattern = "bemovi", 
+    pattern = "flowcam", 
     value = TRUE
   ) |>
   list.files(
-    pattern = "[^(trajectories)]",
     recursive = FALSE,
     full.names = TRUE
   ) |>
   grep(pattern = "density", value = TRUE)
 
-sapply(
-  fns,
-  function(fn){
-    ts <- strsplit(basename(fn), "\\.")[[1]][2] |>
-      as.numeric()
-    
-    x <- readRDS(fn)
-    if (ts <= cont_timestamp) {
-      templ <- x[x$bottle == cont_bottle,]
-      templ$density <- 0
+invisible(
+  pbmcapply::pbmclapply(
+    fns,
+    function(fn){
+      ts <- strsplit(basename(fn), "\\.")[[1]][2] |>
+        as.numeric()
       
-      templ$species <- "Desmodesmus"
-      rbind(x, templ)
-      templ$species <- "DesmodesmusClumps"
-      rbind(x, templ)
-    }
-    {
-      # and =here goes the stuff fo the rest
-    }
-    saveRDS(x, fn)
-  }
+      x <- readRDS(fn)
+      if (ts <= cont_timestamp) {
+        templ <- x[x$bottle == cont_bottle,]
+        templ$density <- 0
+        
+        templ$species <- "Desmodesmus"
+        rbind(x, templ)
+        templ$species <- "DesmodesmusClumps"
+        rbind(x, templ)
+      }
+      {###### HERE BEGIN
+        x_list <- split(
+          x = x,
+          f = x$bottle,
+          drop = TRUE
+        )
+        
+        for (i in seq_along(x_list)) {
+          templ <- x_list[[i]][1,]
+          templ$density <- 0
+          templ$count <- 0
+          sp <- unique(x_list[[i]]$species)
+          if ("Chlamydomonas" %in% sp){
+            if (!("ChlamydomonasClumps" %in% sp)){
+              browser()
+              templ$species <- "ChlamydomonasClumps"
+              x_list[[i]] <- rbind(x_list[[i]], templ)
+            }
+          }
+          if ("Desmodesmus" %in% sp){
+            if (!("DesmodesmusClumps" %in% sp)){
+              browser()
+              templ$species <- "DesmodesmusClumps"
+              x_list[[i]] <- rbind(x_list[[i]], templ)
+            }
+          }
+        }
+        
+        x <- do.call("rbind", x_list)
+      }###### HERE END
+      saveRDS(x, fn)
+    },
+    mc.cores = params$cores, 
+    mc.preschedule = FALSE
+  )
 )
-
 ```
 ## DONE - Add to database and create indices
 Old timestamps will be removed and not be backed up.
@@ -1292,7 +1322,7 @@ The code below recalculates the densities after filtering Stau1 so that only
 particles are kept with high confidence that they are indeed Stau1.
 
 ## Calculate new densities
-```{r species_to_0_bemovi_25_morph_mvt}
+```{r species_to_0_bemovi_25_morph_mvt_2}
 
 options(RRDdb = db_name(2, temp = FALSE))
 
@@ -1344,7 +1374,9 @@ densityStau1 <- full_join(densityStau1, temp) %>%
 ## Update RRD
 Delete from traits and add re-calculated ones.
 
-```{r label, eval=FALSE}
+```{r}
+#| label: update_RRD
+#| 
 file.copy(db_name(2, temp = FALSE), db_name(3, temp = TRUE))
 
 conn <- DBI::dbConnect(
@@ -1409,7 +1441,11 @@ file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
 #| 
 
 toc <- readRDS(params$toc) %>%
-  left_join(db_read_table(db = db_name(4, temp = TRUE), table = "experimental_design") %>% collect()) %>%
+  left_join(
+    db_read_table(db = db_name(4, temp = TRUE), table = "experimental_design") %>% 
+      collect(),
+    by = join_by(bottle)
+    ) %>%
   filter(!is.na(conc))
 
 colnames_toc <- colnames(toc)
@@ -1548,9 +1584,26 @@ add_to_db(
 file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
 ```
 
+# Create Diagnostic Report
+The Diagnostic report needs to be created before the renaming as it does rely on the otriginal terminology.
+
+```{r}
+#| label: createDiagReport
+#| 
+
+report_diagnostic(
+  db = db_name("final", temp = FALSE),  
+  template = "LEEF_1",
+  suffix = paste0("reclassified_", params$version_tag), 
+  format = "html"
+)
+```
+
+
 # 5. VERIFY Rename species and columns
 ```{r}
-#| label: indices_rename
+#| label: rename
+
 file.copy(db_name(4, temp = FALSE), db_name(5, temp = TRUE))
 
 RRD_LEEF_1_rename(db = db_name(5, temp = TRUE))
@@ -1563,7 +1616,7 @@ file.copy(db_name(5, temp = FALSE), db_name("final", temp = FALSE))
 # Do a final vacuuming into new database
 Vacuuming the database will take some time!
 
-To vacuum the sqlite database, i.e. recover the space from the deletion of rows, please run the following command in the directory where the database is located:
+To vacuum the sqlite database, i.e. recover the space from the deletion of rows, please run the following command in the directory where the database is located. I do not expect this to have a big impact on the size.
 
 ```{r echo = FALSE}
 cat(
@@ -1573,19 +1626,12 @@ cat(
 )
 ```
 
-# Create Diagnostic Report
-```{r createDiagReport}
-report_diagnostic(
-  db = db_name("final", temp = FALSE),  
-  template = "LEEF_1",
-  suffix = paste0("reclassified_", params$version_tag), 
-  format = "html"
-)
-```
-
 # Create Overlays
-```{r overlays}
-update_overlays(
+```{r}
+#| label: overlays
+#| 
+
+generate_overlays(
   params = params,
   overwrite = FALSE
 )

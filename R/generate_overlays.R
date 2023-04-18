@@ -8,7 +8,7 @@
 #' @importFrom pbmcapply  pbmclapply
 #' @export
 #'
-update_overlays <- function(
+generate_overlays <- function(
     params = list(
       cores = 7,
       pre_processed_folder = "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/",
