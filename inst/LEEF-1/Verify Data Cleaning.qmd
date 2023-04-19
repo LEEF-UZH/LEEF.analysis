@@ -37,7 +37,7 @@ options(RRDdb = params$db)
 
 # The following aspects are tested
 
-## [x] Removing "test sampling days" and classes not of interest. Some test samplings are still in the RRD (they have sampling year 3000).
+## 1. [x] Removing "test sampling days" and classes not of interest. Some test samplings are still in the RRD (they have sampling year 3000).
 ```{r}
 #| label: test_1
 
@@ -111,26 +111,151 @@ for (tbl in tbls){
 
                 
                 
-## [x] Exclusion of faulty videos from traits and recalculation of species densities (already incorporated in RRD, code not run here)
-## [x] Exclusion of particles that have been classified as *Staurastrum gracile* (i.e. Staurastrum1) with a probability of less than 95% (already incorporated in RRD, code not run here and not completely up-to-date. Rainer has the complete up-to-date code)
-## [x] Exclusion of 20220622 25x videos (duplicates of 20220620) from traits and setting respective densities to NA
-## Adding density=0 for some special cases (algae clumps not tracked and bottle contamination. See details in section)
-## [x] Manual correction of time series based on observations during the experiment
-## [x] Exclusion of time series that are (almost completely) wrong classifications or only noise
-## [x] Removing the linear trend in the water chemistry 
+## 2. [x] Exclusion of videos with `Moving Background` 
 
-## [x] exclusion of all flowcytometer particles where FSC.A < 2 (raw FSC.A < 100)
-## [x] Fix EAWAG daten (Hallo Rainer, mir ist aufgefallen, dass in der LEEF1-RRD bei den flowcytometer-Daten, die an der Eawag gemessen wurden, etwas nicht stimmt. z.B. bei timestamp "20220413" steht bei date "2022-05-17" und es gibt 3 Replikate (ich habe aber nur zwei gemessen))
-
-
-# SOME TESTS ONLY
 ```{r}
-#| label: plot
-#| eval: false
-#| echo: false
+#| label: test_2
 #| 
-tn <- "bemovi_mag_16__mean_density_per_ml"
-db_read_table(table = tn)
+tbls <- c(
+  "bemovi_mag_16__mean_density_per_ml",
+  "bemovi_mag_25__mean_density_per_ml",
+  "bemovi_mag_25__mean_density_per_ml_cropped",
+  "bemovi_mag_25__mean_density_per_ml_non_cropped",
+  
+  "bemovi_mag_16__morph_mvt",
+  "bemovi_mag_25__morph_mvt",
+  "bemovi_mag_25__morph_mvt_cropped",
+  "bemovi_mag_25__morph_mvt_non_cropped"
+)
+
+mb_25x <- c(
+  "20211013_00058", "20211103_00037", "20211105_00066",
+  "20211117_00016", "20211124_00007", "20211210_00031",
+  "20211210_00085", "20220105_00034", "20220119_00058",
+  "20220119_00070", "20220119_00088", "20220124_00085",
+  "20220131_00013", "20220131_00034", "20220131_00043",
+  "20220131_00082", "20220131_00085", "20220131_00088",
+  "20220207_00013", "20220228_00004", "20220228_00019",
+  "20220228_00067", "20220304_00034", "20220408_00088",
+  "20220413_00052", "20220502_00076", "20220509_00086",
+  "20220516_00076", "20220523_00058", "20220601_00064",
+  "20220617_00082", "20220620_00076", "20220622_00076",
+  "20220624_00055", "20220629_00082", "20210924_00001",
+  "20210929_00001", "20210929_00064", "20211001_00012",
+  "20211001_00028", "20211008_00021", "20211013_00076",
+  "20211015_00077", "20211022_00088", "20211105_00022",
+  "20211105_00024", "20211203_00016", "20211203_00040",
+  "20211203_00061", "20211215_00043", "20220107_00054",
+  "20220119_00010", "20220126_00025", "20220131_00079",
+  "20220202_00043", "20220204_00061", "20220204_00067",
+  "20220207_00010", "20220207_00022", "20220304_00076",
+  "20220427_00061", "20220525_00010", "20220530_00016",
+  "20220601_00050", "20220620_00010", "20220620_00073",
+  "20220622_00010", "20220622_00073", "20220704_00055",
+  "20211129_00077", "20211203_00003", "20211203_00009",
+  "20211208_00002", "20220126_00046", "20220126_00049",
+  "20220204_00002", "20220207_00020", "20220207_00052",
+  "20211001_00054", "20211001_00066", "20211001_00069",
+  "20211001_00079", "20211022_00042", "20211022_00067",
+  "20211027_00007", "20211101_00081", "20211129_00001",
+  "20211203_00050", "20211220_00035", "20220126_00054",
+  "20220126_00067", "20220126_00068", "20220207_00031",
+  "20220207_00043", "20220207_00054"
+)
+
+mb_16x <- c(
+  "20210924_00108", "20211020_00133", "20211025_00140",
+  "20211101_00151", "20211105_00129", "20211108_00121",
+  "20220131_00156" ,"20220525_00135"
+)
+
+mb <- c(mb_16x, mb_25x)
+
+for (tbl in tbls){
+  x <- dat |>
+    select(file) |> 
+    distinct() |> 
+    collect() |>
+    filter(file %in% vars(mb)) |>
+    unlist()
+  if (length(x) == 0){
+    cat(tbl, ": OK", "\n")
+  } else {
+    cat("ERROR: ", tbl, "the following movies contain Moving Background but are not filtered out: ", paste0(x, collapse = ", "), "\n")
+  }
+}
 ```
+
+
+
+## 3. [x] Exclusion of particles that have been classified as *Staurastrum gracile* (i.e. Staurastrum1) with a probability of less than 95% (already incorporated in RRD, code not run here and not completely up-to-date. Rainer has the complete up-to-date code)
+```{r}
+#| label: test_3
+#| 
+
+tbls <- c(
+  "flowcam__algae_density",
+  "flowcam__algae_traits"
+)
+
+sp <- "Staurastrum1"
+
+for (tbl in tbls){
+  x <- dat |>
+    filter(species == "Staurastrum1" & probability < 0.95) |>
+    select(species, probability) |> 
+    distinct() |> 
+    collect() |>
+    unlist()
+  if (length(x) == 0){
+    cat(tbl, ": OK", "\n")
+  } else {
+    cat("ERROR: ", tbl, "Table still contains Staurastrum1 with probability < 0.95 \n")
+  }
+}
+```
+
+
+
+
+## 4. [x] Exclusion of 20220622 25x videos (duplicates of 20220620) from traits and setting respective densities to NA
+
+```{r}
+#| label: test_4
+#| 
+tbls <- c(
+  "bemovi_mag_25__mean_density_per_ml",
+  "bemovi_mag_25__mean_density_per_ml_cropped",
+  "bemovi_mag_25__mean_density_per_ml_non_cropped",
+  
+  "bemovi_mag_25__morph_mvt",
+  "bemovi_mag_25__morph_mvt_cropped",
+  "bemovi_mag_25__morph_mvt_non_cropped"
+)
+
+ts <- 20220622
+
+for (tbl in tbls){
+  x <- dat |>
+    select(timestamp) |>
+    filter(timestamp == ts)
+    distinct() |> 
+    collect() |>
+    unlist()
+  if (length(x) == 0){
+    cat(tbl, ": OK", "\n")
+  } else {
+    cat("ERROR: ", tbl, "Still contains timestamp ", ts, "\n")
+  }
+}
+```
+
+## 5. [ ] Adding density=0 for some special cases (algae clumps not tracked and bottle contamination. See details in section)
+## 6. [ ] Manual correction of time series based on observations during the experiment
+## 7. [ ] Exclusion of time series that are (almost completely) wrong classifications or only noise
+## 8. [ ] Removing the linear trend in the water chemistry 
+
+## 9. [ ] exclusion of all flowcytometer particles where FSC.A < 2 (raw FSC.A < 100)
+## 10. [ ] Fix EAWAG daten (Hallo Rainer, mir ist aufgefallen, dass in der LEEF1-RRD bei den flowcytometer-Daten, die an der Eawag gemessen wurden, etwas nicht stimmt. z.B. bei timestamp "20220413" steht bei date "2022-05-17" und es gibt 3 Replikate (ich habe aber nur zwei gemessen))
 
 
