@@ -1,0 +1,126 @@
+---
+title: "Reclassification"
+author: "Rainer M Krug"
+date: "06/05/2022"
+
+input:
+  html_document:
+    dev: png
+    fig_width: 10
+    fig_height: 12
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    code_folding: hide  
+params:
+  db: "/Volumes/Documents/RRD.Reclassification_final/LEEF.RRD.v1.8.5_4.sqlite"
+  version_tag: "v1.8.5"
+  base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
+  output_dir: "~/RRD.Reclassification_final/"
+  archive_dir: "/Volumes/LEEF-1_archive/"
+  pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
+  extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
+  toc: "/Volumes/LEEF/0.TOC/LEEF-1/toc.rds"
+  cores: 7
+---
+
+# This document will run some tests on the RRD to ee if the final data cleaning has been successful
+
+```{r}
+#| label: setup
+#| 
+
+library(LEEF.analysis)
+library(dplyr)
+options(RRDdb = params$db)
+```
+
+# The following aspects are tested
+
+## [x] Removing "test sampling days" and classes not of interest. Some test samplings are still in the RRD (they have sampling year 3000).
+```{r}
+#| label: test_1
+
+
+tbls <- c(
+  "bemovi_mag_16__mean_density_per_ml",
+  "bemovi_mag_25__mean_density_per_ml",
+  "bemovi_mag_25__mean_density_per_ml_cropped",
+  "bemovi_mag_25__mean_density_per_ml_non_cropped",
+  
+  "bemovi_mag_16__morph_mvt",
+  "bemovi_mag_25__morph_mvt",
+  "bemovi_mag_25__morph_mvt_cropped",
+  "bemovi_mag_25__morph_mvt_non_cropped",
+  
+  "flowcam__algae_density",
+  "flowcam__algae_traits",
+  
+  "flowcytometer__flowcytometer_density"
+)
+
+sp <- c(
+  "airbubbles",
+  "OtherCiliate", 
+  "HNA",
+  "LNA", 
+  "MNA",
+  "Debris_and_other", 
+  "Cryptomonas"
+)
+
+for (tbl in tbls){
+  if flowcam add sp_flowcam
+  x <- db_read_table(table = tbl) |>
+    select(species) |> 
+    distinct() |> 
+    collect() |>
+    filter(species %in% vars(sp)) |>
+    unlist()
+  if (length(x) == 0){
+    cat(tbl, ": OK", "\n")
+  } else {
+    cat(tbl, "ERROR: the following species should be filtered out:", paste0(x, collapse = ", "), "\n")
+  }
+}
+
+
+
+  dplyr::filter(day < 1000,
+
+                !(species=="Dexiostoma" & measurement=="flowcam"),
+                !(species=="Coleps_irchel" & measurement=="flowcam"),
+                !(species=="Colpidium" & measurement=="flowcam"),
+                !(species=="Loxocephallus" & measurement=="flowcam"),
+                !(species=="Tetrahymena" & measurement=="flowcam"),
+                ) 
+
+ 
+
+```
+
+                
+                
+## [x] Exclusion of faulty videos from traits and recalculation of species densities (already incorporated in RRD, code not run here)
+## [x] Exclusion of particles that have been classified as *Staurastrum gracile* (i.e. Staurastrum1) with a probability of less than 95% (already incorporated in RRD, code not run here and not completely up-to-date. Rainer has the complete up-to-date code)
+## [x] Exclusion of 20220622 25x videos (duplicates of 20220620) from traits and setting respective densities to NA
+## Adding density=0 for some special cases (algae clumps not tracked and bottle contamination. See details in section)
+## [x] Manual correction of time series based on observations during the experiment
+## [x] Exclusion of time series that are (almost completely) wrong classifications or only noise
+## [x] Removing the linear trend in the water chemistry 
+
+## [x] exclusion of all flowcytometer particles where FSC.A < 2 (raw FSC.A < 100)
+## [x] Fix EAWAG daten (Hallo Rainer, mir ist aufgefallen, dass in der LEEF1-RRD bei den flowcytometer-Daten, die an der Eawag gemessen wurden, etwas nicht stimmt. z.B. bei timestamp "20220413" steht bei date "2022-05-17" und es gibt 3 Replikate (ich habe aber nur zwei gemessen))
+
+
+# SOME TESTS ONLY
+```{r}
+#| label: plot
+#| eval: false
+#| echo: false
+#| 
+tn <- "bemovi_mag_16__mean_density_per_ml"
+db_read_table(table = tn)
+```
+
+
