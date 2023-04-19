@@ -13,6 +13,7 @@ classify_bemovi_archive(
   classifier_constant_name,
   classifier_increasing_name,
   output,
+  exclude_videos = NULL,
   mc.cores = 1
 )
 }
@@ -30,6 +31,8 @@ classify_bemovi_archive(
 \item{classifier_increasing_name}{\code{character} vector of name of the  classifier for temperature treatment \strong{increasing} including path}
 
 \item{output}{path to which the classified data will be saved as \code{rds}}
+
+\item{exclude_videos}{file names of videos to exclude. If \code{NULL}, all will be used.}
 
 \item{mc.cores}{number of cores to be used. Defaults to 1}
 }

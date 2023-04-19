@@ -8,6 +8,7 @@
 #' @param classifier_constant_name `character` vector of name of the classifier for temperature treatment **constant** including path
 #' @param classifier_increasing_name `character` vector of name of the  classifier for temperature treatment **increasing** including path
 #' @param output path to which the classified data will be saved as `rds`
+#' @param exclude_videos file names of videos to exclude. If \code{NULL}, all will be used.
 #' @param mc.cores number of cores to be used. Defaults to 1
 #'
 #' @return invisible `NULL`
@@ -29,6 +30,7 @@ classify_bemovi_archive <- function(
   classifier_constant_name,
   classifier_increasing_name,
   output,
+  exclude_videos = NULL,
   mc.cores = 1
 ){
   dir.create(
@@ -72,7 +74,8 @@ classify_bemovi_archive <- function(
                   datadir = datadir,
                   bemovi_extract_name = beyml,
                   classifier_constant_name = classifier_constant_name,
-                  classifier_increasing_name = classifier_increasing_name
+                  classifier_increasing_name = classifier_increasing_name,
+                  exclude_videos
                 )
               }
             )

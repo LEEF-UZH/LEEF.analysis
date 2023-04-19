@@ -69,9 +69,33 @@ sp <- c(
   "Cryptomonas"
 )
 
+sp_flowcam <- c(
+  "Dexiostoma",
+  "Coleps_irchel",
+  "Colpidium",
+  "Loxocephallus",
+  "Tetrahymena"
+)
+
+
 for (tbl in tbls){
-  if flowcam add sp_flowcam
-  x <- db_read_table(table = tbl) |>
+  dat <- db_read_table(table = tbl)
+  if (grep("flowcam")){
+    x <- dat |>
+      select(species) |> 
+      distinct() |> 
+      collect() |>
+      filter(species %in% vars(sp_flowcam)) |>
+      unlist()
+    if (length(x) == 0){
+      cat(tbl, ": OK", "\n")
+    } else {
+      cat("ERROR: ", tbl, "the following species should be filtered out: ", paste0(x, collapse = ", "), "\n")
+    }
+  }
+  
+
+  x <- dat |>
     select(species) |> 
     distinct() |> 
     collect() |>
@@ -80,23 +104,9 @@ for (tbl in tbls){
   if (length(x) == 0){
     cat(tbl, ": OK", "\n")
   } else {
-    cat(tbl, "ERROR: the following species should be filtered out:", paste0(x, collapse = ", "), "\n")
+    cat("ERROR: ", tbl, "the following species should be filtered out: ", paste0(x, collapse = ", "), "\n")
   }
 }
-
-
-
-  dplyr::filter(day < 1000,
-
-                !(species=="Dexiostoma" & measurement=="flowcam"),
-                !(species=="Coleps_irchel" & measurement=="flowcam"),
-                !(species=="Colpidium" & measurement=="flowcam"),
-                !(species=="Loxocephallus" & measurement=="flowcam"),
-                !(species=="Tetrahymena" & measurement=="flowcam"),
-                ) 
-
- 
-
 ```
 
                 

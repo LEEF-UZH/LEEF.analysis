@@ -8,7 +8,8 @@ classify_bemovi_files(
   datadir,
   bemovi_extract_name = NULL,
   classifier_constant_name,
-  classifier_increasing_name
+  classifier_increasing_name2,
+  exclude_videos = NULL
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ bemovi config file including path.}
 
 \item{classifier_constant_name}{\code{character} vector of name of the classifier
 for temperature treatment \strong{constant} including path}
+
+\item{exclude_videos}{file names of videos to exclude. If \code{NULL}, all will be used.}
 
 \item{classifier_increasing_name}{\code{character} vector of name of the
 classifier for temperature treatment \strong{increasing} including path}

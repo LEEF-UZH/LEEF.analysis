@@ -1,5 +1,5 @@
 ---
-title: "Reclassification"
+title: "Reclassification and Data Cleaning"
 author: "Rainer M Krug"
 date: "06/05/2022"
 
@@ -261,7 +261,14 @@ timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.", "", timestamps)
 
 ### Classify `bemovi_extract.mag.16.yml`
 ```{r classify_bemovi_16}
+moving_background <- c(
+  "20210924_00108", "20211020_00133", "20211025_00140",
+  "20211101_00151", "20211105_00129", "20211108_00121",
+  "20220131_00156" ,"20220525_00135"
+)
+
 out <- file.path(params$output_dir, "bemovi_mag_16")
+
 if (!file.exists(out)) {
   message("Classifying bemovi_extract.mag.16")
   system.time(
@@ -274,6 +281,7 @@ if (!file.exists(out)) {
       bemovi_extract_name = "bemovi_extract.mag.16.yml", 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.16/bemovi_extract.mag.16.yml"))$species_tracked,
       output = out,
+      exclude_videos = moving_background,
       mc.cores = params$cores
     )
   )
@@ -288,7 +296,7 @@ if (!file.exists(out)) {
 ### Clean Up Bemovi 16
 ```{r cleanup_bemovi_16}
 unlink(pdir)
-rm(pdir, class_constant, class_increasing, out)
+rm(pdir, class_constant, class_increasing, out, moving_background)
 ```
 
 ## DONE - Reclassification of Bemovi magnification 25
@@ -325,6 +333,41 @@ timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.", "", timestamps)
 ```{r classify_bemovi_25}
 excl <- c("20220622")
 
+moving_background <- c(
+  "20211013_00058", "20211103_00037", "20211105_00066",
+  "20211117_00016", "20211124_00007", "20211210_00031",
+  "20211210_00085", "20220105_00034", "20220119_00058",
+  "20220119_00070", "20220119_00088", "20220124_00085",
+  "20220131_00013", "20220131_00034", "20220131_00043",
+  "20220131_00082", "20220131_00085", "20220131_00088",
+  "20220207_00013", "20220228_00004", "20220228_00019",
+  "20220228_00067", "20220304_00034", "20220408_00088",
+  "20220413_00052", "20220502_00076", "20220509_00086",
+  "20220516_00076", "20220523_00058", "20220601_00064",
+  "20220617_00082", "20220620_00076", "20220622_00076",
+  "20220624_00055", "20220629_00082", "20210924_00001",
+  "20210929_00001", "20210929_00064", "20211001_00012",
+  "20211001_00028", "20211008_00021", "20211013_00076",
+  "20211015_00077", "20211022_00088", "20211105_00022",
+  "20211105_00024", "20211203_00016", "20211203_00040",
+  "20211203_00061", "20211215_00043", "20220107_00054",
+  "20220119_00010", "20220126_00025", "20220131_00079",
+  "20220202_00043", "20220204_00061", "20220204_00067",
+  "20220207_00010", "20220207_00022", "20220304_00076",
+  "20220427_00061", "20220525_00010", "20220530_00016",
+  "20220601_00050", "20220620_00010", "20220620_00073",
+  "20220622_00010", "20220622_00073", "20220704_00055",
+  "20211129_00077", "20211203_00003", "20211203_00009",
+  "20211208_00002", "20220126_00046", "20220126_00049",
+  "20220204_00002", "20220207_00020", "20220207_00052",
+  "20211001_00054", "20211001_00066", "20211001_00069",
+  "20211001_00079", "20211022_00042", "20211022_00067",
+  "20211027_00007", "20211101_00081", "20211129_00001",
+  "20211203_00050", "20211220_00035", "20220126_00054",
+  "20220126_00067", "20220126_00068", "20220207_00031",
+  "20220207_00043", "20220207_00054"
+)
+
 out <- file.path(params$output_dir, "bemovi_mag_25")
 if (!file.exists(out)) {
   system.time(
@@ -337,6 +380,7 @@ if (!file.exists(out)) {
       bemovi_extract_name = "bemovi_extract.mag.25.yml", 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.yml"))$species_tracked,
       output = out,
+      exclude_videos = moving_background,
       mc.cores = params$cores
     )
   )
@@ -350,6 +394,7 @@ if (!file.exists(out)) {
       bemovi_extract_name = "bemovi_extract.mag.25.non_cropped.yml", 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.non_cropped.yml"))$species_tracked,
       output = out,
+      exclude_videos = moving_background,
       mc.cores = params$cores
     )
   )
@@ -363,6 +408,7 @@ if (!file.exists(out)) {
       bemovi_extract_name = "bemovi_extract.mag.25.cropped.yml", 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.cropped.yml"))$species_tracked,
       output = out,
+      exclude_videos = moving_background,
       mc.cores = params$cores
     )
   )
@@ -377,7 +423,7 @@ if (!file.exists(out)) {
 ### Clean Up Bemovi 25
 ```{r cleanup_bemovi_25}
 unlink(pdir)
-rm(pdir, class_constant, class_increasing, out, species_tracked)
+rm(pdir, class_constant, class_increasing, out, moving_background)
 ```
 
 
@@ -549,6 +595,28 @@ unlink(pdir)
 rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, conv_FSCA_length)
 ```
 
+
+## TODO - Flowcytometer select only needed species in densities
+
+```{r}
+#| label: flowcytometer_remove_categories
+#| 
+
+fns <- list.files(
+  file.path(params$output_dir, "flowcytometer"),
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+lapply(
+  fns,
+  function(fn){
+    readRDS(fn) |>
+      dplyr::filter(species %in% c("bacteria", "algae")) |>
+      saveRDS(vars(file = fn))
+  }
+)
+```
 
 ## TODO - Exclusion of time series that are wrong classifications or only noise
 ```{r}
@@ -855,467 +923,6 @@ rm(composition, experimental_design, immigration_schedule, light_decline_schedul
 file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
 ```
 
-# 2. DONE - Set species to 0 which were mis-classified
-
-This section has been devaloped by Uriah 
-
-## Preparations
-```{r species_to_0_setup}
-
-# Inf --------------------------------------------------------------------
-
-# Developed by Uriah
-
-# Setup -------------------------------------------------------------------
-
-
-### Density data and co.
-
-options(RRDdb = db_name(1, temp = FALSE))
-
-# densities <- db_read_table(table = "density") %>%
-#   dplyr::filter(day < 1000,
-#                 !(species %in% c("Didinium","airbubbles","Debris",
-#                                  "DigestedAlgae","OtherCiliate", "HNA", "LNA", "MNA", "algae",
-#                                  "Small_unidentified","ColpidiumVacuoles", "Debris_and_other")),
-#                 !(species=="Cryptomonas" & measurement!="flowcam"),
-#                 !(species=="Dexiostoma" & measurement=="flowcam"),
-#                 !(species=="Coleps_irchel" & measurement=="flowcam"),
-#                 !(species=="Colpidium" & measurement=="flowcam"),
-#                 !(species=="Loxocephallus" & measurement=="flowcam"),
-#                 !(species=="Tetrahymena" & measurement=="flowcam"),
-#   ) %>%
-#   dplyr::collect() %>%
-#   dplyr::arrange(day)
-
-exp_design <- db_read_table(table = "experimental_design") %>% dplyr::collect()
-compositions <- db_read_table(table = "composition") %>% dplyr::collect()
-```
-
-## bemovi
-
-In the code below the videos the remove are defined. They are then removed
-in the various morph_mvt tables and the densities are recalculated. Species
-that could be present but are not are set to 0.
-These densities are then used to overwrite the previous densities values.
-This is done at 25x and 16x
-
-
-
-
-### Preparation 25x
-```{r species_to_0_bemovi_25}
-
-videos_movingback <- c("20211013_00058", "20211103_00037", "20211105_00066",
-                       "20211117_00016", "20211124_00007", "20211210_00031",
-                       "20211210_00085", "20220105_00034", "20220119_00058",
-                       "20220119_00070", "20220119_00088", "20220124_00085",
-                       "20220131_00013", "20220131_00034", "20220131_00043",
-                       "20220131_00082", "20220131_00085", "20220131_00088",
-                       "20220207_00013", "20220228_00004", "20220228_00019",
-                       "20220228_00067", "20220304_00034", "20220408_00088",
-                       "20220413_00052", "20220502_00076", "20220509_00086",
-                       "20220516_00076", "20220523_00058", "20220601_00064",
-                       "20220617_00082", "20220620_00076", "20220622_00076",
-                       "20220624_00055", "20220629_00082", "20210924_00001",
-                       "20210929_00001", "20210929_00064", "20211001_00012",
-                       "20211001_00028", "20211008_00021", "20211013_00076",
-                       "20211015_00077", "20211022_00088", "20211105_00022",
-                       "20211105_00024", "20211203_00016", "20211203_00040",
-                       "20211203_00061", "20211215_00043", "20220107_00054",
-                       "20220119_00010", "20220126_00025", "20220131_00079",
-                       "20220202_00043", "20220204_00061", "20220204_00067",
-                       "20220207_00010", "20220207_00022", "20220304_00076",
-                       "20220427_00061", "20220525_00010", "20220530_00016",
-                       "20220601_00050", "20220620_00010", "20220620_00073",
-                       "20220622_00010", "20220622_00073", "20220704_00055",
-                       "20211129_00077", "20211203_00003", "20211203_00009",
-                       "20211208_00002", "20220126_00046", "20220126_00049",
-                       "20220204_00002", "20220207_00020", "20220207_00052",
-                       "20211001_00054", "20211001_00066", "20211001_00069",
-                       "20211001_00079", "20211022_00042", "20211022_00067",
-                       "20211027_00007", "20211101_00081", "20211129_00001",
-                       "20211203_00050", "20211220_00035", "20220126_00054",
-                       "20220126_00067", "20220126_00068", "20220207_00031",
-                       "20220207_00043", "20220207_00054")
-
-bottle <- strsplit(videos_movingback, split='_', fixed=TRUE)
-bottle <- as.numeric(unlist(purrr::map(bottle, 2)))
-bottle <- ceiling(bottle/3)
-bottle <- ifelse(bottle<10, paste0("b_0",bottle), paste0("b_",bottle))
-
-timestamp_movingback <- unlist(purrr::map(strsplit(videos_movingback, split='_', fixed=TRUE),1))
-
-moving_background <- data.frame(bottle = bottle,
-                                timestamp = (timestamp_movingback))
-```
-
-### Preparation 16x
-```{r species_to_0_bemovi_16}
-
-videos_to_remove_16 <- c("20210924_00108", "20211020_00133", "20211025_00140",
-                         "20211101_00151", "20211105_00129", "20211108_00121",
-                         "20220131_00156" ,"20220525_00135")
-
-timestamp_movingback16 <- unlist(purrr::map(strsplit(videos_to_remove_16, split='_', fixed=TRUE),1))
-
-bottle16 <- strsplit(videos_to_remove_16, split='_', fixed=TRUE)
-bottle16 <- as.numeric(unlist(purrr::map(bottle16, 2))) - 90
-bottle16 <- ceiling(bottle16/3)
-bottle16 <- ifelse(bottle16<10, paste0("b_0",bottle16), paste0("b_",bottle16))
-
-moving_background16 <- data.frame(bottle = bottle16,
-                                  timestamp = (timestamp_movingback16))
-```
-
-### Calculating new densities
-
-#### bemovi_mag_25__morph_mvt
-
-```{r species_to_0_bemovi_25_morph_mvt}
-
-species.tracked <- c(
-  "Paramecium_bursaria", 
-  "Coleps_irchel",
-  "Colpidium",
-  "Paramecium_caudatum", 
-  "Euplotes",
-  "Stylonychia2"
-)
-meas <- "bemovi_mag_25"
-extrapolation.factor <- 23.367
-cropping.factor <- 1
-
-morph25_list <- apply(moving_background, 1, function(row){
-  sql = paste0("
-                SELECT *
-                FROM 'bemovi_mag_25__morph_mvt'
-                WHERE timestamp == '", row["timestamp"],
-               "' AND bottle == '", row["bottle"], "';")
-
-  read_sql(sql = sql)
-})
-
-morph25 <- do.call("rbind", morph25_list) %>%
-  dplyr::filter(!(file %in% videos_movingback))
-
-morph25_density <- CalculateDensities(
-  morph25, 
-  meas
-)
-morph25_density <- SetNotFoundSpeciesTo0(
-  morph25_density, 
-  moving_background, 
-  meas, 
-  exp_design, 
-  compositions,
-  species.tracked
-)
-```
-
-#### bemovi_mag_25__morph_mvt_cropped
-
-```{r species_to_0_bemovi_25_morph_mvt_cropped}
-
-species.tracked <- c(
-  "Dexiostoma",
-  "Tetrahymena",
-  "Loxocephallus"
-)
-meas <- "bemovi_mag_25_cropped"
-extrapolation.factor <- 23.367
-cropping.factor <- 4
-
-morph25_cropped_list <- apply(moving_background, 1, function(row){
-  sql = paste0("
-                SELECT *
-                FROM 'bemovi_mag_25__morph_mvt_cropped'
-                WHERE timestamp == '", row["timestamp"],
-               "' AND bottle == '", row["bottle"], "';")
-
-  read_sql(sql = sql)
-})
-
-morph25_cropped <- do.call("rbind", morph25_cropped_list) %>%
-  dplyr::filter(!(file %in% videos_movingback))
-
-morph25_cropped_density <- CalculateDensities(morph25_cropped, meas)
-morph25_cropped_density <- SetNotFoundSpeciesTo0(
-  morph25_cropped_density, 
-  moving_background, 
-  meas, exp_design, 
-  compositions, 
-  species.tracked
-)
-```
-
-
-#### bemovi_mag_25__morph_mvt_non_cropped
-
-```{r species_to_0_bemovi_25_morph_mvt_non_cropped}
-species.tracked <- c("Dexiostoma","Tetrahymena","Loxocephallus")
-meas <- "bemovi_mag_25_non_cropped"
-extrapolation.factor <- 23.367
-cropping.factor <- 1
-
-morph25_non_cropped_list <- apply(moving_background, 1, function(row){
-  sql = paste0("
-                SELECT *
-                FROM 'bemovi_mag_25__morph_mvt_non_cropped'
-                WHERE timestamp == '", row["timestamp"],
-               "' AND bottle == '", row["bottle"], "';")
-
-  read_sql(sql = sql)
-})
-
-morph25_non_cropped <- do.call("rbind", morph25_non_cropped_list) %>%
-  dplyr::filter(!(file %in% videos_movingback))
-
-morph25_non_cropped_density <- CalculateDensities(morph25_non_cropped, meas)
-morph25_non_cropped_density <- SetNotFoundSpeciesTo0(
-  morph25_non_cropped_density, 
-  moving_background, 
-  meas, exp_design, 
-  compositions, 
-  species.tracked
-)
-```
-
-#### bemovi_mag_16__morph_mvt
-
-```{r species_to_0_bemovi_16_morph_mvt}
-species.tracked <- c("Paramecium_bursaria", "Coleps_irchel","Colpidium","Paramecium_caudatum", "Euplotes","Stylonychia2")
-meas <- "bemovi_mag_16"
-extrapolation.factor <- 10.044
-cropping.factor <- 1
-
-morph16_list <- apply(
-  moving_background16, 
-  1, 
-  function(row){
-    sql <- paste0("
-                SELECT *
-                FROM 'bemovi_mag_16__morph_mvt'
-                WHERE timestamp == '", row["timestamp"],
-                "' AND bottle == '", row["bottle"], "';")
-    
-    read_sql(sql = sql)
-  }
-)
-
-morph16 <- do.call("rbind", morph16_list) %>%
-  dplyr::filter(!(file %in% videos_to_remove_16))
-
-morph16_density <- CalculateDensities(morph16, meas)
-morph16_density <- SetNotFoundSpeciesTo0(
-  morph16_density, 
-  moving_background16, 
-  meas, 
-  exp_design, 
-  compositions, 
-  species.tracked
-)
-```
-
-
-### Update RRD
-##### Delete moving videos from `__morph_mvt` and `__mean_densities_per_ml...` tables in RRD database
-
-
-```{r delete_bemovi_moving, options}
-file.copy(db_name(1, temp = FALSE), db_name(2, temp = TRUE))
-
-conn <- DBI::dbConnect(
-  drv = RSQLite::SQLite(),
-  db = db_name(2, temp = TRUE)
-)
-DBI::dbBegin(conn)
-
-## morph_mvt
-
-message("Deleting bemovi 25 entries from morph_mvt ...")
-delete_sql <- paste0(
-  "DELETE ",
-  "FROM bemovi_mag_25__morph_mvt ", 
-  "WHERE file IN (", paste0('"', videos_movingback, '"', collapse = ", "), ");"
-)
-message("Executing query '", delete_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_sql)
-message("   ", rd, " rows deleted.")
-
-
-message("Deleting bemovi 25 entries from morph_mvt_cropped ...")
-delete_sql <- paste0(
-  "DELETE ",
-  "FROM bemovi_mag_25__morph_mvt_cropped ", 
-  "WHERE file IN (", paste0('"', videos_movingback, '"', collapse = ", "), ");"
-)
-message("Executing query '", delete_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_sql)
-message("   ", rd, " rows deleted.")
-
-
-message("Deleting bemovi 25 entries from morph_mvt_non_cropped ...")
-delete_sql <- paste0(
-  "DELETE ",
-  "FROM bemovi_mag_25__morph_mvt_non_cropped ", 
-  "WHERE file IN (", paste0('"', videos_movingback, '"', collapse = ", "), ");"
-)
-message("Executing query '", delete_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_sql)
-message("   ", rd, " rows deleted.")
-
-
-message("Deleting bemovi 16 entries from morph_mvt ...")
-delete_sql <- paste0(
-  "DELETE ",
-  "FROM bemovi_mag_16__morph_mvt ", 
-  "WHERE file IN (", paste0('"', videos_to_remove_16, '"', collapse = ", "), ");"
-)
-message("Executing query '", delete_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_sql)
-message("   ", rd, " rows deleted.")
-
-
-### density
-
-message("Deleting bemovi 25 entries from mean_density_per_ml ...")
-delete_sql <- paste0(
-  "DELETE ",
-  "FROM bemovi_mag_25__mean_density_per_ml",
-  " WHERE (",
-  paste0(
-    apply(
-      moving_background, 
-      1,
-      function(row){
-        paste0("timestamp == '", row["timestamp"],"' AND bottle == '", row["bottle"], "'")
-      }
-    ),
-    collapse = ") OR ("
-  ),
-  ")"
-)
-message("Executing query '", delete_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_sql)
-message("   ", rd, " rows deleted.")
-  
-message("Deleting bemovi 25 entries from mean_density_per_ml_cropped ...")
-delete_sql <- paste0(
-  "DELETE ",
-  "FROM bemovi_mag_25__mean_density_per_ml_cropped",
-  " WHERE (",
-  paste0(
-    apply(
-      moving_background, 
-      1,
-      function(row){
-        paste0("timestamp == '", row["timestamp"],"' AND bottle == '", row["bottle"], "'")
-      }
-    ),
-    collapse = ") OR ("
-  ),
-  ")"
-)
-message("Executing query '", delete_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_sql)
-message("   ", rd, " rows deleted.")
-
-message("Deleting bemovi 25 entries from mean_density_per_ml_non_cropped ...")
-delete_sql <- paste0(
-  "DELETE ",
-  "FROM bemovi_mag_25__mean_density_per_ml_non_cropped",
-  " WHERE (",
-  paste0(
-    apply(
-      moving_background, 
-      1,
-      function(row){
-        paste0("timestamp == '", row["timestamp"],"' AND bottle == '", row["bottle"], "'")
-      }
-    ),
-    collapse = ") OR ("
-  ),
-  ")"
-)
-message("Executing query '", delete_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_sql)
-message("   ", rd, " rows deleted.")
-
-message("Deleting bemovi 16 entries from mean_density_per_ml ...")
-delete_sql <- paste0(
-  "DELETE ",
-  "FROM bemovi_mag_16__mean_density_per_ml",
-  " WHERE (",
-  paste0(
-    apply(
-      moving_background16, 
-      1,
-      function(row){
-        paste0("timestamp == '", row["timestamp"],"' AND bottle == '", row["bottle"], "'")
-      }
-    ),
-    collapse = ") OR ("
-  ),
-  ")"
-)
-message("Executing query '", delete_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_sql)
-message("   ", rd, " rows deleted.")
-
-## close
-
-DBI::dbCommit(conn)
-```
-
-##### Add updated densities to RRD database
-```{r add_bemovi_moving}
-
-DBI::dbBegin(conn)
-
-DBI::dbWriteTable(
-  conn,
-  name = "bemovi_mag_25__mean_density_per_ml",
-  value = morph25_density[,-which(names(morph25_density) == "numberOfVideos")],
-  overwrite = FALSE,
-  append = TRUE
-)
-
-DBI::dbWriteTable(
-  conn,
-  name = "bemovi_mag_25__mean_density_per_ml_cropped",
-  value = morph25_cropped_density[,-which(names(morph25_cropped_density) == "numberOfVideos")],
-  overwrite = FALSE,
-  append = TRUE
-)
-
-DBI::dbWriteTable(
-  conn,
-  name = "bemovi_mag_25__mean_density_per_ml_non_cropped",
-  value = morph25_non_cropped_density[,-which(names(morph25_non_cropped_density) == "numberOfVideos")],
-  overwrite = FALSE,
-  append = TRUE
-)
-
-DBI::dbWriteTable(
-  conn,
-  name = "bemovi_mag_16__mean_density_per_ml",
-  value = morph16_density[,-which(names(morph16_density) == "numberOfVideos")],
-  overwrite = FALSE,
-  append = TRUE
-)
-
-
-DBI::dbCommit(conn)
-      
-## close
-
-DBI::dbDisconnect(conn)
-
-file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
-```
-
-
 # 3. DONE - Flowcam Stau1
 
 The code below recalculates the densities after filtering Stau1 so that only
@@ -1324,7 +931,7 @@ particles are kept with high confidence that they are indeed Stau1.
 ## Calculate new densities
 ```{r species_to_0_bemovi_25_morph_mvt_2}
 
-options(RRDdb = db_name(2, temp = FALSE))
+options(RRDdb = db_name(1, temp = FALSE))
 
 sql <-  paste0(
   "
@@ -1377,7 +984,7 @@ Delete from traits and add re-calculated ones.
 ```{r}
 #| label: update_RRD
 #| 
-file.copy(db_name(2, temp = FALSE), db_name(3, temp = TRUE))
+file.copy(db_name(1, temp = FALSE), db_name(2, temp = TRUE))
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
@@ -1422,7 +1029,7 @@ message("   ", nrow(densityStau1), " rows added")
 DBI::dbCommit(conn)
 DBI::dbDisconnect(conn)
 
-file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
+file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
 ```
 
 
@@ -1432,7 +1039,7 @@ file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
 ## Prepare
 ```{r}
 #| label: prepare_tab
-file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
+file.copy(db_name(2, temp = FALSE), db_name(3, temp = TRUE))
 ```
 
 ### Add detrended TOC - Removing the linear trend in the water chemistry 
@@ -1442,7 +1049,7 @@ file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
 
 toc <- readRDS(params$toc) %>%
   left_join(
-    db_read_table(db = db_name(4, temp = TRUE), table = "experimental_design") %>% 
+    db_read_table(db = db_name(3, temp = TRUE), table = "experimental_design") %>% 
       collect(),
     by = join_by(bottle)
     ) %>%
@@ -1519,7 +1126,7 @@ saveRDS(toc, toc_det)
 
 add_to_db(
   toc_det,
-  db = db_name(4, temp = TRUE),
+  db = db_name(3, temp = TRUE),
   tables = "toc__toc",
   remove_timestamps = NULL,
   check_timestamps = TRUE,
@@ -1544,7 +1151,7 @@ fns_o2 <- list.files(
 
 add_to_db(
   fns_o2,
-  db = db_name(4, temp = TRUE),
+  db = db_name(3, temp = TRUE),
   tables = rep("o2meter__o2meter", length(fns_o2)),
   remove_timestamps = NULL,
   check_timestamps = TRUE,
@@ -1568,7 +1175,7 @@ fns_mc <- list.files(
 
 add_to_db(
   fns_mc,
-  db = db_name(4, temp = TRUE),
+  db = db_name(3, temp = TRUE),
   tables = rep("manualcount__manualcount_density", length(fns_mc)),
   remove_timestamps = NULL,
   check_timestamps = TRUE,
@@ -1581,7 +1188,7 @@ add_to_db(
 ```{r}
 #| label: finalize_tab
 #| 
-file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
+file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
 ```
 
 # Create Diagnostic Report
@@ -1592,7 +1199,7 @@ The Diagnostic report needs to be created before the renaming as it does rely on
 #| 
 
 report_diagnostic(
-  db = db_name("final", temp = FALSE),  
+  db = db_name(3, temp = FALSE),  
   template = "LEEF_1",
   suffix = paste0("reclassified_", params$version_tag), 
   format = "html"
@@ -1604,13 +1211,13 @@ report_diagnostic(
 ```{r}
 #| label: rename
 
-file.copy(db_name(4, temp = FALSE), db_name(5, temp = TRUE))
+file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
 
-RRD_LEEF_1_rename(db = db_name(5, temp = TRUE))
+RRD_LEEF_1_rename(db = db_name(4, temp = TRUE))
 
-file.rename(db_name(5, temp = TRUE), db_name(5, temp = FALSE))
+file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
 
-file.copy(db_name(5, temp = FALSE), db_name("final", temp = FALSE))
+file.copy(db_name(4, temp = FALSE), db_name("final", temp = FALSE))
 ```
 
 # Do a final vacuuming into new database
