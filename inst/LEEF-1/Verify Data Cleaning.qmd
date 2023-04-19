@@ -172,7 +172,7 @@ mb_16x <- c(
 mb <- c(mb_16x, mb_25x)
 
 for (tbl in tbls){
-  x <- dat |>
+  x <- db_read_table(table = tbl) |>
     select(file) |> 
     distinct() |> 
     collect() |>
@@ -188,7 +188,8 @@ for (tbl in tbls){
 
 
 
-## 3. [x] Exclusion of particles that have been classified as *Staurastrum gracile* (i.e. Staurastrum1) with a probability of less than 95% (already incorporated in RRD, code not run here and not completely up-to-date. Rainer has the complete up-to-date code)
+## 3. [x] Exclusion of *Staurastrum gracile* < 0.95 probability
+Exclusion of particles that have been classified as *Staurastrum gracile* (i.e. Staurastrum1) with a probability of less than 95% (already incorporated in RRD, code not run here and not completely up-to-date. Rainer has the complete up-to-date code)
 ```{r}
 #| label: test_3
 #| 
@@ -201,7 +202,7 @@ tbls <- c(
 sp <- "Staurastrum1"
 
 for (tbl in tbls){
-  x <- dat |>
+  x <- db_read_table(table = tbl) |>
     filter(species == "Staurastrum1" & probability < 0.95) |>
     select(species, probability) |> 
     distinct() |> 
@@ -214,9 +215,6 @@ for (tbl in tbls){
   }
 }
 ```
-
-
-
 
 ## 4. [x] Exclusion of 20220622 25x videos (duplicates of 20220620) from traits and setting respective densities to NA
 
@@ -254,8 +252,29 @@ for (tbl in tbls){
 ## 6. [ ] Manual correction of time series based on observations during the experiment
 ## 7. [ ] Exclusion of time series that are (almost completely) wrong classifications or only noise
 ## 8. [ ] Removing the linear trend in the water chemistry 
+## 9. [X] exclusion of all flowcytometer particles where FSC.A < 2 (raw FSC.A < 100)
+```{r}
+#| label: test_1
 
-## 9. [ ] exclusion of all flowcytometer particles where FSC.A < 2 (raw FSC.A < 100)
-## 10. [ ] Fix EAWAG daten (Hallo Rainer, mir ist aufgefallen, dass in der LEEF1-RRD bei den flowcytometer-Daten, die an der Eawag gemessen wurden, etwas nicht stimmt. z.B. bei timestamp "20220413" steht bei date "2022-05-17" und es gibt 3 Replikate (ich habe aber nur zwei gemessen))
+
+tbls <- c(
+  "flowcytometer__flowcytometer_traits"
+)
+
+for (tbl in tbls){
+  x <- db_read_table(table = tbl) |>
+    filter(FSCA <= 2) |>
+    select(FSCA) |> 
+    collect() |>
+    unlist()
+  if (length(x) == 0){
+    cat(tbl, ": OK", "\n")
+  } else {
+    cat("ERROR: ", tbl, "Still contains `FSC.A` < 2 \n")
+  }
+}
+```
+## 10. [ ] Fix EAWAG daten 
+Hallo Rainer, mir ist aufgefallen, dass in der LEEF1-RRD bei den flowcytometer-Daten, die an der Eawag gemessen wurden, etwas nicht stimmt. z.B. bei timestamp "20220413" steht bei date "2022-05-17" und es gibt 3 Replikate (ich habe aber nur zwei gemessen)
 
 
