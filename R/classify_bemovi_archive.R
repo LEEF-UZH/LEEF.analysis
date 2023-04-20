@@ -46,6 +46,7 @@ classify_bemovi_archive <- function(
 
   return(
     pbmcapply::pbmclapply(
+    # lapply(
       timestamps,
       function(timestamp){
         datadir <- file.path(
@@ -135,8 +136,8 @@ classify_bemovi_archive <- function(
         message("###############################################")
         invisible(NULL)
       },
-      mc.preschedule = FALSE,
-      mc.cores = mc.cores
+    mc.preschedule = FALSE,
+    mc.cores = mc.cores
     )
   )
 }

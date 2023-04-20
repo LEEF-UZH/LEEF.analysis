@@ -740,3 +740,10 @@ INNER JOIN
 USING
   (bottle)
 /* toc(timestamp,day,bottle,type,concentration,cv,temperature,richness,composition,incubator) */;
+
+CREATE VIEW experimetal_design
+AS
+SELECT
+  *
+FROM
+  experimental_design;

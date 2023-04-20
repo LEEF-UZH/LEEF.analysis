@@ -608,17 +608,19 @@ fns <- list.files(
   full.names = TRUE
 )
 
-lapply(
-  fns,
-  function(fn){
-    readRDS(fn) |>
-      dplyr::filter(species %in% c("bacteria", "algae")) |>
-      saveRDS(vars(file = fn))
-  }
+invisible(
+  lapply(
+    fns,
+    function(fn){
+      readRDS(fn) |>
+        dplyr::filter(species %in% c("bacteria", "algae")) |>
+        saveRDS(file = fn)
+    }
+  )
 )
 ```
 
-## TODO - Exclusion of time series that are wrong classifications or only noise
+## TODO - bemovi - Exclusion of time series that are wrong classifications or only noise
 ```{r}
 
 excl <- data.frame(
@@ -710,7 +712,7 @@ invisible(
 rm(excl, fns)
 ```
 
-## TODO - Adding density=0 for some special cases
+## TODO - flowcam - Adding density=0 for some special cases
 
 ```{r man_correction}
 cont_timestamp <- 20220128
@@ -744,36 +746,35 @@ invisible(
         templ$species <- "DesmodesmusClumps"
         rbind(x, templ)
       }
-      {###### HERE BEGIN
-        x_list <- split(
-          x = x,
-          f = x$bottle,
-          drop = TRUE
-        )
-        
-        for (i in seq_along(x_list)) {
-          templ <- x_list[[i]][1,]
-          templ$density <- 0
-          templ$count <- 0
-          sp <- unique(x_list[[i]]$species)
-          if ("Chlamydomonas" %in% sp){
-            if (!("ChlamydomonasClumps" %in% sp)){
-              browser()
-              templ$species <- "ChlamydomonasClumps"
-              x_list[[i]] <- rbind(x_list[[i]], templ)
-            }
-          }
-          if ("Desmodesmus" %in% sp){
-            if (!("DesmodesmusClumps" %in% sp)){
-              browser()
-              templ$species <- "DesmodesmusClumps"
-              x_list[[i]] <- rbind(x_list[[i]], templ)
-            }
+      ###### HERE BEGIN
+      x_list <- split(
+        x = x,
+        f = x$bottle,
+        drop = TRUE
+      )
+      
+      for (i in seq_along(x_list)) {
+        templ <- x_list[[i]][1,]
+        templ$density <- 0
+        templ$count <- 0
+        sp <- unique(x_list[[i]]$species)
+        if ("Chlamydomonas" %in% sp){
+          if (!("ChlamydomonasClumps" %in% sp)){
+            templ$species <- "ChlamydomonasClumps"
+            x_list[[i]] <- rbind(x_list[[i]], templ)
           }
         }
-        
-        x <- do.call("rbind", x_list)
-      }###### HERE END
+        if ("Desmodesmus" %in% sp){
+          if (!("DesmodesmusClumps" %in% sp)){
+            templ$species <- "DesmodesmusClumps"
+            x_list[[i]] <- rbind(x_list[[i]], templ) |> 
+              dplyr::mutate(Date_Flowcam = data.table::as.IDate(Date_Flowcam))
+          }
+        }
+      }
+      
+      x <- do.call("rbind", x_list)
+      ###### HERE END
       saveRDS(x, fn)
     },
     mc.cores = params$cores, 

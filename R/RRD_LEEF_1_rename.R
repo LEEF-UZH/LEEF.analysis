@@ -256,7 +256,7 @@ RRD_LEEF_1_rename <- function(
       try(
         {
           cat(sql, "...\n")
-          DBI::dbGetQuery(conn, sql)
+          DBI::adExecute(conn, sql)
         }
       )
     }

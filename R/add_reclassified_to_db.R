@@ -35,6 +35,7 @@ add_reclassified_to_db <- function(
   for (method in methods) {
     files <- list.files(file.path(path, method), full.names = TRUE)
     files <- grep("trajectories", files, invert = TRUE, value = TRUE)
+    files <- sample(files)
     tables <- paste0(
       basename(method), "__",
       sapply( files, function(f) {strsplit(basename(f), "\\.")[[1]][[1]]})

@@ -27,7 +27,7 @@ classify_bemovi_files <- function(
   datadir,
   bemovi_extract_name = NULL,
   classifier_constant_name,
-  classifier_increasing_name2,
+  classifier_increasing_name,
   exclude_videos = NULL
 ){
 
@@ -43,7 +43,7 @@ classify_bemovi_files <- function(
 
   if (!is.null(exclude_videos)){
     morph_mvt <- morph_mvt[!(morph_mvt$file %in% exclude_videos),]
-    traj <- traj[!(morph_mvt$file %in% exclude_videos),]
+    traj <- traj[!(traj$file %in% exclude_videos),]
   }
   classified <- LEEF.measurement.bemovi::classify(
     bemovi_extract = bemovi_extract_name,
