@@ -165,7 +165,7 @@ until <- 30000000
 
 ### Set output path
 ```{r output_path_b}
-out <- file.path(params$output_dir, "flowcam")
+out <- file.path(params$output_dir, "flowcam.b_02")
 ```
 
 ### Determine timestamps
@@ -205,7 +205,7 @@ download.file(
 )
 ```
 
-### Classify Flowcam up to 20220704
+### Classify Flowcam b_02 up to 20220704
 ```{r classify_flowcam_1}
 message("Classifying flowcam...")
 system.time(
@@ -217,7 +217,7 @@ system.time(
     classifier_increasing_name = class_increasing, 
     species_tracked = yaml::read_yaml(paste0(base, "parameter/flowcam/flowcam.yml"))$species_tracked,
     output = out,
-    mc.cores = 1, #params$cores,
+    mc.cores = params$cores,
     bottle = bott
   )
 )
@@ -227,6 +227,34 @@ system.time(
 ```{r cleanup_flowcam_1}
 unlink(pdir)
 rm(class_constant, class_increasing)
+```
+
+### Merge `flowcam.b_02` into `flowcam`
+```{r}
+#| label: merge_flowcams
+#| 
+
+b02 <- list.files(
+  file.path(params$output_dir, "flowcam.b_02")
+)
+
+pbmcapply::pbmclapply(
+  sample(b02),
+  function(fn){
+    file.path(params$output_dir, "flowcam", fn) |>
+      readRDS() |>
+      dplyr::filter(bottle != "b_02") |>
+      dplyr::bind_rows(
+        readRDS( file.path(params$output_dir, "flowcam.b_02", fn) ) |>
+          mutate(timestamp = as.character(timestamp))
+      ) |>
+    saveRDS(file = file.path(params$output_dir, "flowcam", fn))
+  },
+  mc.preschedule = FALSE, 
+  mc.cores = params$cores
+)
+
+
 ```
 
 
@@ -989,7 +1017,7 @@ file.copy(db_name(1, temp = FALSE), db_name(2, temp = TRUE))
 
 conn <- DBI::dbConnect(
   drv = RSQLite::SQLite(),
-  db = db_name(3, temp = TRUE)
+  db = db_name(2, temp = TRUE)
 )
 DBI::dbBegin(conn)
 
