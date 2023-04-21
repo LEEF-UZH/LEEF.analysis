@@ -21,6 +21,7 @@ params:
   pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
   extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
   toc: "/Volumes/LEEF/0.TOC/LEEF-1/toc.rds"
+  min_FSC.A: 2
   cores: 7
 ---
 
@@ -525,7 +526,7 @@ invisible(
     timestamps = timestamps,
     output = file.path(params$output_dir, "flowcytometer"),
     use_H = TRUE,
-    min_FSC.A = 2,
+    min_FSC.A = params$min_FSC.A,
     log10_all = TRUE,
     mc.cores = params$cores
   )
@@ -590,6 +591,8 @@ invisible(
     mc.cores = params$cores
   )
 )
+
+
 ```
 
 #### TODO EAWAG Samples
