@@ -300,17 +300,19 @@ out <- file.path(params$output_dir, "bemovi_mag_16")
 if (!file.exists(out)) {
   message("Classifying bemovi_extract.mag.16")
   system.time(
-    classify_bemovi_archive( 
-      timestamps = timestamps, 
-      archive_dir = params$archive_dir, 
-      magnification = 16, 
-      classifier_constant_name = class_constant, 
-      classifier_increasing_name = class_increasing, 
-      bemovi_extract_name = "bemovi_extract.mag.16.yml", 
-      species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.16/bemovi_extract.mag.16.yml"))$species_tracked,
-      output = out,
-      exclude_videos = moving_background,
-      mc.cores = params$cores
+    suppressMessages(
+      classify_bemovi_archive( 
+        timestamps = timestamps, 
+        archive_dir = params$archive_dir, 
+        magnification = 16, 
+        classifier_constant_name = class_constant, 
+        classifier_increasing_name = class_increasing, 
+        bemovi_extract_name = "bemovi_extract.mag.16.yml", 
+        species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.16/bemovi_extract.mag.16.yml"))$species_tracked,
+        output = out,
+        exclude_videos = moving_background,
+        mc.cores = params$cores
+      )
     )
   )
 } else {
@@ -399,45 +401,51 @@ moving_background <- c(
 out <- file.path(params$output_dir, "bemovi_mag_25")
 if (!file.exists(out)) {
   system.time(
-    classify_bemovi_archive( 
-      timestamps = timestamps[!(excl %in% timestamps)], 
-      archive_dir = params$archive_dir, 
-      magnification = 25, 
-      classifier_constant_name = class_constant, 
-      classifier_increasing_name = class_increasing, 
-      bemovi_extract_name = "bemovi_extract.mag.25.yml", 
-      species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.yml"))$species_tracked,
-      output = out,
-      exclude_videos = moving_background,
-      mc.cores = params$cores
+    suppressMessages(
+      classify_bemovi_archive( 
+        timestamps = timestamps[!(excl %in% timestamps)], 
+        archive_dir = params$archive_dir, 
+        magnification = 25, 
+        classifier_constant_name = class_constant, 
+        classifier_increasing_name = class_increasing, 
+        bemovi_extract_name = "bemovi_extract.mag.25.yml", 
+        species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.yml"))$species_tracked,
+        output = out,
+        exclude_videos = moving_background,
+        mc.cores = params$cores
+      )
     )
   )
   system.time(
-    classify_bemovi_archive( 
-      timestamps = timestamps, 
-      archive_dir = params$archive_dir, 
-      magnification = 25, 
-      classifier_constant_name = class_constant, 
-      classifier_increasing_name = class_increasing, 
-      bemovi_extract_name = "bemovi_extract.mag.25.non_cropped.yml", 
-      species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.non_cropped.yml"))$species_tracked,
-      output = out,
-      exclude_videos = moving_background,
-      mc.cores = params$cores
+    suppressMessages(
+      classify_bemovi_archive( 
+        timestamps = timestamps, 
+        archive_dir = params$archive_dir, 
+        magnification = 25, 
+        classifier_constant_name = class_constant, 
+        classifier_increasing_name = class_increasing, 
+        bemovi_extract_name = "bemovi_extract.mag.25.non_cropped.yml", 
+        species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.non_cropped.yml"))$species_tracked,
+        output = out,
+        exclude_videos = moving_background,
+        mc.cores = params$cores
+      )
     )
   )
   system.time(
-    classify_bemovi_archive( 
-      timestamps = timestamps, 
-      archive_dir = params$archive_dir, 
-      magnification = 25, 
-      classifier_constant_name = class_constant, 
-      classifier_increasing_name = class_increasing, 
-      bemovi_extract_name = "bemovi_extract.mag.25.cropped.yml", 
-      species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.cropped.yml"))$species_tracked,
-      output = out,
-      exclude_videos = moving_background,
-      mc.cores = params$cores
+    suppressMessages(
+      classify_bemovi_archive( 
+        timestamps = timestamps, 
+        archive_dir = params$archive_dir, 
+        magnification = 25, 
+        classifier_constant_name = class_constant, 
+        classifier_increasing_name = class_increasing, 
+        bemovi_extract_name = "bemovi_extract.mag.25.cropped.yml", 
+        species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.cropped.yml"))$species_tracked,
+        output = out,
+        exclude_videos = moving_background,
+        mc.cores = params$cores
+      )
     )
   )
 } else {
@@ -813,10 +821,25 @@ invisible(
 ## DONE - Add to database and create indices
 Old timestamps will be removed and not be backed up.
 
-```{r addRRD}
+```{r addRRD_copy}
 file.copy(params$db, db_name(1, temp = TRUE))
 
-## Bemovi and flowcam
+```
+```{r addRRD_b16}
+## Bemovi_16
+
+suppressMessages(
+  add_reclassified_to_db(
+    path = params$output_dir, 
+    db = db_name(1, temp = TRUE), 
+    remove_timestamps = NULL,
+    backup_removed = FALSE,
+    methods = "bemovi_mag_16"
+  )
+)
+```
+```{r addRRD_b25}
+## Bemovi_25
 
 system.time(
   add_reclassified_to_db(
@@ -824,10 +847,25 @@ system.time(
     db = db_name(1, temp = TRUE), 
     remove_timestamps = NULL,
     backup_removed = FALSE,
-    methods = c("flowcam", "bemovi_mag_16", "bemovi_mag_25")
+    methods = "bemovi_mag_25"
   )
 )
+```
+```{r addRRD_fc}
+## flowcam
 
+suppressMessages(
+  add_reclassified_to_db(
+    path = params$output_dir, 
+    db = db_name(1, temp = TRUE), 
+    remove_timestamps = NULL,
+    backup_removed = FALSE,
+    methods = "flowcam"
+  )
+)
+```
+
+```{r addRRD_fcydens}
 ## Flowcytometer Densities
 
 fns_dens <- list.files(
@@ -846,6 +884,8 @@ add_to_db(
   backup_removed = TRUE
 )
 
+```
+```{r addRRD_fcytraits}
 ## Flowcytometer Traits
 
 fns_traits <- list.files(
@@ -864,6 +904,8 @@ add_to_db(
   backup_removed = TRUE
 )
 
+```
+```{r addRRD_indices}
 RRD_create_indices(
   db_name(1, temp = TRUE), 
   LEEF = "LEEF-1", 
