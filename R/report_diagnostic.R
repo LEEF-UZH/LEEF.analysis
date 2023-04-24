@@ -42,8 +42,8 @@ report_diagnostic <- function(db, template = "LEEF_1", suffix = "", format = "ht
   )
 
   rmd <- switch (template,
-    "LEEF_1" = system.file("DiagnosticReport.Rmd", package = "LEEF.analysis"),
-    "LEEF_2" = system.file("LEEF-2", "DiagnosticReport.Rmd", package = "LEEF.analysis"),
+    "LEEF_1" = system.file("LEEF-1", "DiagnosticReport.Rmd", package = "LEEF.analysis"),
+    "LEEF_2" = stop("Pleaase use function `LEEF_2_report_diagnostic()` for LEEF-2!"),
     stop("Unsupprted report template!")
   )
   report <- rmarkdown::render(
