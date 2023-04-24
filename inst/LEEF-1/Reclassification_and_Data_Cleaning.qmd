@@ -87,6 +87,86 @@ if (file.exists(params$db)) {
   stop(params$db, " exists and will not be overwritten!\n", "If you want to re-generate, please rename the database or delete it!")
 } else {
   RRD_new(params$db, LEEF = "LEEF-1")
+  ## Adding of General Parameter tables
+  pdir <- tempfile()
+  dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
+  
+  composition <- file.path(pdir, "compositions.csv")
+  download.file(
+    paste0(base, "parameter/00.general.parameter/compositions.csv"), 
+    destfile = composition,
+    mode = "wb"
+  )
+  
+  experimental_design <- file.path(pdir, "experimental_design.csv")
+  download.file(
+    paste0(base, "parameter/00.general.parameter/experimental_design.csv"), 
+    destfile = experimental_design,
+    mode = "wb"
+  )
+  
+  immigration_schedule <- file.path(pdir, "immigration_schedule.csv")
+  download.file(
+    paste0(base, "treatment/immigration_schedule.csv"), 
+    destfile = immigration_schedule,
+    mode = "wb"
+  )
+  
+  light_decline_schedule <- file.path(pdir, "light_decline_schedule.csv")
+  download.file(
+    paste0(base, "treatment/light_decline_schedule.csv"), 
+    destfile = light_decline_schedule,
+    mode = "wb"
+  )
+  
+  
+  suppressMessages(  
+    add_to_db(
+      fns = composition,
+      db = params$db,
+      tables = "composition",
+      remove_timestamps = NULL,
+      check_timestamps = FALSE,
+      backup_removed = TRUE
+    )
+  )
+  
+  suppressMessages(  
+    add_to_db(
+      fns = experimental_design,
+      db = params$db,
+      tables = "experimental_design",
+      remove_timestamps = NULL,
+      check_timestamps = FALSE,
+      backup_removed = TRUE
+    )
+  )
+  
+  suppressMessages(  
+    add_to_db(
+      fns = immigration_schedule,
+      db = params$db,
+      tables = "immigration_schedule",
+      remove_timestamps = NULL,
+      check_timestamps = FALSE,
+      backup_removed = TRUE
+    )
+  )
+  
+  suppressMessages(  
+    add_to_db(
+      fns = light_decline_schedule,
+      db = params$db,
+      tables = "light_decline_schedule",
+      remove_timestamps = NULL,
+      check_timestamps = FALSE,
+      backup_removed = TRUE
+    )
+  )
+  
+  unlink(pdir)
+  rm(composition, experimental_design, immigration_schedule, light_decline_schedule)
+  
 }
 ```
 
@@ -826,7 +906,6 @@ Old timestamps will be removed and not be backed up.
 
 ```{r addRRD_copy}
 file.copy(params$db, db_name(1, temp = TRUE))
-
 ```
 ```{r addRRD_b16}
 ## Bemovi_16
@@ -844,7 +923,7 @@ suppressMessages(
 ```{r addRRD_b25}
 ## Bemovi_25
 
-system.time(
+suppressMessages(
   add_reclassified_to_db(
     path = params$output_dir, 
     db = db_name(1, temp = TRUE), 
@@ -878,15 +957,16 @@ fns_dens <- list.files(
   full.names = TRUE
 )
 
-add_to_db(
-  fns_dens,
-  db = db_name(1, temp = TRUE),
-  tables = rep("flowcytometer__flowcytometer_density", length(fns_dens)),
-  remove_timestamps = NULL,
-  check_timestamps = FALSE,
-  backup_removed = TRUE
+suppressMessages(
+  add_to_db(
+    fns_dens,
+    db = db_name(1, temp = TRUE),
+    tables = rep("flowcytometer__flowcytometer_density", length(fns_dens)),
+    remove_timestamps = NULL,
+    check_timestamps = FALSE,
+    backup_removed = TRUE
+  )
 )
-
 ```
 ```{r addRRD_fcytraits}
 ## Flowcytometer Traits
@@ -898,15 +978,16 @@ fns_traits <- list.files(
   full.names = TRUE
 )
 
-add_to_db(
-  fns_traits,
-  db = db_name(1, temp = TRUE),
-  tables = rep("flowcytometer__flowcytometer_traits", length(fns_traits)),
-  remove_timestamps = NULL,
-  check_timestamps = FALSE,
-  backup_removed = TRUE
+suppressMessages(
+  add_to_db(
+    fns_traits,
+    db = db_name(1, temp = TRUE),
+    tables = rep("flowcytometer__flowcytometer_traits", length(fns_traits)),
+    remove_timestamps = NULL,
+    check_timestamps = FALSE,
+    backup_removed = TRUE
+  )
 )
-
 ```
 ```{r addRRD_indices}
 RRD_create_indices(
@@ -917,87 +998,8 @@ RRD_create_indices(
 
 ```
 
-## Adding of General Parameter tables
-```{r prepare_gen_param}
-pdir <- tempfile()
-dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
-composition <- file.path(pdir, "compositions.csv")
-download.file(
-  paste0(base, "parameter/00.general.parameter/compositions.csv"), 
-  destfile = composition,
-  mode = "wb"
-)
-
-experimental_design <- file.path(pdir, "experimental_design.csv")
-download.file(
-  paste0(base, "parameter/00.general.parameter/experimental_design.csv"), 
-  destfile = experimental_design,
-  mode = "wb"
-)
-
-immigration_schedule <- file.path(pdir, "immigration_schedule.csv")
-download.file(
-  paste0(base, "treatment/immigration_schedule.csv"), 
-  destfile = immigration_schedule,
-  mode = "wb"
-)
-
-light_decline_schedule <- file.path(pdir, "light_decline_schedule.csv")
-download.file(
-  paste0(base, "treatment/light_decline_schedule.csv"), 
-  destfile = light_decline_schedule,
-  mode = "wb"
-)
-
-
-add_to_db(
-  fns = composition,
-  db = db_name(1, temp = TRUE),
-  tables = "composition",
-  remove_timestamps = NULL,
-  check_timestamps = FALSE,
-  backup_removed = TRUE
-)
-
-add_to_db(
-  fns = experimental_design,
-  db = db_name(1, temp = TRUE),
-  tables = "experimental_design",
-  remove_timestamps = NULL,
-  check_timestamps = FALSE,
-  backup_removed = TRUE
-)
-
-add_to_db(
-  fns = immigration_schedule,
-  db = db_name(1, temp = TRUE),
-  tables = "immigration_schedule",
-  remove_timestamps = NULL,
-  check_timestamps = FALSE,
-  backup_removed = TRUE
-)
-
-add_to_db(
-  fns = light_decline_schedule,
-  db = db_name(1, temp = TRUE),
-  tables = "light_decline_schedule",
-  remove_timestamps = NULL,
-  check_timestamps = FALSE,
-  backup_removed = TRUE
-)
-
-unlink(pdir)
-rm(composition, experimental_design, immigration_schedule, light_decline_schedule)
-```
-
-```{r}
-#| label: close
-
-file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
-```
-
-# 3. DONE - Flowcam Stau1
+# 2. DONE - Flowcam Stau1
 
 The code below recalculates the densities after filtering Stau1 so that only
 particles are kept with high confidence that they are indeed Stau1.
@@ -1108,7 +1110,7 @@ file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
 
 
 
-# 4. TODO Add O2, Manualcount and TOC measuremnts 
+# 3. TODO Add O2, Manualcount and TOC measuremnts 
 
 ## Prepare
 ```{r}
@@ -1223,13 +1225,15 @@ fns_o2 <- list.files(
 ) |>
   file.path("o2meter.csv")
 
-add_to_db(
-  fns_o2,
-  db = db_name(3, temp = TRUE),
-  tables = rep("o2meter__o2meter", length(fns_o2)),
-  remove_timestamps = NULL,
-  check_timestamps = TRUE,
-  backup_removed = TRUE
+suppressMessages(
+  add_to_db(
+    fns_o2,
+    db = db_name(3, temp = TRUE),
+    tables = rep("o2meter__o2meter", length(fns_o2)),
+    remove_timestamps = NULL,
+    check_timestamps = TRUE,
+    backup_removed = TRUE
+  )
 )
 ```
 
@@ -1247,13 +1251,15 @@ fns_mc <- list.files(
 ) |>
   file.path("manualcount_density.csv")
 
-add_to_db(
-  fns_mc,
-  db = db_name(3, temp = TRUE),
-  tables = rep("manualcount__manualcount_density", length(fns_mc)),
-  remove_timestamps = NULL,
-  check_timestamps = TRUE,
-  backup_removed = TRUE
+suppressMessages(
+  add_to_db(
+    fns_mc,
+    db = db_name(3, temp = TRUE),
+    tables = rep("manualcount__manualcount_density", length(fns_mc)),
+    remove_timestamps = NULL,
+    check_timestamps = TRUE,
+    backup_removed = TRUE
+  )
 )
 ```
 
@@ -1281,7 +1287,7 @@ report_diagnostic(
 ```
 
 
-# 5. VERIFY Rename species and columns
+# 4. VERIFY Rename species and columns
 ```{r}
 #| label: rename
 
