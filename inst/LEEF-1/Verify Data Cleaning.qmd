@@ -7,10 +7,14 @@ format:
   html:
     toc: true
     toc-location: left
+    toc-depth: 5
     code-fold: true
     embed-resources: true
+    css: VerifyDataCleaning.css
+execute:
+  cache: true
 params:
-  db: "/Volumes/Documents/RRD.Reclassification_final/LEEF.RRD.v1.8.5_3.sqlite"
+  db: "~/RRD.Reclassification_final/LEEF.RRD.v1.8.5_3.sqlite"
   version_tag: "v1.8.5"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
   output_dir: "~/RRD.Reclassification_final/"
@@ -31,12 +35,198 @@ library(LEEF.analysis)
 library(dplyr)
 options(RRDdb = params$db)
 ```
+# Some Plots
+
+## Density of Species per bottle as measured by measurement over time
+
+\pagebreak
+
+### Bemovi Magnification 16
+```{r}
+#| label:  dens_species_b_16_raw
+#| fig-height: 16
+#| 
+
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_16",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25
+```{r}
+#| label:  dens_species_b_25_raw
+#| fig-height: 16
+#| 
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_25",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25 non_cropped
+```{r}
+#| label:  dens_species_b_25_non_crop_raw
+#| fig-height: 16
+#| 
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_25_non_cropped",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Bemovi Magnification 25 cropped
+```{r}
+#| label:  dens_species_b_25_crop_raw
+#| fig-height: 16
+#| 
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "bemovi_mag_25_cropped",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Flowcam 
+#### All
+```{r}
+#| label:  dens_species_fcam_rest_raw
+#| fig-height: 16
+#| 
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcam",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+#### Algae
+```{r}
+#| label:  dens_species_fcam_al_raw
+#| fig-height: 16
+#| 
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_algae"
+)
+```
+
+\pagebreak
+
+#### Ciliates
+```{r}
+#| label:  dens_species_fcam_cil_raw
+#| fig-height: 16
+#| 
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcam",
+  species_set_id = "flowcam_ciliates"
+)
+```
+
+\pagebreak
+
+### Flowcytometer
+```{r}
+#| label:  dens_species_fcyt_raw
+#| fig-height: 16
+#| 
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "flowcytometer",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Manualcount
+```{r}
+#| label:  dens_species_mc_raw
+#| fig-height: 16
+#| 
+plot_density_species_per_bottle_per_timestamp(
+  params$db, 
+  transform_density_4throot = FALSE, 
+  measurement = "manualcount",
+  species_set_id = NULL
+)
+```
+
+\pagebreak
+
+### Percent O~2~
+
+```{r}
+#| label:  percent_o2_raw
+#| fig-height: 16
+#| 
+plot_o2s_per_bottle_per_timestamp(
+  params$db
+)
+```
+
+\pagebreak
+
+### TOC and TC
+
+```{r}
+#| label:  toc_raw_TOC_TC
+#| fig-height: 16
+#| 
+plot_tocs_per_bottle_per_timestamp(
+  params$db,
+  type = c("TOC", "TC")
+)
+```
+
+\pagebreak
+
+### IC and TN
+
+
+```{r}
+#| label:  toc_raw_IC_TN
+#| fig-height: 16
+#| 
+plot_tocs_per_bottle_per_timestamp(
+  params$db,
+  type = c("IC", "TN")
+)
+```
+
+
+
 
 # The following aspects are tested
 
 ## 1. [x] Removing "test sampling days" and classes not of interest. Some test samplings are still in the RRD (they have sampling year 3000).
 ```{r}
 #| label: test_1
+#| eval: false
 
 
 tbls <- c(
@@ -112,6 +302,7 @@ for (tbl in tbls){
 
 ```{r}
 #| label: test_2
+#| eval: false
 #| 
 tbls <- c(
   # "bemovi_mag_16__mean_density_per_ml",
@@ -189,6 +380,7 @@ for (tbl in tbls){
 Exclusion of particles that have been classified as *Staurastrum gracile* (i.e. Staurastrum1) with a probability of less than 95% (already incorporated in RRD, code not run here and not completely up-to-date. Rainer has the complete up-to-date code)
 ```{r}
 #| label: test_3
+#| eval: false
 #| 
 
 tbls <- c(
@@ -217,6 +409,7 @@ for (tbl in tbls){
 
 ```{r}
 #| label: test_4
+#| eval: false
 #| 
 tbls <- c(
   # "bemovi_mag_25__mean_density_per_ml",
@@ -251,6 +444,7 @@ for (tbl in tbls){
 ## 9. [X] exclusion of all flowcytometer particles where FSC.A < 2 (raw FSC.A < 100)
 ```{r}
 #| label: test_5
+#| eval: false
 
 
 tbls <- c(

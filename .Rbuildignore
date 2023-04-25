@@ -4,3 +4,5 @@
 ^Makefile$
 ^inst/.*\.html$
 ^Meta$
+^inst/LEEF-1/Verify-Data-Cleaning_cache
+^inst/LEEF-1/Verify-Data-Cleaning_files

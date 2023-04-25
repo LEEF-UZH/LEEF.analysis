@@ -608,6 +608,7 @@ invisible(
     use_H = TRUE,
     min_FSC.A = params$min_FSC.A,
     log10_all = TRUE,
+    particles = "bacteria",
     mc.cores = params$cores
   )
 )
@@ -637,6 +638,7 @@ invisible(
     use_H = TRUE,
     min_FSC.A = params$min_FSC.A,
     log10_all = TRUE,
+    particles = "bacteria",
     mc.cores = params$cores
   )
 )

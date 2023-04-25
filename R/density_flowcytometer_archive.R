@@ -10,6 +10,8 @@
 #' @param min_FSC.A numeric. If \code{!NULL}, \code{FSA.A <= min_FSC.A} will be fitered out by using
 #'   a rectangular filter
 #'   \code{flowCore::rectangleGate(filterId="filter_out_0", "FSC-A" = c(min_FSC.A, +Inf))}
+#' @param particles particle class to extract. Mainly \code{bacteria} or
+#'   \code{algae}.
 #' @param mc.cores number of cores to be used. Defaults to 1
 #'
 #' @return invisible `NULL`
@@ -30,6 +32,7 @@ density_flowcytometer_archive <- function(
   use_H,
   log10_all = FALSE,
   min_FSC.A = NULL,
+  particles = NULL,
   mc.cores = 1
 ){
   dir.create(
@@ -91,6 +94,10 @@ density_flowcytometer_archive <- function(
         )
 
         if (!is.null(densities)) {
+          if (!is.null(particles)){
+            densities <- densities[densities$species == particles]
+          }
+
           message("Saving timestamp ", timestamp, "...")
 
           dir.create(file.path(output))
