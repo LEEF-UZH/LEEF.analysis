@@ -1,9 +1,9 @@
 ---
 title: "Reclassification and Data Cleaning"
 author: "Rainer M Krug"
-date: "06/05/2022"
+date: "24/04/2022"
 
-input:
+output:
   html_document:
     dev: png
     fig_width: 10
@@ -484,7 +484,7 @@ if (!file.exists(out)) {
   system.time(
     suppressMessages(
       classify_bemovi_archive( 
-        timestamps = timestamps[!(excl %in% timestamps)], 
+        timestamps = timestamps[!grepl(excl, timestamps)], 
         archive_dir = params$archive_dir, 
         magnification = 25, 
         classifier_constant_name = class_constant, 
@@ -500,7 +500,7 @@ if (!file.exists(out)) {
   system.time(
     suppressMessages(
       classify_bemovi_archive( 
-        timestamps = timestamps, 
+        timestamps = timestamps[grepl(excl, timestamps)], 
         archive_dir = params$archive_dir, 
         magnification = 25, 
         classifier_constant_name = class_constant, 
@@ -516,7 +516,7 @@ if (!file.exists(out)) {
   system.time(
     suppressMessages(
       classify_bemovi_archive( 
-        timestamps = timestamps, 
+        timestamps = timestamps[grepl(excl, timestamps)], 
         archive_dir = params$archive_dir, 
         magnification = 25, 
         classifier_constant_name = class_constant, 
@@ -762,28 +762,21 @@ excl <- data.frame(
   ),
   
   species = c(
-    "Tetrahymena",   "Tetrahymena",   "Tetrahymena",   "Euplotes",
-    "Euplotes",      "Loxocephallus", "Euplotes",      "Colpidium",
-    "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",
-    "Euplotes",      "Euplotes",      "Colpidium",     "Colpidium",
-    "Loxocephallus", "Loxocephallus", "Tetrahymena",   "Tetrahymena",
-    "Loxocephallus", "Loxocephallus", "Tetrahymena",   "Tetrahymena",  
-    "Colpidium",     "Colpidium",     "Dexiostoma",    "Dexiostoma", 
-    "Stylonychia2",  "Euplotes",      "Euplotes",      "Staurastrum1",
-    "Tetrahymena",   "Tetrahymena",   "Colpidium",     "Colpidium",   
-    "Loxocephallus", "Loxocephallus", "Stylonychia2",  "Euplotes",   
-    "Euplotes",      "Colpidium",     "Colpidium",     "Loxocephallus",
-    "Loxocephallus", "Dexiostoma",    "Dexiostoma",    "Euplotes",    
-    "Euplotes",      "Tetrahymena",   "Tetrahymena",   "Colpidium",   
-    "Colpidium",     "Loxocephallus", "Loxocephallus", "Euplotes",   
-    "Euplotes",      "Staurastrum1",  "Colpidium",     "Colpidium",   
-    "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",  
-    "Euplotes",      "Euplotes",      "Colpidium",     "Colpidium",  
-    "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",  
-    "Stylonychia2",  "Euplotes",      "Euplotes",      "Staurastrum2", 
-    "Staurastrum2",  "Staurastrum2",  "Staurastrum2",  "Staurastrum2", 
-    "Staurastrum2",  "Tetrahymena",   "Stylonychia2",  "Stylonychia2",
-    "Euplotes", "Euplotes"
+    "Tetrahymena",   "Tetrahymena",    "Tetrahymena",   "Euplotes",      "Euplotes",      "Loxocephallus",   
+    "Euplotes",      "Colpidium",      "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",
+    "Euplotes",      "Euplotes",       "Colpidium",     "Colpidium",     "Loxocephallus", "Loxocephallus", 
+    "Tetrahymena",   "Tetrahymena",    "Loxocephallus", "Loxocephallus", "Tetrahymena",   "Tetrahymena",  
+    "Colpidium",     "Colpidium",      "Dexiostoma",    "Dexiostoma",    "Stylonychia2",  "Euplotes", 
+    "Euplotes",      "Staurastrum1",   "Tetrahymena",   "Tetrahymena",   "Colpidium",     "Colpidium",   
+    "Loxocephallus", "Loxocephallus",  "Stylonychia2",  "Euplotes",      "Euplotes",      "Colpidium",   
+    "Colpidium",     "Loxocephallus",  "Loxocephallus", "Dexiostoma",    "Dexiostoma",    "Euplotes",  
+    "Euplotes",      "Tetrahymena",    "Tetrahymena",   "Colpidium",     "Colpidium",     "Loxocephallus",   
+    "Loxocephallus", "Euplotes",       "Euplotes",      "Staurastrum1",  "Colpidium",     "Colpidium",   
+    "Loxocephallus", "Loxocephallus",  "Dexiostoma",    "Dexiostoma",    "Euplotes",      "Euplotes",   
+    "Colpidium",     "Colpidium",      "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",  
+    "Stylonychia2",  "Euplotes",       "Euplotes",      "Staurastrum2",  "Staurastrum2",  "Staurastrum2", 
+    "Staurastrum2",  "Staurastrum2",   "Staurastrum2",  "Tetrahymena",   "Stylonychia2",  "Stylonychia2",
+    "Euplotes",      "Euplotes"
   ) 
 )
 
@@ -997,6 +990,13 @@ RRD_create_indices(
 )
 
 ```
+```{r}
+#| label: addRRD_finalize
+#| 
+
+file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
+```
+
 
 
 # 2. DONE - Flowcam Stau1

@@ -46,7 +46,6 @@ classify_bemovi_archive <- function(
 
   return(
     pbmcapply::pbmclapply(
-    # lapply(
       timestamps,
       function(timestamp){
         datadir <- file.path(
