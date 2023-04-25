@@ -10,7 +10,6 @@ format:
     toc-depth: 5
     code-fold: true
     embed-resources: true
-    css: VerifyDataCleaning.css
 execute:
   cache: true
 params:
@@ -29,12 +28,13 @@ params:
 
 ```{r}
 #| label: setup
-#| 
+#| cache: false
 
 library(LEEF.analysis)
 library(dplyr)
 options(RRDdb = params$db)
 ```
+
 # Some Plots
 
 ## Density of Species per bottle as measured by measurement over time
@@ -218,6 +218,20 @@ plot_tocs_per_bottle_per_timestamp(
 )
 ```
 
+## Density plots
+
+### Flowcytometer FSC.A
+```{r}
+#| label: plot_dens_FSC_A
+#| eval: false
+
+x <- db_read_table(table = "flowcytometer__flowcytometer_traits") |>
+  select(fsc.a) |>
+  collect() |>
+  unlist()
+
+density(x)
+```
 
 
 
@@ -226,8 +240,8 @@ plot_tocs_per_bottle_per_timestamp(
 ## 1. [x] Removing "test sampling days" and classes not of interest. Some test samplings are still in the RRD (they have sampling year 3000).
 ```{r}
 #| label: test_1
-#| eval: false
-
+#| 
+ 
 
 tbls <- c(
   "bemovi_mag_16__mean_density_per_ml",
@@ -302,7 +316,6 @@ for (tbl in tbls){
 
 ```{r}
 #| label: test_2
-#| eval: false
 #| 
 tbls <- c(
   # "bemovi_mag_16__mean_density_per_ml",
@@ -380,7 +393,6 @@ for (tbl in tbls){
 Exclusion of particles that have been classified as *Staurastrum gracile* (i.e. Staurastrum1) with a probability of less than 95% (already incorporated in RRD, code not run here and not completely up-to-date. Rainer has the complete up-to-date code)
 ```{r}
 #| label: test_3
-#| eval: false
 #| 
 
 tbls <- c(
@@ -409,7 +421,6 @@ for (tbl in tbls){
 
 ```{r}
 #| label: test_4
-#| eval: false
 #| 
 tbls <- c(
   # "bemovi_mag_25__mean_density_per_ml",
@@ -444,8 +455,7 @@ for (tbl in tbls){
 ## 9. [X] exclusion of all flowcytometer particles where FSC.A < 2 (raw FSC.A < 100)
 ```{r}
 #| label: test_5
-#| eval: false
-
+#| eval: true
 
 tbls <- c(
   "flowcytometer__flowcytometer_traits"
@@ -453,7 +463,7 @@ tbls <- c(
 
 for (tbl in tbls){
   x <- db_read_table(table = tbl) |>
-    filter(fsc.a <= 2) |>
+    filter(fsc.a < 2) |>
     select(fsc.a) |> 
     collect() |>
     unlist()
@@ -467,4 +477,31 @@ for (tbl in tbls){
 ## 10. [ ] Fix EAWAG daten 
 Hallo Rainer, mir ist aufgefallen, dass in der LEEF1-RRD bei den flowcytometer-Daten, die an der Eawag gemessen wurden, etwas nicht stimmt. z.B. bei timestamp "20220413" steht bei date "2022-05-17" und es gibt 3 Replikate (ich habe aber nur zwei gemessen)
 
+TODO: remove c("20220404", "20220406", "20220408", "20220411", "20220413", "20220415", "20220418", "20220420", "20220422", "20220425", "20220427") from data as they are faulty.
 
+```{r}
+#| label: test_5
+#| 
+
+ewag_timestamps <- c("20220404", "20220406", "20220408", "20220411", "20220413", "20220415", "20220418", "20220420", "20220422", "20220425", "20220427")
+
+for (tbl in tbls){
+  x <- db_read_table(table = "flowcytometer__flowcytometer_density") |>
+    select(timestamp, date) |> 
+    collect()
+  
+  eawag <- (x$timestamp %in% ewag_timestamps)
+  x$site <- "UZH"
+  x$site[eawag] <- "EAWAG"
+
+  x[eawag,] |> unique()
+    
+  table(x$timestamp)
+
+  if (length(x) == 0){
+    cat(tbl, ": OK", "\n")
+  } else {
+    cat("ERROR: ", tbl, "Still contains ", length(x), " particles with `FSC.A` < 2 \n")
+  }
+}
+```
