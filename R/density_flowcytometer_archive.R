@@ -95,7 +95,7 @@ density_flowcytometer_archive <- function(
 
         if (!is.null(densities)) {
           if (!is.null(particles)){
-            densities <- densities[densities$species == particles]
+            densities <- densities[densities$species == particles,]
           }
 
           message("Saving timestamp ", timestamp, "...")

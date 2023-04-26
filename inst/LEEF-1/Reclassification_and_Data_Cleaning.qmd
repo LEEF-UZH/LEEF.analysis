@@ -599,19 +599,18 @@ timestamps <- list.files(
 )
 timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
 
-invisible(
-  density_flowcytometer_archive(
-    extracted_dir = params$extracted_dir,
-    gates_coordinates = read.csv(gates_coordinates),
-    timestamps = timestamps,
-    output = file.path(params$output_dir, "flowcytometer"),
-    use_H = TRUE,
-    min_FSC.A = params$min_FSC.A,
-    log10_all = TRUE,
-    particles = "bacteria",
-    mc.cores = params$cores
-  )
+density_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer"),
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE,
+  particles = "bacteria",
+  mc.cores = params$cores
 )
+
 ```
 #### TODO EAWAG Samples
 
@@ -629,18 +628,16 @@ timestamps <- list.files(
 )
 timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
 
-invisible(
-  density_flowcytometer_archive(
-    extracted_dir = extracted_EAWAG,
-    gates_coordinates = read.csv(gates_coordinates_EAWAG_samples),
-    timestamps = timestamps,
-    output = file.path(params$output_dir, "flowcytometer"),
-    use_H = TRUE,
-    min_FSC.A = params$min_FSC.A,
-    log10_all = TRUE,
-    particles = "bacteria",
-    mc.cores = params$cores
-  )
+density_flowcytometer_archive(
+  extracted_dir = extracted_EAWAG,
+  gates_coordinates = read.csv(gates_coordinates_EAWAG_samples),
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer"),
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE,
+  particles = "bacteria",
+  mc.cores = params$cores
 )
 ```
 
@@ -658,23 +655,19 @@ timestamps <- list.files(
 )
 timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
 
-invisible(
-  extract_traits_flowcytometer_archive(
-    extracted_dir = params$extracted_dir,
-    gates_coordinates = read.csv(gates_coordinates),
-    particles = "bacteria",
-    use_H = TRUE,
-    min_FSC.A = params$min_FSC.A,
-    log10_all = TRUE, 
-    timestamps = timestamps,
-    output = file.path(params$output_dir, "flowcytometer_traits"),
-    length_slope =  read.csv(conv_FSCA_length)$slope,
-    length_intercept =  read.csv(conv_FSCA_length)$intercept,
-    mc.cores = params$cores
-  )
+extract_traits_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  particles = "bacteria",
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE, 
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer_traits"),
+  length_slope =  read.csv(conv_FSCA_length)$slope,
+  length_intercept =  read.csv(conv_FSCA_length)$intercept,
+  mc.cores = params$cores
 )
-
-
 ```
 
 #### TODO EAWAG Samples
@@ -692,21 +685,19 @@ timestamps <- list.files(
 )
 timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
 
-invisible(
-  extract_traits_flowcytometer_archive(
-    extracted_dir = extracted_EAWAG,
-    gates_coordinates = read.csv(gates_coordinates_EAWAG_samples),
-    particles = "bacteria",
-    use_H = TRUE,
-    min_FSC.A = params$min_FSC.A,
-    log10_all = TRUE,
-    timestamps = timestamps,
-    output = file.path(params$output_dir, "flowcytometer_traits"),
-    length_slope =  read.csv(conv_FSCA_length)$slope,
-    length_intercept =  read.csv(conv_FSCA_length)$intercept,
-    mc.cores = params$cores, 
-    wellid_keyword = "$SMNO"
-  )
+extract_traits_flowcytometer_archive(
+  extracted_dir = extracted_EAWAG,
+  gates_coordinates = read.csv(gates_coordinates_EAWAG_samples),
+  particles = "bacteria",
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE,
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer_traits"),
+  length_slope =  read.csv(conv_FSCA_length)$slope,
+  length_intercept =  read.csv(conv_FSCA_length)$intercept,
+  mc.cores = params$cores, 
+  wellid_keyword = "$SMNO"
 )
 ```
 
@@ -729,15 +720,13 @@ fns <- list.files(
   full.names = TRUE
 )
 
-invisible(
-  lapply(
-    fns,
-    function(fn){
-      readRDS(fn) |>
-        dplyr::filter(species %in% c("bacteria", "algae")) |>
-        saveRDS(file = fn)
-    }
-  )
+lapply(
+  fns,
+  function(fn){
+    readRDS(fn) |>
+      dplyr::filter(species %in% c("bacteria", "algae")) |>
+      saveRDS(file = fn)
+  }
 )
 ```
 
@@ -806,22 +795,20 @@ fns <- c(
 )
 
 
-invisible(
-  pbmcapply::pbmclapply(
-    fns,
-    function(fn){
-      x <- readRDS(fn) |>
-        dplyr::mutate(bottle_species = paste0(bottle, "_", species)) |>
-        dplyr::filter(!(bottle_species %in% excl$bottle_species))
-        
-      x |>
-        dplyr::select(-bottle_species) |>
-        saveRDS(file = fn)
-    },
-    mc.cores = params$cores, 
-    mc.preschedule = FALSE
-  )
-)  
+pbmcapply::pbmclapply(
+  fns,
+  function(fn){
+    x <- readRDS(fn) |>
+      dplyr::mutate(bottle_species = paste0(bottle, "_", species)) |>
+      dplyr::filter(!(bottle_species %in% excl$bottle_species))
+    
+    x |>
+      dplyr::select(-bottle_species) |>
+      saveRDS(file = fn)
+  },
+  mc.cores = params$cores, 
+  mc.preschedule = FALSE
+)
 
 rm(excl, fns)
 ```
@@ -843,57 +830,55 @@ fns <- list.dirs(path = params$output_dir, recursive = FALSE) |>
   ) |>
   grep(pattern = "density", value = TRUE)
 
-invisible(
-  pbmcapply::pbmclapply(
-    fns,
-    function(fn){
-      ts <- strsplit(basename(fn), "\\.")[[1]][2] |>
-        as.numeric()
+pbmcapply::pbmclapply(
+  fns,
+  function(fn){
+    ts <- strsplit(basename(fn), "\\.")[[1]][2] |>
+      as.numeric()
+    
+    x <- readRDS(fn)
+    if (ts <= cont_timestamp) {
+      templ <- x[x$bottle == cont_bottle,]
+      templ$density <- 0
       
-      x <- readRDS(fn)
-      if (ts <= cont_timestamp) {
-        templ <- x[x$bottle == cont_bottle,]
-        templ$density <- 0
-        
-        templ$species <- "Desmodesmus"
-        rbind(x, templ)
-        templ$species <- "DesmodesmusClumps"
-        rbind(x, templ)
-      }
-      ###### HERE BEGIN
-      x_list <- split(
-        x = x,
-        f = x$bottle,
-        drop = TRUE
-      )
-      
-      for (i in seq_along(x_list)) {
-        templ <- x_list[[i]][1,]
-        templ$density <- 0
-        templ$count <- 0
-        sp <- unique(x_list[[i]]$species)
-        if ("Chlamydomonas" %in% sp){
-          if (!("ChlamydomonasClumps" %in% sp)){
-            templ$species <- "ChlamydomonasClumps"
-            x_list[[i]] <- rbind(x_list[[i]], templ)
-          }
-        }
-        if ("Desmodesmus" %in% sp){
-          if (!("DesmodesmusClumps" %in% sp)){
-            templ$species <- "DesmodesmusClumps"
-            x_list[[i]] <- rbind(x_list[[i]], templ) |> 
-              dplyr::mutate(Date_Flowcam = data.table::as.IDate(Date_Flowcam))
-          }
+      templ$species <- "Desmodesmus"
+      rbind(x, templ)
+      templ$species <- "DesmodesmusClumps"
+      rbind(x, templ)
+    }
+    ###### HERE BEGIN
+    x_list <- split(
+      x = x,
+      f = x$bottle,
+      drop = TRUE
+    )
+    
+    for (i in seq_along(x_list)) {
+      templ <- x_list[[i]][1,]
+      templ$density <- 0
+      templ$count <- 0
+      sp <- unique(x_list[[i]]$species)
+      if ("Chlamydomonas" %in% sp){
+        if (!("ChlamydomonasClumps" %in% sp)){
+          templ$species <- "ChlamydomonasClumps"
+          x_list[[i]] <- rbind(x_list[[i]], templ)
         }
       }
-      
-      x <- do.call("rbind", x_list)
-      ###### HERE END
-      saveRDS(x, fn)
-    },
-    mc.cores = params$cores, 
-    mc.preschedule = FALSE
-  )
+      if ("Desmodesmus" %in% sp){
+        if (!("DesmodesmusClumps" %in% sp)){
+          templ$species <- "DesmodesmusClumps"
+          x_list[[i]] <- rbind(x_list[[i]], templ) |> 
+            dplyr::mutate(Date_Flowcam = data.table::as.IDate(Date_Flowcam))
+        }
+      }
+    }
+    
+    x <- do.call("rbind", x_list)
+    ###### HERE END
+    saveRDS(x, fn)
+  },
+  mc.cores = params$cores, 
+  mc.preschedule = FALSE
 )
 ```
 ## DONE - Add to database and create indices
