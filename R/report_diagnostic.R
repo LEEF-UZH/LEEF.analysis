@@ -15,6 +15,11 @@
 #'
 #' @examples
 report_diagnostic <- function(db, template = "LEEF_1", suffix = "", format = "html", lastDays = 7) {
+
+  if (template == "LEEF_2"){
+    return( LEEF_2_report_diagnostic(db = db, suffix = suffix, format = format, lastDays = 7) )
+  }
+
   name <- ifelse(
     suffix == "",
     "Diagnostic_Report",
@@ -43,7 +48,6 @@ report_diagnostic <- function(db, template = "LEEF_1", suffix = "", format = "ht
 
   rmd <- switch (template,
     "LEEF_1" = system.file("LEEF-1", "DiagnosticReport.Rmd", package = "LEEF.analysis"),
-    "LEEF_2" = stop("Pleaase use function `LEEF_2_report_diagnostic()` for LEEF-2!"),
     stop("Unsupprted report template!")
   )
   report <- rmarkdown::render(
