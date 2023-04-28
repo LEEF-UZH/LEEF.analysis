@@ -10,7 +10,7 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   measurement = "bemovi_mag_16",
   species_set_id = NULL,
   treatment_begin_day = 70,
-  treatment_end_day = NULL
+  treatment_end_day = 154
 )
 }
 \arguments{

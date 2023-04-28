@@ -170,8 +170,8 @@ if (file.exists(params$db)) {
 }
 ```
 
-# 1. DONE - Re-calculations for all timestamps
-## DONE - Reclassification of Flowcam
+# 1. Re-calculations for all timestamps
+## Reclassification of Flowcam
 
 ### Prepare Flowcam
 ```{r prepare_flowcam}
@@ -339,7 +339,7 @@ pbmcapply::pbmclapply(
 ```
 
 
-## DONE - Reclassification of Bemovi magnification 16
+## Reclassification of Bemovi magnification 16
 ### Prepare Bemovi 16
 ```{r prepare_bemovi_16}
 pdir <- tempfile()
@@ -410,7 +410,7 @@ unlink(pdir)
 rm(pdir, class_constant, class_increasing, out, moving_background)
 ```
 
-## DONE - Reclassification of Bemovi magnification 25
+## Reclassification of Bemovi magnification 25
 ### Prepare Bemovi 25
 ```{r prepare_bemovi_25}
 pdir <- tempfile()
@@ -500,7 +500,7 @@ if (!file.exists(out)) {
   system.time(
     suppressMessages(
       classify_bemovi_archive( 
-        timestamps = timestamps[grepl(excl, timestamps)], 
+        timestamps = timestamps[!grepl(excl, timestamps)], 
         archive_dir = params$archive_dir, 
         magnification = 25, 
         classifier_constant_name = class_constant, 
@@ -516,7 +516,7 @@ if (!file.exists(out)) {
   system.time(
     suppressMessages(
       classify_bemovi_archive( 
-        timestamps = timestamps[grepl(excl, timestamps)], 
+        timestamps = timestamps[!grepl(excl, timestamps)], 
         archive_dir = params$archive_dir, 
         magnification = 25, 
         classifier_constant_name = class_constant, 
@@ -544,7 +544,7 @@ rm(pdir, class_constant, class_increasing, out, moving_background)
 ```
 
 
-## DONE - Flowcytometer
+## Flowcytometer
 
 ### Prepare Flowcytometer
 ```{r prepare_flowcytometer}
@@ -583,7 +583,7 @@ download.file(
 )
 ```
 
-### DONE - Flowcytometer densities
+### Flowcytometer densities
 
 Regate using H and re-calculate the densities
 #### All Samples
@@ -642,7 +642,7 @@ density_flowcytometer_archive(
 ```
 
 
-## DONE - Trait Extraction Flowcytometer and Volume Calculation
+## Trait Extraction Flowcytometer and Volume Calculation
 
 ### All Samples
 ```{r biomass}
@@ -708,7 +708,7 @@ rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, c
 ```
 
 
-## TODO - Flowcytometer select only needed species in densities
+## Flowcytometer select only needed species in densities
 
 ```{r}
 #| label: flowcytometer_remove_categories
@@ -730,7 +730,7 @@ lapply(
 )
 ```
 
-## TODO - bemovi - Exclusion of time series that are wrong classifications or only noise
+## bemovi - Exclusion of time series that are wrong classifications or only noise
 ```{r}
 
 excl <- data.frame(
@@ -813,7 +813,7 @@ pbmcapply::pbmclapply(
 rm(excl, fns)
 ```
 
-## TODO - flowcam - Adding density=0 for some special cases
+## flowcam - Adding density=0 for some special cases
 
 ```{r man_correction}
 cont_timestamp <- 20220128
@@ -881,7 +881,7 @@ pbmcapply::pbmclapply(
   mc.preschedule = FALSE
 )
 ```
-## DONE - Add to database and create indices
+## Add to database and create indices
 Old timestamps will be removed and not be backed up.
 
 ```{r addRRD_copy}
@@ -986,7 +986,7 @@ file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
 
 
 
-# 2. DONE - Flowcam Stau1
+# 2. Flowcam Stau1
 
 The code below recalculates the densities after filtering Stau1 so that only
 particles are kept with high confidence that they are indeed Stau1.
@@ -1301,9 +1301,10 @@ cat(
 ```
 
 # Create Overlays
+This is still using the extracted and pre-processed folder and needs to be changed to use the reclassified bemovi data. 
 ```{r}
 #| label: overlays
-#| 
+#| eval: false
 
 generate_overlays(
   params = params,

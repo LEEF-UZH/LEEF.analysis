@@ -17,7 +17,7 @@
 LEEF_2_plot_o2s_per_bottle_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   treatment_begin_day = 70,
-  treatment_end_day = NULL
+  treatment_end_day = 154
 ){
 
   data <- db_read_o2(db) %>%

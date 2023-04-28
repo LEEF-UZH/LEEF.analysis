@@ -8,7 +8,7 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   type = c("IC", "TC", "TN", "TOC"),
   treatment_begin_day = 70,
-  treatment_end_day = NULL
+  treatment_end_day = 154
 )
 }
 \arguments{
