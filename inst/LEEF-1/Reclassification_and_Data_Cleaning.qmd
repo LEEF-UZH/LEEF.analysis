@@ -12,6 +12,7 @@ output:
     toc_float: true
     toc_collapsed: true
     code_folding: hide  
+    embed-resources: true
 params:
   version_tag: "v1.8.5"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"

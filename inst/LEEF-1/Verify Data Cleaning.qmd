@@ -12,9 +12,9 @@ output:
     embed-resources: true
     cache: false
 execute:
-  cache: true
+  cache: FALSE
 params:
-  db: "~/RRD.Reclassification_final/LEEF.RRD.v1.8.5_3.sqlite"
+  db: "~/RRD.Reclassification_final/LEEF.RRD.v1.8.5_4.sqlite"
   version_tag: "v1.8.5"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
   output_dir: "~/RRD.Reclassification_final/"
@@ -30,7 +30,7 @@ params:
 ```{r}
 #| label: setup
 #| cache: false
-
+# .libPaths(c("/opt/R/library", .libPaths()))
 library(LEEF.analysis)
 library(dplyr)
 options(RRDdb = params$db)
@@ -455,7 +455,7 @@ for (tbl in tbls){
 ## 8. [ ] Removing the linear trend in the water chemistry 
 ## 9. [X] exclusion of all flowcytometer particles where FSC.A < 2 (raw FSC.A < 100)
 ```{r}
-#| label: test_5
+#| label: test_9
 #| eval: true
 
 tbls <- c(
