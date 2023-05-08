@@ -521,7 +521,7 @@ rm(pdir, class_constant, class_increasing, out, moving_background)
 ### Bemovi 16 remove species not needed
 
 ```{r}
-#| label: flowecam_remove_species
+#| label: bemovi_16_remove_species
 #| 
 
 fns <- list.files(
@@ -679,7 +679,7 @@ rm(pdir, class_constant, class_increasing, out, moving_background)
 ### Bemovi 25 remove species not needed
 
 ```{r}
-#| label: flowecam_remove_species
+#| label: bemovi_25_remove_species
 #| 
 
 fns <- list.files(
