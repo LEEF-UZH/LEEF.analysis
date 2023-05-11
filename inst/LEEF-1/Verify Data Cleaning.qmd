@@ -10,11 +10,10 @@ output:
     toc-depth: 5
     code-fold: true
     embed-resources: true
-    cache: false
 execute:
-  cache: FALSE
+  cache: TRUE
 params:
-  db: "~/RRD.Reclassification_final/LEEF.RRD.v1.8.5_4.sqlite"
+  db: "~/RRD.Reclassification_final/LEEF.RRD.v1.8.5_3.sqlite"
   version_tag: "v1.8.5"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
   output_dir: "~/RRD.Reclassification_final/"
@@ -34,6 +33,16 @@ params:
 library(LEEF.analysis)
 library(dplyr)
 options(RRDdb = params$db)
+```
+
+# Species lists
+```{r}
+#| label: species_per_method
+#| 
+
+options(RRDdb = params$db)
+densities <- db_read_table(table = "density") %>% collect() %>% arrange(day)
+table(densities$species, densities$measurement)
 ```
 
 # Some Plots
@@ -464,8 +473,8 @@ tbls <- c(
 
 for (tbl in tbls){
   x <- db_read_table(table = tbl) |>
-    filter(fsc.a < 2) |>
     select(fsc.a) |> 
+    filter(fsc.a < 2) |>
     collect() |>
     unlist()
   if (length(x) == 0){
@@ -476,13 +485,13 @@ for (tbl in tbls){
 }
 ```
 ## 10. [ ] Fix EAWAG daten 
-Hallo Rainer, mir ist aufgefallen, dass in der LEEF1-RRD bei den flowcytometer-Daten, die an der Eawag gemessen wurden, etwas nicht stimmt. z.B. bei timestamp "20220413" steht bei date "2022-05-17" und es gibt 3 Replikate (ich habe aber nur zwei gemessen)
-
-TODO: remove c("20220404", "20220406", "20220408", "20220411", "20220413", "20220415", "20220418", "20220420", "20220422", "20220425", "20220427") from data as they are faulty.
 
 ```{r}
 #| label: test_5
-#| 
+#| eval: false
+tbls <- c(
+  "flowcytometer__flowcytometer_traits"
+)
 
 ewag_timestamps <- c("20220404", "20220406", "20220408", "20220411", "20220413", "20220415", "20220418", "20220420", "20220422", "20220425", "20220427")
 
@@ -495,14 +504,13 @@ for (tbl in tbls){
   x$site <- "UZH"
   x$site[eawag] <- "EAWAG"
 
-  x[eawag,] |> unique()
-    
-  table(x$timestamp)
+  x <- x[eawag,]$site |> unique()
 
-  if (length(x) == 0){
+  if (x == "EAWAG"){
     cat(tbl, ": OK", "\n")
   } else {
-    cat("ERROR: ", tbl, "Still contains ", length(x), " particles with `FSC.A` < 2 \n")
+    browser()
+    cat("ERROR: ", tbl, "Still contains ", length(x), " non-EAWAG \n")
   }
 }
 ```

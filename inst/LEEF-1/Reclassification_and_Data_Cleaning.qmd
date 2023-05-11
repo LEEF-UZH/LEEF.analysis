@@ -38,7 +38,6 @@ params:
   keep_flowcytometer:
     - bacteria
     - algae
-
 ---
 
 # Setup
@@ -354,29 +353,6 @@ pbmcapply::pbmclapply(
 
 ```
 
-### Flowcam remove species not needed
-
-```{r}
-#| label: flowcam_remove_species
-#| 
-
-fns <- list.files(
-  file.path(params$output_dir, "flowcam"),
-  recursive = FALSE,
-  full.names = TRUE
-)
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn){
-    readRDS(fn) |>
-      dplyr::filter(!(species %in% c(params$remove_all, params$remove_flowcam))) |>
-      saveRDS(file = fn)
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
-)
-```
 
 ### Adding density=0 for some special cases
 
@@ -384,16 +360,12 @@ pbmcapply::pbmclapply(
 cont_timestamp <- 20220128
 cont_bottle <- "b_02"
 
-fns <- list.dirs(path = params$output_dir, recursive = FALSE) |> 
-  grep(
-    pattern = "flowcam", 
-    value = TRUE
-  ) |>
-  list.files(
-    recursive = FALSE,
-    full.names = TRUE
-  ) |>
-  grep(pattern = "density", value = TRUE)
+fns <- list.files(
+  path = file.path(params$output_dir, "flowcam"), 
+  pattern = "density",
+  full.names = TRUE,
+  recursive = FALSE
+)
 
 pbmcapply::pbmclapply(
   fns,
@@ -403,13 +375,14 @@ pbmcapply::pbmclapply(
     
     x <- readRDS(fn)
     if (ts <= cont_timestamp) {
-      templ <- x[x$bottle == cont_bottle,]
+      templ <- x[x$bottle == cont_bottle,][1,]
       templ$density <- 0
       
       templ$species <- "Desmodesmus"
-      rbind(x, templ)
+      x <- rbind(x, templ)
+      
       templ$species <- "DesmodesmusClumps"
-      rbind(x, templ)
+      x <- rbind(x, templ)
     }
     ###### HERE BEGIN
     x_list <- split(
@@ -444,6 +417,31 @@ pbmcapply::pbmclapply(
   },
   mc.cores = params$cores, 
   mc.preschedule = FALSE
+)
+```
+### Flowcam remove species not needed
+
+```{r}
+#| label: flowcam_remove_species
+#| 
+
+fns <- list.files(
+  file.path(params$output_dir, "flowcam"),
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  fns,
+  function(fn){
+    x <- readRDS(fn) |>
+      dplyr::filter(!(species %in% c(params$remove_all, params$remove_flowcam)))
+    if ("airbubbles" %in% unique(x$species)) {browser()}
+    unlink(fn)
+    saveRDS(x, file = fn)
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = params$cores
 )
 ```
 
@@ -533,9 +531,10 @@ fns <- list.files(
 pbmcapply::pbmclapply(
   fns,
   function(fn){
-    readRDS(fn) |>
-      dplyr::filter(!(species %in% params$remove_all)) |>
-      saveRDS(file = fn)
+    x <- readRDS(fn) |>
+      dplyr::filter(!(species %in% params$remove_all))
+    unlink(fn)
+    saveRDS(x, file = fn)
   }, 
   mc.preschedule = FALSE,
   mc.cores = params$cores
@@ -691,16 +690,17 @@ fns <- list.files(
 pbmcapply::pbmclapply(
   fns,
   function(fn){
-    readRDS(fn) |>
-      dplyr::filter(!(species %in% params$remove_all)) |>
-      saveRDS(file = fn)
+    x <- readRDS(fn) |>
+      dplyr::filter(!(species %in% params$remove_all))
+    unlink(fn)
+    saveRDS(x, file = fn)
   }, 
   mc.preschedule = FALSE,
   mc.cores = params$cores
 )
 ```
 
-## Bemovi - Exclusion of time series that are wrong classifications or only noise
+## Exclusion of time series that are wrong classifications or only noise
 ```{r}
 
 excl <- data.frame(
@@ -758,7 +758,7 @@ fns <- c(
   ),
   list.files(
     path = file.path(params$output_dir, "flowcam"),
-    pattern = "morph|density",
+    pattern = "traits|density",
     recursive = FALSE,
     full.names = TRUE
   )
@@ -964,9 +964,10 @@ fns <- list.files(
 pbmcapply::pbmclapply(
   fns,
   function(fn){
-    readRDS(fn) |>
-      dplyr::filter(species %in% params$keep_flowcytometer) |>
-      saveRDS(file = fn)
+    x <- readRDS(fn) |>
+      dplyr::filter(species %in% params$keep_flowcytometer)
+    unlink(fn)
+    saveRDS(x, file = fn)
   }, 
   mc.cores = params$cores
 )
@@ -1367,7 +1368,7 @@ report_diagnostic(
 ```
 
 
-# 4. VERIFY Rename species and columns
+# 4. Rename species and columns
 ```{r}
 #| label: rename
 
@@ -1376,6 +1377,10 @@ file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
 RRD_LEEF_1_rename(db = db_name(4, temp = TRUE))
 
 file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
+```
+
+```{r}
+#| label: create final db
 
 file.copy(db_name(4, temp = FALSE), db_name("final", temp = FALSE))
 ```

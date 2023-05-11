@@ -14,6 +14,7 @@ output:
     toc_float: true
     toc_collapsed: true
     code_folding: hide
+    embed-resources: true
   pdf_document:
     dev: pdf
     fig_width: 10
