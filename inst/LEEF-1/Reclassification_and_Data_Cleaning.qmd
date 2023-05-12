@@ -16,8 +16,8 @@ output:
 params:
   version_tag: "v1.8.5"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
-  output_dir: "~/RRD.Reclassification_final/"
-  db: "~/RRD.Reclassification_final/LEEF.RRD.sqlite"
+  output_dir: "/Volumes/RRD.Reclassification_final/"
+  db: "/Volumes/RRD.Reclassification_final/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
   pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
   extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
