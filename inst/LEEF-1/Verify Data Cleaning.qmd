@@ -32,6 +32,9 @@ params:
 # .libPaths(c("/opt/R/library", .libPaths()))
 library(LEEF.analysis)
 library(dplyr)
+library(ggplot2)
+library(lubridate)
+
 options(RRDdb = params$db)
 ```
 
@@ -462,6 +465,21 @@ for (tbl in tbls){
 ## 6. [ ] Manual correction of time series based on observations during the experiment
 ## 7. [ ] Exclusion of time series that are (almost completely) wrong classifications or only noise
 ## 8. [ ] Removing the linear trend in the water chemistry 
+
+```{r}
+#| label: toc_detrending
+
+db_read_table(table = "toc__toc") %>%
+  ggplot(aes(position, conc))+
+  facet_wrap(light_phase~inj_type) +
+  geom_smooth(col="red", method = "lm")+
+  geom_smooth(aes(y=conc_org), method = "lm", col="blue")+
+  labs(x="Bottle sampling order")+
+  theme_bw()
+
+
+```
+
 ## 9. [X] exclusion of all flowcytometer particles where FSC.A < 2 (raw FSC.A < 100)
 ```{r}
 #| label: test_9

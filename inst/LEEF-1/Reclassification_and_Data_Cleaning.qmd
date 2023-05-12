@@ -1225,12 +1225,11 @@ toc$analysis_time2 <- sapply(toc$analysis_time2, function(d){
 toc <- toc %>%
   dplyr::mutate(
     light_phase = case_when(
-      temperature =="constant" ~ "constant",
+      temperature == "constant" ~ "constant",
       day < 93 ~ "constant before decrease",
       day >= 93 & day < 198 ~ "decreasing",
       day >= 198 ~ "constant after decrease"),
-    int = interaction(analysis_time2,light_phase
-    )
+    int = interaction(analysis_time2, light_phase)
   )  %>%
   arrange(timestamp)
 
@@ -1264,6 +1263,9 @@ toc_list <- pbmcapply::pbmclapply(
 )
 
 toc <- do.call("rbind",toc_list)
+toc$conc_org <- toc$conc
+toc$conc  <- toc$concentration.detrended
+
 
 toc <- toc |>
   select(
@@ -1276,14 +1278,15 @@ toc <- toc |>
       "analysis_time2", 
       "light_phase", 
       "int", 
-      "concentration.detrended")
+      "concentration.detrended"
+    )
   )
 toc_det <- tempfile(fileext = ".rds")
 saveRDS(toc, toc_det)
 
 add_to_db(
   toc_det,
-  db = db_name(3, temp = TRUE),
+  db = db_name(3, temp = FALSE),
   tables = "toc__toc",
   remove_timestamps = NULL,
   check_timestamps = TRUE,

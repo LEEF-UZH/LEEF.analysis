@@ -438,7 +438,8 @@ CREATE TABLE `toc__toc` (
   `cv_23` REAL,
   `conc_12` REAL,
   `conc_13` REAL,
-  `conc_23` REAL
+  `conc_23` REAL,
+  `conc_org` REAL,
 );
 CREATE TABLE IF NOT EXISTS "flowcam__algae_traits" (
 	"particle_id"	INTEGER,
