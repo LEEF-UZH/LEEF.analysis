@@ -1286,7 +1286,7 @@ saveRDS(toc, toc_det)
 
 add_to_db(
   toc_det,
-  db = db_name(3, temp = FALSE),
+  db = db_name(3, temp = TRUE),
   tables = "toc__toc",
   remove_timestamps = NULL,
   check_timestamps = TRUE,
