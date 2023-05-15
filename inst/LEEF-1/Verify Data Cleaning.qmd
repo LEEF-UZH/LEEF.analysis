@@ -13,14 +13,9 @@ output:
 execute:
   cache: TRUE
 params:
-  db: "~/RRD.Reclassification_final/LEEF.RRD.v1.8.5_3.sqlite"
-  version_tag: "v1.8.5"
+  db: "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_4.sqlite"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
-  output_dir: "~/RRD.Reclassification_final/"
-  archive_dir: "/Volumes/LEEF-1_archive/"
-  pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
-  extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
-  toc: "/Volumes/LEEF/0.TOC/LEEF-1/toc.rds"
+  version_tag: "v1.8.5"
   cores: 7
 ---
 
@@ -469,14 +464,38 @@ for (tbl in tbls){
 ```{r}
 #| label: toc_detrending
 
-db_read_table(table = "toc__toc") %>%
-  ggplot(aes(position, conc))+
-  facet_wrap(light_phase~inj_type) +
-  geom_smooth(col="red", method = "lm")+
-  geom_smooth(aes(y=conc_org), method = "lm", col="blue")+
-  labs(x="Bottle sampling order")+
-  theme_bw()
+toc <- db_read_table(table = "toc__toc") %>% 
+  collect() %>% 
+  left_join(db_read_table(table = "experimetal_design") %>% collect()) %>% filter(!is.na(conc)) 
 
+toc$day <- as.Date(as.character(toc$timestamp), "%Y%m%d") - min(as.Date(as.character(toc$timestamp), "%Y%m%d") ) 
+toc$day <- as.numeric(toc$day) 
+
+toc$analysis_time2 <- as_datetime(toc$anaysis_time, format="%Y-%m-%d %H:%M") # wrong time zones, but doesnt matter 
+toc$analysis_time2 <- sapply(
+  toc$analysis_time2, 
+  function(d){ 
+    paste0(unlist(strsplit(as.character(d), "-")), collapse = "") 
+    }
+) 
+
+toc <- toc %>% 
+  dplyr::mutate(
+    light_phase = case_when(
+      temperature =="constant" ~ "constant", 
+      day < 93 ~ "constant before decrease", 
+      day >= 93 & day < 198 ~ "decreasing", 
+      day >= 198 ~ "constant after decrease"
+    ), 
+    int = interaction(analysis_time2,light_phase)
+    ) %>% 
+  arrange(timestamp) 
+
+toc %>% ggplot(aes(position, conc)) + 
+  facet_wrap(light_phase~inj_type) + 
+  geom_smooth(col="blue", method = "lm") + 
+  labs(x="Bottle sampling order") + 
+  theme_bw()
 
 ```
 
@@ -503,7 +522,7 @@ for (tbl in tbls){
 }
 ```
 ## 10. [ ] Fix EAWAG daten 
-
+This test does not make sense - just for info
 ```{r}
 #| label: test_5
 #| eval: false
@@ -514,21 +533,6 @@ tbls <- c(
 ewag_timestamps <- c("20220404", "20220406", "20220408", "20220411", "20220413", "20220415", "20220418", "20220420", "20220422", "20220425", "20220427")
 
 for (tbl in tbls){
-  x <- db_read_table(table = "flowcytometer__flowcytometer_density") |>
-    select(timestamp, date) |> 
-    collect()
   
-  eawag <- (x$timestamp %in% ewag_timestamps)
-  x$site <- "UZH"
-  x$site[eawag] <- "EAWAG"
-
-  x <- x[eawag,]$site |> unique()
-
-  if (x == "EAWAG"){
-    cat(tbl, ": OK", "\n")
-  } else {
-    browser()
-    cat("ERROR: ", tbl, "Still contains ", length(x), " non-EAWAG \n")
-  }
 }
 ```
