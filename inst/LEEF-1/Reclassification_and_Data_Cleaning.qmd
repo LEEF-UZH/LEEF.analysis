@@ -374,7 +374,7 @@ pbmcapply::pbmclapply(
       as.numeric()
     
     x <- readRDS(fn)
-    if (ts <= cont_timestamp) {
+    if (ts < cont_timestamp) {
       templ <- x[x$bottle == cont_bottle,][1,]
       templ$density <- 0
       
@@ -570,10 +570,9 @@ timestamps <- list.files(
 timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.", "", timestamps)
 ```
 
-### Classify `bemovi_mag.25` excluding "20220622" (duplicates of "20220620")
+### Classify `bemovi_mag.25` excluding moving_background
 
 ```{r classify_bemovi_25}
-excl <- c("20220622")
 
 moving_background <- c(
   "20211013_00058", "20211103_00037", "20211105_00066",
@@ -615,7 +614,7 @@ if (!file.exists(out)) {
   system.time(
     suppressMessages(
       classify_bemovi_archive( 
-        timestamps = timestamps[!grepl(excl, timestamps)], 
+        timestamps = timestamps, 
         archive_dir = params$archive_dir, 
         magnification = 25, 
         classifier_constant_name = class_constant, 
@@ -631,7 +630,7 @@ if (!file.exists(out)) {
   system.time(
     suppressMessages(
       classify_bemovi_archive( 
-        timestamps = timestamps[!grepl(excl, timestamps)], 
+        timestamps = timestamps, 
         archive_dir = params$archive_dir, 
         magnification = 25, 
         classifier_constant_name = class_constant, 
@@ -647,7 +646,7 @@ if (!file.exists(out)) {
   system.time(
     suppressMessages(
       classify_bemovi_archive( 
-        timestamps = timestamps[!grepl(excl, timestamps)], 
+        timestamps = timestamps, 
         archive_dir = params$archive_dir, 
         magnification = 25, 
         classifier_constant_name = class_constant, 
@@ -694,6 +693,39 @@ pbmcapply::pbmclapply(
       dplyr::filter(!(species %in% params$remove_all))
     unlink(fn)
     saveRDS(x, file = fn)
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = params$cores
+)
+```
+
+### Bemovi 25 set densities "20220622" (duplicates of "20220620") to `NA`
+And remove traits
+
+```{r}
+#| label: bemovi_25_remove_species
+#| 
+
+dens_to_na <- c("20220622")
+
+fns <- list.files(
+  file.path(params$output_dir, "bemovi_mag_25"), 
+  recursive = FALSE,
+  full.names = TRUE
+) |>
+  grep(pattern = paste0(dens_to_na, "|density|morph_mvt"), value = TRUE)
+
+pbmcapply::pbmclapply(
+  fns,
+  function(fn){
+    if (grepl("morph_mvt", fn)){
+      unlink(fn)
+    } else {
+      x <- readRDS(fn) |>
+        dplyr::mutate(density = NA)
+      unlink(fn)
+      saveRDS(x, file = fn)
+    }
   }, 
   mc.preschedule = FALSE,
   mc.cores = params$cores
