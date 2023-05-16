@@ -11,7 +11,7 @@ output:
     code-fold: true
     embed-resources: true
 execute:
-  cache: TRUE
+  cache: false
 params:
   db: "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_4.sqlite"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"

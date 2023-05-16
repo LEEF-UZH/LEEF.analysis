@@ -703,7 +703,7 @@ pbmcapply::pbmclapply(
 And remove traits
 
 ```{r}
-#| label: bemovi_25_remove_species
+#| label: bemovi_remove_duplictes
 #| 
 
 dens_to_na <- c("20220622")
@@ -713,7 +713,9 @@ fns <- list.files(
   recursive = FALSE,
   full.names = TRUE
 ) |>
-  grep(pattern = paste0(dens_to_na, "|density|morph_mvt"), value = TRUE)
+  grep(pattern = paste0("density|morph_mvt"), value = TRUE) |>
+  grep(pattern = paste0(dens_to_na), value = TRUE) 
+  
 
 pbmcapply::pbmclapply(
   fns,
@@ -798,7 +800,7 @@ fns <- c(
 
 
 pbmcapply::pbmclapply(
-  fns,
+  sample(fns),
   function(fn){
     x <- readRDS(fn) |>
       dplyr::mutate(bottle_species = paste0(bottle, "_", species)) |>
