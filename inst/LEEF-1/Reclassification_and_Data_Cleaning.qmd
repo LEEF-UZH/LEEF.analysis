@@ -250,22 +250,22 @@ unlink(pdir)
 rm(class_constant, class_increasing, out)
 ```
 
-## Flowcam Bottle `b_02`
+### Flowcam Bottle `b_02`
 Bottle `b_02` was contaminated and needs to be classified separately. All timestamps will be classified using the same classifier.
 
-### Set Bottle and range of timestamps
+#### Set Bottle and range of timestamps
 ```{r bot_after_until}
 bott <- "b_02"
 after <- 20220128
 until <- 30000000
 ```
 
-### Set output path
+#### Set output path
 ```{r output_path_b}
 out <- file.path(params$output_dir, "flowcam.b_02")
 ```
 
-### Determine timestamps
+#### Determine timestamps
 All available after `20220504` data will be reclassified and are determined below based on the archived data.
 ```{r flowcam_timestamps}
 timestamps <- list.files(
@@ -282,7 +282,7 @@ timestamps
 ```
 
 
-### Prepare Flowcam
+#### Prepare Flowcam
 ```{r prepare_flowcam_2}
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
@@ -302,7 +302,7 @@ download.file(
 )
 ```
 
-### Classify Flowcam b_02 up to 20220704
+#### Classify Flowcam b_02 up to 20220704
 ```{r classify_flowcam_1}
 message("Classifying flowcam...")
 system.time(
@@ -320,13 +320,13 @@ system.time(
 )
 ```
 
-### Clean Up Flowcam
+#### Clean Up Flowcam
 ```{r cleanup_flowcam_1}
 unlink(pdir)
 rm(class_constant, class_increasing)
 ```
 
-### Merge `flowcam.b_02` into `flowcam`
+#### Merge `flowcam.b_02` into `flowcam`
 ```{r}
 #| label: merge_flowcams
 #| 
@@ -445,6 +445,44 @@ pbmcapply::pbmclapply(
 )
 ```
 
+### TODO Calculate Biomass Flowcam
+THe biomass is calculated here
+
+```{r}
+#| label: flowcam_biomass
+#| 
+
+
+fns <- list.files(
+  path = file.path(params$output_dir, "flowcam"), 
+  pattern = "algae_traits",
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  fns,
+  function(fn_traits){
+    fn_dens <- fn_traits |> 
+      gsub(
+        pattern = "algae_traits", 
+        replacement = "algae_density"
+      )
+    biomass_flowcam <- LEEF_1_biomass_flowcam(
+      algae_traits = readRDS(fn_traits),
+      algae_density = readRDS(fn_dens)
+    )
+    
+    saveRDS(biomass_flowcam$traits, file = fn_traits)
+    saveRDS(biomass_flowcam$density, file = fn_dens)
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = params$cores
+)
+
+```
+
+
 ## Bemovi 16 - Reclassification
 ### Prepare Bemovi 16
 ```{r prepare_bemovi_16}
@@ -540,6 +578,44 @@ pbmcapply::pbmclapply(
   mc.cores = params$cores
 )
 ```
+
+### TODO Calculate Biomass Bemovi 16
+THe biomass is calculated here
+
+```{r}
+#| label: bemovi_16_biomass
+#| 
+
+
+fns <- list.files(
+  path = file.path(params$output_dir, "bemovi_mag_16"), 
+  pattern = "morph_mvt",
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  fns,
+  function(fn_traits){
+    fn_dens <- fn_traits |> 
+      gsub(
+        pattern = "morph_mvt", 
+        replacement = "mean_density_per_ml"
+      )
+    biomass_bemovi_16 <- LEEF_1_biomass_bemovi_16(
+      ciliate_traits_16 = readRDS(fn_traits),
+      ciliate_density_16 = readRDS(fn_dens)
+    )
+    
+    saveRDS(biomass_bemovi_16$traits, file = fn_traits)
+    saveRDS(biomass_bemovi_16$density, file = fn_dens)
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = params$cores
+)
+
+```
+
 
 ## Bemovi 25 - Reclassification of 
 ### Prepare Bemovi 25
@@ -733,6 +809,103 @@ pbmcapply::pbmclapply(
   mc.cores = params$cores
 )
 ```
+
+### TODO Calculate Biomass Bemovi 25
+The biomass is calculated here
+
+```{r}
+#| label: bemovi_25_biomass
+#| 
+
+## Bemovi 25
+
+fns <- list.files(
+  path = file.path(params$output_dir, "bemovi_mag_25"), 
+  pattern = "morph_mvt\\.",
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  fns,
+  function(fn_traits){
+    fn_dens <- fn_traits |> 
+      gsub(
+        pattern = "morph_mvt", 
+        replacement = "mean_density_per_ml"
+      )
+    biomass_bemovi_25 <- LEEF_1_biomass_bemovi_25(
+      ciliate_traits_25 = readRDS(fn_traits),
+      ciliate_density_25 = readRDS(fn_dens)
+    )
+    
+    saveRDS(biomass_bemovi_25$traits, file = fn_traits)
+    saveRDS(biomass_bemovi_25$density, file = fn_dens)
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = params$cores
+)
+
+## Bemovi 25 cropped
+
+fns <- list.files(
+  path = file.path(params$output_dir, "bemovi_mag_25"), 
+  pattern = "morph_mvt_cropped\\.",
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  fns,
+  function(fn_traits){
+    fn_dens <- fn_traits |> 
+      gsub(
+        pattern = "morph_mvt", 
+        replacement = "mean_density_per_ml"
+      )
+    biomass_bemovi_25 <- LEEF_1_biomass_bemovi_25_cropped(
+      ciliate_traits_25 = readRDS(fn_traits),
+      ciliate_density_25 = readRDS(fn_dens)
+    )
+    
+    saveRDS(biomass_bemovi_25$traits, file = fn_traits)
+    saveRDS(biomass_bemovi_25$density, file = fn_dens)
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = params$cores
+)
+
+## Bemovi 25 non_cropped
+
+fns <- list.files(
+  path = file.path(params$output_dir, "bemovi_mag_25"), 
+  pattern = "morph_mvt_non_cropped\\.",
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  fns,
+  function(fn_traits){
+    fn_dens <- fn_traits |> 
+      gsub(
+        pattern = "morph_mvt", 
+        replacement = "mean_density_per_ml"
+      )
+    biomass_bemovi_25 <- LEEF_1_biomass_bemovi_25_non_cropped(
+      ciliate_traits_25 = readRDS(fn_traits),
+      ciliate_density_25 = readRDS(fn_dens)
+    )
+    
+    saveRDS(biomass_bemovi_25$traits, file = fn_traits)
+    saveRDS(biomass_bemovi_25$density, file = fn_dens)
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = params$cores
+)
+
+```
+
 
 ## Exclusion of time series that are wrong classifications or only noise
 ```{r}
