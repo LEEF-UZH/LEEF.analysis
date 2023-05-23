@@ -10,6 +10,7 @@ CREATE TABLE `flowcam__algae_density` (
   `richness` INTEGER,
   `count` INTEGER,
   `density` REAL,
+  `biomass` REAL,
   `timestamp` TEXT
 );
 CREATE TABLE `flowcytometer__flowcytometer_traits` (
@@ -128,7 +129,8 @@ CREATE TABLE `bemovi_mag_25__mean_density_per_ml_cropped` (
   `temperature_treatment` TEXT,
   `magnification` INTEGER,
   `sample` INTEGER,
-  `density` REAL
+  `density` REAL,
+  `biomass` REAL
 );
 CREATE TABLE `bemovi_mag_25__mean_density_per_ml` (
   `timestamp` TEXT,
@@ -139,7 +141,8 @@ CREATE TABLE `bemovi_mag_25__mean_density_per_ml` (
   `temperature_treatment` TEXT,
   `magnification` INTEGER,
   `sample` INTEGER,
-  `density` REAL
+  `density` REAL,
+  `biomass` REAL
 );
 CREATE TABLE `bemovi_mag_25__morph_mvt_cropped` (
   `timestamp` TEXT,
@@ -194,7 +197,8 @@ CREATE TABLE `bemovi_mag_25__morph_mvt_cropped` (
   `stylonychia2_prob` INTEGER,
   `coleps_irchel_prob` INTEGER,
   `colpidium_prob` INTEGER,
-  `dexiostoma_prob` INTEGER
+  `dexiostoma_prob` INTEGER,
+  `biomass` REAL
 );
 CREATE TABLE `bemovi_mag_25__morph_mvt` (
   `timestamp` TEXT,
@@ -249,7 +253,8 @@ CREATE TABLE `bemovi_mag_25__morph_mvt` (
   `stylonychia2_prob` INTEGER,
   `dexiostoma_prob` INTEGER,
   `coleps_irchel_prob` INTEGER,
-  `colpidium_prob` INTEGER
+  `colpidium_prob` INTEGER,
+  `biomass` REAL
 );
 CREATE TABLE `bemovi_mag_16__mean_density_per_ml` (
   `timestamp` TEXT,
@@ -260,7 +265,8 @@ CREATE TABLE `bemovi_mag_16__mean_density_per_ml` (
   `temperature_treatment` TEXT,
   `magnification` INTEGER,
   `sample` INTEGER,
-  `density` REAL
+  `density` REAL,
+  `biomass` REAL
 );
 CREATE TABLE `bemovi_mag_16__morph_mvt` (
   `timestamp` TEXT,
@@ -311,7 +317,8 @@ CREATE TABLE `bemovi_mag_16__morph_mvt` (
   `paramecium_caudatum_prob` INTEGER,
   `stylonychia2_prob` INTEGER,
   `coleps_irchel_prob` INTEGER,
-  `colpidium_prob` INTEGER
+  `colpidium_prob` INTEGER,
+  `biomass` REAL
 );
 CREATE TABLE `bemovi_mag_25__mean_density_per_ml_non_cropped` (
   `timestamp` TEXT,
@@ -322,7 +329,8 @@ CREATE TABLE `bemovi_mag_25__mean_density_per_ml_non_cropped` (
   `temperature_treatment` TEXT,
   `magnification` INTEGER,
   `sample` INTEGER,
-  `density` REAL
+  `density` REAL,
+  `biomass` REAL
 );
 CREATE TABLE `bemovi_mag_25__morph_mvt_non_cropped` (
   `timestamp` TEXT,
@@ -377,7 +385,8 @@ CREATE TABLE `bemovi_mag_25__morph_mvt_non_cropped` (
   `stylonychia2_prob` INTEGER,
   `dexiostoma_prob` INTEGER,
   `coleps_irchel_prob` INTEGER,
-  `colpidium_prob` INTEGER
+  `colpidium_prob` INTEGER,
+  `biomass` REAL
 );
 CREATE TABLE `composition` (
   `composition` TEXT,
@@ -550,7 +559,8 @@ CREATE TABLE IF NOT EXISTS "flowcam__algae_traits" (
 	"dividingchlamydomonas_prob"	REAL,
 	"small_unidentified_prob"	REAL,
 	"small_cells_prob"	TEXT,
-	"desmodesmusclumps_prob"	TEXT
+	"desmodesmusclumps_prob"	TEXT,
+	"biomass"  REAL
 );
 
 CREATE VIEW o2
