@@ -125,6 +125,7 @@ extract_traits_flowcytometer_archive <- function(
           ## V = 4/3 * pi * l^3 / 72
           ##
           traits[[particles]]$volume <- 4/3 * pi * traits[[particles]]$length^3/72
+          traits[[particles]]$biomass <- traits[[particles]]$volume / 10^12
 
           # traits_sum <- traits[[particles]] %>%
           #   dplyr::group_by(bottle) %>%

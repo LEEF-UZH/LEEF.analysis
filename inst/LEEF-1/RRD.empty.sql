@@ -33,7 +33,8 @@ CREATE TABLE `flowcytometer__flowcytometer_traits` (
   `bottle` TEXT,
   `dilution_factor` INTEGER,
   `length` REAL,
-  `volume` REAL
+  `volume` REAL,
+  `biomass` REAL
 );
 CREATE TABLE `flowcytometer__flowcytometer_density` (
   `timestamp` TEXT,
@@ -50,7 +51,8 @@ CREATE TABLE `flowcytometer__flowcytometer_density` (
   `sample_number` INTEGER,
   `species` TEXT,
   `count` INTEGER,
-  `density` REAL
+  `density` REAL,
+  `biomass` REAL
 );
 CREATE TABLE `manualcount__manualcount_density` (
   `timestamp` TEXT,

@@ -1181,6 +1181,39 @@ pbmcapply::pbmclapply(
 ```
 
 
+### TODO CHECK !!!!!! Calculate Biomass Flowcytometer
+The biomass is calculated here
+
+```{r}
+#| label: flowcytometer_biomass
+#| 
+
+fns <- list.files(
+  path = file.path(params$output_dir, "flowcytometer_traits"), 
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  fns,
+  function(fn_traits){
+    fn_dens <- fn_traits |> 
+      gsub(
+        pattern = "/flowcytometer_traits/", 
+        replacement = "/flowcytometer/"
+      )
+    biomass_flowcytometer <- LEEF_1_biomass_flowcytometer(
+      traits = readRDS(fn_traits),
+      density = readRDS(fn_dens)
+    )
+    
+    saveRDS(biomass_flowcytometer$traits, file = fn_traits)
+    saveRDS(biomass_flowcytometer$density, file = fn_dens)
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = params$cores
+)
+```
 
 ## Add to database and create indices
 Old timestamps will be removed and not be backed up.
