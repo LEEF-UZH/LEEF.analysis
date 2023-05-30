@@ -33,6 +33,8 @@ RRD_new <- function(
   )
 
   sql <- readLines(sql)
+
+  sql <- sql[!grepl("-- ", sql)]
   sql <- paste0(sql, collapse = " ")
   sql <- strsplit(sql, ";")
 
