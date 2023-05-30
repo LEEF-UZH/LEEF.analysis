@@ -200,6 +200,7 @@ CREATE TABLE `bemovi_mag_25__morph_mvt_cropped` (
   `coleps_irchel_prob` INTEGER,
   `colpidium_prob` INTEGER,
   `dexiostoma_prob` INTEGER,
+  `height` REAL,
   `biomass` REAL
 );
 CREATE TABLE `bemovi_mag_25__morph_mvt` (
@@ -256,6 +257,7 @@ CREATE TABLE `bemovi_mag_25__morph_mvt` (
   `dexiostoma_prob` INTEGER,
   `coleps_irchel_prob` INTEGER,
   `colpidium_prob` INTEGER,
+  `height` REAL,
   `biomass` REAL
 );
 CREATE TABLE `bemovi_mag_16__mean_density_per_ml` (
@@ -320,6 +322,7 @@ CREATE TABLE `bemovi_mag_16__morph_mvt` (
   `stylonychia2_prob` INTEGER,
   `coleps_irchel_prob` INTEGER,
   `colpidium_prob` INTEGER,
+  `height` REAL,
   `biomass` REAL
 );
 CREATE TABLE `bemovi_mag_25__mean_density_per_ml_non_cropped` (
@@ -388,6 +391,7 @@ CREATE TABLE `bemovi_mag_25__morph_mvt_non_cropped` (
   `dexiostoma_prob` INTEGER,
   `coleps_irchel_prob` INTEGER,
   `colpidium_prob` INTEGER,
+  `height` REAL,
   `biomass` REAL
 );
 CREATE TABLE `composition` (
@@ -562,6 +566,7 @@ CREATE TABLE IF NOT EXISTS "flowcam__algae_traits" (
 	"small_unidentified_prob"	REAL,
 	"small_cells_prob"	TEXT,
 	"desmodesmusclumps_prob"	TEXT,
+  "height" REAL,
 	"biomass"  REAL
 );
 
@@ -611,7 +616,8 @@ FROM
      bottle,
      'bemovi_mag_16' AS measurement,
      species,
-     density
+     density,
+     biomass
    FROM
      bemovi_mag_16__mean_density_per_ml
    UNION ALL
@@ -621,7 +627,8 @@ FROM
      bottle,
      'bemovi_mag_25' AS measurement,
      species,
-     density
+     density,
+     biomass
    FROM
      bemovi_mag_25__mean_density_per_ml
    UNION ALL
@@ -631,7 +638,8 @@ FROM
      bottle,
      'bemovi_mag_25_cropped' AS measurement,
      species,
-     density
+     density,
+     biomass
    FROM
      bemovi_mag_25__mean_density_per_ml_cropped
    UNION ALL
@@ -641,7 +649,8 @@ FROM
      bottle,
      'bemovi_mag_25_non_cropped' AS measurement,
      species,
-     density
+     density,
+     biomass
    FROM
      bemovi_mag_25__mean_density_per_ml_non_cropped
    UNION ALL
@@ -651,7 +660,8 @@ FROM
      bottle,
      'flowcam' AS measurement,
      species,
-     density
+     density,
+     biomass
    FROM
      flowcam__algae_density
    UNION ALL
@@ -661,7 +671,8 @@ FROM
      bottle,
      'flowcytometer' AS measurement,
      species,
-     density
+     density,
+     biomass
    FROM
      flowcytometer__flowcytometer_density
    UNION ALL
@@ -671,7 +682,8 @@ FROM
      bottle,
      'manualcount' AS measurement,
      species,
-     density
+     density,
+     'NA' AS biomass
    FROM
      manualcount__manualcount_density
   )
