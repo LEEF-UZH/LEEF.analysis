@@ -5,7 +5,7 @@ date: |
   | Last `timestamp`: `r LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(timestamp) FROM density WHERE timestamp < 30000000')`
   | Sampling `day`: `r LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(day) FROM density WHERE day < 1000')`
   | `LEEF.analysis` package version: `r packageVersion('LEEF.analysis')`
-output:
+format:
   html_document:
     dev: png
     fig_width: 10

@@ -2,8 +2,8 @@
 title: "Reclassification and Data Cleaning of LEEF-2 data"
 author: "Rainer M Krug"
 
-output:
-  html_document:
+format:
+  html:
     dev: png
     fig_width: 10
     fig_height: 12
@@ -13,7 +13,7 @@ output:
     code_folding: hide  
     embed-resources: true
 params:
-  release: "v2.3.0-LEEF-2"
+  release: "v2.3.1-LEEF-2"
   repo: "https://github.com/LEEF-UZH/LEEF.parameter/"
   output_dir: "~/RRD.Reclassification_final_LEEF-2/"
   db: "/LEEF-2.RRD.sqlite"
@@ -45,16 +45,27 @@ params:
 4. Create empty database `params$db` in directory `params$output_dir` database, unless it already exists
 
 
-```{r setup_reclass, include=FALSE}
+```{r}
+#| label: setup
+#| include: false 
+#| 
+
 knitr::opts_chunk$set(
   echo = TRUE,
   eval = FALSE,
   message = TRUE,
   warning = TRUE
 )
+
 library("LEEF.analysis")
 library(dplyr)
-
+library(pbmcapply)
+library(pbapply)
+library(yaml)
+library(tidyr)
+library(DBI)
+library(RSQLite)
+library(lubridate)
 
 db <- function(
     iteration = NULL,
@@ -84,6 +95,10 @@ pdir <- tempfile(pattern = paste0("parameter_", params$release))
 
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
+on.exit({
+  try(unlink(pdir), silent = TRUE)
+})
+
 download.file(
   url = paste0(params$repo, "archive/refs/tags/", params$release, ".zip"), 
   destfile = file.path(pdir, paste0(params$release, ".zip")),
@@ -99,15 +114,15 @@ dir.create(params$output_dir, recursive = TRUE, showWarnings = FALSE)
 
 ## 3. -----
 
-if (!file.exists(params$archive_dir)){
-  stop(
+if (!file.exists(params$pre_processed_dir)){
+  warning(
     "This is not a problem when not reclassifying! \n",
     "Archive directory '", params$archive_dir, "' does not exist!\n",
     "Probably not mounted?" 
   )
 }
 if (!file.exists(params$extracted_dir)){
-  stop(
+  warning(
     "This is not a problem when not reclassifying! \n",
     "Archive directory is not valid! \n",
     "It does not contain the folder '", params$extracted_dir, "'.\n",
@@ -163,23 +178,9 @@ if (file.exists(db())) {
 ## Reclassification of Flowcam
 
 ### Prepare Flowcam
-```{r prepare_flowcam}
-pdir <- tempfile()
-dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
-
-class_constant <- file.path(pdir, "class_constant.rds")
-download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_20221226_MergedData.rds"), 
-  destfile = class_constant,
-  mode = "wb"
-)
-
-class_increasing <- file.path(pdir, "class_increasing.rds")
-download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_20221226_MergedData.rds"), 
-  destfile = class_increasing,
-  mode = "wb"
-)
+```{r}
+#| label: flowcam_prepare
+#| 
 
 timestamps <- list.files(
   path = params$extracted_dir, 
@@ -188,22 +189,24 @@ timestamps <- list.files(
   full.names = FALSE
 )
 timestamps <- gsub("^LEEF\\.fast\\.flowcam\\.", "", timestamps)
+timestamps <- 
 ```
 
-### Classify Flowcam up to 20220704
-```{r classify_flowcam}
-
+### Classify Flowcam
+```{r}
+#| label: flowcam_classify
+#| 
 
 out <- file.path(params$output_dir, "flowcam")
 if (!file.exists(out)) {
   message("Classifying flowcam...")
   system.time(
-    classify_flowcam_archive(
-      archive_dir = params$archive_dir, 
-      timestamps = timestamps[as.numeric(timestamps) <= 20220704], 
+    LEEF_2_classify_flowcam_archive(
+      archive_dir = file.path(params$extracted_dir, ".."), 
+      timestamps = timestamps, 
       algae_traits_name = "algae_traits_filtered.rds", 
-      classifier_constant_name = class_constant, 
-      classifier_increasing_name = class_increasing, 
+      classifier_cname = "svm_flowcam_classifiers.rds", 
+      classifier_increasing_name = "svm_flowcam_classifiers.rds", 
       species_tracked = yaml::read_yaml(paste0(base, "parameter/flowcam/flowcam.yml"))$species_tracked,
       output = out,
       mc.cores = params$cores
@@ -219,213 +222,20 @@ if (!file.exists(out)) {
 
 
 ### Clean Up Flowcam
-```{r cleanup_flowcam}
-unlink(pdir)
-rm(class_constant, class_increasing, out)
-```
-
-### Flowcam Bottle `b_02`
-Bottle `b_02` was contaminated and needs to be classified separately. All timestamps will be classified using the same classifier.
-
-#### Set Bottle and range of timestamps
-```{r bot_after_until}
-bott <- "b_02"
-after <- 20220128
-until <- 30000000
-```
-
-#### Set output path
-```{r output_path_b}
-out <- file.path(params$output_dir, "flowcam.b_02")
-```
-
-#### Determine timestamps
-All available after `20220504` data will be reclassified and are determined below based on the archived data.
-```{r flowcam_timestamps}
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcam\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcam\\.", "", timestamps)
-timestamps <- as.integer(timestamps)
-
-timestamps <- timestamps[(timestamps >= after) & (timestamps <= until)]
-timestamps
-```
-
-
-#### Prepare Flowcam
-```{r prepare_flowcam_2}
-pdir <- tempfile()
-dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
-
-class_constant <- file.path(pdir, "class_constant.rds")
-download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_20221226_MergedData.rds"), 
-  destfile = class_constant,
-  mode = "wb"
-)
-
-class_increasing <- file.path(pdir, "class_increasing.rds")
-download.file(
-  paste0(base, "parameter/flowcam/svm_flowcam_classifiers_B02_contaminated_20221226_MergedData.rds"), 
-  destfile = class_increasing,
-  mode = "wb"
-)
-```
-
-#### Classify Flowcam b_02 up to 20220704
-```{r classify_flowcam_1}
-message("Classifying flowcam...")
-system.time(
-  classify_flowcam_archive(
-    archive_dir = params$archive_dir, 
-    timestamps = timestamps[as.numeric(timestamps) <= 20220704], 
-    algae_traits_name = "algae_traits_filtered.rds", 
-    classifier_constant_name = class_constant, 
-    classifier_increasing_name = class_increasing, 
-    species_tracked = yaml::read_yaml(paste0(base, "parameter/flowcam/flowcam.yml"))$species_tracked,
-    output = out,
-    mc.cores = params$cores,
-    bottle = bott
-  )
-)
-```
-
-#### Clean Up Flowcam
-```{r cleanup_flowcam_1}
-unlink(pdir)
-rm(class_constant, class_increasing)
-```
-
-#### Merge `flowcam.b_02` into `flowcam`
 ```{r}
-#| label: merge_flowcams
+#| label: flowcam_cleanup
 #| 
 
-b02 <- list.files(
-  file.path(params$output_dir, "flowcam.b_02")
-)
-
-pbmcapply::pbmclapply(
-  sample(b02),
-  function(fn){
-    file.path(params$output_dir, "flowcam", fn) |>
-      readRDS() |>
-      dplyr::filter(bottle != "b_02") |>
-      dplyr::bind_rows(
-        readRDS( file.path(params$output_dir, "flowcam.b_02", fn) ) |>
-          mutate(timestamp = as.character(timestamp))
-      ) |>
-    saveRDS(file = file.path(params$output_dir, "flowcam", fn))
-  },
-  mc.preschedule = FALSE, 
-  mc.cores = params$cores
-)
-
+rm(timestamps)
 ```
 
 
-### Adding density=0 for some special cases
-
-```{r man_correction}
-cont_timestamp <- 20220128
-cont_bottle <- "b_02"
-
-fns <- list.files(
-  path = file.path(params$output_dir, "flowcam"), 
-  pattern = "density",
-  full.names = TRUE,
-  recursive = FALSE
-)
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn){
-    ts <- strsplit(basename(fn), "\\.")[[1]][2] |>
-      as.numeric()
-    
-    x <- readRDS(fn)
-    if (ts < cont_timestamp) {
-      templ <- x[x$bottle == cont_bottle,][1,]
-      templ$density <- 0
-      
-      templ$species <- "Desmodesmus"
-      x <- rbind(x, templ)
-      
-      templ$species <- "DesmodesmusClumps"
-      x <- rbind(x, templ)
-    }
-    ###### HERE BEGIN
-    x_list <- split(
-      x = x,
-      f = x$bottle,
-      drop = TRUE
-    )
-    
-    for (i in seq_along(x_list)) {
-      templ <- x_list[[i]][1,]
-      templ$density <- 0
-      templ$count <- 0
-      sp <- unique(x_list[[i]]$species)
-      if ("Chlamydomonas" %in% sp){
-        if (!("ChlamydomonasClumps" %in% sp)){
-          templ$species <- "ChlamydomonasClumps"
-          x_list[[i]] <- rbind(x_list[[i]], templ)
-        }
-      }
-      if ("Desmodesmus" %in% sp){
-        if (!("DesmodesmusClumps" %in% sp)){
-          templ$species <- "DesmodesmusClumps"
-          x_list[[i]] <- rbind(x_list[[i]], templ) |> 
-            dplyr::mutate(Date_Flowcam = data.table::as.IDate(Date_Flowcam))
-        }
-      }
-    }
-    
-    x <- do.call("rbind", x_list)
-    ###### HERE END
-    saveRDS(x, fn)
-  },
-  mc.cores = params$cores, 
-  mc.preschedule = FALSE
-)
-```
-### Flowcam remove species not needed
-
-```{r}
-#| label: flowcam_remove_species
-#| 
-
-fns <- list.files(
-  file.path(params$output_dir, "flowcam"),
-  recursive = FALSE,
-  full.names = TRUE
-)
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn){
-    x <- readRDS(fn) |>
-      dplyr::filter(!(species %in% c(params$remove_all, params$remove_flowcam)))
-    if ("airbubbles" %in% unique(x$species)) {browser()}
-    unlink(fn)
-    saveRDS(x, file = fn)
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
-)
-```
-
-### TODO Calculate Biomass Flowcam
-THe biomass is calculated here
+### Calculate Biomass Flowcam
+The biomass is calculated here
 
 ```{r}
 #| label: flowcam_biomass
 #| 
-
 
 fns <- list.files(
   path = file.path(params$output_dir, "flowcam"), 
@@ -442,7 +252,7 @@ pbmcapply::pbmclapply(
         pattern = "algae_traits", 
         replacement = "algae_density"
       )
-    biomass_flowcam <- LEEF_1_biomass_flowcam(
+    biomass_flowcam <- LEEF_2_biomass_flowcam(
       algae_traits = readRDS(fn_traits),
       algae_density = readRDS(fn_dens)
     )
@@ -459,23 +269,9 @@ pbmcapply::pbmclapply(
 
 ## Bemovi 16 - Reclassification
 ### Prepare Bemovi 16
-```{r prepare_bemovi_16}
-pdir <- tempfile()
-dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
-
-class_constant <- file.path(pdir, "class_constant.rds")
-download.file(
-  paste0(base, "parameter/bemovi.mag.16/svm_video_classifiers_16x_20220706_MergedData.rds"), 
-  destfile = class_constant,
-  mode = "wb"
-)
-
-class_increasing <- file.path(pdir, "class_increasing.rds")
-download.file(
-  paste0(base, "/parameter/bemovi.mag.16/svm_video_classifiers_16x_20220706_MergedData.rds"), 
-  destfile = class_increasing,
-  mode = "wb"
-)
+```{r}
+#| label: bemovi_16_prepare
+#| 
 
 timestamps <- list.files(
   path = params$extracted_dir, 
@@ -488,11 +284,7 @@ timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.", "", timestamps)
 
 ### Classify `bemovi_extract.mag.16.yml`
 ```{r classify_bemovi_16}
-moving_background <- c(
-  "20210924_00108", "20211020_00133", "20211025_00140",
-  "20211101_00151", "20211105_00129", "20211108_00121",
-  "20220131_00156" ,"20220525_00135"
-)
+moving_background <- NULL
 
 out <- file.path(params$output_dir, "bemovi_mag_16")
 
@@ -500,12 +292,11 @@ if (!file.exists(out)) {
   message("Classifying bemovi_extract.mag.16")
   system.time(
     suppressMessages(
-      classify_bemovi_archive( 
+      LEEF_2_classify_bemovi_archive( 
         timestamps = timestamps, 
         archive_dir = params$archive_dir, 
         magnification = 16, 
-        classifier_constant_name = class_constant, 
-        classifier_increasing_name = class_increasing, 
+        classifier_name = "svm_video_classifiers_16x.rds", 
         bemovi_extract_name = "bemovi_extract.mag.16.yml", 
         species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.16/bemovi_extract.mag.16.yml"))$species_tracked,
         output = out,
@@ -523,43 +314,19 @@ if (!file.exists(out)) {
 ```
 
 ### Clean Up Bemovi 16
-```{r cleanup_bemovi_16}
-unlink(pdir)
-rm(pdir, class_constant, class_increasing, out, moving_background)
-```
-
-### Bemovi 16 remove species not needed
-
 ```{r}
-#| label: bemovi_16_remove_species
+#| label: bemovi_16_cleanup
 #| 
 
-fns <- list.files(
-  file.path(params$output_dir, "bemovi_mag_16"),
-  recursive = FALSE,
-  full.names = TRUE
-)
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn){
-    x <- readRDS(fn) |>
-      dplyr::filter(!(species %in% params$remove_all))
-    unlink(fn)
-    saveRDS(x, file = fn)
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
-)
+rm(timestamps)
 ```
 
-### TODO Calculate Biomass Bemovi 16
-THe biomass is calculated here
+### Calculate Biomass Bemovi 16
+The biomass is calculated here
 
 ```{r}
 #| label: bemovi_16_biomass
 #| 
-
 
 fns <- list.files(
   path = file.path(params$output_dir, "bemovi_mag_16"), 
@@ -576,7 +343,7 @@ pbmcapply::pbmclapply(
         pattern = "morph_mvt", 
         replacement = "mean_density_per_ml"
       )
-    biomass_bemovi_16 <- LEEF_1_biomass_bemovi_16(
+    biomass_bemovi_16 <- LEEF_2_biomass_bemovi_16(
       ciliate_traits_16 = readRDS(fn_traits),
       ciliate_density_16 = readRDS(fn_dens)
     )
@@ -593,23 +360,8 @@ pbmcapply::pbmclapply(
 
 ## Bemovi 25 - Reclassification of 
 ### Prepare Bemovi 25
-```{r prepare_bemovi_25}
-pdir <- tempfile()
-dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
-
-class_constant <- file.path(pdir, "class_constant.rds")
-download.file(
-  paste0(base, "parameter/bemovi.mag.25/svm_video_classifiers_25x_20220706_MergedData.rds"), 
-  destfile = class_constant,
-  mode = "wb"
-)
-
-class_increasing <- file.path(pdir, "class_increasing.rds")
-download.file(
-  paste0(base, "parameter/bemovi.mag.25/svm_video_classifiers_25x_20220706_MergedData.rds"), 
-  destfile = class_increasing,
-  mode = "wb"
-)
+```{r}
+#| label: bemovi_25_prepare
 
 timestamps <- list.files(
   path = params$extracted_dir, 
@@ -624,51 +376,17 @@ timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.", "", timestamps)
 
 ```{r classify_bemovi_25}
 
-moving_background <- c(
-  "20211013_00058", "20211103_00037", "20211105_00066",
-  "20211117_00016", "20211124_00007", "20211210_00031",
-  "20211210_00085", "20220105_00034", "20220119_00058",
-  "20220119_00070", "20220119_00088", "20220124_00085",
-  "20220131_00013", "20220131_00034", "20220131_00043",
-  "20220131_00082", "20220131_00085", "20220131_00088",
-  "20220207_00013", "20220228_00004", "20220228_00019",
-  "20220228_00067", "20220304_00034", "20220408_00088",
-  "20220413_00052", "20220502_00076", "20220509_00086",
-  "20220516_00076", "20220523_00058", "20220601_00064",
-  "20220617_00082", "20220620_00076", "20220622_00076",
-  "20220624_00055", "20220629_00082", "20210924_00001",
-  "20210929_00001", "20210929_00064", "20211001_00012",
-  "20211001_00028", "20211008_00021", "20211013_00076",
-  "20211015_00077", "20211022_00088", "20211105_00022",
-  "20211105_00024", "20211203_00016", "20211203_00040",
-  "20211203_00061", "20211215_00043", "20220107_00054",
-  "20220119_00010", "20220126_00025", "20220131_00079",
-  "20220202_00043", "20220204_00061", "20220204_00067",
-  "20220207_00010", "20220207_00022", "20220304_00076",
-  "20220427_00061", "20220525_00010", "20220530_00016",
-  "20220601_00050", "20220620_00010", "20220620_00073",
-  "20220622_00010", "20220622_00073", "20220704_00055",
-  "20211129_00077", "20211203_00003", "20211203_00009",
-  "20211208_00002", "20220126_00046", "20220126_00049",
-  "20220204_00002", "20220207_00020", "20220207_00052",
-  "20211001_00054", "20211001_00066", "20211001_00069",
-  "20211001_00079", "20211022_00042", "20211022_00067",
-  "20211027_00007", "20211101_00081", "20211129_00001",
-  "20211203_00050", "20211220_00035", "20220126_00054",
-  "20220126_00067", "20220126_00068", "20220207_00031",
-  "20220207_00043", "20220207_00054"
-)
+moving_background <- NULL
 
 out <- file.path(params$output_dir, "bemovi_mag_25")
 if (!file.exists(out)) {
   system.time(
     suppressMessages(
-      classify_bemovi_archive( 
+      LEEF_2_classify_bemovi_archive( 
         timestamps = timestamps, 
         archive_dir = params$archive_dir, 
         magnification = 25, 
-        classifier_constant_name = class_constant, 
-        classifier_increasing_name = class_increasing, 
+        classifier_name = "svm_video_classifiers_25x.rds", 
         bemovi_extract_name = "bemovi_extract.mag.25.yml", 
         species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.yml"))$species_tracked,
         output = out,
@@ -679,12 +397,11 @@ if (!file.exists(out)) {
   )
   system.time(
     suppressMessages(
-      classify_bemovi_archive( 
+      LEEF_2_classify_bemovi_archive( 
         timestamps = timestamps, 
         archive_dir = params$archive_dir, 
         magnification = 25, 
-        classifier_constant_name = class_constant, 
-        classifier_increasing_name = class_increasing, 
+        classifier_name = "svm_video_classifiers_25x.rds", 
         bemovi_extract_name = "bemovi_extract.mag.25.non_cropped.yml", 
         species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.non_cropped.yml"))$species_tracked,
         output = out,
@@ -695,12 +412,11 @@ if (!file.exists(out)) {
   )
   system.time(
     suppressMessages(
-      classify_bemovi_archive( 
+      LEEF_2_classify_bemovi_archive( 
         timestamps = timestamps, 
         archive_dir = params$archive_dir, 
         magnification = 25, 
-        classifier_constant_name = class_constant, 
-        classifier_increasing_name = class_increasing, 
+        classifier_name = "svm_video_classifiers_25x.rds", 
         bemovi_extract_name = "bemovi_extract.mag.25.cropped.yml", 
         species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.cropped.yml"))$species_tracked,
         output = out,
@@ -718,73 +434,15 @@ if (!file.exists(out)) {
 ```
 
 ### Clean Up Bemovi 25
-```{r cleanup_bemovi_25}
-unlink(pdir)
-rm(pdir, class_constant, class_increasing, out, moving_background)
-```
-
-
-### Bemovi 25 remove species not needed
-
 ```{r}
-#| label: bemovi_25_remove_species
+#| label: bemovi_25_cleanup
 #| 
 
-fns <- list.files(
-  file.path(params$output_dir, "bemovi_mag_25"),
-  recursive = FALSE,
-  full.names = TRUE
-)
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn){
-    x <- readRDS(fn) |>
-      dplyr::filter(!(species %in% params$remove_all))
-    unlink(fn)
-    saveRDS(x, file = fn)
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
-)
+rm(timestamps)
 ```
 
-### Bemovi 25 set densities "20220622" (duplicates of "20220620") to `NA`
-And remove traits
 
-```{r}
-#| label: bemovi_remove_duplictes
-#| 
-
-dens_to_na <- c("20220622")
-
-fns <- list.files(
-  file.path(params$output_dir, "bemovi_mag_25"), 
-  recursive = FALSE,
-  full.names = TRUE
-) |>
-  grep(pattern = paste0("density|morph_mvt"), value = TRUE) |>
-  grep(pattern = paste0(dens_to_na), value = TRUE) 
-  
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn){
-    if (grepl("morph_mvt", fn)){
-      unlink(fn)
-    } else {
-      x <- readRDS(fn) |>
-        dplyr::mutate(density = NA)
-      unlink(fn)
-      saveRDS(x, file = fn)
-    }
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
-)
-```
-
-### TODO Calculate Biomass Bemovi 25
+### Calculate Biomass Bemovi 25
 The biomass is calculated here
 
 ```{r}
@@ -808,7 +466,7 @@ pbmcapply::pbmclapply(
         pattern = "morph_mvt", 
         replacement = "mean_density_per_ml"
       )
-    biomass_bemovi_25 <- LEEF_1_biomass_bemovi_25(
+    biomass_bemovi_25 <- LEEF_2_biomass_bemovi_25(
       ciliate_traits_25 = readRDS(fn_traits),
       ciliate_density_25 = readRDS(fn_dens)
     )
@@ -837,7 +495,7 @@ pbmcapply::pbmclapply(
         pattern = "morph_mvt", 
         replacement = "mean_density_per_ml"
       )
-    biomass_bemovi_25 <- LEEF_1_biomass_bemovi_25_cropped(
+    biomass_bemovi_25 <- LEEF_2_biomass_bemovi_25_cropped(
       ciliate_traits_25 = readRDS(fn_traits),
       ciliate_density_25 = readRDS(fn_dens)
     )
@@ -866,7 +524,7 @@ pbmcapply::pbmclapply(
         pattern = "morph_mvt", 
         replacement = "mean_density_per_ml"
       )
-    biomass_bemovi_25 <- LEEF_1_biomass_bemovi_25_non_cropped(
+    biomass_bemovi_25 <- LEEF_2_biomass_bemovi_25_non_cropped(
       ciliate_traits_25 = readRDS(fn_traits),
       ciliate_density_25 = readRDS(fn_dens)
     )
@@ -881,127 +539,17 @@ pbmcapply::pbmclapply(
 ```
 
 
-## Exclusion of time series that are wrong classifications or only noise
-```{r}
-
-excl <- data.frame(
-  bottles = c(
-    "b_30", "b_02", "b_09", "b_02", "b_09", "b_14", 
-    "b_23", "b_04", "b_07", "b_13", "b_07", "b_13", 
-    "b_07", "b_13", "b_10", "b_21", "b_10", "b_21",
-    "b_01", "b_11", "b_01", "b_11", "b_20", "b_28",
-    "b_28", "b_22", "b_22", "b_27", "b_22", "b_22",
-    "b_27", "b_03", "b_03", "b_06" ,"b_03", "b_06", 
-    "b_03", "b_06", "b_03", "b_03", "b_06", "b_19", 
-    "b_29", "b_19", "b_29", "b_19", "b_29", "b_19", 
-    "b_29", "b_05", "b_24" ,"b_05", "b_24", "b_05",
-    "b_24", "b_05", "b_24", "b_15", "b_12", "b_15", 
-    "b_12", "b_15", "b_12", "b_15", "b_12", "b_15", 
-    "b_16", "b_26" ,"b_16", "b_26", "b_16", "b_26", 
-    "b_16", "b_16", "b_26", "b_05", "b_12", "b_15",
-    "b_16", "b_24", "b_26", "b_08", "b_06", "b_26",
-    "b_14", "b_25"
-  ),
-  
-  species = c(
-    "Tetrahymena",   "Tetrahymena",    "Tetrahymena",   "Euplotes",      "Euplotes",      "Loxocephallus",   
-    "Euplotes",      "Colpidium",      "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",
-    "Euplotes",      "Euplotes",       "Colpidium",     "Colpidium",     "Loxocephallus", "Loxocephallus", 
-    "Tetrahymena",   "Tetrahymena",    "Loxocephallus", "Loxocephallus", "Tetrahymena",   "Tetrahymena",  
-    "Colpidium",     "Colpidium",      "Dexiostoma",    "Dexiostoma",    "Stylonychia2",  "Euplotes", 
-    "Euplotes",      "Staurastrum1",   "Tetrahymena",   "Tetrahymena",   "Colpidium",     "Colpidium",   
-    "Loxocephallus", "Loxocephallus",  "Stylonychia2",  "Euplotes",      "Euplotes",      "Colpidium",   
-    "Colpidium",     "Loxocephallus",  "Loxocephallus", "Dexiostoma",    "Dexiostoma",    "Euplotes",  
-    "Euplotes",      "Tetrahymena",    "Tetrahymena",   "Colpidium",     "Colpidium",     "Loxocephallus",   
-    "Loxocephallus", "Euplotes",       "Euplotes",      "Staurastrum1",  "Colpidium",     "Colpidium",   
-    "Loxocephallus", "Loxocephallus",  "Dexiostoma",    "Dexiostoma",    "Euplotes",      "Euplotes",   
-    "Colpidium",     "Colpidium",      "Loxocephallus", "Loxocephallus", "Dexiostoma",    "Dexiostoma",  
-    "Stylonychia2",  "Euplotes",       "Euplotes",      "Staurastrum2",  "Staurastrum2",  "Staurastrum2", 
-    "Staurastrum2",  "Staurastrum2",   "Staurastrum2",  "Tetrahymena",   "Stylonychia2",  "Stylonychia2",
-    "Euplotes",      "Euplotes"
-  ) 
-)
-
-excl$bottle_species <- paste0(excl$bottles, "_", excl$species)
-
-fns <- c(
-  list.files(
-    path = file.path(params$output_dir, "bemovi_mag_16"),
-    pattern = "morph|density",
-    recursive = FALSE,
-    full.names = TRUE
-  ),
-  list.files(
-    path = file.path(params$output_dir, "bemovi_mag_25"),
-    pattern = "morph|density",
-    recursive = FALSE,
-    full.names = TRUE
-  ),
-  list.files(
-    path = file.path(params$output_dir, "flowcam"),
-    pattern = "traits|density",
-    recursive = FALSE,
-    full.names = TRUE
-  )
-)
-
-
-pbmcapply::pbmclapply(
-  sample(fns),
-  function(fn){
-    x <- readRDS(fn) |>
-      dplyr::mutate(bottle_species = paste0(bottle, "_", species)) |>
-      dplyr::filter(!(bottle_species %in% excl$bottle_species))
-    
-    x |>
-      dplyr::select(-bottle_species) |>
-      saveRDS(file = fn)
-  },
-  mc.cores = params$cores, 
-  mc.preschedule = FALSE
-)
-
-rm(excl, fns)
-```
-
-
-## Flowcytometer
+## TODO Flowcytometer
 
 ### Prepare Flowcytometer
 ```{r prepare_flowcytometer}
-pdir <- tempfile()
-dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
-
-gates_coordinates <- file.path(pdir, "gates_coordinates.csv")
-download.file(
-  paste0(base, "parameter/flowcytometer/gates_coordinates.csv"), 
-  destfile = gates_coordinates,
-  mode = "wb"
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
 )
-
-gates_coordinates_EAWAG_samples <-  file.path(pdir, "gates_coordinates_Eawag_samples.csv")
-gates_coordinates <- file.path(pdir, "gates_coordinates_Eawag_samples.csv")
-download.file(
-  paste0(base, "parameter/flowcytometer/gates_coordinates_Eawag_samples.csv"), 
-  destfile = gates_coordinates,
-  mode = "wb"
-)
-
-
-metadata_flowcytometer <- file.path(pdir, "metadata_flowcytometer.csv")
-download.file(
-  paste0(base, "parameter/flowcytometer/metadata_flowcytometer.csv"), 
-  destfile = metadata_flowcytometer,
-  mode = "wb"
-)
-
-
-conv_FSCA_length <- file.path(pdir, "conv_FSCA_length")
-download.file(
-  paste0(base, "parameter/flowcytometer/conv_FSCA_length.csv"), 
-  destfile = conv_FSCA_length,
-  mode = "wb"
-)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
 ```
 
 ### Flowcytometer densities
@@ -1033,39 +581,10 @@ density_flowcytometer_archive(
 )
 
 ```
-#### TODO EAWAG Samples
-
-Now process the EAWAG samples. the previous ones will be replaced, if they exist.
-
-```{r densities_EAWAG}
-## Select all timestamps
-
-extracted_EAWAG <- gsub("LEEF.archived.data", "LEEF.EAWAG.archived.data", params$extracted_dir)
-timestamps <- list.files(
-  path = extracted_EAWAG, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
-
-density_flowcytometer_archive(
-  extracted_dir = extracted_EAWAG,
-  gates_coordinates = read.csv(gates_coordinates_EAWAG_samples),
-  timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer"),
-  use_H = TRUE,
-  min_FSC.A = params$min_FSC.A,
-  log10_all = TRUE,
-  particles = "bacteria",
-  mc.cores = params$cores
-)
-```
 
 
 ### Trait Extraction Flowcytometer and Volume Calculation
 
-#### All Samples
 ```{r biomass}
 ## Select all timestamps
 timestamps <- list.files(
@@ -1089,43 +608,6 @@ extract_traits_flowcytometer_archive(
   length_intercept =  read.csv(conv_FSCA_length)$intercept,
   mc.cores = params$cores
 )
-```
-
-#### TODO EAWAG Samples
-
-Now process the EAWAG samples. the previous ones will be replaced, if they exist.
-```{r biomass_EAWAG}
-## Select all timestamps
-extracted_EAWAG <- gsub("LEEF.archived.data", "LEEF.EAWAG.archived.data", params$extracted_dir)
-
-timestamps <- list.files(
-  path = extracted_EAWAG, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
-
-extract_traits_flowcytometer_archive(
-  extracted_dir = extracted_EAWAG,
-  gates_coordinates = read.csv(gates_coordinates_EAWAG_samples),
-  particles = "bacteria",
-  use_H = TRUE,
-  min_FSC.A = params$min_FSC.A,
-  log10_all = TRUE,
-  timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer_traits"),
-  length_slope =  read.csv(conv_FSCA_length)$slope,
-  length_intercept =  read.csv(conv_FSCA_length)$intercept,
-  mc.cores = params$cores, 
-  wellid_keyword = "$SMNO"
-)
-```
-
-#### Clean Up EAWAG
-```{r cleanup_flowcytometer}
-unlink(pdir)
-rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, conv_FSCA_length)
 ```
 
 
@@ -1154,8 +636,16 @@ pbmcapply::pbmclapply(
 )
 ```
 
+### Clean Up Floowcytometer
+```{r}
+#| label: bemovi_16_cleanup
+#| 
 
-### TODO CHECK !!!!!! Calculate Biomass Flowcytometer
+rm(timestamps)
+```
+
+
+### Calculate Biomass Flowcytometer
 The biomass is calculated here
 
 ```{r}
@@ -1189,11 +679,11 @@ pbmcapply::pbmclapply(
 )
 ```
 
-## Add to database and create indices
+## TODO Add to database and create indices
 Old timestamps will be removed and not be backed up.
 
 ```{r addRRD_copy}
-file.copy(params$db, db_name(1, temp = TRUE))
+file.copy(db(), db(1, temp = TRUE))
 ```
 ```{r addRRD_b16}
 ## Bemovi_16
@@ -1294,118 +784,8 @@ file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
 
 
 
-# 2. Flowcam Stau1
 
-The code below recalculates the densities after filtering Stau1 so that only
-particles are kept with high confidence that they are indeed Stau1.
-
-## Calculate new densities
-```{r species_to_0_bemovi_25_morph_mvt_2}
-
-options(RRDdb = db_name(1, temp = FALSE))
-
-sql <-  paste0(
-  "
-    SELECT *
-    FROM 'flowcam__algae_traits'
-    WHERE species == 'Staurastrum1' AND species_probability > 0.95;
-  "
-)
-  
-stau1traits <- read_sql(sql = sql) %>%
-  group_by(bottle)
-
-# extrapolation.factor <- 1/0.3 # I think 0.3ml were imaged
-
-densityStau1 <- stau1traits %>%
-  group_by(
-    date_flowcam,
-    species,
-    bottle,
-    composition,
-    temperature,
-    incubator,
-    volume_imaged,
-    dilution_factor,
-    richness,
-    timestamp
-  ) %>%
-  summarize(count=n()) %>%
-  mutate(density = count * (dilution_factor / volume_imaged))
-
-# Set not found to 0
-
-temp <- tidyr::expand_grid(
-  timestamp = unique(stau1traits$timestamp),
-  bottle = unique(stau1traits$bottle),
-  species = "Staurastrum1"
-)
-
-densityStau1 <- full_join(densityStau1, temp) %>%
-  mutate(
-    count = ifelse(is.na(count),0,count),
-    density = ifelse(is.na(density),0,density)
-  )
-```
-
-
-## Update RRD
-Delete from traits and add re-calculated ones.
-
-```{r}
-#| label: update_RRD
-#| 
-file.copy(db_name(1, temp = FALSE), db_name(2, temp = TRUE))
-
-conn <- DBI::dbConnect(
-  drv = RSQLite::SQLite(),
-  db = db_name(2, temp = TRUE)
-)
-DBI::dbBegin(conn)
-
-
-message("Deleting flowcam entries from flowcam__algae_traits ...")
-delete_sql <- paste0(
-  "DELETE ",
-  "FROM flowcam__algae_traits ",
-  "WHERE (species == \"Staurastrum1\" AND species_probability <= 0.95)"
-)
-message("Executing query '", delete_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_sql)
-message("   ", rd, " rows deleted.")
-
-message("Deleting flowcam densities from RRD ...")
-delete_sql <- paste0(
-  "DELETE ",
-  "FROM flowcam__algae_density ",
-  "WHERE (species == \"Staurastrum1\"); "
-)
-message("Executing query '", delete_sql, "`...")
-rd <- DBI::dbExecute(conn, delete_sql)
-message("   ", rd, " rows deleted.")
-
-
-message("Adding flowcam densities to RRD ...")
-DBI::dbWriteTable(
-  conn,
-  name = "flowcam__algae_density",
-  value = densityStau1,
-  overwrite = FALSE,
-  append = TRUE
-)
-message("   ", nrow(densityStau1), " rows added")
-
-## close
-
-DBI::dbCommit(conn)
-DBI::dbDisconnect(conn)
-
-file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
-```
-
-
-
-# 3. TODO Add O2, Manualcount and TOC measuremnts 
+# TODO 3. Add O2, Manualcount and TOC measuremnts 
 
 ## Prepare
 ```{r}
@@ -1413,7 +793,7 @@ file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
 file.copy(db_name(2, temp = FALSE), db_name(3, temp = TRUE))
 ```
 
-### Add detrended TOC - Removing the linear trend in the water chemistry 
+## Add detrended TOC - Removing the linear trend in the water chemistry 
 ```{r}
 #| label: add_toc
 #| 
@@ -1510,7 +890,7 @@ add_to_db(
 unlink(toc_det)
 ```
 
-### Add O2
+## Add O2
 ```{r}
 #| label: add_o2
 #| 
@@ -1536,7 +916,7 @@ suppressMessages(
 ```
 
 
-### Add manualcount
+## Add manualcount
 ```{r}
 #| label: add_manualcount
 #| 
@@ -1569,7 +949,7 @@ suppressMessages(
 file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
 ```
 
-# Create Diagnostic Report
+# TODO Create Diagnostic Report
 The Diagnostic report needs to be created before the renaming as it does rely on the otriginal terminology.
 
 ```{r}
@@ -1585,7 +965,7 @@ report_diagnostic(
 ```
 
 
-# 4. Rename species and columns
+# TODO 4. Rename species and columns
 ```{r}
 #| label: rename
 
@@ -1602,7 +982,7 @@ file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
 file.copy(db_name(4, temp = FALSE), db_name("final", temp = FALSE))
 ```
 
-# Do a final vacuuming into new database
+# TODO Do a final vacuuming into new database
 Vacuuming the database will take some time!
 
 To vacuum the sqlite database, i.e. recover the space from the deletion of rows, please run the following command in the directory where the database is located. I do not expect this to have a big impact on the size.
@@ -1615,8 +995,8 @@ cat(
 )
 ```
 
-# Create Overlays
-This is still using the extracted and pre-processed folder and needs to be changed to use the reclassified bemovi data. 
+# TODO Create Overlays
+TODO This is still using the extracted and pre-processed folder and needs to be changed to use the reclassified bemovi data. 
 ```{r}
 #| label: overlays
 #| eval: false

@@ -3,7 +3,7 @@ title: "Reclassification"
 author: "Rainer M Krug"
 date: "06/05/2022"
 
-output: 
+format: 
   html:
     toc: true
     toc-location: left

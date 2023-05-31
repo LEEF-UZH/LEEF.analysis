@@ -3,7 +3,7 @@ title: "Reclassification and Data Cleaning"
 author: "Rainer M Krug"
 date: "24/04/2022"
 
-output:
+format:
   html_document:
     dev: png
     fig_width: 10
