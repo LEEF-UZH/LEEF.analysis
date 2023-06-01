@@ -555,18 +555,10 @@ timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
 ### Flowcytometer densities
 
 Regate using H and re-calculate the densities
-#### All Samples
+TODO
+[ ] Port modifications from LEEF-1 flowcytometer density extraction to LEEF-2 branch
+[ ] Change code here for LEEF-2
 ```{r densities}
-
-## Select all timestamps
-
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
 
 density_flowcytometer_archive(
   extracted_dir = params$extracted_dir,
@@ -794,6 +786,10 @@ file.copy(db_name(2, temp = FALSE), db_name(3, temp = TRUE))
 ```
 
 ## Add detrended TOC - Removing the linear trend in the water chemistry 
+[ ] Translate and wording
+In the OC meter ( Type ), "der Katalysator in der Säule vom Brenner vom TOCA wurde am 27.2.23 und am 23.05.23 gewechselt." All measurements after DATE were done using the new THING.
+Bis samples L2_20230220A mit dem Katalysator der Yves schon nutzte. Samples L2_20230224A-L2_20230505A mit dem Katalysator vom 27.2.23. Samples L2_20230508A-.... mit dem Katalysator vom 23.5.23
+
 ```{r}
 #| label: add_toc
 #| 
