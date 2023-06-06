@@ -3,8 +3,10 @@ title: "Reclassification and Data Cleaning"
 author: "Rainer M Krug"
 date: "24/04/2022"
 
+execute: 
+  cache: true
 format:
-  html_document:
+  html:
     dev: png
     fig_width: 10
     fig_height: 12
