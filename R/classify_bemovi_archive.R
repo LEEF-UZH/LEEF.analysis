@@ -57,6 +57,9 @@ classify_bemovi_archive <- function(
         message("Classifying timestamp ", timestamp, "...")
 
         beyml <- file.path(datadir, bemovi_extract_name)
+        if (!file.exists(beyml)) {
+          return(FALSE)
+        }
         if (!is.null(species_tracked)) {
           p <- yaml::read_yaml(beyml)
           p$species_tracked <- species_tracked

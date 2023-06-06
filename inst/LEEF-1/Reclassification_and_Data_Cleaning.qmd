@@ -617,7 +617,7 @@ pbmcapply::pbmclapply(
 ```
 
 
-## Bemovi 25 - Reclassification of 
+## Bemovi 25 - Reclassification
 ### Prepare Bemovi 25
 ```{r prepare_bemovi_25}
 pdir <- tempfile()
