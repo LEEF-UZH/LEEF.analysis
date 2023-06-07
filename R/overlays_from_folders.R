@@ -10,7 +10,7 @@
 #' @param bemovi_extract_yml_file name of the `bemovi_extract.yml` config file
 #' @param temp_overlay_folder directory where the subtitle files will be saved
 #' @param overlay_folder directory where the overlay video will be saved
-#' #' @param overlay_type option for the overlays. Overlays can either be shown as
+#' @param overlay_type option for the overlays. Overlays can either be shown as
 #'   \code{"label"}, \code{"circle"} or \code{"both"}
 #' @param label column to be used to label the particle. Default is
 #'   \code{"trajectory"}, other useful might be \code{"species"}

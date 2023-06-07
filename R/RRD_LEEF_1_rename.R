@@ -117,7 +117,7 @@ RRD_LEEF_1_rename <- function(
     c("Stylonychia1", "Stylonychia mytilus"),
     c("Stylonychia2", "Stylonychia sp."),
     c("Euplotes", "Euplotes daidaleos"),
-    c("Paramecium bursaria", "Paramecium bursaria"),
+    c("Paramecium_bursaria", "Paramecium bursaria"),
     c("Didinium", "Didinium nasutum"),
     c("ChlamydomonasClumps", "Chlamydomonas clumps"),
     c("DesmodesmusClumps", "Desmodesmus clumps"),
