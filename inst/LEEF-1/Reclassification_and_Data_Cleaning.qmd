@@ -495,7 +495,10 @@ pbmcapply::pbmclapply(
 
 ## Bemovi 16 - Reclassification
 ### Prepare Bemovi 16
-```{r prepare_bemovi_16}
+```{r}
+#| label: bemovi_16_prepare
+#| 
+
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -523,7 +526,10 @@ timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.", "", timestamps)
 ```
 
 ### Classify `bemovi_extract.mag.16.yml`
-```{r classify_bemovi_16}
+```{r}
+#| label: bemovi_16_classify
+#| 
+
 moving_background <- c(
   "20210924_00108", "20211020_00133", "20211025_00140",
   "20211101_00151", "20211105_00129", "20211108_00121",
@@ -559,7 +565,8 @@ if (!file.exists(out)) {
 ```
 
 ### Clean Up Bemovi 16
-```{r cleanup_bemovi_16}
+```{r}
+#| label: bemovi_16_cleanup
 unlink(pdir)
 rm(pdir, class_constant, class_increasing, out, moving_background)
 ```
