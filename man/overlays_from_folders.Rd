@@ -30,8 +30,9 @@ overlays_from_folders(
 
 \item{temp_overlay_folder}{directory where the subtitle files will be saved}
 
-\item{overlay_folder}{directory where the overlay video will be saved
-#' @param overlay_type option for the overlays. Overlays can either be shown as
+\item{overlay_folder}{directory where the overlay video will be saved}
+
+\item{overlay_type}{option for the overlays. Overlays can either be shown as
 \code{"label"}, \code{"circle"} or \code{"both"}}
 
 \item{label}{column to be used to label the particle. Default is

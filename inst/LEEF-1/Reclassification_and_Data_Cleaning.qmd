@@ -37,7 +37,7 @@ params:
     - Colpidium
     - Loxocephallus
     - Tetrahymena
-  keep_flowcytometer:
+  flowcytometer_particles:
     - bacteria
     - algae
 ---
@@ -51,8 +51,12 @@ This reclassification is based on the classifiers as in the repo at the base URL
 Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
 
 
-```{r setup_reclass, include=FALSE}
-knitr::opts_chunk$set(
+```{r}
+#| label: setup
+#| include: false
+#| 
+ 
+ knitr::opts_chunk$set(
   echo = TRUE,
   eval = TRUE,
   message = TRUE,
@@ -71,14 +75,18 @@ dir.create(params$output_dir, recursive = TRUE, showWarnings = FALSE)
 
 
 db_name <- function(
-    iteration,
+    iteration = NULL,
     db_org = params$db,
     version_tag = params$version_tag,
     temp = FALSE
 ){
-  db_name <- gsub(".sqlite", paste0(".", version_tag, "_", iteration, ".sqlite"), db_org)
-  if (temp){
-    db_name <- paste0(db_name, ".tmp")
+  if (!is.null(iteration)){
+    db_name <- gsub(".sqlite", paste0(".", version_tag, "_", iteration, ".sqlite"), db_org)
+    if (temp){
+      db_name <- paste0(db_name, ".tmp")
+    }
+  } else {
+    db_name <- db_org
   }
   return(db_name)
 }
@@ -438,7 +446,7 @@ pbmcapply::pbmclapply(
   function(fn){
     x <- readRDS(fn) |>
       dplyr::filter(!(species %in% c(params$remove_all, params$remove_flowcam)))
-    if ("airbubbles" %in% unique(x$species)) {browser()}
+    # if ("airbubbles" %in% unique(x$species)) {browser()}
     unlink(fn)
     saveRDS(x, file = fn)
   }, 
@@ -447,7 +455,7 @@ pbmcapply::pbmclapply(
 )
 ```
 
-### TODO Calculate Biomass Flowcam
+### Calculate Biomass Flowcam
 THe biomass is calculated here
 
 ```{r}
@@ -581,7 +589,7 @@ pbmcapply::pbmclapply(
 )
 ```
 
-### TODO Calculate Biomass Bemovi 16
+### Calculate Biomass Bemovi 16
 THe biomass is calculated here
 
 ```{r}
@@ -812,7 +820,7 @@ pbmcapply::pbmclapply(
 )
 ```
 
-### TODO Calculate Biomass Bemovi 25
+### Calculate Biomass Bemovi 25
 The biomass is calculated here
 
 ```{r}
@@ -911,6 +919,8 @@ pbmcapply::pbmclapply(
 
 ## Exclusion of time series that are wrong classifications or only noise
 ```{r}
+#| label: exclusion_timeseries
+#| 
 
 excl <- data.frame(
   bottles = c(
@@ -996,7 +1006,10 @@ rm(excl, fns)
 ## Flowcytometer
 
 ### Prepare Flowcytometer
-```{r prepare_flowcytometer}
+```{r}
+#| label: flowcytometer_prepare
+#| 
+
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -1032,11 +1045,14 @@ download.file(
 )
 ```
 
-### Flowcytometer densities
+### Flowcytometer densities and traits
 
 Regate using H and re-calculate the densities
-#### All Samples
-```{r densities}
+
+#### Densities UZH Samples
+```{r}
+#| label: flowcytometer_densities
+#| 
 
 ## Select all timestamps
 
@@ -1056,45 +1072,16 @@ density_flowcytometer_archive(
   use_H = TRUE,
   min_FSC.A = params$min_FSC.A,
   log10_all = TRUE,
-  particles = "bacteria",
+  particles = params$flowcytometer_particles,
   mc.cores = params$cores
 )
 
 ```
-#### TODO EAWAG Samples
+#### Biomass UZH Samples
+```{r}
+#| label: flowcytometer_biomass
+#| 
 
-Now process the EAWAG samples. the previous ones will be replaced, if they exist.
-
-```{r densities_EAWAG}
-## Select all timestamps
-
-extracted_EAWAG <- gsub("LEEF.archived.data", "LEEF.EAWAG.archived.data", params$extracted_dir)
-timestamps <- list.files(
-  path = extracted_EAWAG, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
-
-density_flowcytometer_archive(
-  extracted_dir = extracted_EAWAG,
-  gates_coordinates = read.csv(gates_coordinates_EAWAG_samples),
-  timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer"),
-  use_H = TRUE,
-  min_FSC.A = params$min_FSC.A,
-  log10_all = TRUE,
-  particles = "bacteria",
-  mc.cores = params$cores
-)
-```
-
-
-### Trait Extraction Flowcytometer and Volume Calculation
-
-#### All Samples
-```{r biomass}
 ## Select all timestamps
 timestamps <- list.files(
   path = params$extracted_dir, 
@@ -1104,7 +1091,7 @@ timestamps <- list.files(
 )
 timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
 
-extract_traits_flowcytometer_archive(
+biomass_per_bottle  <- extract_traits_flowcytometer_archive(
   extracted_dir = params$extracted_dir,
   gates_coordinates = read.csv(gates_coordinates),
   particles = "bacteria",
@@ -1117,12 +1104,48 @@ extract_traits_flowcytometer_archive(
   length_intercept =  read.csv(conv_FSCA_length)$intercept,
   mc.cores = params$cores
 )
-```
+ ```
 
-#### TODO EAWAG Samples
+
+#### Densities EAWAG Samples
 
 Now process the EAWAG samples. the previous ones will be replaced, if they exist.
-```{r biomass_EAWAG}
+
+```{r}
+#| label: flowcytometer_densities_EAWAG
+#| 
+
+## Select all timestamps
+
+extracted_EAWAG <- gsub("LEEF.archived.data", "LEEF.EAWAG.archived.data", params$extracted_dir)
+timestamps <- list.files(
+  path = extracted_EAWAG, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+
+density_flowcytometer_archive(
+  extracted_dir = extracted_EAWAG,
+  gates_coordinates = read.csv(gates_coordinates_EAWAG_samples),
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer_EAWAG"),
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE,
+  particles = params$flowcytometer_particles,
+  mc.cores = params$cores
+)
+```
+
+#### Biomass EAWAG Samples
+
+Now process the EAWAG samples. the previous ones will be replaced, if they exist.
+```{r}
+#| label: flowcytometer_biomass_EAWAG
+#| 
+
 ## Select all timestamps
 extracted_EAWAG <- gsub("LEEF.archived.data", "LEEF.EAWAG.archived.data", params$extracted_dir)
 
@@ -1133,98 +1156,87 @@ timestamps <- list.files(
   full.names = FALSE
 )
 timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+ 
 
-extract_traits_flowcytometer_archive(
+biomass_per_bottle <- extract_traits_flowcytometer_archive(
   extracted_dir = extracted_EAWAG,
   gates_coordinates = read.csv(gates_coordinates_EAWAG_samples),
-  particles = "bacteria",
+  particles = params$flowcytometer_particles,
   use_H = TRUE,
   min_FSC.A = params$min_FSC.A,
   log10_all = TRUE,
   timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer_traits"),
+  output = file.path(params$output_dir, "flowcytometer_traits_EAWAG"),
   length_slope =  read.csv(conv_FSCA_length)$slope,
   length_intercept =  read.csv(conv_FSCA_length)$intercept,
   mc.cores = params$cores, 
   wellid_keyword = "$SMNO"
 )
+
+pbmcapply::pbmclapply(
+  names(biomass_per_bottle),
+  function(timestamp){
+    dens_fn <- file.path(params$output_dir, "flowcytometer_EAWAG", paste0("flowcytometer_density.", timestamp, ".rds"))
+    merge(
+        readRDS(dens_fn),
+        biomass_per_bottle[[timestamp]],
+        by = c("bottle", "species")
+    ) |>
+    saveRDS(file = dens_fn)
+  }
+)
 ```
 
-#### Clean Up EAWAG
-```{r cleanup_flowcytometer}
+### TODO Merge EAWAG into UZH
+```{r}
+#| label: flowcytometer_merge
+#| 
+
+list.files(
+  path = file.path(params$output_dir, "flowcytometer_EAWAG"), 
+  pattern = "^flowcytometer_density\\..*\\.rds",
+  recursive = FALSE, 
+  full.names = TRUE
+) |>
+  file.copy(
+    to = file.path(params$output_dir, "flowcytometer"),
+    overwrite = TRUE
+  )
+
+list.files(
+  path = file.path(params$output_dir, "flowcytometer_traits_EAWAG"), 
+  pattern = "^flowcytometer_traits_.*\\.rds",
+  recursive = FALSE, 
+  full.names = TRUE
+) |>
+  file.copy(
+    to = file.path(params$output_dir, "flowcytometer_traits"),
+    overwrite = TRUE
+  )
+
+```
+
+#### Clean Up flowcytometer
+```{r}
+#| label: flowcytometer_cleanup
+#| 
+
 unlink(pdir)
 rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, conv_FSCA_length)
 ```
 
 
-### Flowcytometer select species needed
-This can only be done in densities!
-
-```{r}
-#| label: flowcytometer_remove_categories
-#| 
-
-fns <- list.files(
-  file.path(params$output_dir, "flowcytometer"),
-  recursive = FALSE,
-  full.names = TRUE
-)
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn){
-    x <- readRDS(fn) |>
-      dplyr::filter(species %in% params$keep_flowcytometer)
-    unlink(fn)
-    saveRDS(x, file = fn)
-  }, 
-  mc.cores = params$cores
-)
-```
-
-
-### TODO CHECK !!!!!! Calculate Biomass Flowcytometer
-The biomass is calculated here
-
-```{r}
-#| label: flowcytometer_biomass
-#| 
-
-fns <- list.files(
-  path = file.path(params$output_dir, "flowcytometer_traits"), 
-  recursive = FALSE,
-  full.names = TRUE
-)
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn_traits){
-    fn_dens <- fn_traits |> 
-      gsub(
-        pattern = "/flowcytometer_traits/", 
-        replacement = "/flowcytometer/"
-      )
-    biomass_flowcytometer <- LEEF_1_biomass_flowcytometer(
-      traits = readRDS(fn_traits),
-      density = readRDS(fn_dens)
-    )
-    
-    saveRDS(biomass_flowcytometer$traits, file = fn_traits)
-    saveRDS(biomass_flowcytometer$density, file = fn_dens)
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
-)
-```
-
 ## Add to database and create indices
 Old timestamps will be removed and not be backed up.
 
-```{r addRRD_copy}
+```{r}
+#| label: rrd_copy_1_temp
+#| 
+
 file.copy(params$db, db_name(1, temp = TRUE))
 ```
-```{r addRRD_b16}
-## Bemovi_16
+```{r}
+#| label: add_bemovi16
 
 suppressMessages(
   add_reclassified_to_db(
@@ -1236,8 +1248,8 @@ suppressMessages(
   )
 )
 ```
-```{r addRRD_b25}
-## Bemovi_25
+```{r}
+#| label: add_bemovi25
 
 suppressMessages(
   add_reclassified_to_db(
@@ -1249,8 +1261,8 @@ suppressMessages(
   )
 )
 ```
-```{r addRRD_fc}
-## flowcam
+```{r}
+#| label: add_flowcam
 
 suppressMessages(
   add_reclassified_to_db(
@@ -1263,8 +1275,8 @@ suppressMessages(
 )
 ```
 
-```{r addRRD_fcydens}
-## Flowcytometer Densities
+```{r}
+#| label: add_flowcytometer_density
 
 fns_dens <- list.files(
   path =  file.path(params$output_dir, "flowcytometer"), 
@@ -1276,7 +1288,7 @@ fns_dens <- list.files(
 suppressMessages(
   add_to_db(
     fns_dens,
-    db = db_name(1, temp = TRUE),
+    db = db_name(),
     tables = rep("flowcytometer__flowcytometer_density", length(fns_dens)),
     remove_timestamps = NULL,
     check_timestamps = FALSE,
@@ -1284,16 +1296,16 @@ suppressMessages(
   )
 )
 ```
-```{r addRRD_fcytraits}
-## Flowcytometer Traits
-
-fns_traits <- list.files(
+```{r}
+#| label: add_flowcytometer_traits
+#| 
+ 
+ fns_traits <- list.files(
   path =  file.path(params$output_dir, "flowcytometer_traits"), 
   pattern = "^flowcytometer_traits_bacteria\\..*\\.rds",
   recursive = FALSE, 
   full.names = TRUE
 )
-
 suppressMessages(
   add_to_db(
     fns_traits,
@@ -1305,7 +1317,9 @@ suppressMessages(
   )
 )
 ```
-```{r addRRD_indices}
+```{r}
+#| label: add_indices
+
 RRD_create_indices(
   db_name(1, temp = TRUE), 
   LEEF = "LEEF-1", 
@@ -1314,7 +1328,7 @@ RRD_create_indices(
 
 ```
 ```{r}
-#| label: addRRD_finalize
+#| label: rrd_rename_1
 #| 
 
 file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
@@ -1328,7 +1342,9 @@ The code below recalculates the densities after filtering Stau1 so that only
 particles are kept with high confidence that they are indeed Stau1.
 
 ## Calculate new densities
-```{r species_to_0_bemovi_25_morph_mvt_2}
+```{r}
+#| label: species_to_0_bemovi_25_morph_mvt_2
+#| 
 
 options(RRDdb = db_name(1, temp = FALSE))
 
@@ -1358,7 +1374,7 @@ densityStau1 <- stau1traits %>%
     richness,
     timestamp
   ) %>%
-  summarize(count=n()) %>%
+  summarize(count=n(), biomass = sum(biomass)) %>%
   mutate(density = count * (dilution_factor / volume_imaged))
 
 # Set not found to 0
@@ -1453,7 +1469,7 @@ toc <- readRDS(params$toc) %>%
     by = join_by(bottle)
     ) %>%
   filter(!is.na(conc))
-
+ params <- rmarkdown::yaml_front_matter()params
 colnames_toc <- colnames(toc)
 
 toc$day <- as.Date(as.character(toc$timestamp), "%Y%m%d") - min(as.Date(as.character(toc$timestamp), "%Y%m%d") )

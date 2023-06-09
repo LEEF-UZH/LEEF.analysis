@@ -45,10 +45,7 @@ extract_traits_flowcytometer_archive <- function(
   log10_all = FALSE,
   mc.cores = 1,
   wellid_keyword = "$WELLID"
-){
-  if (length(particles) > 1){
-    stop("Argument particles has to be a character vector of length 1!")
-  }
+) {
 
   dir.create(
     output,
@@ -61,11 +58,11 @@ extract_traits_flowcytometer_archive <- function(
 
   # do the stuff -------------------------------------------------------
 
-  return(
-    pbmcapply::pbmclapply(
-    # parallel::mclapply(
+    biomass_per_bottle <- pbmcapply::pbmclapply(
+    # biomass_per_bottle <- lapply(
         timestamps,
-      function(timestamp){
+      function(timestamp) {
+        biomass_per_bottle <- dplyr::tibble()
         datadir <- file.path(
           extracted_dir,
           paste0("LEEF.fast.flowcytometer.", as.character(timestamp))
@@ -111,34 +108,58 @@ extract_traits_flowcytometer_archive <- function(
         )
 
         if (!is.null(traits)) {
-          # stop("There is something still wrong here!!!")
-          traits[[particles]]$length <- traits[[particles]]$FSC.A * length_slope + length_intercept
-          # traits[[particles]]$length[traits[[particles]]$length <= 0] <- NA
-          ##
-          ## We assume the bacteria to have the shape of an ellipsoid of revolution
-          ## See e.g. https://en.wikipedia.org/wiki/Ellipsoid#Volume
-          ## The volume can be calculated as follows
-          ## V = 4/3 * pi * a * b * c ## we assume, that :
-          ## a = length / 2 ## b = c = a/3 = length / 6
-          ## therefore we have:
-          ## V = 4/3 * pi * (l/2) * (l/6) * (l/6)
-          ## V = 4/3 * pi * l^3 / 72
-          ##
-          traits[[particles]]$volume <- 4/3 * pi * traits[[particles]]$length^3/72
-          traits[[particles]]$biomass <- traits[[particles]]$volume / 10^12
-
-          # traits_sum <- traits[[particles]] %>%
-          #   dplyr::group_by(bottle) %>%
-          #   dplyr::summarise(n = n(), mean = mean(length), sd = sd(length), median = median(length))
-
-          message("Saving timestamp ", timestamp, "...")
-
-
           dir.create(file.path(output), showWarnings = FALSE)
-          saveRDS(
-            object = traits[[particles]],
-            file = file.path(output, paste0("flowcytometer_traits_", particles, ".", timestamp, ".rds"))
-          )
+
+          for (p in particles){
+
+            traits[[p]]$length <- NA
+            traits[[p]]$volume <- NA
+            traits[[p]]$biomass <- NA
+
+            if (p == "bacteria") {
+              # stop("There is something still wrong here!!!")
+
+              traits[[p]]$length <- traits[[p]]$FSC.A * length_slope + length_intercept
+
+              # traits[[p]]$length[traits[[p]]$length <= 0] <- NA
+              ##
+              ## We assume the bacteria to have the shape of an ellipsoid of revolution
+              ## See e.g. https://en.wikipedia.org/wiki/Ellipsoid#Volume
+              ## The volume can be calculated as follows
+              ## V = 4/3 * pi * a * b * c ## we assume, that :
+              ## a = length / 2 ## b = c = a/3 = length / 6
+              ## therefore we have:
+              ## V = 4/3 * pi * (l/2) * (l/6) * (l/6)
+              ## V = 4/3 * pi * l^3 / 72
+              ##
+
+              traits[[p]]$volume <- 4 / 3 * pi * traits[[p]]$length^3 / 72
+              traits[[p]]$biomass <- traits[[p]]$volume / 10^12
+
+            }
+
+            bm <- traits[[p]] |>
+              group_by(bottle) |>
+              summarise(biomass = sum(biomass))
+            bm$species <- p
+
+            if (p != "bacteria") {
+              bm$biomass <- NA
+            }
+
+            biomass_per_bottle <- rbind(
+              biomass_per_bottle,
+              bm
+            )
+            rm(bm)
+
+            saveRDS(
+             object = traits[[p]],
+             file = file.path(output, paste0("flowcytometer_traits_", p, ".", timestamp, ".rds"))
+           )
+
+          }
+
 
         } else {
           message("ERROR in extracting traits in timestamp ", timestamp)
@@ -147,10 +168,12 @@ extract_traits_flowcytometer_archive <- function(
 
         message("Done")
         message("###############################################")
-        invisible(NULL)
+
+        return(biomass_per_bottle)
       },
       mc.preschedule = FALSE,
       mc.cores = mc.cores
     )
-  )
+    names(biomass_per_bottle) <- timestamps
+  return(biomass_per_bottle)
 }
