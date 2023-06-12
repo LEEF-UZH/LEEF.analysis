@@ -1476,7 +1476,7 @@ toc <- readRDS(params$toc) %>%
     by = join_by(bottle)
     ) %>%
   filter(!is.na(conc))
- params <- rmarkdown::yaml_front_matter()params
+
 colnames_toc <- colnames(toc)
 
 toc$day <- as.Date(as.character(toc$timestamp), "%Y%m%d") - min(as.Date(as.character(toc$timestamp), "%Y%m%d") )
