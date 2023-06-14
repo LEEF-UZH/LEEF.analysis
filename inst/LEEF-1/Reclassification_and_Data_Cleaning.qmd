@@ -3,8 +3,6 @@ title: "Reclassification and Data Cleaning"
 author: "Rainer M Krug"
 date: "24/04/2022"
 
-execute: 
-  cache: true
 format:
   html:
     dev: png
@@ -579,6 +577,7 @@ rm(pdir, class_constant, class_increasing, out, moving_background)
 
 fns <- list.files(
   file.path(params$output_dir, "bemovi_mag_16"),
+  pattern = "\\.rds$",
   recursive = FALSE,
   full.names = TRUE
 )
@@ -636,7 +635,10 @@ pbmcapply::pbmclapply(
 
 ## Bemovi 25 - Reclassification
 ### Prepare Bemovi 25
-```{r prepare_bemovi_25}
+```{r}
+#| label: bemovi_25_prepare
+#| 
+
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -665,8 +667,8 @@ timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.", "", timestamps)
 
 ### Classify `bemovi_mag.25` excluding moving_background
 
-```{r classify_bemovi_25}
-
+```{r}
+#| label: bemovi_25_classify
 moving_background <- c(
   "20211013_00058", "20211103_00037", "20211105_00066",
   "20211117_00016", "20211124_00007", "20211210_00031",
@@ -761,7 +763,10 @@ if (!file.exists(out)) {
 ```
 
 ### Clean Up Bemovi 25
-```{r cleanup_bemovi_25}
+```{r}
+#| label: bemovi_25_cleanup
+#| 
+
 unlink(pdir)
 rm(pdir, class_constant, class_increasing, out, moving_background)
 ```
@@ -775,6 +780,7 @@ rm(pdir, class_constant, class_increasing, out, moving_background)
 
 fns <- list.files(
   file.path(params$output_dir, "bemovi_mag_25"),
+  pattern = "\\.rds$",
   recursive = FALSE,
   full.names = TRUE
 )
@@ -817,7 +823,7 @@ pbmcapply::pbmclapply(
       unlink(fn)
     } else {
       x <- readRDS(fn) |>
-        dplyr::mutate(density = NA)
+        dplyr::mutate(density = as.numeric(NA))
       unlink(fn)
       saveRDS(x, file = fn)
     }
@@ -1056,9 +1062,9 @@ download.file(
 
 Regate using H and re-calculate the densities
 
-#### Densities UZH Samples
+#### Densities and Biomass UZH Samples
 ```{r}
-#| label: flowcytometer_densities
+#| label: flowcytometer_densities_biomass
 #| 
 
 ## Select all timestamps
@@ -1070,6 +1076,8 @@ timestamps <- list.files(
   full.names = FALSE
 )
 timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+
+## Density
 
 density_flowcytometer_archive(
   extracted_dir = params$extracted_dir,
@@ -1083,25 +1091,12 @@ density_flowcytometer_archive(
   mc.cores = params$cores
 )
 
-```
-#### Biomass UZH Samples
-```{r}
-#| label: flowcytometer_biomass
-#| 
-
-## Select all timestamps
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+## Biomass
 
 biomass_per_bottle  <- extract_traits_flowcytometer_archive(
   extracted_dir = params$extracted_dir,
   gates_coordinates = read.csv(gates_coordinates),
-  particles = "bacteria",
+  particles = params$flowcytometer_particles,
   use_H = TRUE,
   min_FSC.A = params$min_FSC.A,
   log10_all = TRUE, 
@@ -1111,15 +1106,30 @@ biomass_per_bottle  <- extract_traits_flowcytometer_archive(
   length_intercept =  read.csv(conv_FSCA_length)$intercept,
   mc.cores = params$cores
 )
- ```
+
+## Add biomass to density
+
+pbmcapply::pbmclapply(
+    names(biomass_per_bottle),
+    function(timestamp) {
+        dens_fn <- file.path(params$output_dir, "flowcytometer", paste0("flowcytometer_density.", timestamp, ".rds"))
+        merge(
+            readRDS(dens_fn),
+            biomass_per_bottle[[timestamp]],
+            by = c("sample", "species")
+        ) |>
+            saveRDS(file = dens_fn)
+    }
+)
+```
 
 
-#### Densities EAWAG Samples
+#### Densities and Biomass EAWAG Samples
 
 Now process the EAWAG samples. the previous ones will be replaced, if they exist.
 
 ```{r}
-#| label: flowcytometer_densities_EAWAG
+#| label: flowcytometer_densities_biomass_EAWAG
 #| 
 
 ## Select all timestamps
@@ -1132,6 +1142,8 @@ timestamps <- list.files(
   full.names = FALSE
 )
 timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+
+## density
 
 density_flowcytometer_archive(
   extracted_dir = extracted_EAWAG,
@@ -1144,26 +1156,8 @@ density_flowcytometer_archive(
   particles = params$flowcytometer_particles,
   mc.cores = params$cores
 )
-```
 
-#### Biomass EAWAG Samples
-
-Now process the EAWAG samples. the previous ones will be replaced, if they exist.
-```{r}
-#| label: flowcytometer_biomass_EAWAG
-#| 
-
-## Select all timestamps
-extracted_EAWAG <- gsub("LEEF.archived.data", "LEEF.EAWAG.archived.data", params$extracted_dir)
-
-timestamps <- list.files(
-  path = extracted_EAWAG, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
- 
+## Biomass
 
 biomass_per_bottle <- extract_traits_flowcytometer_archive(
   extracted_dir = extracted_EAWAG,
@@ -1176,9 +1170,11 @@ biomass_per_bottle <- extract_traits_flowcytometer_archive(
   output = file.path(params$output_dir, "flowcytometer_traits_EAWAG"),
   length_slope =  read.csv(conv_FSCA_length)$slope,
   length_intercept =  read.csv(conv_FSCA_length)$intercept,
-  mc.cores = params$cores, 
+  mc.cores = 1, #params$cores, 
   wellid_keyword = "$SMNO"
 )
+
+## Add biomass to density
 
 pbmcapply::pbmclapply(
   names(biomass_per_bottle),
@@ -1187,14 +1183,14 @@ pbmcapply::pbmclapply(
     merge(
         readRDS(dens_fn),
         biomass_per_bottle[[timestamp]],
-        by = c("bottle", "species")
+        by = c("sample", "species")
     ) |>
     saveRDS(file = dens_fn)
   }
 )
 ```
 
-### TODO Merge EAWAG into UZH
+### Merge EAWAG into UZH
 ```{r}
 #| label: flowcytometer_merge
 #| 
@@ -1295,7 +1291,7 @@ fns_dens <- list.files(
 suppressMessages(
   add_to_db(
     fns_dens,
-    db = db_name(),
+    db = db_name(1, temp = TRUE),
     tables = rep("flowcytometer__flowcytometer_density", length(fns_dens)),
     remove_timestamps = NULL,
     check_timestamps = FALSE,
@@ -1307,12 +1303,12 @@ suppressMessages(
 #| label: add_flowcytometer_traits
 #| 
  
- fns_traits <- list.files(
-  path =  file.path(params$output_dir, "flowcytometer_traits"), 
-  pattern = "^flowcytometer_traits_bacteria\\..*\\.rds",
-  recursive = FALSE, 
-  full.names = TRUE
+fns_traits <- list.files(
+    path =  file.path(params$output_dir, "flowcytometer_traits"), 
+    recursive = FALSE, 
+    full.names = TRUE
 )
+
 suppressMessages(
   add_to_db(
     fns_traits,
@@ -1324,6 +1320,30 @@ suppressMessages(
   )
 )
 ```
+
+
+#| label: add_flowcytometer_algae_traits
+#| 
+ 
+fns_traits <- list.files(
+  path =  file.path(params$output_dir, "flowcytometer_traits"), 
+  pattern = "^flowcytometer_traits_algae\\..*\\.rds",
+  recursive = FALSE, 
+  full.names = TRUE
+)
+suppressMessages(
+  add_to_db(
+    fns_traits,
+    db = db_name(1, temp = TRUE),
+    tables = rep("flowcytometer__flowcytometer_algae_traits", length(fns_traits)),
+    remove_timestamps = NULL,
+    check_timestamps = FALSE,
+    backup_removed = TRUE
+  )
+)
+```
+
+
 ```{r}
 #| label: add_indices
 
@@ -1456,7 +1476,7 @@ file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
 
 
 
-# 3. TODO Add O2, Manualcount and TOC measuremnts 
+# 3. Add O2, Manualcount and TOC measuremnts 
 
 ## Prepare
 ```{r}
@@ -1620,7 +1640,25 @@ suppressMessages(
 file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
 ```
 
-# Create Diagnostic Report
+# 4. Rename species and columns
+```{r}
+#| label: rename
+
+file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
+
+RRD_LEEF_1_rename(db = db_name(4, temp = TRUE))
+
+file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
+```
+
+# final. Create final RRD database
+```{r}
+#| label: create final db
+
+file.copy(db_name(4, temp = FALSE), db_name("final", temp = FALSE))
+```
+
+# Create Diagnostic Report from sqlite 3
 The Diagnostic report needs to be created before the renaming as it does rely on the otriginal terminology.
 
 ```{r}
@@ -1636,22 +1674,6 @@ report_diagnostic(
 ```
 
 
-# 4. Rename species and columns
-```{r}
-#| label: rename
-
-file.copy(db_name(3, temp = FALSE), db_name(4, temp = TRUE))
-
-RRD_LEEF_1_rename(db = db_name(4, temp = TRUE))
-
-file.rename(db_name(4, temp = TRUE), db_name(4, temp = FALSE))
-```
-
-```{r}
-#| label: create final db
-
-file.copy(db_name(4, temp = FALSE), db_name("final", temp = FALSE))
-```
 
 # Do a final vacuuming into new database
 Vacuuming the database will take some time!

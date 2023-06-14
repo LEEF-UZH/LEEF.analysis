@@ -19,17 +19,35 @@ RRD_LEEF_1_rename <- function(
 
   # c("TABLE_NAME", "FROM", "TO")
   column_names <- list(
-     c("bemovi_mag_16__mean_density_per_ml", "temperature_treatment", "light_treatment"),
-     c("bemovi_mag_16__morph_mvt", "temperature_treatment", "light_treatment"),
-     c("bemovi_mag_25__mean_density_per_ml", "temperature_treatment", "light_treatment"),
-     c("bemovi_mag_25__mean_density_per_ml_cropped", "temperature_treatment", "light_treatment"),
-     c("bemovi_mag_25__mean_density_per_ml_non_cropped", "temperature_treatment", "light_treatment"),
-     c("bemovi_mag_25__morph_mvt", "temperature_treatment", "light_treatment"),
-     c("bemovi_mag_25__morph_mvt_cropped", "temperature_treatment", "light_treatment"),
-     c("bemovi_mag_25__morph_mvt_non_cropped", "temperature_treatment", "light_treatment"),
-     c("experimetal_design", "temperature", "light_treatment"),
-     c("flowcam__algae_density", "temperature", "light_treatment"),
-     c("flowcam__algae_traits", "temperature", "light_treatment")
+    c("bemovi_mag_16__mean_density_per_ml", "temperature_treatment", "light_treatment"),
+    c("bemovi_mag_16__morph_mvt", "temperature_treatment", "light_treatment"),
+    c("bemovi_mag_25__mean_density_per_ml", "temperature_treatment", "light_treatment"),
+    c("bemovi_mag_25__mean_density_per_ml_cropped", "temperature_treatment", "light_treatment"),
+    c("bemovi_mag_25__mean_density_per_ml_non_cropped", "temperature_treatment", "light_treatment"),
+    c("bemovi_mag_25__morph_mvt", "temperature_treatment", "light_treatment"),
+    c("bemovi_mag_25__morph_mvt_cropped", "temperature_treatment", "light_treatment"),
+    c("bemovi_mag_25__morph_mvt_non_cropped", "temperature_treatment", "light_treatment"),
+    c("experimetal_design", "temperature", "light_treatment"),
+    c("flowcam__algae_density", "temperature", "light_treatment"),
+    c("flowcam__algae_traits", "temperature", "light_treatment"),
+    c("composition", "Chlamydomonas", "Chlamydomonas_reinhardtii"),
+    c("composition", "Cryptomonas", "Cryptomonas_sp"),
+    c("composition", "Monoraphidium", "Monoraphidium_obtusum"),
+    c("composition", "Cosmarium", "Cosmarium_botrytis"),
+    c("composition", "Staurastrum1", "Staurastrum_gracile"),
+    c("composition", "Staurastrum2", "Staurastrum_polytrichum"),
+    c("composition", "Desmodesmus", "Desmodesmus_armatus"),
+    c("composition", "Tetrahymena", "Tetrahymena_thermophila"),
+    c("composition", "Colpidium", "Colpidium_striatum"),
+    c("composition", "Loxocephallus", "Loxocephalus_sp"),
+    c("composition", "Dexiostoma", "Dexiostoma_campylum"),
+    c("composition", "Paramecium_caudatum", "Paramecium_caudatum"),
+    c("composition", "Stylonychia1", "Stylonychia_mytilus"),
+    c("composition", "Stylonychia2", "Stylonychia_sp"),
+    c("composition", "Coleps_irchel", "Coleps_sp"),
+    c("composition", "Paramecium_bursaria", "Paramecium_bursaria"),
+    c("composition", "Euplotes", "Euplotes_daidaleos"),
+    c("composition", "Didinium", "Didinium_nasutum")
   )
 
 

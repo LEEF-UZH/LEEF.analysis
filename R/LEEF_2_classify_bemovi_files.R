@@ -3,8 +3,7 @@
 #' @param datadir `character` vector containing the root directory for all files
 #' @param bemovi_extract_name `character` vector containing the name of the
 #'   bemovi config file including path.
-#' @param classifier_name `character` vector of name of the classifier
-#'   for bemovi 16 including path
+#' @param classifier classifier for bemovi 16 including path
 #' @param exclude_videos file names of videos to exclude. If \code{NULL}, all will be used.
 #'
 #' @return `list` containing three objects:
@@ -21,10 +20,10 @@
 #' @examples
 #'
 #'
-classify_bemovi_files <- function(
+LEEF_2_classify_bemovi_files <- function(
   datadir,
   bemovi_extract_name = NULL,
-  classifier_name,
+  classifier = NULL,
   exclude_videos = NULL
 ){
 
@@ -46,7 +45,7 @@ classify_bemovi_files <- function(
     bemovi_extract = bemovi_extract_name,
     morph_mvt = morph_mvt,
     trajectory_data = traj,
-    classifiers = readRDS(classifier_name),
+    classifiers = classifier,
     video_description_file = as.data.frame(
         read.table(
             file.path(datadir, p$video.description.folder, p$video.description.file), 

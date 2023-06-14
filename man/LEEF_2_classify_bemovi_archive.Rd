@@ -5,12 +5,11 @@
 \title{Classify bemovi data by using the archived data}
 \usage{
 LEEF_2_classify_bemovi_archive(
-  archive_dir = "/Users/rainerkrug/MountainDuck/LEEFSwift3",
+  extracted_dir = NULL,
   magnification = 16,
-  bemovi_extract_name = "bemovi_extract.yml",
-  species_tracked = NULL,
+  bemovi_extract_name = NULL,
   timestamps,
-  classifier_name = "svm_video_classifiers_16x.rds",
+  classifier = NULL,
   output,
   exclude_videos = NULL,
   mc.cores = 1
@@ -23,18 +22,17 @@ LEEF_2_classify_bemovi_archive(
 the analysis in the directory of the data. The directory depends on the
 \code{root_dir}, \code{magnification} and \code{timestamp}}
 
-\item{species_tracked}{names of the species tracked as a character vector. If
-\code{NULL} the species tracked from the \code{bemovi_extract_file}  will be used.}
-
 \item{timestamps}{\code{character} vector containing the timestamps to be classified}
 
-\item{classifier_name}{\code{character} vector of name of the classifier for bemovi 16 including path}
+\item{classifier}{classifier for bemovi 16 including path}
 
 \item{output}{path to which the classified data will be saved as \code{rds}}
 
 \item{exclude_videos}{file names of videos to exclude. If \code{NULL}, all will be used.}
 
 \item{mc.cores}{number of cores to be used. Defaults to 1}
+
+\item{directory}{with extracted data}
 }
 \value{
 invisible \code{NULL}

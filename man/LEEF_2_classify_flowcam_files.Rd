@@ -7,7 +7,7 @@
 LEEF_2_classify_flowcam_files(
   datadir,
   algae_traits_name = "algae_traits_filtered.rds",
-  classifier_name = "svm_flowcam_classifiers.rds",
+  classifier = NULL,
   timestamp = "55555555",
   species_tracked = NULL,
   bottle = NULL
@@ -19,8 +19,7 @@ LEEF_2_classify_flowcam_files(
 \item{algae_traits_name}{\code{character} vector containing the name of the algae
 traits file without path}
 
-\item{classifier_name}{\code{character} vector of name of the classifier
-for flowcam}
+\item{classifier}{classifier for flowcam}
 
 \item{timestamp}{timestamp to be used to stamp the classified data}
 

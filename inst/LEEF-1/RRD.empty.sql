@@ -15,6 +15,7 @@ CREATE TABLE `flowcam__algae_density` (
 );
 CREATE TABLE `flowcytometer__flowcytometer_traits` (
   `sample` TEXT,
+  `species` TEXT,
   `fsc.a` REAL,
   `ssc.a` REAL,
   `fl1.a` REAL,

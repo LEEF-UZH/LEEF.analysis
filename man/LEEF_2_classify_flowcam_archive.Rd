@@ -5,10 +5,10 @@
 \title{Classify algae_traits data.frame}
 \usage{
 LEEF_2_classify_flowcam_archive(
-  archive_dir = "/Users/rainerkrug/MountainDuck/LEEFSwift3",
+  extracted_dir = NULL,
   timestamps,
   algae_traits_name = "algae_traits_filtered.rds",
-  classifier_name = "svm_flowcam_classifiers.rds",
+  classifier = NULL,
   species_tracked = NULL,
   output,
   mc.cores = 1,
@@ -16,9 +16,11 @@ LEEF_2_classify_flowcam_archive(
 )
 }
 \arguments{
+\item{extracted_dir}{path to the extracted data}
+
 \item{timestamps}{\code{character} vector containing the timestamps to be classified}
 
-\item{classifier_name}{the classifier for flowcytometer}
+\item{classifier}{classifier for flowcytometer}
 
 \item{species_tracked}{names of the species tracked as a character vector. If \code{NULL} it will be read from the original configuration file in the \code{datadir}.}
 

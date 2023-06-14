@@ -111,7 +111,7 @@ LEEF_2_biomass_flowcam <- function(
     ) %>%
     mutate(
       biomass = biomass/volume_imaged,
-      biomass = ifelse(!(species %in% flowcam_biomass_species), NA, biomass)
+      biomass = ifelse(!(species %in% flowcam_biomass_species), as.numeric(NA), biomass)
     ) %>% # add biomass=NA if not a species
     select(-volume_imaged)
 

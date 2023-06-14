@@ -13,13 +13,12 @@ format:
     code_folding: hide  
     embed-resources: true
 params:
-  release: "v2.3.1-LEEF-2"
+  release: "v2.3.2-LEEF-2"
   repo: "https://github.com/LEEF-UZH/LEEF.parameter/"
-  output_dir: "~/RRD.Reclassification_final_LEEF-2/"
-  db: "/LEEF-2.RRD.sqlite"
-  pre_processed_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
-  extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
-  toc: "/Volumes/LEEF/0.TOC/LEEF-1/toc.rds"
+  output_dir: "/Volumes/RRD.Reclassification_final/RRD.Reclassification_final_LEEF-2/"
+  db: "LEEF-2.RRD.sqlite"
+  extracted_dir: "/Volumes/LEEF-2_archive/archive/extracted/"
+  toc: "/Volumes/LEEF/0.TOC/LEEF-2/toc.rds"
   min_FSC.A: 2
   cores: 7
   remove_all:
@@ -49,6 +48,9 @@ params:
 #| label: setup
 #| include: false 
 #| 
+if (!exists("params")){
+   params <- rmarkdown::yaml_front_matter('~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/Reclassification_and_Data_Cleaning.qmd')$params
+}
 
 knitr::opts_chunk$set(
   echo = TRUE,
@@ -114,13 +116,6 @@ dir.create(params$output_dir, recursive = TRUE, showWarnings = FALSE)
 
 ## 3. -----
 
-if (!file.exists(params$pre_processed_dir)){
-  warning(
-    "This is not a problem when not reclassifying! \n",
-    "Archive directory '", params$archive_dir, "' does not exist!\n",
-    "Probably not mounted?" 
-  )
-}
 if (!file.exists(params$extracted_dir)){
   warning(
     "This is not a problem when not reclassifying! \n",
@@ -177,19 +172,18 @@ if (file.exists(db())) {
 # 1. Re-calculations for all timestamps
 ## Reclassification of Flowcam
 
-### Prepare Flowcam
+### Timestamps Flowcam
 ```{r}
-#| label: flowcam_prepare
+#| label: flowcam_timestamps
 #| 
 
 timestamps <- list.files(
   path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcam\\.",
+  pattern = "^LEEF\\.flowcam\\.flowcam\\.",
   recursive = FALSE, 
   full.names = FALSE
 )
-timestamps <- gsub("^LEEF\\.fast\\.flowcam\\.", "", timestamps)
-timestamps <- 
+timestamps <- gsub("^LEEF\\.flowcam\\.flowcam\\.", "", timestamps)
 ```
 
 ### Classify Flowcam
@@ -198,16 +192,16 @@ timestamps <-
 #| 
 
 out <- file.path(params$output_dir, "flowcam")
+
 if (!file.exists(out)) {
   message("Classifying flowcam...")
   system.time(
     LEEF_2_classify_flowcam_archive(
-      archive_dir = file.path(params$extracted_dir, ".."), 
+      extracted_dir = params$extracted_dir, 
       timestamps = timestamps, 
       algae_traits_name = "algae_traits_filtered.rds", 
-      classifier_cname = "svm_flowcam_classifiers.rds", 
-      classifier_increasing_name = "svm_flowcam_classifiers.rds", 
-      species_tracked = yaml::read_yaml(paste0(base, "parameter/flowcam/flowcam.yml"))$species_tracked,
+      classifier = readRDS(file.path(parameter_dir, "parameter", "0.raw.data", "flowcam", "svm_flowcam_classifiers.rds")), 
+      species_tracked = yaml::read_yaml(file.path(parameter_dir, "parameter", "0.raw.data", "flowcam", "flowcam.yml"))$species_tracked,
       output = out,
       mc.cores = params$cores
     )
@@ -215,7 +209,7 @@ if (!file.exists(out)) {
 } else {
   message(
     "Directory ", out, "exists\n",
-    "skipping Flowcam."
+    "skipping Flowcam classification."
   )
 }
 ```
@@ -230,12 +224,12 @@ rm(timestamps)
 ```
 
 
-### Calculate Biomass Flowcam
+### TODO Calculate Biomass Flowcam
 The biomass is calculated here
 
 ```{r}
 #| label: flowcam_biomass
-#| 
+#| eval: false
 
 fns <- list.files(
   path = file.path(params$output_dir, "flowcam"), 
@@ -263,14 +257,13 @@ pbmcapply::pbmclapply(
   mc.preschedule = FALSE,
   mc.cores = params$cores
 )
-
 ```
 
 
-## Bemovi 16 - Reclassification
-### Prepare Bemovi 16
+## Reclassification of Bemovi 16
+### Timestamps Bemovi 16
 ```{r}
-#| label: bemovi_16_prepare
+#| label: bemovi_16_timestamps
 #| 
 
 timestamps <- list.files(
@@ -283,32 +276,30 @@ timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.", "", timestamps)
 ```
 
 ### Classify `bemovi_extract.mag.16.yml`
-```{r classify_bemovi_16}
+```{r}
+#| label: bemovi_16_classify
+#| 
+
 moving_background <- NULL
 
 out <- file.path(params$output_dir, "bemovi_mag_16")
 
 if (!file.exists(out)) {
   message("Classifying bemovi_extract.mag.16")
-  system.time(
-    suppressMessages(
-      LEEF_2_classify_bemovi_archive( 
-        timestamps = timestamps, 
-        archive_dir = params$archive_dir, 
-        magnification = 16, 
-        classifier_name = "svm_video_classifiers_16x.rds", 
-        bemovi_extract_name = "bemovi_extract.mag.16.yml", 
-        species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.16/bemovi_extract.mag.16.yml"))$species_tracked,
-        output = out,
-        exclude_videos = moving_background,
-        mc.cores = params$cores
-      )
-    )
+  LEEF_2_classify_bemovi_archive( 
+    timestamps = timestamps, 
+    extracted_dir = params$extracted_dir, 
+    magnification = 16, 
+    classifier = readRDS(file.path(parameter_dir, "parameter", "0.raw.data", "bemovi.mag.16", "svm_video_classifiers_16x.rds")), 
+    bemovi_extract_name = file.path(parameter_dir, "parameter", "0.raw.data", "bemovi.mag.16", "bemovi_extract.mag.16.yml"), 
+    output = out,
+    exclude_videos = moving_background,
+    mc.cores = params$cores
   )
 } else {
   message(
     "Directory ", out, " exists\n",
-    "Skipping 'bemovi_extract.mag.16.'"
+    "Skipping bemovi_extract.mag.16 classification."
   )
 }
 ```
@@ -321,11 +312,12 @@ if (!file.exists(out)) {
 rm(timestamps)
 ```
 
-### Calculate Biomass Bemovi 16
+### TODO Calculate Biomass Bemovi 16
 The biomass is calculated here
 
 ```{r}
 #| label: bemovi_16_biomass
+#| eval: false
 #| 
 
 fns <- list.files(
@@ -335,33 +327,49 @@ fns <- list.files(
   full.names = TRUE
 )
 
-pbmcapply::pbmclapply(
+# pbmcapply::pbmclapply(
+lapply(
   fns,
   function(fn_traits){
-    fn_dens <- fn_traits |> 
-      gsub(
-        pattern = "morph_mvt", 
-        replacement = "mean_density_per_ml"
-      )
+    fn_dens <- fn_traits |>
+        gsub(
+            pattern = "morph_mvt",
+            replacement = "mean_density_per_ml"
+        )
+    timestamp <- substr(
+        fn_traits,
+        start = nchar(fn_traits) - 11,
+        stop = nchar(fn_traits) - 4
+    ) |>
+        as.numeric()
+
+    traits <- readRDS(fn_traits) |>
+      mutate(timestamp = timestamp)
+
+    dens$timestamp <- timestamp 
+
     biomass_bemovi_16 <- LEEF_2_biomass_bemovi_16(
-      ciliate_traits_16 = readRDS(fn_traits),
+      ciliate_traits_16 = traits,
       ciliate_density_16 = readRDS(fn_dens)
     )
+    # select the last 12 characters of a string
     
+
+
     saveRDS(biomass_bemovi_16$traits, file = fn_traits)
     saveRDS(biomass_bemovi_16$density, file = fn_dens)
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
+  }# , 
+  # mc.preschedule = FALSE,
+  # mc.cores = params$cores
 )
 
 ```
 
 
-## Bemovi 25 - Reclassification of 
-### Prepare Bemovi 25
+## Reclassification of Bemovi 25
+### Timestamps Bemovi 25
 ```{r}
-#| label: bemovi_25_prepare
+#| label: bemovi_25_timestamps
 
 timestamps <- list.files(
   path = params$extracted_dir, 
@@ -372,9 +380,11 @@ timestamps <- list.files(
 timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.25\\.bemovi\\.", "", timestamps)
 ```
 
-### Classify `bemovi_mag.25` excluding moving_background
+### TODO Classify `bemovi_mag.25` excluding moving_background
 
-```{r classify_bemovi_25}
+```{r}
+#| label: bemovi_25_classify
+#| 
 
 moving_background <- NULL
 
@@ -384,11 +394,9 @@ if (!file.exists(out)) {
     suppressMessages(
       LEEF_2_classify_bemovi_archive( 
         timestamps = timestamps, 
-        archive_dir = params$archive_dir, 
         magnification = 25, 
-        classifier_name = "svm_video_classifiers_25x.rds", 
-        bemovi_extract_name = "bemovi_extract.mag.25.yml", 
-        species_tracked = yaml::read_yaml(paste0(base, "parameter/bemovi.mag.25/bemovi_extract.mag.25.yml"))$species_tracked,
+        classifier = readRDS(file.path(parameter_dir, "parameter", "0.raw.data", "bemovi.mag.16", "svm_video_classifiers_25x.rds")), 
+        bemovi_extract_name = file.path(parameter_dir, "parameter", "0.raw.data", "bemovi.mag.16", "bemovi_extract.mag.25.yml"),
         output = out,
         exclude_videos = moving_background,
         mc.cores = params$cores
@@ -399,7 +407,6 @@ if (!file.exists(out)) {
     suppressMessages(
       LEEF_2_classify_bemovi_archive( 
         timestamps = timestamps, 
-        archive_dir = params$archive_dir, 
         magnification = 25, 
         classifier_name = "svm_video_classifiers_25x.rds", 
         bemovi_extract_name = "bemovi_extract.mag.25.non_cropped.yml", 
@@ -428,7 +435,7 @@ if (!file.exists(out)) {
 } else {
   message(
     "Directory ", out, "exists\n",
-    "Skipping 'bemovi_mag_25'"
+    "Skipping all bemovi_mag_25 classifcations"
   )
 }
 ```
@@ -442,12 +449,12 @@ rm(timestamps)
 ```
 
 
-### Calculate Biomass Bemovi 25
+### TODO Calculate Biomass Bemovi 25
 The biomass is calculated here
 
 ```{r}
 #| label: bemovi_25_biomass
-#| 
+#| eval: false
 
 ## Bemovi 25
 
@@ -535,149 +542,26 @@ pbmcapply::pbmclapply(
   mc.preschedule = FALSE,
   mc.cores = params$cores
 )
-
 ```
 
 
-## TODO Flowcytometer
-
-### Prepare Flowcytometer
-```{r prepare_flowcytometer}
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
-```
-
-### Flowcytometer densities
-
-Regate using H and re-calculate the densities
-TODO
-[ ] Port modifications from LEEF-1 flowcytometer density extraction to LEEF-2 branch
-[ ] Change code here for LEEF-2
-```{r densities}
-
-density_flowcytometer_archive(
-  extracted_dir = params$extracted_dir,
-  gates_coordinates = read.csv(gates_coordinates),
-  timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer"),
-  use_H = TRUE,
-  min_FSC.A = params$min_FSC.A,
-  log10_all = TRUE,
-  particles = "bacteria",
-  mc.cores = params$cores
-)
-
-```
 
 
-### Trait Extraction Flowcytometer and Volume Calculation
 
-```{r biomass}
-## Select all timestamps
-timestamps <- list.files(
-  path = params$extracted_dir, 
-  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
-  recursive = FALSE, 
-  full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
-
-extract_traits_flowcytometer_archive(
-  extracted_dir = params$extracted_dir,
-  gates_coordinates = read.csv(gates_coordinates),
-  particles = "bacteria",
-  use_H = TRUE,
-  min_FSC.A = params$min_FSC.A,
-  log10_all = TRUE, 
-  timestamps = timestamps,
-  output = file.path(params$output_dir, "flowcytometer_traits"),
-  length_slope =  read.csv(conv_FSCA_length)$slope,
-  length_intercept =  read.csv(conv_FSCA_length)$intercept,
-  mc.cores = params$cores
-)
-```
-
-
-### Flowcytometer select species needed
-This can only be done in densities!
-
-```{r}
-#| label: flowcytometer_remove_categories
-#| 
-
-fns <- list.files(
-  file.path(params$output_dir, "flowcytometer"),
-  recursive = FALSE,
-  full.names = TRUE
-)
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn){
-    x <- readRDS(fn) |>
-      dplyr::filter(species %in% params$keep_flowcytometer)
-    unlink(fn)
-    saveRDS(x, file = fn)
-  }, 
-  mc.cores = params$cores
-)
-```
-
-### Clean Up Floowcytometer
-```{r}
-#| label: bemovi_16_cleanup
-#| 
-
-rm(timestamps)
-```
-
-
-### Calculate Biomass Flowcytometer
-The biomass is calculated here
-
-```{r}
-#| label: flowcytometer_biomass
-#| 
-
-fns <- list.files(
-  path = file.path(params$output_dir, "flowcytometer_traits"), 
-  recursive = FALSE,
-  full.names = TRUE
-)
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn_traits){
-    fn_dens <- fn_traits |> 
-      gsub(
-        pattern = "/flowcytometer_traits/", 
-        replacement = "/flowcytometer/"
-      )
-    biomass_flowcytometer <- LEEF_1_biomass_flowcytometer(
-      traits = readRDS(fn_traits),
-      density = readRDS(fn_dens)
-    )
-    
-    saveRDS(biomass_flowcytometer$traits, file = fn_traits)
-    saveRDS(biomass_flowcytometer$density, file = fn_dens)
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
-)
-```
 
 ## TODO Add to database and create indices
 Old timestamps will be removed and not be backed up.
 
-```{r addRRD_copy}
+```{r}
+#| label: addRRD_copy_temp
+#| 
+
 file.copy(db(), db(1, temp = TRUE))
 ```
-```{r addRRD_b16}
+```{r}
+#| label: addRRD_b16
+#| 
+
 ## Bemovi_16
 
 suppressMessages(
@@ -690,7 +574,10 @@ suppressMessages(
   )
 )
 ```
-```{r addRRD_b25}
+```{r}
+#| label: addRRD_b25
+#| 
+
 ## Bemovi_25
 
 suppressMessages(
@@ -703,7 +590,10 @@ suppressMessages(
   )
 )
 ```
-```{r addRRD_fc}
+```{r}
+#| label: addRRD_flowcam
+#| 
+
 ## flowcam
 
 suppressMessages(
@@ -717,15 +607,22 @@ suppressMessages(
 )
 ```
 
-```{r addRRD_fcydens}
+```{r}
+#| label: addRRD_flowcytometer_density
+#| eval: false
+#| 
+
 ## Flowcytometer Densities
 
-fns_dens <- list.files(
-  path =  file.path(params$output_dir, "flowcytometer"), 
-  pattern = "^flowcytometer_density\\..*\\.rds",
-  recursive = FALSE, 
-  full.names = TRUE
-)
+f_dirs <- list.dirs(
+    params$extracted_dir,
+    recursive = FALSE,
+    full.names = TRUE
+) |>
+    grep(pattern = "LEEF\\.flowcytometer\\.flowcytometer\\.", value = TRUE)
+
+fns_dens <- file.path(f_dirs, "flowcytometer_density.csv")
+
 
 suppressMessages(
   add_to_db(
@@ -737,15 +634,26 @@ suppressMessages(
     backup_removed = TRUE
   )
 )
+
+rm(f_dirs, fns_dens)
 ```
-```{r addRRD_fcytraits}
+```{r}
+#| label:  addRRD_flowcytometer_traits
+#| eval: false
+#| 
+
 ## Flowcytometer Traits
 
-fns_traits <- list.files(
-  path =  file.path(params$output_dir, "flowcytometer_traits"), 
-  pattern = "^flowcytometer_traits_bacteria\\..*\\.rds",
-  recursive = FALSE, 
-  full.names = TRUE
+f_dirs <- list.dirs(
+    params$extracted_dir,
+    recursive = FALSE,
+    full.names = TRUE
+) |>
+    grep(pattern = "LEEF\\.flowcytometer\\.flowcytometer\\.", value = TRUE)
+
+fn_traits <- c(
+    file.path(f_dirs, "flowcytometer_traits_algae.rds"),
+    file.path(f_dirs, "flowcytometer_traits_bacteria.rds")
 )
 
 suppressMessages(
@@ -758,8 +666,13 @@ suppressMessages(
     backup_removed = TRUE
   )
 )
+
+rm(f_dirs, fn_traits)
 ```
-```{r addRRD_indices}
+```{r}
+#| label: addRRD_add_indices
+#| 
+
 RRD_create_indices(
   db_name(1, temp = TRUE), 
   LEEF = "LEEF-1", 

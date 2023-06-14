@@ -61,7 +61,7 @@ LEEF_1_biomass_bemovi_16 <- function(
       biomass = biomass*extrapolation.factor_16,
       biomass = ifelse(
         !(species %in% video_biomass_species),
-        NA,
+        as.numeric(NA),
         biomass
       )
     ) # add biomass=NA if not a species

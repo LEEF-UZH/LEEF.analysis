@@ -3,8 +3,7 @@
 #' @param datadir `character` vector containing the root directory for all files
 #' @param algae_traits_name `character` vector containing the name of the algae
 #'   traits file without path
-#' @param classifier_name `character` vector of name of the classifier
-#'   for flowcam
+#' @param classifier classifier for flowcam
 #' @param timestamp timestamp to be used to stamp the classified data
 #' @param species_tracked names of the species tracked as a character vector.
 #'   If `NULL` it will be read from the original configuration file in the `datadir`.
@@ -25,7 +24,7 @@
 LEEF_2_classify_flowcam_files <- function(
   datadir,
   algae_traits_name = "algae_traits_filtered.rds",
-  classifier_name = "svm_flowcam_classifiers.rds",
+  classifier = NULL,
   timestamp = "55555555",
   species_tracked = NULL,
   bottle = NULL
@@ -60,7 +59,7 @@ LEEF_2_classify_flowcam_files <- function(
 
   classified <- LEEF.2.measurement.flowcam::classify_LEEF_2(
     algae_traits = dat,
-    classifiers = readRDS(classifier_name),
+    classifiers = classifier,
     exp_design = read.csv(file.path(datadir, "experimental_design.csv")),
     species_tracked = species_tracked,
     timestamp = timestamp

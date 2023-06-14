@@ -59,7 +59,7 @@ extract_traits_flowcytometer_archive <- function(
   # do the stuff -------------------------------------------------------
 
     biomass_per_bottle <- pbmcapply::pbmclapply(
-    # biomass_per_bottle <- lapply(
+    # biomass_per_bottle <- parallel::mclapply(
         timestamps,
       function(timestamp) {
         biomass_per_bottle <- dplyr::tibble()
@@ -112,16 +112,16 @@ extract_traits_flowcytometer_archive <- function(
 
           for (p in particles){
 
-            traits[[p]]$length <- NA
-            traits[[p]]$volume <- NA
-            traits[[p]]$biomass <- NA
+            traits[[p]]$length <- as.numeric(NA)
+            traits[[p]]$volume <- as.numeric(NA)
+            traits[[p]]$biomass <- as.numeric(NA)
 
             if (p == "bacteria") {
               # stop("There is something still wrong here!!!")
 
               traits[[p]]$length <- traits[[p]]$FSC.A * length_slope + length_intercept
 
-              # traits[[p]]$length[traits[[p]]$length <= 0] <- NA
+              # traits[[p]]$length[traits[[p]]$length <= 0] <- as.numeric(NA)
               ##
               ## We assume the bacteria to have the shape of an ellipsoid of revolution
               ## See e.g. https://en.wikipedia.org/wiki/Ellipsoid#Volume
@@ -139,12 +139,12 @@ extract_traits_flowcytometer_archive <- function(
             }
 
             bm <- traits[[p]] |>
-              group_by(bottle) |>
+              group_by(sample) |>
               summarise(biomass = sum(biomass))
             bm$species <- p
 
             if (p != "bacteria") {
-              bm$biomass <- NA
+              bm$biomass <- as.numeric(NA)
             }
 
             biomass_per_bottle <- rbind(
@@ -153,6 +153,8 @@ extract_traits_flowcytometer_archive <- function(
             )
             rm(bm)
 
+            traits[[p]]$species <- p
+            
             saveRDS(
              object = traits[[p]],
              file = file.path(output, paste0("flowcytometer_traits_", p, ".", timestamp, ".rds"))

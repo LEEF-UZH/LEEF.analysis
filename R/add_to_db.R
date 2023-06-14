@@ -87,7 +87,7 @@ add_to_db <- function(
           return <- FALSE
         }
       }
-      DBI::dbBegin(conn)
+      # DBI::dbBegin(conn)
       DBI::dbWriteTable(
         conn,
         name = tables[i],
@@ -95,7 +95,7 @@ add_to_db <- function(
         overwrite = FALSE,
         append = TRUE
       )
-      DBI::dbCommit(conn)
+      # DBI::dbCommit(conn)
       return(TRUE)
     }
   )

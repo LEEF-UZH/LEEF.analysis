@@ -78,9 +78,9 @@ get_column_info <- function(
   )
   if (!mimema_d){
     mimema <- c(
-      min = NA,
-      mean = NA,
-      max = NA,
+      min = as.numeric(NA),
+      mean = as.numeric(NA),
+      max = as.numeric(NA),
       no_distict_values = mimema[["no_distict_values"]]
     )
   }
@@ -93,7 +93,7 @@ get_column_info <- function(
       max_values = max_values
     )
   } else {
-    values <- NA
+    values <- as.numeric(NA)
   }
 
   result <- data.frame(
