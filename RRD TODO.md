@@ -12,6 +12,8 @@
 - [ ] density 0 -> biomass = 0
 - [ ] water chemistry timstamps (raw data, leg. missing. or mia)
 - [x] Renaming coli=nd `composition`
+- [ ] flowcam b_02 biomass is NULL
+
 
 ## LEEF 2
 

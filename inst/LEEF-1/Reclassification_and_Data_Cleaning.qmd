@@ -53,7 +53,10 @@ Make sure, that the S3 LEEF archive is mounted and you know the path to the arch
 #| label: setup
 #| include: false
 #| 
- 
+ if (!exists("params")){
+   params <- rmarkdown::yaml_front_matter('~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-1/Reclassification_and_Data_Cleaning.qmd')$params
+ }
+
  knitr::opts_chunk$set(
   echo = TRUE,
   eval = TRUE,
@@ -197,7 +200,10 @@ if (file.exists(params$db)) {
 ## Reclassification of Flowcam
 
 ### Prepare Flowcam
-```{r prepare_flowcam}
+```{r}
+#| label: flowcam_prepare
+#| 
+
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -225,8 +231,8 @@ timestamps <- gsub("^LEEF\\.fast\\.flowcam\\.", "", timestamps)
 ```
 
 ### Classify Flowcam up to 20220704
-```{r classify_flowcam}
-
+```{r}
+#| label:  flowcam_classify
 
 out <- file.path(params$output_dir, "flowcam")
 if (!file.exists(out)) {
@@ -253,7 +259,10 @@ if (!file.exists(out)) {
 
 
 ### Clean Up Flowcam
-```{r cleanup_flowcam}
+```{r}
+#| label: cleanup_flowcam
+#| 
+
 unlink(pdir)
 rm(class_constant, class_increasing, out)
 ```
@@ -261,21 +270,17 @@ rm(class_constant, class_increasing, out)
 ### Flowcam Bottle `b_02`
 Bottle `b_02` was contaminated and needs to be classified separately. All timestamps will be classified using the same classifier.
 
-#### Set Bottle and range of timestamps
-```{r bot_after_until}
+
+#### Set bottle and Determine timestamps
+All available after `20220504` data will be reclassified and are determined below based on the archived data.
+```{r}
+#| label: flowcam_bottle_timestamps
+#| 
+
 bott <- "b_02"
 after <- 20220128
 until <- 30000000
-```
 
-#### Set output path
-```{r output_path_b}
-out <- file.path(params$output_dir, "flowcam.b_02")
-```
-
-#### Determine timestamps
-All available after `20220504` data will be reclassified and are determined below based on the archived data.
-```{r flowcam_timestamps}
 timestamps <- list.files(
   path = params$extracted_dir, 
   pattern = "^LEEF\\.fast\\.flowcam\\.",
@@ -291,7 +296,10 @@ timestamps
 
 
 #### Prepare Flowcam
-```{r prepare_flowcam_2}
+```{r}
+#| label: flowcam_bottle_prepare
+#| 
+
 pdir <- tempfile()
 dir.create(pdir, showWarnings = FALSE, recursive = TRUE)
 
@@ -311,7 +319,10 @@ download.file(
 ```
 
 #### Classify Flowcam b_02 up to 20220704
-```{r classify_flowcam_1}
+```{r}
+#| label: flowcam_bottle_classify
+out <- file.path(params$output_dir, "flowcam.b_02")
+
 message("Classifying flowcam...")
 system.time(
   classify_flowcam_archive(
@@ -329,7 +340,10 @@ system.time(
 ```
 
 #### Clean Up Flowcam
-```{r cleanup_flowcam_1}
+```{r}
+#| label: flowcam_bottle_cleanup
+#| 
+
 unlink(pdir)
 rm(class_constant, class_increasing)
 ```
@@ -361,10 +375,38 @@ pbmcapply::pbmclapply(
 
 ```
 
+### Flowcam remove species not needed
+
+```{r}
+#| label: flowcam_remove_species
+#| 
+
+fns <- list.files(
+  file.path(params$output_dir, "flowcam"),
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  fns,
+  function(fn){
+    x <- readRDS(fn) |>
+      dplyr::filter(!(species %in% c(params$remove_all, params$remove_flowcam)))
+    # if ("airbubbles" %in% unique(x$species)) {browser()}
+    unlink(fn)
+    saveRDS(x, file = fn)
+  }, 
+  mc.preschedule = FALSE,
+  mc.cores = params$cores
+)
+```
 
 ### Adding density=0 for some special cases
 
-```{r man_correction}
+```{r}
+#| label: flowcam_man_correction
+#| 
+
 cont_timestamp <- 20220128
 cont_bottle <- "b_02"
 
@@ -425,31 +467,6 @@ pbmcapply::pbmclapply(
   },
   mc.cores = params$cores, 
   mc.preschedule = FALSE
-)
-```
-### Flowcam remove species not needed
-
-```{r}
-#| label: flowcam_remove_species
-#| 
-
-fns <- list.files(
-  file.path(params$output_dir, "flowcam"),
-  recursive = FALSE,
-  full.names = TRUE
-)
-
-pbmcapply::pbmclapply(
-  fns,
-  function(fn){
-    x <- readRDS(fn) |>
-      dplyr::filter(!(species %in% c(params$remove_all, params$remove_flowcam)))
-    # if ("airbubbles" %in% unique(x$species)) {browser()}
-    unlink(fn)
-    saveRDS(x, file = fn)
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
 )
 ```
 
@@ -1322,27 +1339,6 @@ suppressMessages(
 ```
 
 
-#| label: add_flowcytometer_algae_traits
-#| 
- 
-fns_traits <- list.files(
-  path =  file.path(params$output_dir, "flowcytometer_traits"), 
-  pattern = "^flowcytometer_traits_algae\\..*\\.rds",
-  recursive = FALSE, 
-  full.names = TRUE
-)
-suppressMessages(
-  add_to_db(
-    fns_traits,
-    db = db_name(1, temp = TRUE),
-    tables = rep("flowcytometer__flowcytometer_algae_traits", length(fns_traits)),
-    remove_timestamps = NULL,
-    check_timestamps = FALSE,
-    backup_removed = TRUE
-  )
-)
-```
-
 
 ```{r}
 #| label: add_indices
@@ -1571,7 +1567,8 @@ saveRDS(toc, toc_det)
 
 add_to_db(
   toc_det,
-  db = db_name(3, temp = TRUE),
+  # db = db_name(3, temp = TRUE),
+  db = db_name("final", temp = FALSE),
   tables = "toc__toc",
   remove_timestamps = NULL,
   check_timestamps = TRUE,
@@ -1664,6 +1661,7 @@ The Diagnostic report needs to be created before the renaming as it does rely on
 ```{r}
 #| label: createDiagReport
 #| 
+options(knitr.duplicate.label = "allow")
 
 report_diagnostic(
   db = db_name(3, temp = FALSE),  
@@ -1671,6 +1669,8 @@ report_diagnostic(
   suffix = paste0("reclassified_", params$version_tag), 
   format = "html"
 )
+
+options(knitr.duplicate.label = NULL)
 ```
 
 

@@ -457,7 +457,7 @@ CREATE TABLE `toc__toc` (
   `conc_23` REAL,
   `conc_org` REAL
 );
-CREATE TABLE IF NOT EXISTS "flowcam__algae_traits" (
+CREATE TABLE 'flowcam__algae_traits' (
 	"particle_id"	INTEGER,
 	"area_abd"	REAL,
 	"area_filled"	REAL,
@@ -684,7 +684,7 @@ FROM
      'manualcount' AS measurement,
      species,
      density,
-     'NA' AS biomass
+     NULL AS biomass
    FROM
      manualcount__manualcount_density
   )

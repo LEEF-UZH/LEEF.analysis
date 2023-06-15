@@ -21,7 +21,7 @@ library(here)
 set.seed(1)
 options(dplyr.summarise.inform = FALSE)
 
-options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_4.sqlite")
+options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_final.sqlite")
 
 # options(RRDdb = "LEEF.RRD.v1.8.5_4.sqlite")
 # options(RRDdb = "/Volumes/LEEF/0.RRD/LEEF-1/LEEF.RRD.sqlite")
@@ -31,6 +31,7 @@ densities <- db_read_table(table = "density") %>%
   arrange(day) 
 # CHECK: Code in previous 3 lines give the below message, which seems indicate a problem in the data
 # Column `biomass`: mixed type, first seen values of type real, coercing other values of type string
+# RMK: Fixed
 
 o2 <- db_read_table(table = "o2") %>% collect()
 
@@ -51,8 +52,11 @@ vars <- c("Coleps sp.","Paramecium bursaria","Paramecium caudatum",
 all(vars %in% unique(densities$species)) 
 idx <- unique(densities$species) %in% vars
 idx
+# RMK: OK
+
 # CHECK: must be empty
 unique(densities$species)[!idx]
+# RMK: OK
 
 ## Next check: missing timestamps
 
@@ -61,8 +65,10 @@ unique(densities$species)[!idx]
 # CHECK: length should be 123
 timestamps <- unique(densities$timestamp)
 length(timestamps)
+# RMK OK
 
 # CHECK: The following data.frame should be empty
+# TODO RMK
 missing_timestamps <- densities %>%
   group_by(measurement, species, bottle) %>%
   summarize(missing_timestamps = as.numeric(timestamps[which(!(timestamps %in% unique(timestamp)))])) %>%
@@ -73,15 +79,19 @@ missing_timestamps
 ### the same for the oxygen and the water chemistry 
 
 # CHECK: The following data.frame should be empty
+# RMK: OK b_29 Sensor 4 is mssing in raw data
 missing_timestamps_o2 <- o2 %>%
   group_by(sensor, bottle) %>%
   summarize(missing_timestamps = as.numeric(timestamps[which(!(timestamps %in% unique(timestamp)))])) %>%
   dplyr::filter(!(missing_timestamps==20211208 & bottle=="b_01" & sensor==4),
-                missing_timestamps!=20211201) # Previously confirmed missing data is filtered out
+                missing_timestamps!=20211201,
+                ) # Previously confirmed missing data is filtered out
 missing_timestamps_o2
 
 # CHECK: The following data.frame should be empty
 # This check fails (missing_timestamps_wc). Romana confirmed that there is raw data for timestamps 20211001 and 20220624 (note: date is incorrect specified in 20211001 water chem file). Because of this I'm assuming that the other timestamps should also be present (most of them were in previous RRD versions). Please check.
+# 
+# CONFIRM RMK should be working now
 missing_timestamps_wc <- water_chem %>%
   group_by(type, bottle) %>%
   summarize(missing_timestamps = as.numeric(timestamps[which(!(timestamps %in% unique(timestamp)))])) 
@@ -92,9 +102,12 @@ missing_timestamps_wc
 ## Next check: NAs. 
 
 # CHECK: The following data.frame should be empty
+# RMK: Algae has no biomass, therefore added to filter
+# RMK added timestamp into grouping
+# TODO RMK flowcam biomass calculation is fishy
 NAs <- densities %>%
-  dplyr::filter(species!="Debris", species!="Digested algae",species!="Small unidentified",species!="Colpidium vacuoles", species!="Didinium nasutum") %>% #biomass not calculated for these classes
-  group_by(measurement, species, bottle) %>%
+  dplyr::filter(species!="Debris", species!="Digested algae",species!="Small unidentified",species!="Colpidium vacuoles", species!="Didinium nasutum", species != "Algae") %>% #biomass not calculated for these classes
+  group_by(measurement, species, bottle, timestamp) %>%
   summarize(densityNA = sum(is.na(density)),
             biomassNA = sum(is.na(biomass))) %>%
   dplyr::filter(biomassNA>0 | densityNA>0,
@@ -102,6 +115,7 @@ NAs <- densities %>%
 NAs
 
 # CHECK: The following data.frame should be empty
+# RMK: OK
 NAs_o2 <- o2 %>%
   group_by(sensor, bottle) %>%
   summarize(o2NA = sum(is.na(percent_o2))) %>%
@@ -109,6 +123,7 @@ NAs_o2 <- o2 %>%
 NAs_o2
 
 # CHECK: The following data.frame should be empty
+# RMK: OK
 NAs_wc <- water_chem %>%
   group_by(type, bottle) %>%
   summarize(concentrationNA = sum(is.na(concentration))) %>%
@@ -119,9 +134,11 @@ NAs_wc
 
 # see below for check
 # all uncommented checks below were passing at 4pm on 14.6.2023 while using LEEF.RRD.v1.8.5_4.sqlite
+# RMK: OK
+
 
 ## TO FIX...
-comps <- db_read_table(table = "composition") %>% collect() # still has the old species names...
+comps <- db_read_table(table = "composition") %>% collect() # still has the old species names... FIXED
 design <- db_read_table(table = "experimental_design") %>% collect()
 
 design <- full_join(design, comps)
@@ -224,12 +241,14 @@ design_long <- design_long %>%
   dplyr::filter(!(bottle.species %in% timeSeries_toExclude$int)) 
 
 # CHECK: densities2 should have the same dimensions as densties data.frame
+# TODO RMK
 densities2 <- full_join(densities, design_long) # no change = everything that is supposed to be present is present
 dim(densities)
 dim(densities2)
 
 
 # CHECK: data.frame "check" should be empty (species time series correctly removed)
+# RMK: OK
 check <- densities %>%
   dplyr::mutate(bottle.species = interaction(bottle, species)) %>%
   dplyr::filter((bottle.species %in% timeSeries_toExclude$int)) 

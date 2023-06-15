@@ -18,10 +18,14 @@ LEEF_1_biomass_flowcam <- function(
     dplyr::filter(!(species %in% c("Chlamydomonas","Small_cells") & area_abd >500)) %>% # filter out individuals that are too big for these two classes
     collect()
 
-  flowcam_biomass_species <- c("Chlamydomonas","ChlamydomonasClumps","DividingChlamydomonas", # species for which biomass is calculated
-                               "Cosmarium","Desmodesmus","DesmodesmusClumps",
-                               "Monoraphidium", "Small_cells",
-                               "Staurastrum1", "Staurastrum2")
+  flowcam_biomass_species <- c( # species for which biomass is calculated
+    "Chlamydomonas", "ChlamydomonasClumps", "DividingChlamydomonas", 
+    "Cosmarium",
+    "Desmodesmus", "DesmodesmusClumps",
+    "Monoraphidium",
+    "Small_cells",
+    "Staurastrum1", "Staurastrum2"
+  )
 
   # Median Chlamy and Desmo based on classifier data
 
