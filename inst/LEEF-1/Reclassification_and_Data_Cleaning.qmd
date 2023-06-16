@@ -372,7 +372,7 @@ b02 <- list.files(
   file.path(params$output_dir, "flowcam.b_02")
 )
 
-pbmcapply::pbmclapply(
+pbapply::pblapply(
   sample(b02),
   function(fn){
     file.path(params$output_dir, "flowcam", fn) |>
@@ -383,9 +383,7 @@ pbmcapply::pbmclapply(
           mutate(timestamp = as.character(timestamp))
       ) |>
     saveRDS(file = file.path(params$output_dir, "flowcam", fn))
-  },
-  mc.preschedule = FALSE, 
-  mc.cores = params$cores
+  }
 )
 
 ```
@@ -403,7 +401,7 @@ fns <- list.files(
   full.names = TRUE
 )
 
-pbmcapply::pbmclapply(
+pbapply::pblapply(
   fns,
   function(fn){
     x <- readRDS(fn) |>
@@ -411,9 +409,7 @@ pbmcapply::pbmclapply(
     # if ("airbubbles" %in% unique(x$species)) {browser()}
     unlink(fn)
     saveRDS(x, file = fn)
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
+  }
 )
 ```
 
@@ -434,7 +430,7 @@ fns <- list.files(
   recursive = FALSE
 )
 
-pbmcapply::pbmclapply(
+pbapply::pblapply(
   fns,
   function(fn){
     ts <- strsplit(basename(fn), "\\.")[[1]][2] |>
@@ -481,9 +477,7 @@ pbmcapply::pbmclapply(
     x <- do.call("rbind", x_list)
     ###### HERE END
     saveRDS(x, fn)
-  },
-  mc.cores = params$cores, 
-  mc.preschedule = FALSE
+  }
 )
 ```
 
@@ -503,7 +497,7 @@ fns <- list.files(
   full.names = TRUE
 )
 
-pbmcapply::pbmclapply(
+pbapply::pblapply(
   fns,
   function(fn_traits){
     fn_dens <- fn_traits |> 
@@ -518,9 +512,7 @@ pbmcapply::pbmclapply(
     
     saveRDS(biomass_flowcam$traits, file = fn_traits)
     saveRDS(biomass_flowcam$density, file = fn_dens)
-  }, 
-  mc.preschedule = FALSE,
-  mc.cores = params$cores
+  }
 )
 
 ```
@@ -1410,42 +1402,37 @@ Old timestamps will be removed and not be backed up.
 file.copy(params$db, db_name(1, temp = TRUE))
 ```
 ```{r}
-#| label: add_bemovi16
-
-suppressMessages(
-  add_reclassified_to_db(
-    path = params$output_dir, 
-    db = db_name(1, temp = TRUE), 
-    remove_timestamps = NULL,
-    backup_removed = FALSE,
-    methods = "bemovi_mag_16"
-  )
-)
-```
-```{r}
-#| label: add_bemovi25
-
-suppressMessages(
-  add_reclassified_to_db(
-    path = params$output_dir, 
-    db = db_name(1, temp = TRUE), 
-    remove_timestamps = NULL,
-    backup_removed = FALSE,
-    methods = "bemovi_mag_25"
-  )
-)
-```
-```{r}
 #| label: add_flowcam
 
-suppressMessages(
-  add_reclassified_to_db(
-    path = params$output_dir, 
-    db = db_name(1, temp = TRUE), 
+add_reclassified_to_db(
+    path = params$output_dir,
+    db = db_name(1, temp = TRUE),
     remove_timestamps = NULL,
     backup_removed = FALSE,
     methods = "flowcam"
-  )
+)
+```
+
+```{r}
+#| label: add_bemovi_16
+
+add_reclassified_to_db(
+    path = params$output_dir,
+    db = db_name(1, temp = TRUE),
+    remove_timestamps = NULL,
+    backup_removed = FALSE,
+    methods = "bemovi_mag_16"
+)
+```
+```{r}
+#| label: add_bemovi_25
+
+add_reclassified_to_db(
+    path = params$output_dir,
+    db = db_name(1, temp = TRUE),
+    remove_timestamps = NULL,
+    backup_removed = FALSE,
+    methods = "bemovi_mag_25"
 )
 ```
 
@@ -1630,7 +1617,7 @@ file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
 
 ## Prepare
 ```{r}
-#| label: prepare_tab
+#| label: prepare_toc
 file.copy(db_name(2, temp = FALSE), db_name(3, temp = TRUE))
 ```
 
