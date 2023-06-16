@@ -45,6 +45,7 @@ classify_bemovi_archive <- function(
   # do the stuff -------------------------------------------------------
 
   return(
+    # parallel::pbmclapply(
     pbmcapply::pbmclapply(
       timestamps,
       function(timestamp){

@@ -21,10 +21,10 @@ library(here)
 set.seed(1)
 options(dplyr.summarise.inform = FALSE)
 
-options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_final.sqlite")
+
+options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_1.sqlite")
 
 # options(RRDdb = "LEEF.RRD.v1.8.5_4.sqlite")
-# options(RRDdb = "/Volumes/LEEF/0.RRD/LEEF-1/LEEF.RRD.sqlite")
 
 densities <- db_read_table(table = "density") %>%
   collect() %>%
@@ -67,6 +67,8 @@ timestamps <- unique(densities$timestamp)
 length(timestamps)
 # RMK OK
 
+
+
 # CHECK: The following data.frame should be empty
 # TODO RMK
 missing_timestamps <- densities %>%
@@ -75,6 +77,39 @@ missing_timestamps <- densities %>%
   dplyr::filter(measurement!="manualcount", !(measurement=="bemovi_mag_25_non_cropped" & missing_timestamps<20211103), # non_cropped only used from 20211103 onwards
                 !(measurement=="flowcytometer" & missing_timestamps %in% c(20220404,20220406,20220415,20220418,20220425))) # For the flowcytometer for the following timestamps there was no data collection: "20220404" "20220406" "20220415" "20220418" "20220425" 
 missing_timestamps
+
+# RMK: More detailed tests of missing timestamps
+{ 
+  # CHECK: should be empty
+  timestamps[!(timestamps %in% unique(densities[densities$measurement == "bemovi_mag_16", ]$timestamp))]
+  # RMK: OK
+
+  # CHECK: should be empty
+  timestamps[!(timestamps %in% unique(densities[densities$measurement == "bemovi_mag_25", ]$timestamp))]
+  # RMK: OK
+
+  # CHECK: should be empty
+  timestamps[!(timestamps %in% unique(densities[densities$measurement == "bemovi_mag_25_cropped", ]$timestamp))]
+  # [1] "20211029"
+  # TODO
+
+  # CHECK: should be empty
+  # non_cropped only used from 20211103 onwards
+  timestamps[!(timestamps[timestamps >= 20211103] %in% unique(densities[densities$measurement == "bemovi_mag_25_non_cropped", ]$timestamp))]
+  #  [1] "20211112"
+  # TODO WRONG
+
+  # CHECK: should be empty
+  timestamps[!(timestamps %in% unique(densities[densities$measurement == "flowcam", ]$timestamp))]
+  # RMK: OK
+
+  # CHECK: should be as these are missing "20220404" "20220406" "20220415" "20220418" "20220425"
+  timestamps[!(timestamps %in% unique(densities[densities$measurement == "flowcytometer", ]$timestamp))]
+  # RMK: OK
+
+  # Not measured regularly
+  # timestamps[!(timestamps %in% unique(densities[densities$measurement == "manualcount", ]$timestamp))]
+}
 
 ### the same for the oxygen and the water chemistry 
 
