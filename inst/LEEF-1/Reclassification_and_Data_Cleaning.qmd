@@ -546,10 +546,9 @@ pbapply::pblapply(
         )
 
         densityStau1 <- full_join(
-          densityStau1, 
-          temp,
-          by = join_by(bottle, timestamp)
-          ) %>%
+            densityStau1,
+            temp,
+        ) %>%
             mutate(
                 count = ifelse(is.na(count), 0, count),
                 density = ifelse(is.na(density), 0, density)
