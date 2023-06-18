@@ -40,9 +40,13 @@ params:
     - algae
   reclassify_bemovi_16: false
   reclassify_bemovi_25: false
-  reclassify_flowcam: false
+  reclassify_flowcam: true
   regate_flowcytometer: false
 ---
+
+# General remarks
+1. I had to switch to single thread processing because randomly files were not nwritten to disc
+2. Flowcam in particular, can be heavily optimised by loading the teaits and than do all the cleanings and afterwards save it. At them moement it is structured for clarity and understanding of the individual steps of the cleaning.
 
 # Setup
 1. Set Base to use
@@ -481,40 +485,92 @@ pbapply::pblapply(
 )
 ```
 
-### Calculate Biomass Flowcam
-THe biomass is calculated here
+### Adjust for Staurastrum1 <= 0.95
+The code below recalculates the densities after filtering Stau1 so that only
+particles are kept with high confidence that they are indeed Stau1.
 
 ```{r}
-#| label: flowcam_biomass
+#| label: flowcam_staurastrum1
 #| eval: !expr params$reclassify_flowcam
 #| 
 
 
 fns <- list.files(
-  path = file.path(params$output_dir, "flowcam"), 
-  pattern = "algae_traits",
-  recursive = FALSE,
-  full.names = TRUE
+    path = file.path(params$output_dir, "flowcam"),
+    pattern = "algae_traits",
+    recursive = FALSE,
+    full.names = TRUE
 )
 
 pbapply::pblapply(
-  fns,
-  function(fn_traits){
-    fn_dens <- fn_traits |> 
-      gsub(
-        pattern = "algae_traits", 
-        replacement = "algae_density"
-      )
-    biomass_flowcam <- LEEF_1_biomass_flowcam(
-      algae_traits = readRDS(fn_traits),
-      algae_density = readRDS(fn_dens)
-    )
-    
-    saveRDS(biomass_flowcam$traits, file = fn_traits)
-    saveRDS(biomass_flowcam$density, file = fn_dens)
-  }
-)
+    fns,
+    function(fn_traits) {
+      cat(basename(fn_traits))
 
+        fn_density <- fn_traits |>
+            gsub(
+                pattern = "algae_traits",
+                replacement = "algae_density"
+            )
+
+        traits <- readRDS(fn_traits)
+        density <- readRDS(fn_density)
+
+        # Calculate density new
+
+        traitsStau1 <- traits |>
+            filter((species == "Staurastrum1" & species_probability > 0.95))
+
+        densityStau1 <- traitsStau1 |>
+            group_by(
+                Date_Flowcam,
+                species,
+                bottle,
+                composition,
+                temperature,
+                incubator,
+                volume_imaged,
+                dilution_factor,
+                richness,
+                timestamp
+            ) %>%
+            summarize(count = n()) %>%
+            mutate(density = count * (dilution_factor / volume_imaged))
+
+        # Set not found to 0
+
+        temp <- tidyr::expand_grid(
+            timestamp = unique(traitsStau1$timestamp),
+            bottle = unique(traitsStau1$bottle),
+            species = "Staurastrum1"
+        )
+
+        densityStau1 <- full_join(
+          densityStau1, 
+          temp,
+          by = join_by(bottle, timestamp)
+          ) %>%
+            mutate(
+                count = ifelse(is.na(count), 0, count),
+                density = ifelse(is.na(density), 0, density)
+            )
+
+        # Remove  "Staurastrum1" AND species_probability <= 0.95 from traits
+
+        traits <- traits |>
+            filter(!(species == "Staurastrum1" & species_probability <= 0.95))
+
+        density <- density |>
+            filter(!(species == "Staurastrum1"))
+        density <- rbind(density, densityStau1)
+
+        unlink(fn_traits)
+        unlink(fn_density)
+
+        saveRDS(traits, file = fn_traits)
+        saveRDS(densityStau1, file = fn_density)
+    }
+)
 ```
 
 ### Exclusion of time series that are wrong classifications or only noise
@@ -570,7 +626,6 @@ fns <- list.files(
     full.names = TRUE
 )
 
-
 pbapply::pblapply(
   sample(fns),
   function(fn){
@@ -585,6 +640,43 @@ pbapply::pblapply(
 )
 
 rm(excl, fns)
+```
+
+
+### Calculate Biomass Flowcam
+The biomass is calculated here
+
+```{r}
+#| label: flowcam_biomass
+#| eval: !expr params$reclassify_flowcam
+#| 
+
+
+fns <- list.files(
+  path = file.path(params$output_dir, "flowcam"), 
+  pattern = "algae_traits",
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbapply::pblapply(
+  fns,
+  function(fn_traits){
+    fn_dens <- fn_traits |> 
+      gsub(
+        pattern = "algae_traits", 
+        replacement = "algae_density"
+      )
+    biomass_flowcam <- LEEF_1_biomass_flowcam(
+      algae_traits = readRDS(fn_traits),
+      algae_density = readRDS(fn_dens)
+    )
+    
+    saveRDS(biomass_flowcam$traits, file = fn_traits)
+    saveRDS(biomass_flowcam$density, file = fn_dens)
+  }
+)
+
 ```
 
 
@@ -1500,7 +1592,7 @@ file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
 
 
 
-# 2. Flowcam Stau1
+# %%%%%%% 2. Flowcam Stau1
 
 The code below recalculates the densities after filtering Stau1 so that only
 particles are kept with high confidence that they are indeed Stau1.
@@ -1617,13 +1709,13 @@ file.rename(db_name(2, temp = TRUE), db_name(2, temp = FALSE))
 
 ## Prepare
 ```{r}
-#| label: prepare_toc
+#| label: prepare_add
 file.copy(db_name(2, temp = FALSE), db_name(3, temp = TRUE))
 ```
 
 ### Add detrended TOC - Removing the linear trend in the water chemistry 
 ```{r}
-#| label: add_toc
+#| label: add_toc_detrended
 #| 
 
 toc <- readRDS(params$toc) %>%
@@ -1772,7 +1864,7 @@ suppressMessages(
 
 ## Finalize
 ```{r}
-#| label: finalize_tab
+#| label: add_finalize
 #| 
 file.rename(db_name(3, temp = TRUE), db_name(3, temp = FALSE))
 ```
