@@ -22,7 +22,7 @@ set.seed(1)
 options(dplyr.summarise.inform = FALSE)
 
 
-options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_1.sqlite")
+options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_final.sqlite")
 
 # options(RRDdb = "LEEF.RRD.v1.8.5_4.sqlite")
 
@@ -31,7 +31,7 @@ densities <- db_read_table(table = "density") %>%
   arrange(day) 
 # CHECK: Code in previous 3 lines give the below message, which seems indicate a problem in the data
 # Column `biomass`: mixed type, first seen values of type real, coercing other values of type string
-# RMK: Fixed
+# RMK: OK
 
 o2 <- db_read_table(table = "o2") %>% collect()
 
@@ -65,46 +65,49 @@ unique(densities$species)[!idx]
 # CHECK: length should be 123
 timestamps <- unique(densities$timestamp)
 length(timestamps)
-# RMK OK
+# RMK: OK
 
 
 
 # CHECK: The following data.frame should be empty
-# TODO RMK
 missing_timestamps <- densities %>%
   group_by(measurement, species, bottle) %>%
   summarize(missing_timestamps = as.numeric(timestamps[which(!(timestamps %in% unique(timestamp)))])) %>%
-  dplyr::filter(measurement!="manualcount", !(measurement=="bemovi_mag_25_non_cropped" & missing_timestamps<20211103), # non_cropped only used from 20211103 onwards
-                !(measurement=="flowcytometer" & missing_timestamps %in% c(20220404,20220406,20220415,20220418,20220425))) # For the flowcytometer for the following timestamps there was no data collection: "20220404" "20220406" "20220415" "20220418" "20220425" 
+  dplyr::filter(
+    measurement != "manualcount",
+    !(measurement == "bemovi_mag_25_non_cropped" & missing_timestamps < 20211103), # non_cropped only used from 20211103 onwards
+    !(measurement == "flowcytometer" & missing_timestamps %in% c(20220404, 20220406, 20220415, 20220418, 20220425)) # For the flowcytometer for the following timestamps there was no data collection: "20220404" "20220406" "20220415" "20220418" "20220425"
+  )
 missing_timestamps
+missing_timestamps$missing_timestamps[missing_timestamps$measurement == "flowcam"] |> unique()
+missing_timestamps$missing_timestamps[missing_timestamps$measurement == "flowcytometer"] |> unique()
+# TODO: 
 
 # RMK: More detailed tests of missing timestamps
 { 
-  # CHECK: should be empty
+  # CHECK: bemovi_mag_16 should be empty
   timestamps[!(timestamps %in% unique(densities[densities$measurement == "bemovi_mag_16", ]$timestamp))]
   # RMK: OK
 
-  # CHECK: should be empty
+  # CHECK: bemovi_mag_25 should be empty
   timestamps[!(timestamps %in% unique(densities[densities$measurement == "bemovi_mag_25", ]$timestamp))]
   # RMK: OK
 
-  # CHECK: should be empty
+  # CHECK: bemovi_mag_25_cropped should be empty
   timestamps[!(timestamps %in% unique(densities[densities$measurement == "bemovi_mag_25_cropped", ]$timestamp))]
-  # [1] "20211029"
-  # TODO
+  # RMK: OK
 
-  # CHECK: should be empty
+  # CHECK: bemovi_mag_25_non_cropped should be empty
   # non_cropped only used from 20211103 onwards
   timestamps[!(timestamps[timestamps >= 20211103] %in% unique(densities[densities$measurement == "bemovi_mag_25_non_cropped", ]$timestamp))]
-  #  [1] "20211112"
-  # TODO WRONG
+  # RMK: OK
 
-  # CHECK: should be empty
+  # CHECK: flowcam should be empty
   timestamps[!(timestamps %in% unique(densities[densities$measurement == "flowcam", ]$timestamp))]
   # RMK: OK
 
-  # CHECK: should be as these are missing "20220404" "20220406" "20220415" "20220418" "20220425"
-  timestamps[!(timestamps %in% unique(densities[densities$measurement == "flowcytometer", ]$timestamp))]
+  # CHECK: flowcytometer should be all `TRUE` these are missing "20220404" "20220406" "20220415" "20220418" "20220425"
+  timestamps[!(timestamps %in% unique(densities[densities$measurement == "flowcytometer", ]$timestamp))] == c(20220404, 20220406, 20220415, 20220418, 20220425)
   # RMK: OK
 
   # Not measured regularly
@@ -132,6 +135,7 @@ missing_timestamps_wc <- water_chem %>%
   summarize(missing_timestamps = as.numeric(timestamps[which(!(timestamps %in% unique(timestamp)))])) 
 table(missing_timestamps_wc$missing_timestamps, missing_timestamps_wc$bottle)
 missing_timestamps_wc
+# TODO: 
 
 
 ## Next check: NAs. 
@@ -139,7 +143,7 @@ missing_timestamps_wc
 # CHECK: The following data.frame should be empty
 # RMK: Algae has no biomass, therefore added to filter
 # RMK added timestamp into grouping
-# TODO RMK flowcam biomass calculation is fishy
+# TODO RMK flowcam "Staurastrum gracile" is biomass not calculated
 NAs <- densities %>%
   dplyr::filter(species!="Debris", species!="Digested algae",species!="Small unidentified",species!="Colpidium vacuoles", species!="Didinium nasutum", species != "Algae") %>% #biomass not calculated for these classes
   group_by(measurement, species, bottle, timestamp) %>%
@@ -276,7 +280,7 @@ design_long <- design_long %>%
   dplyr::filter(!(bottle.species %in% timeSeries_toExclude$int)) 
 
 # CHECK: densities2 should have the same dimensions as densties data.frame
-# TODO RMK
+# TODO RMK densities2 has an additional field "bottle.species" which is not present in densities
 densities2 <- full_join(densities, design_long) # no change = everything that is supposed to be present is present
 dim(densities)
 dim(densities2)
