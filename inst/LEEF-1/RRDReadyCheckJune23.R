@@ -23,6 +23,7 @@ options(dplyr.summarise.inform = FALSE)
 
 
 options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_final.sqlite")
+# options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_1.sqlite")
 
 # options(RRDdb = "LEEF.RRD.v1.8.5_4.sqlite")
 
@@ -39,14 +40,17 @@ water_chem <- db_read_toc() %>% collect()
 
 ## check that all variables are (species) present
 
-vars <- c("Coleps sp.","Paramecium bursaria","Paramecium caudatum", 
-          "Stylonychia sp.","Colpidium striatum","Euplotes daidaleos",
-          "Dexiostoma campylum","Loxocephalus sp.","Chlamydomonas reinhardtii",
-          "Chlamydomonas clumps","Cosmarium botrytis","Debris",
-          "Desmodesmus armatus","Desmodesmus clumps","Digested algae",
-          "Dividing Chlamydomonas","Small cells","Small unidentified",
-          "Staurastrum gracile","Colpidium vacuoles","Monoraphidium obtusum",
-          "Staurastrum polytrichum","Bacteria","Didinium nasutum", "Algae")    
+vars <- c(
+  "Coleps sp.", "Paramecium bursaria", "Paramecium caudatum",
+  "Stylonychia sp.", "Colpidium striatum", "Euplotes daidaleos",
+  "Dexiostoma campylum", "Loxocephalus sp.", "Chlamydomonas reinhardtii",
+  "Chlamydomonas clumps", "Cosmarium botrytis", "Debris",
+  "Desmodesmus armatus", "Desmodesmus clumps", "Digested algae",
+  "Dividing Chlamydomonas", "Small cells", "Small unidentified",
+  "Staurastrum gracile", "Colpidium vacuoles", "Monoraphidium obtusum",
+  "Staurastrum polytrichum", "Didinium nasutum",
+  "Bacteria", "Algae"
+)
 
 # CHECK: Must be TRUE
 all(vars %in% unique(densities$species)) 
@@ -76,48 +80,23 @@ missing_timestamps <- densities %>%
   dplyr::filter(
     measurement != "manualcount",
     !(measurement == "bemovi_mag_25_non_cropped" & missing_timestamps < 20211103), # non_cropped only used from 20211103 onwards
-    !(measurement == "flowcytometer" & missing_timestamps %in% c(20220404, 20220406, 20220415, 20220418, 20220425)) # For the flowcytometer for the following timestamps there was no data collection: "20220404" "20220406" "20220415" "20220418" "20220425"
+    !(measurement == "flowcytometer" & (missing_timestamps %in% c(20220404, 20220406, 20220415, 20220418, 20220425))) # For the flowcytometer for the following timestamps there was no data collection: "20220404" "20220406" "20220415" "20220418" "20220425"
   )
 missing_timestamps
-missing_timestamps$missing_timestamps[missing_timestamps$measurement == "flowcam"] |> unique()
-missing_timestamps$missing_timestamps[missing_timestamps$measurement == "flowcytometer"] |> unique()
-# TODO: 
+## TODO RMK: flowcam Strrastum is missing
+missing_timestamps$measurement |>
+  unique()
+missing_timestamps$missing_timestamps[missing_timestamps$measurement == "flowcam"] |>
+  unique() |>
+  sort()
+missing_timestamps[missing_timestamps$measurement == "flowcam", ] |>
+  View()
 
-# RMK: More detailed tests of missing timestamps
-{ 
-  # CHECK: bemovi_mag_16 should be empty
-  timestamps[!(timestamps %in% unique(densities[densities$measurement == "bemovi_mag_16", ]$timestamp))]
-  # RMK: OK
 
-  # CHECK: bemovi_mag_25 should be empty
-  timestamps[!(timestamps %in% unique(densities[densities$measurement == "bemovi_mag_25", ]$timestamp))]
-  # RMK: OK
-
-  # CHECK: bemovi_mag_25_cropped should be empty
-  timestamps[!(timestamps %in% unique(densities[densities$measurement == "bemovi_mag_25_cropped", ]$timestamp))]
-  # RMK: OK
-
-  # CHECK: bemovi_mag_25_non_cropped should be empty
-  # non_cropped only used from 20211103 onwards
-  timestamps[!(timestamps[timestamps >= 20211103] %in% unique(densities[densities$measurement == "bemovi_mag_25_non_cropped", ]$timestamp))]
-  # RMK: OK
-
-  # CHECK: flowcam should be empty
-  timestamps[!(timestamps %in% unique(densities[densities$measurement == "flowcam", ]$timestamp))]
-  # RMK: OK
-
-  # CHECK: flowcytometer should be all `TRUE` these are missing "20220404" "20220406" "20220415" "20220418" "20220425"
-  timestamps[!(timestamps %in% unique(densities[densities$measurement == "flowcytometer", ]$timestamp))] == c(20220404, 20220406, 20220415, 20220418, 20220425)
-  # RMK: OK
-
-  # Not measured regularly
-  # timestamps[!(timestamps %in% unique(densities[densities$measurement == "manualcount", ]$timestamp))]
-}
 
 ### the same for the oxygen and the water chemistry 
 
 # CHECK: The following data.frame should be empty
-# RMK: OK b_29 Sensor 4 is mssing in raw data
 missing_timestamps_o2 <- o2 %>%
   group_by(sensor, bottle) %>%
   summarize(missing_timestamps = as.numeric(timestamps[which(!(timestamps %in% unique(timestamp)))])) %>%
@@ -125,6 +104,7 @@ missing_timestamps_o2 <- o2 %>%
                 missing_timestamps!=20211201,
                 ) # Previously confirmed missing data is filtered out
 missing_timestamps_o2
+# RMK: OK b_29 Sensor 4 is mssing in raw data
 
 # CHECK: The following data.frame should be empty
 # This check fails (missing_timestamps_wc). Romana confirmed that there is raw data for timestamps 20211001 and 20220624 (note: date is incorrect specified in 20211001 water chem file). Because of this I'm assuming that the other timestamps should also be present (most of them were in previous RRD versions). Please check.
@@ -135,15 +115,12 @@ missing_timestamps_wc <- water_chem %>%
   summarize(missing_timestamps = as.numeric(timestamps[which(!(timestamps %in% unique(timestamp)))])) 
 table(missing_timestamps_wc$missing_timestamps, missing_timestamps_wc$bottle)
 missing_timestamps_wc
-# TODO: 
+# TODO: waterchemistry has missing values
 
 
 ## Next check: NAs. 
 
 # CHECK: The following data.frame should be empty
-# RMK: Algae has no biomass, therefore added to filter
-# RMK added timestamp into grouping
-# TODO RMK flowcam "Staurastrum gracile" is biomass not calculated
 NAs <- densities %>%
   dplyr::filter(species!="Debris", species!="Digested algae",species!="Small unidentified",species!="Colpidium vacuoles", species!="Didinium nasutum", species != "Algae") %>% #biomass not calculated for these classes
   group_by(measurement, species, bottle, timestamp) %>%
@@ -152,22 +129,23 @@ NAs <- densities %>%
   dplyr::filter(biomassNA>0 | densityNA>0,
                 !(measurement %in% c("bemovi_mag_25","bemovi_mag_25_cropped","bemovi_mag_25_non_cropped") & densityNA == 1)) # There is 1 NA for all species for all bottles at magnification 25 (20220622 missing)
 NAs
+# TODO RMK flowcam
 
 # CHECK: The following data.frame should be empty
-# RMK: OK
 NAs_o2 <- o2 %>%
   group_by(sensor, bottle) %>%
   summarize(o2NA = sum(is.na(percent_o2))) %>%
   dplyr::filter(o2NA>0)
 NAs_o2
+# RMK: OK
 
 # CHECK: The following data.frame should be empty
-# RMK: OK
 NAs_wc <- water_chem %>%
   group_by(type, bottle) %>%
   summarize(concentrationNA = sum(is.na(concentration))) %>%
   dplyr::filter(concentrationNA>0)
 NAs_wc
+# RMK: OK
 
 ## Next check: are all species present in all the bottles they are supposed to be
 
@@ -280,18 +258,18 @@ design_long <- design_long %>%
   dplyr::filter(!(bottle.species %in% timeSeries_toExclude$int)) 
 
 # CHECK: densities2 should have the same dimensions as densties data.frame
-# TODO RMK densities2 has an additional field "bottle.species" which is not present in densities
 densities2 <- full_join(densities, design_long) # no change = everything that is supposed to be present is present
 dim(densities)
 dim(densities2)
+# TODO RMK densities2 has an additional field "bottle.species" which is not present in densities
 
 
 # CHECK: data.frame "check" should be empty (species time series correctly removed)
-# RMK: OK
 check <- densities %>%
   dplyr::mutate(bottle.species = interaction(bottle, species)) %>%
   dplyr::filter((bottle.species %in% timeSeries_toExclude$int)) 
 check
+# RMK: OK
 
 ## Further (older) checks. not run anymore
 

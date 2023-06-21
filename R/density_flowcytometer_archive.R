@@ -48,6 +48,7 @@ density_flowcytometer_archive <- function(
 
   return(
     pbmcapply::pbmclapply(
+    # parallel::mclapply(
       timestamps,
       function(timestamp){
         datadir <- file.path(
@@ -95,7 +96,7 @@ density_flowcytometer_archive <- function(
 
         if (!is.null(densities)) {
           if (!is.null(particles)){
-            densities <- densities[densities$species == particles,]
+            densities <- densities[densities$species %in% particles,]
           }
 
           message("Saving timestamp ", timestamp, "...")
