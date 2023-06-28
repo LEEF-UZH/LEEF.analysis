@@ -11,23 +11,30 @@
 #' @param check_timestamps. If `TRUE`, the data will ony be added when timestamp does not exist in db yet. If `FALSE`,
 #'   it will always be added. Usually this should **NOT** be done.
 #' @param backup_removed if 'TRUE` data which will be replaced will be backed up.
+#' @param DBIDriver the DBI driver to use. Default is RSQLite::SQLite()
 #'
 #' @return vector of length of `fns` with `TRUE` if the data has been added,
 #'   `FALSE` otherwise
+#' 
 #' @importFrom pbapply  pbsapply
+#' @importFrom DBI dbConnect dbDisconnect dbWriteTable dbGetQuery
+#' @importFrom RSQLite SQLite
+#' @importFrom utils  read.csv
+#' 
 #' @export
 #'
 #' @md
 #' @examples
 add_to_db <- function(
-  fns,
-  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  tables,
-  remove_timestamps = NULL,
-  check_timestamps = TRUE,
-  backup_removed = TRUE
-){
-  if (length(fns) != length(tables)){
+    fns,
+    db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+    tables,
+    remove_timestamps = NULL,
+    check_timestamps = TRUE,
+    backup_removed = TRUE,
+    DBIDriver = RSQLite::SQLite()
+) {
+  if (length(fns) != length(tables)) {
     stop("'fns' and 'tables' have to have the same length!")
   }
 
@@ -41,11 +48,11 @@ add_to_db <- function(
     try(DBI::dbDisconnect(conn), silent = TRUE)
   })
 
-  if (!is.null(remove_timestamps)){
+  if (!is.null(remove_timestamps)) {
     tss <- unique(remove_timestamps)
     sapply(
       unique(tables),
-      function(table){
+      function(table) {
         message("Removing timestamps from ", table)
         extract_timestamps(
           db = db,
@@ -60,8 +67,8 @@ add_to_db <- function(
 
   added <- pbapply::pbsapply(
     1:length(fns),
-    function(i){
-      message("\nAdding '", basename(fns[i]), "' to '", tables[i], "'..."  )
+    function(i) {
+      message("\nAdding '", basename(fns[i]), "' to '", tables[i], "'...")
 
       if (grepl("\\.rds$", fns[i])) {
         dat <- readRDS(fns[i])

@@ -10,7 +10,8 @@ add_to_db(
   tables,
   remove_timestamps = NULL,
   check_timestamps = TRUE,
-  backup_removed = TRUE
+  backup_removed = TRUE,
+  DBIDriver = RSQLite::SQLite()
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ the same index should be added to.
 \item{remove_timestamps}{vector of timestamps to be removed.}
 
 \item{backup_removed}{if 'TRUE` data which will be replaced will be backed up.}
+
+\item{DBIDriver}{the DBI driver to use. Default is RSQLite::SQLite()}
 
 \item{check_timestamps.}{If \code{TRUE}, the data will ony be added when timestamp does not exist in db yet. If \code{FALSE},
 it will always be added. Usually this should \strong{NOT} be done.}

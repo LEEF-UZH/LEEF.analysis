@@ -8,20 +8,27 @@
 #'   it will always be added. Usually this should **NOT** be done.#'
 #' @param backup_removed if \code{TRUE} data which will be replaced will be backed up.
 #' @param method method to be added. If \code{NULL}, method will be determined by the sub-directories.
+#' @param DBIDriver the DBI driver to use. Default is RSQLite::SQLite()
 #'
 #' @return
+#' 
+#' @importFrom DBI dbConnect dbDisconnect dbWriteTable dbGetQuery
+#' @importFrom RSQLite SQLite
+#' @importFrom utils read.csv
+#' @
 #' @export
 #'
 #' @examples
 add_reclassified_to_db <- function(
-  path,
-  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  remove_timestamps = NULL,
-  check_timestamps = TRUE,
-  backup_removed = TRUE,
-  methods = NULL
-){
-  if (!file.exists(db)){
+    path,
+    db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+    remove_timestamps = NULL,
+    check_timestamps = TRUE,
+    backup_removed = TRUE,
+    methods = NULL,
+    DBIDriver = RSQLite::SQLite()
+) {
+  if (!file.exists(db)) {
     LEEF.backend.sqlite::new_RRD(db)
   }
 
@@ -38,7 +45,9 @@ add_reclassified_to_db <- function(
     files <- sample(files)
     tables <- paste0(
       basename(method), "__",
-      sapply( files, function(f) {strsplit(basename(f), "\\.")[[1]][[1]]})
+      sapply(files, function(f) {
+        strsplit(basename(f), "\\.")[[1]][[1]]
+      })
     )
     names(tables) <- NULL
 
@@ -49,7 +58,8 @@ add_reclassified_to_db <- function(
       db = db,
       remove_timestamps = remove_timestamps,
       check_timestamps = check_timestamps,
-      backup_removed = backup_removed
+      backup_removed = backup_removed,
+      DBIDriver = DBIDriver
     )
   }
 }

@@ -10,7 +10,8 @@ add_reclassified_to_db(
   remove_timestamps = NULL,
   check_timestamps = TRUE,
   backup_removed = TRUE,
-  methods = NULL
+  methods = NULL,
+  DBIDriver = RSQLite::SQLite()
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \co
 it will always be added. Usually this should **NOT** be done.#'}
 
 \item{backup_removed}{if \code{TRUE} data which will be replaced will be backed up.}
+
+\item{DBIDriver}{the DBI driver to use. Default is RSQLite::SQLite()}
 
 \item{method}{method to be added. If \code{NULL}, method will be determined by the sub-directories.}
 }

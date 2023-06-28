@@ -4,10 +4,12 @@
 \alias{RRD_new}
 \title{Create new RRD database}
 \usage{
-RRD_new(dbname, LEEF = NULL)
+RRD_new(dbname, LEEF = NULL, DBIDriver = RSQLite::SQLite())
 }
 \arguments{
 \item{dbname}{the path and name of the database. Must not exist.}
+
+\item{DBIDriver}{the DBI driver to use. Default is RSQLite::SQLite()}
 
 \item{either}{"LEEF-1" or "LEEF-2"}
 }
