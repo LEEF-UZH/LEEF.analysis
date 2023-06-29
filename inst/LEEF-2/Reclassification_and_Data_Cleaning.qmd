@@ -37,6 +37,8 @@ params:
     - algae
 ---
 
+TODO: Chek for errors in pipeline and re-run these
+
 # Setup
 1. Download parameter as defined in the `params$version_tag` from the repo as defined in `parms$base` 
 2. Create output directory as specified in `params$output_dir`
