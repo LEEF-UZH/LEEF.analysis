@@ -143,11 +143,13 @@ missing_timestamps |>
     knitr::kable()
 
 ```
-TODO: RMK: Flowcytometer needs to be chaeched again
+
 
 ### &#10003; missing timetamps oxygen
 
 CHECK: The following data.frame should be empty
+
+The measurement `4 b_29 20211004` is missing in the raw data.
 
 ```{r}
 
@@ -163,7 +165,7 @@ missing_timestamps_o2
 ```
 RMK: OK b_29 Sensor 4 is mssing in raw data
 
-### TODO missing timetamps water chemistry
+### &#10003; missing timetamps water chemistry
 
 CHECK: The following data.frame should be empty
 
@@ -171,7 +173,6 @@ CHECK: The following data.frame should be empty
 
 # This check fails (missing_timestamps_wc). Romana confirmed that there is raw data for timestamps 20211001 and 20220624 (note: date is incorrect specified in 20211001 water chem file). Because of this I'm assuming that the other timestamps should also be present (most of them were in previous RRD versions). Please check.
 # 
-# CONFIRM RMK should be working now
 missing_timestamps_wc <- water_chem %>%
   group_by(type, bottle) %>%
   summarize(missing_timestamps = as.numeric(timestamps[which(!(timestamps %in% unique(timestamp)))])) 
@@ -180,7 +181,7 @@ table(missing_timestamps_wc$missing_timestamps, missing_timestamps_wc$bottle) |>
 missing_timestamps_wc |>
     knitr::kable()
 ```
-TODO: RMK: waterchemistry has missing values
+RMK: OK: these missing timestamps are because of the filtering out of `!is.na(conc)` in the detrending. They were left in, because they either had one measurement ur the the CV was larger than the threashold in all measurements. The missing timestamps are therefore not a problem.
 
 ## &#10003; Check NAs
 
