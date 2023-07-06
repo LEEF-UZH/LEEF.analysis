@@ -50,6 +50,7 @@ params:
   rename_rrd: true
   final_rrd: true
   diagnostic_report: true
+  parquet: true
 ---
 
 # General remarks
@@ -436,10 +437,10 @@ pbmcapply::pbmclapply(
 )
 ```
 
-### Adding density=0 for some special cases
+### Adding density=0 for some special cases Desmodesmus and Chlamydomonas
 
 ```{r}
-#| label: flowcam_man_correction
+#| label: flowcam_man_correction_des_chlam
 #| eval: !expr params$reclassify_flowcam
 #| 
 
@@ -466,7 +467,7 @@ pbapply::pblapply(
     # experiment. For the days prior to these contamination I set the Desmodesmus
     # and DesmodesmusClumps densities to 0
 
-    if (ts < params$contamination_timestamp) {
+    if (ts < params$contamination_timestamp){
       templ <- x[x$bottle == params$contamination_bottle, ][1, ]
       templ$density <- 0
       templ$count <- 0
@@ -497,19 +498,19 @@ pbapply::pblapply(
       templ <- x_list[[i]][1,]
       templ$density <- 0
       templ$count <- 0
-      # if ("Chlamydomonas" %in% sp){
+      if ("Chlamydomonas" %in% sp){
         if (!("ChlamydomonasClumps" %in% sp)){
           templ$species <- "ChlamydomonasClumps"
           x_list[[i]] <- rbind(x_list[[i]], templ)
         }
-      # }
-      # if ("Desmodesmus" %in% sp){
+      }
+      if ("Desmodesmus" %in% sp){
         if (!("DesmodesmusClumps" %in% sp)){
           templ$species <- "DesmodesmusClumps"
           x_list[[i]] <- rbind(x_list[[i]], templ) |> 
             dplyr::mutate(Date_Flowcam = data.table::as.IDate(Date_Flowcam))
         }
-      # }
+      }
     }
     
     x <- do.call("rbind", x_list)
@@ -1926,11 +1927,11 @@ generate_overlays(
 
 
 # Create parquet
-This is experimental. Te main storage is still the RRD sqlite database.
+This is experimental. The main storage is still the RRD sqlite database.
 
 ```{r}
 #| label: parquet
-#| eval: false
+#| eval: !expr params$parquet
 
 pd <- file.path(params$output_dir, "parquet")
 dir.create(pd, showWarnings = FALSE, recursive = TRUE)
@@ -1940,21 +1941,21 @@ list.files(
   pattern = "\\.rds$", 
   full.names = TRUE
 ) |>
-  parquet_add_bemovi_16(path_to_parquet_root_dir = pd)
+  LEEF.analysis:::parquet_add_bemovi_16(path_to_parquet_root_dir = pd)
 
 list.files(
     file.path(params$output_dir, "bemovi_mag_25"),
     pattern = "\\.rds$",
     full.names = TRUE
 ) |>
-    parquet_add_bemovi_25(path_to_parquet_root_dir = pd)
+    LEEF.analysis:::parquet_add_bemovi_25(path_to_parquet_root_dir = pd)
 
 list.files(
     file.path(params$output_dir, "flowcam"),
     pattern = "\\.rds$",
     full.names = TRUE
 ) |>
-    parquet_add_flowcam(path_to_parquet_root_dir = pd)
+    LEEF.analysis:::parquet_add_flowcam(path_to_parquet_root_dir = pd)
 
 c(
     list.files(
@@ -1968,7 +1969,7 @@ c(
         full.names = TRUE
     )
 ) |>
-    parquet_add_flowcytometer(path_to_parquet_root_dir = pd)
+    LEEF.analysis:::parquet_add_flowcytometer(path_to_parquet_root_dir = pd)
 
 
 fns_o2 <- list.files(
@@ -1978,5 +1979,5 @@ fns_o2 <- list.files(
     full.names = TRUE
 ) |>
     file.path("o2meter.csv") |>
-    parquet_add_o2(path_to_parquet_root_dir = pd)
+    LEEF.analysis:::parquet_add_o2(path_to_parquet_root_dir = pd)
 ```
