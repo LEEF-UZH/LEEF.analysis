@@ -38,8 +38,8 @@ extract_traits_flowcytometer_archive <- function(
   particles = "bacteria",
   timestamps,
   output,
-  length_slope = 4.933454e-06, # ,201615
-  length_intercept = 2.215799e-01, #-39861.52,
+  length_slope, # = 4.933454e-06, # ,201615
+  length_intercept, # = 2.215799e-01, #-39861.52,
   use_H,
   min_FSC.A,
   log10_all = FALSE,
@@ -143,18 +143,31 @@ extract_traits_flowcytometer_archive <- function(
               summarise(biomass = sum(biomass))
             bm$species <- p
 
+            # Biomass per sample
             if (p != "bacteria") {
               bm$biomass <- as.numeric(NA)
             }
+
+            # Biomass per bottle
+            fcu <- read.csv(file.path(file.path(datadir, "flowcytometer_ungated.csv")))
+           
+            bm <- merge(
+              x = bm,
+              y = fcu,
+              by = "sample"
+            ) |>
+              mutate(biomass * 1000000 / volume * dilution_factor) |>
+                select(sample, biomass, species)
 
             biomass_per_bottle <- rbind(
               biomass_per_bottle,
               bm
             )
-            rm(bm)
+
+            rm(bm, fcu)
 
             traits[[p]]$species <- p
-            
+
             saveRDS(
              object = traits[[p]],
              file = file.path(output, paste0("flowcytometer_traits_", p, ".", timestamp, ".rds"))
