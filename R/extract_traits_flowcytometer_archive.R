@@ -139,7 +139,7 @@ extract_traits_flowcytometer_archive <- function(
             }
 
             bm <- traits[[p]] |>
-              group_by(sample) |>
+              group_by(bottle, sample) |>
               summarise(biomass = sum(biomass))
             bm$species <- p
 
@@ -150,13 +150,13 @@ extract_traits_flowcytometer_archive <- function(
 
             # Biomass per bottle
             fcu <- read.csv(file.path(file.path(datadir, "flowcytometer_ungated.csv")))
-           
+
             bm <- merge(
               x = bm,
               y = fcu,
               by = "sample"
             ) |>
-              mutate(biomass * 1000000 / volume * dilution_factor) |>
+              mutate(biomass = biomass * 1000000 / volume * dilution_factor) |>
                 select(sample, biomass, species)
 
             biomass_per_bottle <- rbind(
