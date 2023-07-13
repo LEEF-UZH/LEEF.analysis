@@ -53,13 +53,13 @@ LEEF_1_biomass_bemovi_25_cropped <- function(
   # calculate biomass per milliliter
 
   extrapolation.factor_25 <- 23.367
-
+  cropping.factor  <- 4
 
   biomasses <- ciliate_traits_25_cropped %>%
     group_by(timestamp, bottle, species) %>%
     summarize(biomass = sum(biomass, na.rm = T)) %>%
     mutate(
-      biomass = biomass * extrapolation.factor_25,
+      biomass = biomass * extrapolation.factor_25 * cropping.factor,
       biomass = ifelse(
         !(species %in% video_biomass_species),
         as.numeric(NA),

@@ -20,7 +20,7 @@ parquet_add_bemovi_16 <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "bottle", "species")
+                partitioning = c("bottle", "species")
             )
         }
     )
@@ -50,7 +50,7 @@ parquet_add_bemovi_25 <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "bottle", "species")
+                partitioning = c("bottle", "species")
             )
         }
     )
@@ -78,7 +78,7 @@ parquet_add_flowcam <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "bottle", "species")
+                partitioning = c("bottle", "species")
             )
         }
     )
@@ -106,13 +106,12 @@ parquet_add_flowcytometer <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "bottle", "species")
+                partitioning = c("bottle", "species")
             )
         }
     )
 }
 
-# generate roxygen documentation of the following function
 parquet_add_o2 <- function(
     fns = NULL,
     path_to_parquet_root_dir = NULL) {
@@ -130,8 +129,42 @@ parquet_add_o2 <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "bottle")
+                partitioning = c("bottle")
             )
         }
+    )
+}
+
+parquet_add_manualcount <- function(
+    fns = NULL,
+    path_to_parquet_root_dir = NULL) {
+    pbapply::pblapply(
+        fns,
+        function(fn) {
+            message("\nadding ", basename(fn), " ...\n")
+
+            path_to_parquet <- file.path(path_to_parquet_root_dir, "manualcount")
+
+            if (!dir.exists(path_to_parquet)) {
+                dir.create(path_to_parquet)
+            }
+            parquetize::csv_to_parquet(
+                path_to_file = fn,
+                path_to_parquet = path_to_parquet,
+                partition = "yes",
+                partitioning = c("bottle")
+            )
+        }
+    )
+}
+
+parquet_add_toc <- function(
+    fn = NULL,
+    path_to_parquet_root_dir = NULL) {
+    parquetize::rds_to_parquet(
+        path_to_file = fn,
+        path_to_parquet = file.path(path_to_parquet_root_dir, "toc"),
+        partition = "yes",
+        partitioning = c("bottle")
     )
 }
