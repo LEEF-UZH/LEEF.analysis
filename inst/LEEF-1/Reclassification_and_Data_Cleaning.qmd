@@ -1,5 +1,5 @@
 ---
-title: "Reclassification and Data Cleaning"
+title: "Reclassification and Data Cleaning LEEF-1"
 author: "Rainer M Krug"
 date: "24/04/2022"
 
@@ -50,7 +50,7 @@ params:
   rename_rrd: true
   final_rrd: true
   diagnostic_report: true
-  parquet: true
+  parquet: false
 ---
 
 # General remarks
@@ -59,7 +59,7 @@ params:
 
 # Setup
 1. Set Base to use
-This reclassification is based on the classifiers as in the repo at the base URL which speicifies the repo and the reference / tag which should be used for this reclassification
+This reclassification is based on the classifiers as in the repo at the base URL which specifies the repo and the reference / tag which should be used for this reclassification
 2. Set output path
 3. Set database
 4. Set Archive Directory
