@@ -4,17 +4,17 @@
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples
+#' @examples 
 #' \dontrun{
-#' if (interactive()) {
-#'     # EXAMPLE1
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
 #' }
-#' }
-#' @seealso
+#' @seealso 
 #'  \code{\link[pbapply]{pbapply}}
 #'  \code{\link[parquetize]{rds_to_parquet}}
 #' @rdname parquet_add_bemovi_16
-#' @export
+#' @export 
 #' @importFrom pbapply pblapply
 #' @importFrom parquetize rds_to_parquet
 parquet_add_bemovi_16 <- function(
@@ -79,17 +79,17 @@ parquet_add_bemovi_16 <- function(
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples
+#' @examples 
 #' \dontrun{
-#' if (interactive()) {
-#'     # EXAMPLE1
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
 #' }
-#' }
-#' @seealso
+#' @seealso 
 #'  \code{\link[pbapply]{pbapply}}
 #'  \code{\link[parquetize]{rds_to_parquet}}
 #' @rdname parquet_add_bemovi_25
-#' @export
+#' @export 
 #' @importFrom pbapply pblapply
 #' @importFrom parquetize rds_to_parquet
 parquet_add_bemovi_25 <- function(
@@ -154,17 +154,17 @@ parquet_add_bemovi_25 <- function(
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples
+#' @examples 
 #' \dontrun{
-#' if (interactive()) {
-#'     # EXAMPLE1
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
 #' }
-#' }
-#' @seealso
+#' @seealso 
 #'  \code{\link[pbapply]{pbapply}}
 #'  \code{\link[parquetize]{rds_to_parquet}}
 #' @rdname parquet_add_bemovi_25_cropped
-#' @export
+#' @export 
 #' @importFrom pbapply pblapply
 #' @importFrom parquetize rds_to_parquet
 parquet_add_bemovi_25_cropped <- function(
@@ -230,17 +230,17 @@ parquet_add_bemovi_25_cropped <- function(
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples
+#' @examples 
 #' \dontrun{
-#' if (interactive()) {
-#'     # EXAMPLE1
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
 #' }
-#' }
-#' @seealso
+#' @seealso 
 #'  \code{\link[pbapply]{pbapply}}
 #'  \code{\link[parquetize]{rds_to_parquet}}
 #' @rdname parquet_add_flowcam
-#' @export
+#' @export 
 #' @importFrom pbapply pblapply
 #' @importFrom parquetize rds_to_parquet
 parquet_add_flowcam <- function(
@@ -303,17 +303,17 @@ parquet_add_flowcam <- function(
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples
+#' @examples 
 #' \dontrun{
-#' if (interactive()) {
-#'     # EXAMPLE1
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
 #' }
-#' }
-#' @seealso
+#' @seealso 
 #'  \code{\link[pbapply]{pbapply}}
 #'  \code{\link[parquetize]{rds_to_parquet}}
 #' @rdname parquet_add_flowcytometer
-#' @export
+#' @export 
 #' @importFrom pbapply pblapply
 #' @importFrom parquetize rds_to_parquet
 parquet_add_flowcytometer <- function(
@@ -374,17 +374,17 @@ parquet_add_flowcytometer <- function(
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples
+#' @examples 
 #' \dontrun{
-#' if (interactive()) {
-#'     # EXAMPLE1
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
 #' }
-#' }
-#' @seealso
+#' @seealso 
 #'  \code{\link[pbapply]{pbapply}}
 #'  \code{\link[parquetize]{csv_to_parquet}}
 #' @rdname parquet_add_o2
-#' @export
+#' @export 
 #' @importFrom pbapply pblapply
 #' @importFrom parquetize csv_to_parquet
 parquet_add_o2 <- function(
@@ -428,17 +428,17 @@ parquet_add_o2 <- function(
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples
+#' @examples 
 #' \dontrun{
-#' if (interactive()) {
-#'     # EXAMPLE1
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
 #' }
-#' }
-#' @seealso
+#' @seealso 
 #'  \code{\link[pbapply]{pbapply}}
 #'  \code{\link[parquetize]{csv_to_parquet}}
 #' @rdname parquet_add_manualcount
-#' @export
+#' @export 
 #' @importFrom pbapply pblapply
 #' @importFrom parquetize csv_to_parquet
 parquet_add_manualcount <- function(
@@ -482,16 +482,16 @@ parquet_add_manualcount <- function(
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples
+#' @examples 
 #' \dontrun{
-#' if (interactive()) {
-#'     # EXAMPLE1
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
 #' }
-#' }
-#' @seealso
+#' @seealso 
 #'  \code{\link[parquetize]{rds_to_parquet}}
 #' @rdname parquet_add_toc
-#' @export
+#' @export 
 #' @importFrom parquetize rds_to_parquet
 parquet_add_toc <- function(
     fn = NULL,

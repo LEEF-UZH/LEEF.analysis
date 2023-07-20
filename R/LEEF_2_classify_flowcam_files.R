@@ -56,7 +56,6 @@ LEEF_2_classify_flowcam_files <- function(
   names(dat)[which(names(dat) == "date_flowcam")] <- "Date_Flowcam"
 
 # The classification ------------------------------------------------------
-
   classified <- LEEF.2.measurement.flowcam::classify_LEEF_2(
     algae_traits = dat,
     classifiers = classifier,

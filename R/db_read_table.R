@@ -22,34 +22,60 @@
 #'
 #' @examples
 db_read_table <- function(
-  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  table = NULL,
-  quiet = FALSE
-){
-  con <- DBI::dbConnect(RSQLite::SQLite(), db, flags = RSQLite::SQLITE_RO)
+    db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+    table = NULL,
+    quiet = FALSE) {
+  # if (grepl("\\.sqlite$", db)) {
+    con <- DBI::dbConnect(RSQLite::SQLite(), db, flags = RSQLite::SQLITE_RO)
 
-  tables <- DBI::dbListTables(con)
-  ##
-  if (is.null(table)) {
-    DBI::dbDisconnect(con)
-  	if (!quiet){
-  	  warning(
-  	    "This function needs a table name.\n",
-  	    "  Please specify a table by specifying `table = 'TABLENAME'` to read the table.\n",
-  	    "  The table names are returned!"
-  	  )
-  	}
-    data <- tables
-  } else {
-    if (!table %in% tables) {
-      stop(
-        table, " is not a table in the database.\n",
-        "  The follwing tables are in the database:\n\n",
-        paste(tables, collapse = "\n")
-      )
+    tables <- DBI::dbListTables(con)
+    ##
+    if (is.null(table)) {
+      DBI::dbDisconnect(con)
+      if (!quiet) {
+        warning(
+          "This function needs a table name.\n",
+          "  Please specify a table by specifying `table = 'TABLENAME'` to read the table.\n",
+          "  The table names are returned!"
+        )
+      }
+      data <- tables
+    } else {
+      if (!table %in% tables) {
+        stop(
+          table, " is not a table in the database.\n",
+          "  The follwing tables are in the database:\n\n",
+          paste(tables, collapse = "\n")
+        )
+      }
+      data <- con %>%
+        dplyr::tbl(table)
     }
-    data <- con %>%
-      dplyr::tbl(table)
-  }
+  # } else {
+  #   message("assuming a parquet directory!")
+  #   stop("Not implemented yet!")
+  #   tables <- list.files(db, pattern = "\\.parquet$", full.names = TRUE)
+  #   ##
+  #   if (is.null(table)) {
+  #     if (!quiet) {
+  #       warning(
+  #         "This function needs a table name.\n",
+  #         "  Please specify a table by specifying `table = 'TABLENAME'` to read the table.\n",
+  #         "  The table names are returned!"
+  #       )
+  #     }
+  #     data <- tables
+  #   } else {
+  #     if (!table %in% tables) {
+  #       stop(
+  #         table, " is not a table in the database.\n",
+  #         "  The follwing tables are in the database:\n\n",
+  #         paste(tables, collapse = "\n")
+  #       )
+  #     }
+  #     open_dataset
+  #     data <- read_parquet()      
+  #   }
+  # }
   return(data)
 }

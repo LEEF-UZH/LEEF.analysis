@@ -31,7 +31,7 @@ LEEF_2_classify_flowcam_archive <- function(
 
   dir.create( output, showWarnings = FALSE, recursive = TRUE)
 
-  dir <- tempfile(pattern = "extracted.data_")
+  # dir <- tempfile(pattern = "extracted.data_")
 
   # do the stuff -------------------------------------------------------
 

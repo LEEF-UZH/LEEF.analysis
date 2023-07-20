@@ -53,8 +53,6 @@ extract_traits_flowcytometer_archive <- function(
     recursive = TRUE
   )
 
-  dir <- tempfile(pattern = "extracted.data_")
-  dir.create(dir, recursive = TRUE, showWarnings = TRUE)
 
   # do the stuff -------------------------------------------------------
 
