@@ -1,5 +1,38 @@
 #' @title FUNCTION_TITLE
 #' @description FUNCTION_DESCRIPTION
+#' @param sources PARAM_DESCRIPTION, Default: NULL
+#' @param partitioning PARAM_DESCRIPTION, Default: NULL
+#' @param hive_style PARAM_DESCRIPTION, Default: TRUE
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if (interactive()) {
+#'     # EXAMPLE1
+#' }
+#' }
+#' @seealso
+#'  \code{\link[arrow]{open_dataset}}
+#' @rdname new_parquet_definition
+#' @export 
+new_parquet_definition <- function(
+    sources = NULL,
+    partitioning = NULL,
+    hive_style = TRUE) {
+    def <- list(
+        sources = sources,
+        partitioning = partitioning,
+        hive_style = hive_style
+    )
+    class(def) <- append(class(def), "parquet_definition")
+    return(def)
+}
+
+
+
+
+#' @title FUNCTION_TITLE
+#' @description FUNCTION_DESCRIPTION
 #' @param fns PARAM_DESCRIPTION, Default: NULL
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
 #' @return OUTPUT_DESCRIPTION
@@ -53,7 +86,9 @@ parquet_add_bemovi_16 <- function(
         ),
         partitioning = c("bottle", "species"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+    "class<-"("parquet_definition") |>
+    saveRDS(
         file = file.path(path_to_parquet_root_dir, "bemovi_16_density.arrow.rds")
     )
 
@@ -66,7 +101,9 @@ parquet_add_bemovi_16 <- function(
         ),
         partitioning = c("bottle", "species"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "bemovi_16_morph.arrow.rds")
     )
 }
@@ -130,7 +167,9 @@ parquet_add_bemovi_25 <- function(
         ),
         partitioning = c("bottle", "species"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |>
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "bemovi_25_density.arrow.rds")
     )
 
@@ -143,7 +182,9 @@ parquet_add_bemovi_25 <- function(
         ),
         partitioning = c("bottle", "species"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "bemovi_25_morph.arrow.rds")
     )
 }
@@ -205,7 +246,9 @@ parquet_add_bemovi_25_cropped <- function(
         ),
         partitioning = c("bottle", "species"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "bemovi_25_density_cropped.arrow.rds")
     )
 
@@ -218,7 +261,9 @@ parquet_add_bemovi_25_cropped <- function(
         ),
         partitioning = c("bottle", "species"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "bemovi_25_morph_cropped.arrow.rds")
     )
 }
@@ -279,7 +324,9 @@ parquet_add_flowcam <- function(
         ),
         partitioning = c("bottle", "species"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "flowcam_traits.arrow.rds")
     )
 
@@ -292,7 +339,9 @@ parquet_add_flowcam <- function(
         ),
         partitioning = c("bottle", "species"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "flowcam_density.arrow.rds")
     )
 }
@@ -351,7 +400,9 @@ parquet_add_flowcytometer <- function(
         ),
         partitioning = c("bottle", "species"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "flowcytometer_traits.arrow.rds")
     )
     list(
@@ -363,7 +414,9 @@ parquet_add_flowcytometer <- function(
         ),
         partitioning = c("bottle", "species"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "flowcytometer_density.arrow.rds")
     )
 }
@@ -417,7 +470,9 @@ parquet_add_o2 <- function(
         ),
         partitioning = c("bottle"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "o2.arrow.rds")
     )
 }
@@ -471,7 +526,9 @@ parquet_add_manualcount <- function(
         ),
         partitioning = c("bottle"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "manualcount.arrow.rds")
     )
 }
@@ -511,7 +568,9 @@ parquet_add_toc <- function(
         ),
         partitioning = c("bottle"),
         hive_style = TRUE
-    ) |> saveRDS(
+    ) |> 
+     "class<-"("parquet_definition") |> 
+     saveRDS(
         file = file.path(path_to_parquet_root_dir, "toc.arrow.rds")
     )
 }

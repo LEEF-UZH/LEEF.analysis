@@ -7,10 +7,10 @@
 parquet_open_table(def)
 }
 \arguments{
-\item{def}{Path to the parquet files definition.}
+\item{def}{Path to the parquet files definition or the actual definition object. These have usually the name `TABLENAME.sources.rds`}
 }
 \value{
-Link to the table \code{density} in the RRD to be used with \code{dplyr} and friends
+Object to the table \code{density} in the RRD to be used with \code{dplyr} and friends
 }
 \description{
 Opens the arrow dataset of parquet files. The resulting pbject can be used in a dplyr pipeline as a starting point.

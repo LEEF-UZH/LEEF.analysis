@@ -972,6 +972,9 @@ This is experimental. The main storage is still the RRD sqlite database.
 ```{r}
 #| label: create_parquet
 #| eval: !expr params$parquet
+###
+tic()
+###
 
 pd <- file.path(params$output_dir, "parquet")
 unlink(pd, recursive = TRUE, force = TRUE)
@@ -1049,4 +1052,7 @@ list.files(
 ) |>
     LEEF.analysis:::parquet_add_manualcount(path_to_parquet_root_dir = pd)
 
+###
+toc()
+###
 ```
