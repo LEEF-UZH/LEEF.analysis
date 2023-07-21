@@ -2,11 +2,14 @@
 % Please edit documentation in R/oxy-parquet.R, R/parquet.R
 \name{parquet_add_toc}
 \alias{parquet_add_toc}
+\alias{parquet_add_conductivity}
 \title{FUNCTION_TITLE}
 \usage{
 parquet_add_toc(fn = NULL, path_to_parquet_root_dir = NULL)
 
 parquet_add_toc(fn = NULL, path_to_parquet_root_dir = NULL)
+
+parquet_add_conductivity(fns = NULL, path_to_parquet_root_dir = NULL)
 }
 \arguments{
 \item{fn}{PARAM_DESCRIPTION, Default: NULL}
@@ -17,13 +20,19 @@ parquet_add_toc(fn = NULL, path_to_parquet_root_dir = NULL)
 OUTPUT_DESCRIPTION
 
 OUTPUT_DESCRIPTION
+
+OUTPUT_DESCRIPTION
 }
 \description{
 FUNCTION_DESCRIPTION
 
 FUNCTION_DESCRIPTION
+
+FUNCTION_DESCRIPTION
 }
 \details{
+DETAILS
+
 DETAILS
 
 DETAILS
@@ -39,8 +48,15 @@ if (interactive()) {
     # EXAMPLE1
 }
 }
+\dontrun{
+if (interactive()) {
+    # EXAMPLE1
+}
+}
 }
 \seealso{
+\code{\link[parquetize]{rds_to_parquet}}
+
 \code{\link[parquetize]{rds_to_parquet}}
 
 \code{\link[parquetize]{rds_to_parquet}}

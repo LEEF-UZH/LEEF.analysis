@@ -445,10 +445,7 @@ The biomass is calculated here
 
 ```{r}
 #| label: bemovi_25_biomass
-#| eval: false
-#| 
-
-# #| eval: !expr params$reclassify_bemovi_25
+#| eval: !expr params$reclassify_bemovi_25
 
 ## Bemovi 25
 
@@ -538,7 +535,9 @@ toc()
 
 ## TODO Regate Flowcytometer
 
-Not implemented yet - needs a bit of thinking.
+TODO Not implemented yet - needs a bit of thinking.
+
+TODO Biomass is missing from flowcytometer
 ```{r}
 #| label: regate_flowcytometer
 #| eval: false
@@ -599,6 +598,88 @@ pbmcapply::pbmclapply(
 rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, conv_FSCA_length)
 ```
 
+## Assemble Flowcytometer
+```{r}
+#| label: assemble_flowcytometer
+#| eval: !expr params$regate_flowcytometer
+#| 
+
+### traits
+
+fns_traits <- list.files(
+    path = params$extracted_dir,
+    pattern = "^LEEF\\.flowcytometer\\.flowcytometer\\.",
+    recursive = FALSE,
+    full.names = TRUE
+)
+
+from_algae <- file.path(fns_traits, "flowcytometer_traits_algae.rds")
+from_bacteria <- file.path(fns_traits, "flowcytometer_traits_bacteria.rds")
+
+
+dp <- file.path(params$output_dir, "flowcytometer_traits")
+dir.create(dp, showWarnings = FALSE, recursive = TRUE)
+
+to_algae <- file.path(
+    dp,
+    paste0(
+        "flowcytometer_traits_algae.",
+        from_algae |>
+            gsub(pattern = file.path(params$extracted_dir, "LEEF.flowcytometer.flowcytometer."), replacement = "") |>
+            gsub(pattern = "/flowcytometer_traits_algae.rds", replacement = "") |>
+            gsub(pattern = "/flowcytometer_traits_bacteria.rds", replacement = ""),
+        ".rds"
+    )
+)  
+
+to_bacteria <- file.path(
+    dp,
+    paste0(
+        "flowcytometer_traits_bacteria.",
+        from_bacteria |>
+            gsub(pattern = file.path(params$extracted_dir, "LEEF.flowcytometer.flowcytometer."), replacement = "") |>
+            gsub(pattern = "/flowcytometer_traits_algae.rds", replacement = "") |>
+            gsub(pattern = "/flowcytometer_traits_bacteria.rds", replacement = ""),
+        ".rds"
+    )
+)
+
+file.copy(from = c(from_algae, from_bacteria), to = c(to_algae, to_bacteria))
+
+### Density
+
+fns_density <- list.files(
+    path = params$extracted_dir,
+    pattern = "^LEEF\\.flowcytometer\\.flowcytometer\\.",
+    recursive = FALSE,
+    full.names = TRUE
+) |>
+    file.path("flowcytometer_density.csv")
+
+dp <- file.path(params$output_dir, "flowcytometer")
+dir.create(dp, showWarnings = FALSE, recursive = TRUE)
+
+to  <- file.path(
+    dp,
+    paste0(
+        "flowcytometer_density.",
+        fns_density |>
+            gsub(pattern = file.path(params$extracted_dir, "LEEF.flowcytometer.flowcytometer."), replacement = "") |>
+            gsub(pattern = "/flowcytometer_density.csv", replacement = ""),
+        ".rds"
+    )
+)
+
+for (i in 1:length(fns_density)){
+    read.csv(fns_density[i]) |>
+        saveRDS(file = to[i])
+}
+
+
+rm(dp, fns_traits, fns_density)
+
+```
+
 ## Assemble TOC
 ```{r}
 #| label: assemble_toc_detrended
@@ -647,6 +728,38 @@ file.path(
 rm(dp, fns_o2)
 ```
 
+## Assemble Conductivity
+```{r}
+#| label: assemble_conductivity
+#| eval: !expr params$assemble_conductivity
+#|
+
+from <- list.files(
+    path = params$extracted_dir,
+    pattern = "^LEEF\\.conductivity\\.conductivity\\.",
+    recursive = FALSE,
+    full.names = TRUE
+) |>
+    file.path("conductivity.csv")
+
+dp <- file.path(params$output_dir, "conductivity")
+dir.create(dp, showWarnings = FALSE, recursive = TRUE)
+
+to <- file.path(
+    dp,
+    paste0(
+        from |>
+            gsub(pattern = file.path(params$extracted_dir, "LEEF.conductivity.conductivity."), replacement = "") |>
+            gsub(pattern = "/conductivity.csv", replacement = ""),
+        ".csv"
+    )
+)
+
+file.copy(from = from, to = to)
+
+rm(dp, from, to)
+```
+
 
 ## Assemble manualcount
 ```{r}
@@ -678,225 +791,6 @@ file.path(
     file.copy(from = fns_mc)
 
 rm(dp, fns_mc)
-```
-
-
-
-
-
-
-
-# 1 Add to database and create indices
-Old timestamps will be removed and not be backed up.
-
-```{r}
-#| label: addRRD_copy_temp
-#| eval: !expr params$add_to_rrd
-#| 
-
-file.copy(db(), db(1, temp = TRUE))
-```
-```{r}
-#| label: addRRD_b16
-#| eval: !expr params$add_to_rrd
-#| 
-
-## Bemovi_16
-
-suppressMessages(
-  add_reclassified_to_db(
-    path = params$output_dir, 
-    db = db_name(1, temp = TRUE), 
-    remove_timestamps = NULL,
-    backup_removed = FALSE,
-    methods = "bemovi_mag_16"
-  )
-)
-```
-```{r}
-#| label: addRRD_b25
-#| eval: !expr params$add_to_rrd
-#| 
-
-## Bemovi_25
-
-suppressMessages(
-  add_reclassified_to_db(
-    path = params$output_dir, 
-    db = db_name(1, temp = TRUE), 
-    remove_timestamps = NULL,
-    backup_removed = FALSE,
-    methods = "bemovi_mag_25"
-  )
-)
-```
-```{r}
-#| label: addRRD_flowcam
-#| eval: !expr params$add_to_rrd
-#| 
-
-## flowcam
-
-suppressMessages(
-  add_reclassified_to_db(
-    path = params$output_dir, 
-    db = db_name(1, temp = TRUE), 
-    remove_timestamps = NULL,
-    backup_removed = FALSE,
-    methods = "flowcam"
-  )
-)
-```
-
-```{r}
-#| label: addRRD_flowcytometer_density
-#| eval: !expr params$add_to_rrd
-#| 
-
-## Flowcytometer Densities
-
-f_dirs <- list.dirs(
-    params$extracted_dir,
-    recursive = FALSE,
-    full.names = TRUE
-) |>
-    grep(pattern = "LEEF\\.flowcytometer\\.flowcytometer\\.", value = TRUE)
-
-fns_dens <- file.path(f_dirs, "flowcytometer_density.csv")
-
-
-suppressMessages(
-  add_to_db(
-    fns_dens,
-    db = db_name(1, temp = TRUE),
-    tables = rep("flowcytometer__flowcytometer_density", length(fns_dens)),
-    remove_timestamps = NULL,
-    check_timestamps = FALSE,
-    backup_removed = TRUE
-  )
-)
-
-rm(f_dirs, fns_dens)
-```
-```{r}
-#| label:  addRRD_flowcytometer_traits
-#| eval: !expr params$add_to_rrd
-#| 
-
-## Flowcytometer Traits
-
-f_dirs <- list.dirs(
-    params$extracted_dir,
-    recursive = FALSE,
-    full.names = TRUE
-) |>
-    grep(pattern = "LEEF\\.flowcytometer\\.flowcytometer\\.", value = TRUE)
-
-fn_traits <- c(
-    file.path(f_dirs, "flowcytometer_traits_algae.rds"),
-    file.path(f_dirs, "flowcytometer_traits_bacteria.rds")
-)
-
-suppressMessages(
-  add_to_db(
-    fns_traits,
-    db = db_name(1, temp = TRUE),
-    tables = rep("flowcytometer__flowcytometer_traits", length(fns_traits)),
-    remove_timestamps = NULL,
-    check_timestamps = FALSE,
-    backup_removed = TRUE
-  )
-)
-
-rm(f_dirs, fn_traits)
-```
-```{r}
-#| label: add_toc_detrended
-#| eval: !expr params$add_to_rrd
-#|
-
-tp <- file.path(params$output_dir, "toc")
-toc_det <- file.path(tp, "toc_detrended.rds")
-
-add_to_db(
-    toc_det,
-    db = db_name(1, temp = TRUE),
-    tables = "toc__toc",
-    remove_timestamps = NULL,
-    check_timestamps = TRUE,
-    backup_removed = TRUE
-)
-
-rm(toc_det, tp)
-```
-
-```{r}
-#| label: add_o2
-#| eval: !expr params$add_to_rrd
-#|
-
-fns_o2 <- list.files(
-  path = file.path(params$output_dir, "o2meter"), 
-  pattern = "^LEEF\\.fast\\.o2meter\\.",
-  recursive = FALSE, 
-  full.names = TRUE
-)
-
-suppressMessages(
-  add_to_db(
-    fns_o2,
-    db = db_name(1, temp = TRUE),
-    tables = rep("o2meter__o2meter", length(fns_o2)),
-    remove_timestamps = NULL,
-    check_timestamps = TRUE,
-    backup_removed = TRUE
-  )
-)
-```
-
-
-```{r}
-#| label: add_manualcount
-#| eval: !expr params$add_to_rrd
-#|
-
-fns_mc <- list.files(
-  path = file.path(params$output_dir, "manualcount"), 
-  pattern = "^LEEF\\.fast\\.manualcount\\.",
-  recursive = FALSE, 
-  full.names = TRUE
-)
-
-suppressMessages(
-  add_to_db(
-    fns_mc,
-    db = db_name(1, temp = TRUE),
-    tables = rep("manualcount__manualcount_density", length(fns_mc)),
-    remove_timestamps = NULL,
-    check_timestamps = TRUE,
-    backup_removed = TRUE
-  )
-)
-```
-```{r}
-#| label: addRRD_add_indices
-#| eval: !expr params$add_to_rrd
-#|
-
-RRD_create_indices(
-    db_name(1, temp = TRUE),
-    LEEF = "LEEF-1",
-    continue_after_error = TRUE
-)
-
-```
-
-```{r}
-#| label: addRRD_finalize
-#| eval: !expr params$add_to_rrd
-#|
-
-file.rename(db_name(1, temp = TRUE), db_name(1, temp = FALSE))
 ```
 
 
@@ -939,18 +833,7 @@ file.rename(db_name(2, temp = TRUE), db_name(3, temp = FALSE))
 file.copy(db_name(4, temp = FALSE), db_name("final", temp = FALSE))
 ```
 
-# TODO Do a final vacuuming into new database
-Vacuuming the database will take some time!
 
-To vacuum the sqlite database, i.e. recover the space from the deletion of rows, please run the following command in the directory where the database is located. I do not expect this to have a big impact on the size.
-
-```{r echo = FALSE}
-cat(
-  paste0(
-    "sqlite3 \"./", basename(db_name("final", temp = FALSE)), "\" 'VACUUM main INTO \"", db_name("final_vacuumed", temp = FALSE), "\"'"
-    )
-)
-```
 
 # TODO Create Overlays
 TODO This is still using the extracted and pre-processed folder and needs to be changed to use the reclassified bemovi data. 
@@ -977,6 +860,7 @@ tic()
 ###
 
 pd <- file.path(params$output_dir, "parquet")
+
 unlink(pd, recursive = TRUE, force = TRUE)
 dir.create(pd, showWarnings = FALSE, recursive = TRUE)
 
@@ -986,7 +870,7 @@ list.files(
     pattern = "\\.rds$",
     full.names = TRUE
 ) |>
-    LEEF.analysis:::parquet_add_bemovi_16(path_to_parquet_root_dir = pd)
+    parquet_add_bemovi_16(path_to_parquet_root_dir = pd)
 
 ## bemovi mag 25
 list.files(
@@ -995,7 +879,7 @@ list.files(
     full.names = TRUE
 ) |>
     grep(pattern = "_cropped\\.", value = TRUE, invert = TRUE) |>
-    LEEF.analysis:::parquet_add_bemovi_25(path_to_parquet_root_dir = pd)
+    parquet_add_bemovi_25(path_to_parquet_root_dir = pd)
 
 ## bemovi mag 25 cropped
 list.files(
@@ -1004,7 +888,7 @@ list.files(
     full.names = TRUE
 ) |>
     grep(pattern = "_cropped\\.", value = TRUE) |>
-    LEEF.analysis:::parquet_add_bemovi_25_cropped(path_to_parquet_root_dir = pd)
+    parquet_add_bemovi_25_cropped(path_to_parquet_root_dir = pd)
 
 
 ## flowcam
@@ -1013,9 +897,10 @@ list.files(
     pattern = "\\.rds$",
     full.names = TRUE
 ) |>
-    LEEF.analysis:::parquet_add_flowcam(path_to_parquet_root_dir = pd)
+    parquet_add_flowcam(path_to_parquet_root_dir = pd)
 
 ## flowcytometer
+tic()
 c(
     list.files(
         file.path(params$output_dir, "flowcytometer"),
@@ -1028,10 +913,19 @@ c(
         full.names = TRUE
     )
 ) |>
-    LEEF.analysis:::parquet_add_flowcytometer(path_to_parquet_root_dir = pd)
+    parquet_add_flowcytometer(path_to_parquet_root_dir = pd)
+toc()
+
+## manualcount
+list.files(
+    path = file.path(params$output_dir, "manualcount"),
+    recursive = FALSE,
+    full.names = TRUE
+) |>
+    parquet_add_manualcount(path_to_parquet_root_dir = pd)
 
 ## toc
-LEEF.analysis:::parquet_add_toc(
+parquet_add_toc(
     fn = file.path(params$output_dir, "toc", "toc.rds"),
     path_to_parquet_root_dir = pd
 )
@@ -1042,15 +936,34 @@ list.files(
     recursive = FALSE,
     full.names = TRUE
 ) |>
-    LEEF.analysis:::parquet_add_o2(path_to_parquet_root_dir = pd)
+    parquet_add_o2(path_to_parquet_root_dir = pd)
 
-## manualcount
+## conductivity
 list.files(
-    path = file.path(params$output_dir, "manualcount"),
+    path = file.path(params$output_dir, "conductivity"),
     recursive = FALSE,
     full.names = TRUE
 ) |>
-    LEEF.analysis:::parquet_add_manualcount(path_to_parquet_root_dir = pd)
+    parquet_add_conductivity(path_to_parquet_root_dir = pd)
+
+
+## experimental tables
+
+parquetize::csv_to_parquet(
+    path_to_file = file.path(parameter_dir, "parameter", "00.general.parameter", "compositions.csv"),
+    path_to_parquet = file.path(pd, "composition")
+)
+
+parquetize::csv_to_parquet(
+    path_to_file = file.path(parameter_dir, "parameter", "00.general.parameter", "experimental_design.csv"),
+    path_to_parquet = file.path(pd, "experimental_design")
+)
+
+parquetize::csv_to_parquet(
+    path_to_file = file.path(parameter_dir, "treatment", "stressor_levels.csv"),
+    path_to_parquet = file.path(pd, "stressor_levels")
+)
+
 
 ###
 toc()
