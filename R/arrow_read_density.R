@@ -10,7 +10,7 @@
 #'
 #' @importFrom DBI dbConnect
 #' @importFrom RSQLite SQLite SQLITE_RO
-#' @importFrom dplyr tbl
+#' @importFrom dplyr tbl relocate mutate collect
 #'
 #' @export
 #'
@@ -53,10 +53,10 @@ arrow_read_density <- function(
         filter(as.integer(timestamp) >= as.integer(from_timestamp)) |>
         filter(as.integer(timestamp) <= as.integer(to_timestamp))
 
-    density |>
-        collect() |>
-        mutate(day = as.integer(difftime(as.Date(as.character(timestamp), format = "%Y%m%d"), as.Date("2022-11-07"), units = "days"))) |>
-        relocate(day, .after = timestamp)
+    density <- density |>
+        dplyr::collect() |>
+        dplyr::mutate(day = as.integer(difftime(as.Date(as.character(timestamp), format = "%Y%m%d"), as.Date("2022-11-07"), units = "days"))) |>
+        dplyr::relocate(day, .after = timestamp)
 
     return(density)
 }

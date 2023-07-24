@@ -10,7 +10,7 @@
 #'
 #' @importFrom DBI dbConnect
 #' @importFrom RSQLite SQLite SQLITE_RO
-#' @importFrom dplyr tbl
+#' @importFrom dplyr tbl mutate relocate collect
 #'
 #' @export
 #'
@@ -31,9 +31,9 @@ arrow_read_conductivity <- function(
         full_join(exp_des, by = "bottle")
 
     conductivity <- conductivity |>
-        collect() |>
-        mutate(day = as.integer(difftime(as.Date(as.character(timestamp), format = "%Y%m%d"), as.Date("2022-11-07"), units = "days"))) |>
-        relocate(day, .after = timestamp)
+        dplyr::collect() |>
+        dplyr::mutate(day = as.integer(difftime(as.Date(as.character(timestamp), format = "%Y%m%d"), as.Date("2022-11-07"), units = "days"))) |>
+        dplyr::relocate(day, .after = timestamp)
 
     return(o2)
 }
