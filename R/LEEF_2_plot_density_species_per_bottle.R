@@ -43,15 +43,16 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp <- function(
   ## plotting
   spid <- species_set(species_set_id)
   data <- density %>%
-    dplyr::filter(measurement == !!measurement) %>%
-    dplyr::filter(
-      ifelse(
-        is.null(species_set_id),
-        TRUE,
-        species %in% !!spid
+    dplyr::filter(measurement == !!measurement)
+  if (!is.null(species_set_id)) {
+    data <- data |>
+      dplyr::filter(
+        species %in% species_set(species_set_id)
       )
-    ) %>%
+  }
+  data <- data |>
     dplyr::collect()
+  
   if (nrow(data) < 1) {
     warning("No data for available!")
   } else {

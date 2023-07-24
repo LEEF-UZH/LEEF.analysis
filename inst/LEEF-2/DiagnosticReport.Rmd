@@ -126,10 +126,10 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 ### Flowcam Algae
 ```{r dens_species_fcam_al_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
-  params$db, 
-  transform_density_4throot = FALSE, 
+  params$db,
+  transform_density_4throot = FALSE,
   measurement = "flowcam",
-  species_set_id = "LEEF_2_flowcam_algae", 
+  species_set_id = "LEEF_2_flowcam_algae",
   arrow = params$arrow
 )
 ```
@@ -139,8 +139,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 ### Flowcam Rest
 ```{r dens_species_fcam_rest_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_density_species_per_bottle_per_timestamp(
-  params$db, 
-  transform_density_4throot = FALSE, 
+  params$db,
+  transform_density_4throot = FALSE,
   measurement = "flowcam",
   species_set_id = "LEEF_2_flowcam_rest",
   arrow = params$arrow

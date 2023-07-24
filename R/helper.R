@@ -64,21 +64,40 @@ species_set <- function(species_set_id = NULL){
     ),
     LEEF_2_flowcam_algae = c(
       "Chlamydomonas",
+      "ChlamydomonasClumpsLarge",
+      "ChlamydomonasClumpsSmall",
       "Cryptomonas",
-      "ChlamydomonasClumps",
       "DividingChlamydomonas",
-      "Small_unidentified",
-      "DigestedAlgae"
+      "Small_cells"
     ),
+    # LEEF_2_flowcam_algae = c(
+    #   "Chlamydomonas",
+    #   "Cryptomonas",
+    #   "ChlamydomonasClumps",
+    #   "DividingChlamydomonas",
+    #   "Small_unidentified",
+    #   "DigestedAlgae"
+    # ),
     LEEF_2_flowcam_rest = c(
-      "Loxocephallus",
       "airbubbles",
-      "ColpidiumVacuoles",
+      "CiliateCysts",
+      "CystsWhite",
       "Debris",
+      "DigestedAlgae",
+      "DigestedWhite",
+      "Loxocephallus",
       "OtherCiliate",
-      "Coleps_irchel",
-      "Colpidium"
+      "Small_unidentified"
     )
+    # LEEF_2_flowcam_rest = c(
+    #   "Loxocephallus",
+    #   "airbubbles",
+    #   "ColpidiumVacuoles",
+    #   "Debris",
+    #   "OtherCiliate",
+    #   "Coleps_irchel",
+    #   "Colpidium"
+    # )
   )
   if (is.null(species_set_id)) {
     return(names(sets))
