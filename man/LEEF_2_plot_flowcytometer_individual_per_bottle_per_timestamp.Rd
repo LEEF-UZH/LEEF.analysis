@@ -7,7 +7,8 @@
 \usage{
 LEEF_2_plot_flowcytometer_individual_per_bottle_per_timestamp(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  species = c("bacteria")
+  species = c("bacteria"),
+  arrow = FALSE
 )
 }
 \arguments{
@@ -15,6 +16,8 @@ LEEF_2_plot_flowcytometer_individual_per_bottle_per_timestamp(
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
 
 \item{species}{species to be plotted}
+
+\item{arrow}{if \code{TRUE} read data from arrow instead of sqlite database}
 }
 \value{
 \code{ggplot} object of the plot

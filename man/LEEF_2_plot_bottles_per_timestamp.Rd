@@ -7,7 +7,8 @@
 \usage{
 LEEF_2_plot_bottles_per_timestamp(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  lastDays = 7
+  lastDays = 7,
+  arrow = FALSE
 )
 }
 \arguments{
@@ -15,6 +16,8 @@ LEEF_2_plot_bottles_per_timestamp(
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
 
 \item{lastDays}{last days to plot. Defaoult \code{7}}
+
+\item{arrow}{if \code{TRUE} read data from arrow instead of sqlite database}
 }
 \value{
 \code{ggplot} object of the plot

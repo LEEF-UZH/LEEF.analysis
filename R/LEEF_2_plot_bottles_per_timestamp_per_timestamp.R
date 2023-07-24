@@ -3,6 +3,7 @@
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
 #' @param lastDays last days to plot. Defaoult \code{7}
+#' @param arrow if \code{TRUE} read data from arrow instead of sqlite database
 #'
 #' @return \code{ggplot} object of the plot
 #'
@@ -14,23 +15,35 @@
 #' @examples
 LEEF_2_plot_bottles_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  lastDays = 7
+  lastDays = 7,
+  arrow = FALSE
 ){
-  density <- db_read_density(db) %>%
+  if (arrow) {
+    density <- arrow_read_density()
+    o2 <- arrow_read_o2()
+    conductivity <- arrow_read_conductivity()
+  } else {
+    density <- db_read_density(db)
+    o2 <- db_read_o2(db)
+    conductivity <- db_read_conductivity(db)
+  }
+
+  ## plotting
+  density <- density %>%
     dplyr::select(timestamp, day, bottle, measurement) %>%
     dplyr::filter(day >= (max(day, na.rm=TRUE) - lastDays)) %>%
     # dplyr::group_by(timestamp, day, bottle, measurement) %>%
     # dplyr::summarise(n = dplyr::n()) %>%
     dplyr::collect()
 
-  o2 <- db_read_o2(db) %>%
+  o2 <- o2 %>%
     dplyr::select(timestamp, day, bottle, measurement) %>%
     dplyr::filter(day >= (max(day, na.rm=TRUE) - lastDays)) %>%
     # dplyr::group_by(timestamp, day, bottle, measurement) %>%
     # dplyr::summarise(n = dplyr::n()) %>%
     dplyr::collect()
 
-  conductivity <- db_read_conductivity(db) %>%
+  conductivity <- conductivity %>%
     dplyr::select(timestamp, day, bottle, measurement) %>%
     dplyr::filter(day >= (max(day, na.rm=TRUE) - lastDays)) %>%
     # dplyr::group_by(timestamp, day, bottle, measurement) %>%

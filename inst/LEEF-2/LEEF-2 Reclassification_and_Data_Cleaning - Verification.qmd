@@ -200,12 +200,137 @@ params:
 
 # Preparation
   
-  ```{r setup, include=FALSE}
+```{r setup, include=FALSE}
+library(LEEF.analysis)
+library(dplyr)
+library(knitr)
 
-  if (!exists("params")) {
-     params <- rmarkdown::yaml_front_matter('~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning - Verification.qmd')$params
-  }
+if (!exists("params")) {
+    params <- rmarkdown::yaml_front_matter('~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning - Verification.qmd')$params
+}
 
-  
-  ```
-  
+options(RRDarrow = "/Volumes/RRD.Reclassification_LEEF-2/parquet/")
+
+densities <- arrow_read_density() |>
+    arrange(day)
+o2 <- arrow_read_table(table = "o2") %>% collect()
+water_chem <- arrow_read_table("toc") %>% collect()
+
+exp_timestamps <- params$timestamps[params$timestamps < as.integer(format(Sys.Date(), "%Y%m%d"))]
+```
+# Check presence of all timestamps in all methods
+
+## Generally missing or to many
+
+### Additional timestamps
+```{r}
+densities |>
+  select(timestamp) |>
+  filter(!(timestamp %in% exp_timestamps)) |>
+  rename(additional_timestamps = timestamp) |>
+  knitr::kable()
+```
+
+### Additional timestamps
+```{r}
+densities |>
+  select(timestamp) |>
+  reframe(missing_timestamps = as.numeric(exp_timestamps[which(!(exp_timestamps %in% unique(timestamp)))])) |>
+  knitr::kable()
+```
+
+## measurements
+```{r}
+missing_timestamps <- densities %>%
+    group_by(measurement, bottle) %>%
+    reframe(missing_timestamps = as.numeric(exp_timestamps[which(!(exp_timestamps %in% unique(timestamp)))]))
+
+missing_timestamps |>
+    arrange(missing_timestamps, bottle) |>
+    knitr::kable()
+```
+
+### bemovi_16
+```{r}
+missing_timestamps |>
+    filter(measurement == "bemovi_16") |>
+    select(measurement, missing_timestamps) |>
+    distinct() |>
+    arrange() |>
+    knitr::kable()
+```
+
+### bemovi_25
+```{r}
+missing_timestamps |>
+    filter(measurement == "bemovi_25") |>
+    select(measurement, missing_timestamps) |>
+    distinct() |>
+    arrange() |>
+    knitr::kable()
+```
+
+### bemovi_25_cropped
+```{r}
+missing_timestamps |>
+    filter(measurement == "bemovi_25_cropped") |>
+    select(measurement, missing_timestamps) |>
+    distinct() |>
+    arrange() |>
+    knitr::kable()
+```
+
+### flowcam
+```{r}
+missing_timestamps |>
+    filter(measurement == "flowcam") |>
+    select(measurement, missing_timestamps) |>
+    distinct() |>
+    arrange() |>
+    knitr::kable()
+```
+
+### flowcytometer
+```{r}
+missing_timestamps |>
+    filter(measurement == "flowcytometer") |>
+    select(measurement, missing_timestamps) |>
+    distinct() |>
+    arrange() |>
+    knitr::kable()
+```
+
+
+## O2 measurements
+
+```{r}
+missing_timestamps_o2 <- o2 %>%
+    group_by(sensor, bottle) %>%
+    reframe(missing_timestamps = as.numeric(exp_timestamps[which(!(exp_timestamps %in% unique(timestamp)))])) # %>%
+# dplyr::filter(
+#     !(missing_timestamps == 20211208 & bottle == "b_01" & sensor == 4),
+#     missing_timestamps != 20211201,
+# ) # Previously confirmed missing data is filtered out
+missing_timestamps_o2 |>
+    arrange(missing_timestamps, bottle, sensor) |>
+    knitr::kable()
+```  
+
+## Water chemistry
+
+```{r}
+missing_timestamps_wc <- water_chem %>%
+    group_by(inj_type, bottle) %>%
+    reframe(missing_timestamps = as.numeric(exp_timestamps[which(!(exp_timestamps %in% unique(timestamp)))]))
+table(missing_timestamps_wc$missing_timestamps, missing_timestamps_wc$bottle) |>
+    knitr::kable()
+
+missing_timestamps_wc |>
+    arrange(missing_timestamps, bottle, inj_type) |>
+    knitr::kable()
+```
+
+# Diagnostic Report
+```{r}
+LEEF_2_report_diagnostic(arrow = TRUE)
+```

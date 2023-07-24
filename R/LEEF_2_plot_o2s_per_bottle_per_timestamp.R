@@ -4,6 +4,7 @@
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
 #' @param treatment_begin_day begin of treatment (vertical red line in plot). If \code{NULL} none is plotted.
 #' @param treatment_end_day end of treatment (vertical red line in plot). If \code{NULL} none is plotted.
+#' @param arrow if \code{TRUE} read data from arrow instead of sqlite database
 #'
 #' @return \code{ggplot} object of the plot
 #'
@@ -17,10 +18,21 @@
 LEEF_2_plot_o2s_per_bottle_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   treatment_begin_day = 70,
-  treatment_end_day = 154
+  treatment_end_day = 154,
+  arrow = FALSE
 ){
+  if (arrow) {
+    # density <- arrow_read_density()
+    o2 <- arrow_read_o2()
+    # conductivity <- arrow_read_conductivity()
+  } else {
+    # density <- db_read_density(db)
+    o2 <- db_read_o2(db)
+    # conductivity <- db_read_conductivity(db)
+  }
 
-  data <- db_read_o2(db) %>%
+  ## plotting
+  data <- o2 %>%
     dplyr::collect() %>%
     dplyr::mutate(percent_o2 = replace(percent_o2, percent_o2 == "---", NA)) %>%
     dplyr::mutate(percent_o2 = as.numeric(percent_o2)) %>%

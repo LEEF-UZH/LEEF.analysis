@@ -8,7 +8,8 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
   type = c("IC", "TC", "TN", "TOC"),
   treatment_begin_day = 70,
-  treatment_end_day = 154
+  treatment_end_day = 154,
+  arrow = FALSE
 )
 }
 \arguments{
@@ -21,6 +22,8 @@ Possible values are: "TOC", "TN", "IC", "TN", "".}
 \item{treatment_begin_day}{begin of treatment (vertical red line in plot). If \code{NULL} none is plotted.}
 
 \item{treatment_end_day}{end of treatment (vertical red line in plot). If \code{NULL} none is plotted.}
+
+\item{arrow}{if \code{TRUE} read data from arrow instead of sqlite database}
 }
 \value{
 \code{ggplot} object of the plot

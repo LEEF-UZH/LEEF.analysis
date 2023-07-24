@@ -3,6 +3,8 @@
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
 #' @param species species to be plotted
+#' @param arrow if \code{TRUE} read data from arrow instead of sqlite database
+#' 
 #' @return \code{ggplot} object of the plot
 #'
 #' @importFrom dplyr collect mutate filter select
@@ -14,7 +16,8 @@
 #' @examples
 LEEF_2_plot_flowcytometer_individual_per_bottle_per_timestamp <- function(
   db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  species = c("bacteria")
+  species = c("bacteria"),
+  arrow = FALSE
 ){
   options(dplyr.summarise.inform = FALSE)
 

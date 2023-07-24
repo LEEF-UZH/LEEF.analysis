@@ -4,11 +4,16 @@
 \alias{LEEF_2_plot_response_incubator}
 \title{Plot diagnostic plot to check number of species per timestamp}
 \usage{
-LEEF_2_plot_response_incubator(db = getOption("RRDdb", "LEEF.RRD.sqlite"))
+LEEF_2_plot_response_incubator(
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  arrow = FALSE
+)
 }
 \arguments{
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
+
+\item{arrow}{if \code{TRUE} read data from arrow instead of sqlite database}
 }
 \value{
 \code{ggplot} object of the plot

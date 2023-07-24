@@ -10,7 +10,7 @@
 #'
 #' @importFrom DBI dbConnect
 #' @importFrom RSQLite SQLite SQLITE_RO
-#' @importFrom dplyr tbl mutate collect relocate
+#' @importFrom dplyr tbl mutate collect relocate rename
 #'
 #' @export
 #'
@@ -28,7 +28,11 @@ arrow_read_o2 <- function(
         mutate(measurement = "o2meter") |>
         filter(as.integer(timestamp) >= as.integer(from_timestamp)) |>
         filter(as.integer(timestamp) <= as.integer(to_timestamp)) |>
-        full_join(exp_des, by = "bottle")
+        full_join(exp_des, by = "bottle") |>
+        rename(
+            percent_o2 = Value,
+            temperature_actual = Temp
+        )
 
     o2 <- o2 |>
         dplyr::collect() |>

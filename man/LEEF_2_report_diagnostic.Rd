@@ -4,7 +4,14 @@
 \alias{LEEF_2_report_diagnostic}
 \title{Report for checking pipeline and sampling}
 \usage{
-LEEF_2_report_diagnostic(db, suffix = "", format = "html", lastDays = 7)
+LEEF_2_report_diagnostic(
+  db = NULL,
+  suffix = "",
+  format = "html",
+  lastDays = 7,
+  arrow = FALSE,
+  parquet_dir = "/Volumes/RRD.Reclassification_LEEF-2/parquet/"
+)
 }
 \arguments{
 \item{db}{fully qualified path to the sqlite database. The report will be saved to the same directory.}
@@ -15,6 +22,10 @@ LEEF_2_report_diagnostic(db, suffix = "", format = "html", lastDays = 7)
 Supported are at the moment: \code{html} (the default), \code{pdf} and \code{word}.}
 
 \item{lastDays}{number of last days to be included in graph 2. Default: 7}
+
+\item{arrow}{if \code{TRUE} read data from arrow instead of sqlite database}
+
+\item{parquet_dir}{directory where the parquet files are stored. Default: '/Volumes/RRD.Reclassification_LEEF-2/parquet/'. Will only be used whe \code{arrow = TRUE}}
 }
 \value{
 the fully qualified file name to the created report.

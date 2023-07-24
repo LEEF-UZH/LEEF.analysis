@@ -2,8 +2,8 @@
 title: "Diagnostic plots for the LEEF-2 RRD `r params$db`"
 author: "Rainer M Krug"
 date: | 
-  | Last `timestamp`: `r LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(timestamp) FROM density WHERE timestamp < 30000000')`
-  | Sampling `day`: `r LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(day) FROM density WHERE day < 1000')`
+  | Last `timestamp`: `r ifelse(arrow, "NA",LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(timestamp) FROM density WHERE timestamp < 30000000'))`
+  | Sampling `day`: `r ifelse(arrow, "NA",LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(day) FROM density WHERE day < 1000'))`
   | `LEEF.analysis` package version: `r packageVersion('LEEF.analysis')`
 format:
   html_document:
@@ -25,12 +25,20 @@ format:
     fig_height: 12
 params:
   db: ~/Desktop/9.backend/LEEF-2.RRD.sqlite
+  parquet_dir: /Volumes/RRD.Reclassification_LEEF-2/parquet/
   lastDays: 7
+  arrow: true
 ---
 
 ```{r setup, include=FALSE}
+if (!exists("params")) {
+  params <- rmarkdown::yaml_front_matter("~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/DiagnosticReport.Rmd")$params
+}
+
 knitr::opts_chunk$set(echo = TRUE)
 library(LEEF.analysis)
+
+options(RRDarrow = params$parquet)
 ```
 ## Invocation from commandline
 The report can be generated from the command line by using
@@ -44,7 +52,7 @@ Rscript -e "library(LEEF.analysis); LEEF_2_report_diagnostic(db = 'DATABASE PATH
 ## Response  variable in the last timestap
 
 ```{r response_per_timestamp, fig.height = 26}
-LEEF_2_plot_response_incubator(params$db)
+LEEF_2_plot_response_incubator(params$db, arrow = params$arrow)
 ```
 
 \pagebreak
@@ -54,7 +62,7 @@ LEEF_2_plot_response_incubator(params$db)
 This plot shows, if a `bottle` is present for the `measurement` for the timestamps analysed. Each `measurement` is a panes. Missing dots indicate missing datapoints for the `bottle` at the `measurement` for the `timestamp`.
 
 ```{r bottles_per_timestamp}
-LEEF_2_plot_bottles_per_timestamp(params$db, lastDays = params$lastDays)
+LEEF_2_plot_bottles_per_timestamp(params$db, lastDays = params$lastDays, arrow = params$arrow)
 ```
 
 \pagebreak
@@ -69,7 +77,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "bemovi_mag_16",
-  species_set_id = NULL
+  species_set_id = NULL, 
+  arrow = params$arrow
 )
 ```
 
@@ -81,7 +90,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "bemovi_mag_25",
-  species_set_id = NULL
+  species_set_id = NULL, 
+  arrow = params$arrow
 )
 ```
 
@@ -93,7 +103,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "bemovi_mag_25_cropped",
-  species_set_id = NULL
+  species_set_id = NULL, 
+  arrow = params$arrow
 )
 ```
 
@@ -105,7 +116,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "flowcam",
-  species_set_id = NULL
+  species_set_id = NULL, 
+  arrow = params$arrow
 )
 ```
 
@@ -117,7 +129,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "flowcam",
-  species_set_id = "LEEF_2_flowcam_algae"
+  species_set_id = "LEEF_2_flowcam_algae", 
+  arrow = params$arrow
 )
 ```
 `
@@ -129,7 +142,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "flowcam",
-  species_set_id = "LEEF_2_flowcam_rest"
+  species_set_id = "LEEF_2_flowcam_rest",
+  arrow = params$arrow
 )
 ```
 
@@ -142,7 +156,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "flowcytometer",
-  species_set_id = NULL
+  species_set_id = NULL,
+  arrow = params$arrow
 )
 ```
 
@@ -154,7 +169,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = FALSE, 
   measurement = "manualcount",
-  species_set_id = NULL
+  species_set_id = NULL,
+  arrow = params$arrow
 )
 ```
 
@@ -164,7 +180,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 
 ```{r percent_o2_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_o2s_per_bottle_per_timestamp(
-  params$db
+  params$db,
+  arrow = params$arrow
 )
 ```
 
@@ -174,7 +191,8 @@ LEEF_2_plot_o2s_per_bottle_per_timestamp(
 
 ```{r conductivity_raw, fig.height = 10, fig.width = 15}
 LEEF_2_plot_conductivity_per_bottle_per_timestamp(
-  params$db
+  params$db,
+  arrow = params$arrow
 )
 ```
 
@@ -185,7 +203,8 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp(
 ```{r toc_raw_1_1, fig.height = 10, fig.width = 15}
 LEEF_2_plot_tocs_per_bottle_per_timestamp(
   params$db,
-  type = c("TOC", "TC")
+  type = c("TOC", "TC"),
+  arrow = params$arrow
 )
 ```
 
@@ -197,7 +216,8 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp(
 ```{r toc_raw_2_1, fig.height = 10, fig.width = 15}
 LEEF_2_plot_tocs_per_bottle_per_timestamp(
   params$db,
-  type = c("IC", "TN")
+  type = c("IC", "TN"),
+  arrow = params$arrow
 )
 ```
 
@@ -211,7 +231,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "bemovi_mag_16",
-  species_set_id = NULL
+  species_set_id = NULL,
+  arrow = params$arrow
 )
 ```
 
@@ -223,7 +244,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "bemovi_mag_25",
-  species_set_id = NULL
+  species_set_id = NULL,
+  arrow = params$arrow
 )
 ```
 
@@ -235,7 +257,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "bemovi_mag_25_cropped",
-  species_set_id = NULL
+  species_set_id = NULL,
+  arrow = params$arrow
 )
 ```
 
@@ -247,7 +270,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "flowcam",
-  species_set_id = "LEEF_2_flowcam_algae"
+  species_set_id = "LEEF_2_flowcam_algae",
+  arrow = params$arrow
 )
 ```
 
@@ -259,7 +283,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "flowcam",
-  species_set_id = "LEEF_flowcam_rest"
+  species_set_id = "LEEF_flowcam_rest",
+  arrow = params$arrow
 )
 ```
 
@@ -272,7 +297,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "flowcytometer",
-  species_set_id = NULL
+  species_set_id = NULL,
+  arrow = params$arrow
 )
 ```
 
@@ -284,7 +310,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
   params$db, 
   transform_density_4throot = TRUE, 
   measurement = "manualcount",
-  species_set_id = NULL
+  species_set_id = NULL,
+  arrow = params$arrow
 )
 ```
 
@@ -294,7 +321,8 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp(
 
 ```{r percent_o2, fig.height = 10, fig.width = 15}
 LEEF_2_plot_o2s_per_bottle_per_timestamp(
-  params$db
+  params$db,
+  arrow = params$arrow
 )
 ```
 
@@ -304,7 +332,8 @@ LEEF_2_plot_o2s_per_bottle_per_timestamp(
 
 ```{r conductivity, fig.height = 10, fig.width = 15}
 LEEF_2_plot_conductivity_per_bottle_per_timestamp(
-  params$db
+  params$db,
+  arrow = params$arrow
 )
 ```
 
@@ -315,7 +344,8 @@ LEEF_2_plot_conductivity_per_bottle_per_timestamp(
 ```{r toc_raw_1_2, fig.height = 10, fig.width = 15}
 LEEF_2_plot_tocs_per_bottle_per_timestamp(
   params$db,
-  type = c("TOC", "TC")
+  type = c("TOC", "TC"),
+  arrow = params$arrow
 )
 ```
 
@@ -327,6 +357,7 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp(
 ```{r toc_raw_2_2, fig.height = 10, fig.width = 15}
 LEEF_2_plot_tocs_per_bottle_per_timestamp(
   params$db,
-  type = c("IC", "TN")
+  type = c("IC", "TN"),
+  arrow = params$arrow
 )
 ```

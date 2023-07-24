@@ -21,13 +21,13 @@ arrow_read_density <- function(
     to_timestamp = 20230812) {
     b_16 <- arrow_read_table("bemovi_16_density", db) |>
         dplyr::select(timestamp, bottle, species, density, biomass) |>
-        mutate(measurement = "bemovi_16")
+        mutate(measurement = "bemovi_mag_16")
     b_25 <- arrow_read_table("bemovi_25_density", db) |>
         dplyr::select(timestamp, bottle, species, density, biomass) |>
-        mutate(measurement = "bemovi_25")
+        mutate(measurement = "bemovi_mag_25")
     b_25_c <- arrow_read_table("bemovi_25_density_cropped", db) |>
         dplyr::select(timestamp, bottle, species, density, biomass) |>
-        mutate(measurement = "bemovi_25_cropped")
+        mutate(measurement = "bemovi_mag_25_cropped")
     fcam <- arrow_read_table("flowcam_density", db) |>
         dplyr::select(timestamp, bottle, species, density, biomass) |>
         mutate(measurement = "flowcam")

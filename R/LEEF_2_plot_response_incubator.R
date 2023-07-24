@@ -2,6 +2,7 @@
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
+#' @param arrow if \code{TRUE} read data from arrow instead of sqlite database
 #'
 #' @return \code{ggplot} object of the plot
 #'
@@ -12,16 +13,28 @@
 #'
 #' @examples
 LEEF_2_plot_response_incubator <- function(
-  db = getOption("RRDdb", "LEEF.RRD.sqlite")
+  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+  arrow = FALSE
 ){
-  density <- db_read_density(db) %>%
+  if (arrow) {
+    density <- arrow_read_density()
+    o2 <- arrow_read_o2()
+    conductivity <- arrow_read_conductivity()
+  } else {
+    density <- db_read_density(db)
+    o2 <- db_read_o2(db)
+    conductivity <- db_read_conductivity(db)
+  }
+  
+  ## plotting
+  density <- density %>%
     dplyr::filter(timestamp == max(timestamp, na.rm = TRUE)) %>%
     dplyr::mutate(mxs = paste(species, measurement)) %>%
     dplyr::mutate(treatment = paste0("t: ", temperature, "; r: ", resources, "; s: ", salinity)) %>%
     dplyr::select(timestamp, bottle, temperature, resources, treatment, incubator, density, mxs) %>%
     collect()
 
-  o2 <- db_read_o2(db) %>%
+  o2 <- o2 %>%
     dplyr::filter(timestamp == max(timestamp, na.rm = TRUE)) %>%
     dplyr::rename(density = percent_o2) %>%
     dplyr::mutate(mxs = measurement) %>%
@@ -31,7 +44,7 @@ LEEF_2_plot_response_incubator <- function(
     dplyr::mutate(density = replace(density, density == "---", NA)) %>%
     dplyr::mutate(density = as.numeric(density))
 
-  conductivity <- db_read_conductivity(db) %>%
+  conductivity <- conductivity %>%
     dplyr::filter(timestamp == max(timestamp, na.rm = TRUE)) %>%
     dplyr::rename(density = conductivity) %>%
     dplyr::mutate(mxs = measurement) %>%

@@ -8,6 +8,7 @@
 #' @param species_set_id id of species set to use for filtering
 #' @param treatment_begin_day begin of treatment (vertical red line in plot). If \code{NULL} none is plotted.
 #' @param treatment_end_day end of treatment (vertical red line in plot). If \code{NULL} none is plotted.
+#' @param arrow if \code{TRUE} read data from arrow instead of sqlite database
 #'
 #' @return \code{ggplot} object of the plot
 #'
@@ -24,12 +25,24 @@ LEEF_2_plot_density_species_per_bottle_per_timestamp <- function(
     measurement = "bemovi_mag_16",
     species_set_id = NULL,
     treatment_begin_day = 70,
-    treatment_end_day = 154
+    treatment_end_day = 154,
+  arrow = FALSE
 ){
+  if (arrow) {
+    density <- arrow_read_density()
+    # o2 <- arrow_read_o2()
+    # conductivity <- arrow_read_conductivity()
+  } else {
+    density <- db_read_density(db)
+    # o2 <- db_read_o2(db)
+    # conductivity <- db_read_conductivity(db)
+  }
   options(dplyr.summarise.inform = FALSE)
 
+  
+  ## plotting
   spid <- species_set(species_set_id)
-  data <- db_read_density(db) %>%
+  data <- density %>%
     dplyr::filter(measurement == !!measurement) %>%
     dplyr::filter(
       ifelse(

@@ -35,5 +35,5 @@ arrow_read_conductivity <- function(
         dplyr::mutate(day = as.integer(difftime(as.Date(as.character(timestamp), format = "%Y%m%d"), as.Date("2022-11-07"), units = "days"))) |>
         dplyr::relocate(day, .after = timestamp)
 
-    return(o2)
+    return(conductivity)
 }
