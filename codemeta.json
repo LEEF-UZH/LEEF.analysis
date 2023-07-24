@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/LEEF-UZH/LEEF.analysis",
   "issueTracker": "https://github.com/LEEF-UZH/LEEF.analysis/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "0.5.38",
+  "version": "0.5.39",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -259,6 +259,18 @@
     },
     "20": {
       "@type": "SoftwareApplication",
+      "identifier": "parquetize",
+      "name": "parquetize",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=parquetize"
+    },
+    "21": {
+      "@type": "SoftwareApplication",
       "identifier": "arrow",
       "name": "arrow",
       "provider": {
@@ -271,5 +283,5 @@
     },
     "SystemRequirements": null
   },
-  "fileSize": "1702.931KB"
+  "fileSize": "1702.945KB"
 }
