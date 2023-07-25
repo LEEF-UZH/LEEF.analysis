@@ -5,16 +5,30 @@
 \alias{parquet_add_conductivity}
 \title{FUNCTION_TITLE}
 \usage{
-parquet_add_toc(fn = NULL, path_to_parquet_root_dir = NULL)
+parquet_add_toc(
+  fn = NULL,
+  path_to_parquet_root_dir = NULL,
+  compression = "snappy"
+)
 
-parquet_add_toc(fn = NULL, path_to_parquet_root_dir = NULL)
+parquet_add_toc(
+  fn = NULL,
+  path_to_parquet_root_dir = NULL,
+  compression = "snappy"
+)
 
-parquet_add_conductivity(fns = NULL, path_to_parquet_root_dir = NULL)
+parquet_add_conductivity(
+  fns = NULL,
+  path_to_parquet_root_dir = NULL,
+  compression = "snappy"
+)
 }
 \arguments{
 \item{fn}{PARAM_DESCRIPTION, Default: NULL}
 
 \item{path_to_parquet_root_dir}{PARAM_DESCRIPTION, Default: NULL}
+
+\item{compression}{PARAM_DESCRIPTION, Default: "snappy"}
 }
 \value{
 OUTPUT_DESCRIPTION

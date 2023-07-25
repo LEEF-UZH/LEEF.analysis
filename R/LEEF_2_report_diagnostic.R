@@ -15,7 +15,13 @@
 #' @export
 #'
 #' @examples
-LEEF_2_report_diagnostic <- function(db = NULL, suffix = "", format = "html", lastDays = 7, arrow = FALSE, parquet_dir = "/Volumes/RRD.Reclassification_LEEF-2/parquet/") {
+LEEF_2_report_diagnostic <- function(
+    db = NULL,
+    suffix = "",
+    format = "html",
+    lastDays = 7,
+    arrow = FALSE,
+    parquet_dir = "/Volumes/RRD.Reclassification_LEEF-2/parquet/") {
   name <- ifelse(
     suffix == "",
     "Diagnostic_Report",
@@ -27,29 +33,28 @@ LEEF_2_report_diagnostic <- function(db = NULL, suffix = "", format = "html", la
     file.path(parquet_dir, "..", name),
     file.path(dirname(db), name)
   )
-  report_name <- switch (
-    format,
+  report_name <- switch(format,
     html = {
       output_format <- "html_document"
       output_file <- paste0(output, ".html")
-      output_dir = output
+      output_dir <- output
     },
     pdf = {
       output_format <- "pdf_document"
       output_file <- paste0(output, ".pdf")
-      output_dir = output
+      output_dir <- output
     },
     word = {
       output_format <- "word_document"
       output_file <- paste0(output, ".docx")
-      output_dir = output
+      output_dir <- output
     },
     stop("Unsupported format. Use 'html', 'pdf' or 'word'")
   )
   report <- rmarkdown::render(
     input = system.file("LEEF-2", "DiagnosticReport.Rmd", package = "LEEF.analysis"),
     output_format = output_format,
-    params = list(db = db, lastDays = lastDays, arrow = arrow),
+    params = list(db = db, lastDays = lastDays, arrow = arrow, parquet_dir = parquet_dir),
     output_file = output_file
   )
   utils::browseURL(report, encodeIfNeeded = TRUE)

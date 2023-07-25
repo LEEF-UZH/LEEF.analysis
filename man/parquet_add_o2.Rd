@@ -4,9 +4,17 @@
 \alias{parquet_add_o2}
 \title{FUNCTION_TITLE}
 \usage{
-parquet_add_o2(fns = NULL, path_to_parquet_root_dir = NULL)
+parquet_add_o2(
+  fns = NULL,
+  path_to_parquet_root_dir = NULL,
+  compression = "snappy"
+)
 
-parquet_add_o2(fns = NULL, path_to_parquet_root_dir = NULL)
+parquet_add_o2(
+  fns = NULL,
+  path_to_parquet_root_dir = NULL,
+  compression = "snappy"
+)
 }
 \arguments{
 \item{fns}{PARAM_DESCRIPTION, Default: NULL}

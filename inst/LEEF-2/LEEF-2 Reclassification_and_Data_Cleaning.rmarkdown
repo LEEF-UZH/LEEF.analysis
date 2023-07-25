@@ -60,6 +60,7 @@ params:
   parquet: false
 ---
 
+
 TODO: Chek for errors in pipeline and re-run these
 
 # Setup
@@ -67,6 +68,7 @@ TODO: Chek for errors in pipeline and re-run these
 2. Create output directory as specified in `params$output_dir`
 3. Check if `params$pre_processed_dir` and `params$extracted_dir` exist. The existance is only necessary for the re-classification and overlay creation (when done).
 4. Create empty database `params$db` in directory `params$output_dir` database, unless it already exists
+
 
 
 ```{r}
@@ -206,11 +208,13 @@ if (!file.exists(params$extracted_dir)) {
 # }
 ```
 
+
 # 1. Re-calculations for all timestamps
 ## Reclassification of Flowcam
 
 
 ### Classify Flowcam
+
 ```{r}
 #| label: flowcam_classify
 #| eval: !expr params$reclassify_flowcam
@@ -251,8 +255,10 @@ rm(timestamps)
 
 
 
+
 ### Calculate Biomass Flowcam
 The biomass is calculated here
+
 
 ```{r}
 #| label: flowcam_biomass
@@ -291,10 +297,12 @@ toc()
 ```
 
 
+
 ## Reclassification of Bemovi 16
 
 
 ### Classify `bemovi_extract.mag.16.yml`
+
 ```{r}
 #| label: bemovi_16_classify
 #| eval: !expr params$reclassify_bemovi_16
@@ -337,8 +345,10 @@ rm(timestamps)
 
 
 
+
 ### Calculate Biomass Bemovi 16
 The biomass is calculated here
+
 
 ```{r}
 #| label: bemovi_16_biomass
@@ -389,9 +399,11 @@ toc()
 ```
 
 
+
 ## Reclassification of Bemovi 25
 
 ### Classify `bemovi_mag.25` excluding moving_background
+
 
 ```{r}
 #| label: bemovi_25_classify
@@ -448,8 +460,10 @@ rm(timestamps)
 
 
 
+
 ### Calculate Biomass Bemovi 25
 The biomass is calculated here
+
 
 ```{r}
 #| label: bemovi_25_biomass
@@ -541,11 +555,13 @@ toc()
 ```
 
 
+
 ## TODO Regate Flowcytometer
 
 TODO Not implemented yet - needs a bit of thinking.
 
 TODO Biomass is missing from flowcytometer
+
 ```{r}
 #| label: regate_flowcytometer
 #| eval: false
@@ -606,7 +622,9 @@ pbmcapply::pbmclapply(
 rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, conv_FSCA_length)
 ```
 
+
 ## Assemble Flowcytometer
+
 ```{r}
 #| label: assemble_flowcytometer
 #| eval: !expr params$regate_flowcytometer
@@ -688,7 +706,9 @@ rm(dp, fns_traits, fns_density)
 
 ```
 
+
 ## Assemble TOC
+
 ```{r}
 #| label: assemble_toc_detrended
 #| eval: !expr params$assemble_toc
@@ -705,7 +725,9 @@ file.copy(
 rm(tp)
 ```
 
+
 ## Assemble O2
+
 ```{r}
 #| label: assemble_o2
 #| eval: !expr params$assemble_o2
@@ -736,7 +758,9 @@ file.path(
 rm(dp, fns_o2)
 ```
 
+
 ## Assemble Conductivity
+
 ```{r}
 #| label: assemble_conductivity
 #| eval: !expr params$assemble_conductivity
@@ -769,7 +793,9 @@ rm(dp, from, to)
 ```
 
 
+
 ## Assemble manualcount
+
 ```{r}
 #| label: assemble_manualcount
 #| eval: !expr params$assemble_manualcount
@@ -803,7 +829,9 @@ rm(dp, fns_mc)
 
 
 
+
 # TODO 2. Rename species and columns
+
 ```{r}
 #| label: rename
 #| eval: !expr params$rename_parquet
@@ -819,7 +847,9 @@ file.rename(db_name(2, temp = TRUE), db_name(3, temp = FALSE))
 
 
 
+
 # Create parquet
+
 
 ```{r}
 #| label: create_parquet
@@ -832,7 +862,7 @@ dir.create(parquet_dir, showWarnings = FALSE, recursive = TRUE)
 ```
 
 ```{r}
-#| label: add_bemovi_mag_16
+#| label: add_bemoci_mag_16
 #| eval: !expr params$update_parquet_bemovi_16
 #| 
 
@@ -847,7 +877,7 @@ list.files(
 ```
 
 ```{r}
-#| label: add_bemovi_mag_25
+#| label: add_bemoci_mag_25
 #| eval: !expr params$update_parquet_bemovi_25
 #| 
 
@@ -994,8 +1024,10 @@ parquetize::csv_to_parquet(
 
 ```
 
+
 # TODO Create Diagnostic Report
 The Diagnostic report needs to be created before the renaming as it does rely on the otriginal terminology.
+
 
 ```{r}
 #| label: createDiagReport
@@ -1010,3 +1042,4 @@ LEEF_2_report_diagnostic(
     parquet_dir = file.path(params$output_dir, "parquet")
 )
 ```
+

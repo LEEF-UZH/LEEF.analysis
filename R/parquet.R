@@ -3,6 +3,7 @@
 #' @description FUNCTION_DESCRIPTION
 #' @param fns PARAM_DESCRIPTION, Default: NULL
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
+#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -20,7 +21,11 @@
 #' @importFrom parquetize rds_to_parquet
 parquet_add_bemovi_16 <- function(
     fns = NULL,
-    path_to_parquet_root_dir = NULL) {
+    path_to_parquet_root_dir = NULL,
+    compression = "snappy") {
+    unlink(file.path(path_to_parquet_root_dir, "bemovi_16_density"), recursive = TRUE, force = TRUE)
+    unlink(file.path(path_to_parquet_root_dir, "bemovi_16_morph"), recursive = TRUE, force = TRUE)
+
     pbapply::pblapply(
         fns,
         function(fn) {
@@ -40,19 +45,19 @@ parquet_add_bemovi_16 <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "species")
+                partitioning = c("timestamp", "species"), 
+                compression = compression
             )
         }
     )
-
 }
 
-# TODO CHECK FOR cropped etc
 
 #' @title FUNCTION_TITLE
 #' @description FUNCTION_DESCRIPTION
 #' @param fns PARAM_DESCRIPTION, Default: NULL
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
+#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -70,7 +75,11 @@ parquet_add_bemovi_16 <- function(
 #' @importFrom parquetize rds_to_parquet
 parquet_add_bemovi_25 <- function(
     fns = NULL,
-    path_to_parquet_root_dir = NULL) {
+    path_to_parquet_root_dir = NULL,
+    compression = "snappy") {
+    unlink(file.path(path_to_parquet_root_dir, "bemovi_25_density"), recursive = TRUE, force = TRUE)
+    unlink(file.path(path_to_parquet_root_dir, "bemovi_25_morph"), recursive = TRUE, force = TRUE)
+
     pbapply::pblapply(
         fns,
         function(fn) {
@@ -92,7 +101,8 @@ parquet_add_bemovi_25 <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "species")
+                partitioning = c("timestamp", "species"), 
+                compression = compression
             )
         }
     )
@@ -102,6 +112,7 @@ parquet_add_bemovi_25 <- function(
 #' @description FUNCTION_DESCRIPTION
 #' @param fns PARAM_DESCRIPTION, Default: NULL
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
+#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -119,7 +130,11 @@ parquet_add_bemovi_25 <- function(
 #' @importFrom parquetize rds_to_parquet
 parquet_add_bemovi_25_cropped <- function(
     fns = NULL,
-    path_to_parquet_root_dir = NULL) {
+    path_to_parquet_root_dir = NULL,
+    compression = "snappy") {
+    unlink(file.path(path_to_parquet_root_dir, "bemovi_25_density_cropped"), recursive = TRUE, force = TRUE)
+    unlink(file.path(path_to_parquet_root_dir, "bemovi_25_morph_cropped"), recursive = TRUE, force = TRUE)
+
     pbapply::pblapply(
         fns,
         function(fn) {
@@ -141,7 +156,8 @@ parquet_add_bemovi_25_cropped <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "species")
+                partitioning = c("timestamp", "species"), 
+                compression = compression
             )
         }
     )
@@ -153,6 +169,7 @@ parquet_add_bemovi_25_cropped <- function(
 #' @description FUNCTION_DESCRIPTION
 #' @param fns PARAM_DESCRIPTION, Default: NULL
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
+#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -170,8 +187,12 @@ parquet_add_bemovi_25_cropped <- function(
 #' @importFrom parquetize rds_to_parquet
 parquet_add_flowcam <- function(
     fns = NULL,
-    path_to_parquet_root_dir = NULL) {
-    pbapply::pblapply(
+    path_to_parquet_root_dir = NULL,
+    compression = "snappy") {
+    unlink(file.path(path_to_parquet_root_dir, "flowcam_density"), recursive = TRUE, force = TRUE)
+    unlink(file.path(path_to_parquet_root_dir, "flowcam_traits"), recursive = TRUE, force = TRUE)
+
+   pbapply::pblapply(
         fns,
         function(fn) {
             message("\nadding ", basename(fn), " ...\n")
@@ -190,7 +211,8 @@ parquet_add_flowcam <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "species")
+                partitioning = c("timestamp", "species"), 
+                compression = compression
             )
         }
     )
@@ -201,6 +223,7 @@ parquet_add_flowcam <- function(
 #' @description FUNCTION_DESCRIPTION
 #' @param fns PARAM_DESCRIPTION, Default: NULL
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
+#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -218,7 +241,11 @@ parquet_add_flowcam <- function(
 #' @importFrom parquetize rds_to_parquet
 parquet_add_flowcytometer <- function(
     fns = NULL,
-    path_to_parquet_root_dir = NULL) {
+    path_to_parquet_root_dir = NULL,
+    compression = "snappy") {
+    unlink(file.path(path_to_parquet_root_dir, "flowcytometer_density"), recursive = TRUE, force = TRUE)
+    unlink(file.path(path_to_parquet_root_dir, "flowcytometer_traits"), recursive = TRUE, force = TRUE)
+
     pbapply::pblapply(
         fns,
         function(fn) {
@@ -238,7 +265,8 @@ parquet_add_flowcytometer <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "bottle")
+                partitioning = c("timestamp", "bottle"), 
+                compression = compression
             )
         }
     )
@@ -248,6 +276,7 @@ parquet_add_flowcytometer <- function(
 #' @description FUNCTION_DESCRIPTION
 #' @param fns PARAM_DESCRIPTION, Default: NULL
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
+#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -265,7 +294,10 @@ parquet_add_flowcytometer <- function(
 #' @importFrom parquetize csv_to_parquet
 parquet_add_o2 <- function(
     fns = NULL,
-    path_to_parquet_root_dir = NULL) {
+    path_to_parquet_root_dir = NULL,
+    compression = "snappy") {
+    unlink(file.path(path_to_parquet_root_dir, "o2"), recursive = TRUE, force = TRUE)
+
     pbapply::pblapply(
         fns,
         function(fn) {
@@ -280,7 +312,8 @@ parquet_add_o2 <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp")
+                partitioning = c("timestamp"), 
+                compression = compression
             )
         }
     )
@@ -291,6 +324,7 @@ parquet_add_o2 <- function(
 #' @description FUNCTION_DESCRIPTION
 #' @param fns PARAM_DESCRIPTION, Default: NULL
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
+#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -308,7 +342,10 @@ parquet_add_o2 <- function(
 #' @importFrom parquetize csv_to_parquet
 parquet_add_manualcount <- function(
     fns = NULL,
-    path_to_parquet_root_dir = NULL) {
+    path_to_parquet_root_dir = NULL,
+    compression = "snappy") {
+    unlink(file.path(path_to_parquet_root_dir, "manualcount"), recursive = TRUE, force = TRUE)
+
     pbapply::pblapply(
         fns,
         function(fn) {
@@ -323,7 +360,8 @@ parquet_add_manualcount <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp")
+                partitioning = c("timestamp"), 
+                compression = compression
             )
         }
     )
@@ -334,6 +372,7 @@ parquet_add_manualcount <- function(
 #' @description FUNCTION_DESCRIPTION
 #' @param fn PARAM_DESCRIPTION, Default: NULL
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
+#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -349,12 +388,16 @@ parquet_add_manualcount <- function(
 #' @importFrom parquetize rds_to_parquet
 parquet_add_toc <- function(
     fn = NULL,
-    path_to_parquet_root_dir = NULL) {
+    path_to_parquet_root_dir = NULL,
+    compression = "snappy") {
+    unlink(file.path(path_to_parquet_root_dir, "toc"), recursive = TRUE, force = TRUE)
+
     parquetize::rds_to_parquet(
         path_to_file = fn,
         path_to_parquet = file.path(path_to_parquet_root_dir, "toc"),
         partition = "yes",
-        partitioning = c("bottle")
+        partitioning = c("bottle"), 
+        compression = compression
     )
    
 }
@@ -363,6 +406,8 @@ parquet_add_toc <- function(
 #' @description FUNCTION_DESCRIPTION
 #' @param fn PARAM_DESCRIPTION, Default: NULL
 #' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
+#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
+#' @param compression PARAM_DESCRIPTION, Default: "snappy"
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -378,7 +423,10 @@ parquet_add_toc <- function(
 #' @importFrom parquetize rds_to_parquet
 parquet_add_conductivity <- function(
     fns = NULL,
-    path_to_parquet_root_dir = NULL) {
+    path_to_parquet_root_dir = NULL,
+    compression = "snappy") {
+    unlink(file.path(path_to_parquet_root_dir, "conductivity"), recursive = TRUE, force = TRUE)
+
     pbapply::pblapply(
         fns,
         function(fn) {
@@ -393,7 +441,8 @@ parquet_add_conductivity <- function(
                 path_to_file = fn,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp")
+                partitioning = c("timestamp"), 
+                compression = compression
             )
         }
     )
