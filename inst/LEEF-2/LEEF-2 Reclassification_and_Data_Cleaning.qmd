@@ -86,6 +86,23 @@ knitr::opts_chunk$set(
     warning = TRUE
 )
 
+library(tictoc)
+
+knitr::knit_hooks$set(
+    timeit = function(before, options, envir) {
+        if (before) {
+            ## code to be run before a chunk
+            tic()
+        } else {
+            ## code to be run after a chunk
+            elapsed <- toc()$toc
+            print(paste0("Execution took ", elapsed, " seconds"))
+        }
+    }
+)
+
+####
+
 library("LEEF.analysis")
 library(dplyr)
 library(pbmcapply)
@@ -95,7 +112,6 @@ library(tidyr)
 library(DBI)
 library(RSQLite)
 library(lubridate)
-library(tictoc)
 
 db <- function(
     iteration = NULL,
