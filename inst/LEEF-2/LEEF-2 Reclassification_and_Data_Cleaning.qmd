@@ -41,22 +41,22 @@ params:
   bemovi_mag_16_moving_background: ~
   bemovi_mag_25_moving_background: ~
   reclassify_flowcam: false
-  update_parquet_flowcam: true
   reclassify_bemovi_16: false
-  update_parquet_bemovi_16: true
   reclassify_bemovi_25: false
-  update_parquet_bemovi_25: true
   regate_flowcytometer: false
-  update_parquet_flowcytometer: true
   assemble_toc: false
-  update_parquet_toc: true
   assemble_o2: false
-  update_parquet_o2: true
   assemble_manualcount: false
-  update_parquet_manualcount: true
-  update_parquet_experimental_tables: true
   rename_parquet: false
   diagnostic_report: false
+  update_parquet_flowcam: true
+  update_parquet_bemovi_16: true
+  update_parquet_bemovi_25: true
+  update_parquet_flowcytometer: true
+  update_parquet_toc: true
+  update_parquet_o2: true
+  update_parquet_manualcount: true
+  update_parquet_experimental_tables: true
   parquet: false
 ---
 
@@ -864,7 +864,7 @@ list.files(
 
 ```{r}
 #| label: add_bemovi_mag_25
-#| eval: !expr params$update_parquet_bemovi_25
+#| eval: !expr params$parquet | params$update_parquet_bemovi_25
 #| 
 
 ## bemovi mag 25
@@ -887,7 +887,7 @@ list.files(
 
 ```{r}
 #| label: add_flowcam
-#| eval: !expr params$update_parquet_flowcam
+#| eval: !expr params$parquet | params$update_parquet_flowcam
 #| 
 
 ## flowcam
@@ -902,7 +902,7 @@ list.files(
 
 ```{r}
 #| label: add_flowcytometer
-#| eval: !expr params$update_parquet_flowcytometer
+#| eval: !expr params$parquet | params$update_parquet_flowcytometer
 #| 
 
 ## flowcytometer
@@ -923,7 +923,7 @@ c(
 
 ```{r}
 #| label: add_manualcount
-#| eval: !expr params$update_parquet_manualcount
+#| eval: !expr params$parquet | params$update_parquet_manualcount
 #| 
 
 ## manualcount
@@ -939,7 +939,7 @@ list.files(
 
 ```{r}
 #| label: add_toc
-#| eval: !expr params$update_parquet_toc
+#| eval: !expr params$parquet | params$update_parquet_toc
 #| 
 
 ## toc
@@ -953,7 +953,7 @@ parquet_add_toc(
 
 ```{r}
 #| label: add_o2meter
-#| eval: !expr params$update_parquet_o2meter
+#| eval: !expr params$parquet | params$update_parquet_o2meter
 #| 
 
 ## o2meter
@@ -969,7 +969,7 @@ list.files(
 
 ```{r}
 #| label: add_conductivity
-#| eval: !expr params$update_parquet_conductivity
+#| eval: !expr params$parquet | params$update_parquet_conductivity
 #| 
 
 ## conductivity
@@ -986,23 +986,23 @@ list.files(
 
 ```{r}
 #| label: add_experimental_tables
-#| eval: !expr params$update_parquet_experimental_tables
+#| eval: !expr params$parquet | params$update_parquet_experimental_tables
 #| 
 
 ## experimental tables
-unlink(file.path(path_to_parquet_root_dir, "composition"), recursive = TRUE, force = TRUE)
+unlink(file.path(parquet_dir, "composition"), recursive = TRUE, force = TRUE)
 parquetize::csv_to_parquet(
     path_to_file = file.path(parameter_dir, "parameter", "00.general.parameter", "compositions.csv"),
     path_to_parquet = file.path(parquet_dir, "composition")
 )
     
-unlink(file.path(path_to_parquet_root_dir, "experimental_design"), recursive = TRUE, force = TRUE)
+unlink(file.path(parquet_dir, "experimental_design"), recursive = TRUE, force = TRUE)
 parquetize::csv_to_parquet(
     path_to_file = file.path(parameter_dir, "parameter", "00.general.parameter", "experimental_design.csv"),
     path_to_parquet = file.path(parquet_dir, "experimental_design")
 )
 
-unlink(file.path(path_to_parquet_root_dir, "composition"), recursive = TRUE, force = TRUE)
+unlink(file.path(parquet_dir, "stressor_levels"), recursive = TRUE, force = TRUE)
 parquetize::csv_to_parquet(
     path_to_file = file.path(parameter_dir, "treatment", "stressor_levels.csv"),
     path_to_parquet = file.path(parquet_dir, "stressor_levels")
