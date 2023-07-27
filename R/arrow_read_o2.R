@@ -23,15 +23,15 @@ arrow_read_o2 <- function(
     exp_des <- arrow_read_table("experimental_design", db)
 
     o2 <- arrow_read_table("o2", db) |>
-        dplyr::select(timestamp, bottle, sensor, Temp, Value) |>
+        dplyr::select(timestamp, bottle, sensor, temp, value) |>
         mutate(timestamp = as.integer(timestamp)) |>
         mutate(measurement = "o2meter") |>
         filter(as.integer(timestamp) >= as.integer(from_timestamp)) |>
         filter(as.integer(timestamp) <= as.integer(to_timestamp)) |>
         full_join(exp_des, by = "bottle") |>
         rename(
-            percent_o2 = Value,
-            temperature_actual = Temp
+            percent_o2 = value,
+            temperature_actual = temp
         )
 
     o2 <- o2 |>

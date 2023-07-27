@@ -2,8 +2,8 @@
 title: "Diagnostic plots for the LEEF-2 RRD `r params$db`"
 author: "Rainer M Krug"
 date: | 
-  | Last `timestamp`: `r ifelse(arrow, "NA",LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(timestamp) FROM density WHERE timestamp < 30000000'))`
-  | Sampling `day`: `r ifelse(arrow, "NA",LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(day) FROM density WHERE day < 1000'))`
+  | Last `timestamp`: `r ifelse(params$arrow, "NA",LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(timestamp) FROM density WHERE timestamp < 30000000'))`
+  | Sampling `day`: `r ifelse(params$arrow, "NA",LEEF.analysis::read_sql(params$db, sql = 'SELECT MAX(day) FROM density WHERE day < 1000'))`
   | `LEEF.analysis` package version: `r packageVersion('LEEF.analysis')`
 format:
   html_document:
@@ -25,8 +25,8 @@ format:
     fig_height: 12
 params:
   db: ~/Desktop/9.backend/LEEF-2.RRD.sqlite
-  parquet_dir: /Volumes/RRD.Reclassification_LEEF-2/parquet/
-  lastDays: 7
+  parquet_dir: /Volumes/RRD.Reclassification_LEEF-2//parquet_v2.3.7-LEEF-2_20230727
+  lastDays: 300
   arrow: true
 ---
 
@@ -38,7 +38,7 @@ if (!exists("params")) {
 knitr::opts_chunk$set(echo = TRUE)
 library(LEEF.analysis)
 
-options(RRDarrow = params$parquet)
+options(RRDarrow = params$parquet_dir)
 ```
 ## Invocation from commandline
 The report can be generated from the command line by using

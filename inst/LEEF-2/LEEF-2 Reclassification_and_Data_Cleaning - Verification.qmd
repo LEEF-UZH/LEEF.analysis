@@ -13,13 +13,12 @@ format:
     code_folding: hide  
     embed-resources: true
 params:
-  release: "v2.3.3-LEEF-2"
+  arrow_dir: "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.7-LEEF-2_20230727"
+  release: "v2.3.7-LEEF-2"
   repo: "https://github.com/LEEF-UZH/LEEF.parameter/"
   output_dir: "/Volumes/RRD.Reclassification_LEEF-2/"
-  db: "LEEF-2.RRD.sqlite"
   extracted_dir: "/Volumes/LEEF-2_archive/archive/extracted/"
   toc: "/Volumes/LEEF/0.TOC/LEEF-2/toc.rds"
-  min_FSC.A: 2
   cores: 7
   remove_all:
     - airbubbles
@@ -149,15 +148,15 @@ params:
     - 20230717
     - 20230719
     - 20230721
-    - 20230724
-    - 20230726
-    - 20230728
-    - 20230731
-    - 20230802
-    - 20230804
-    - 20230807
-    - 20230809
-    - 20230811
+    # - 20230724
+    # - 20230726
+    # - 20230728
+    # - 20230731
+    # - 20230802
+    # - 20230804
+    # - 20230807
+    # - 20230809
+    # - 20230811
   species_bemovi_16:
     - Coleps_irchel
     - Colpidium
@@ -174,24 +173,24 @@ params:
     - Paramecium_bursaria
     - Euplotes
     - Loxocephallus
-    - Debris_and_other (not needed in final RRD but needed for detection of faulty videos)
+    - Debris_and_other # (not needed in final RRD but needed for detection of faulty videos)
   species_bemovi_25_cropped:
     - Loxocephallus
-    - Debris_and_other (not needed in final RRD but needed for detection of faulty videos)
+    - Debris_and_other # (not needed in final RRD but needed for detection of faulty videos)
   species_flowcam:
     - Chlamydomonas
-    - Cryptomonas (probably died out so not present)
+    - Cryptomonas #(probably died out so not present)
     - Loxocephallus
     - ColpidiumVacuoles
-    - Debris (not necessarily --- Ask Romana)
+    - Debris #(not necessarily --- Ask Romana)
     - DigestedAlgae
     - Small_unidentified
     - DividingChlamydomonas
     - ChlamydomonasClumpsLarge
     - ChlamydomonasClumpsSmall
-    - CiliateCysts (not necessarily --- Ask Romana)
-    - CystsWhite (not necessarily --- Ask Romana)
-    - DigestedWhite (not necessarily --- Ask Romana)
+    - CiliateCysts #(not necessarily --- Ask Romana)
+    - CystsWhite #(not necessarily --- Ask Romana)
+    - DigestedWhite #(not necessarily --- Ask Romana)
     - Small_cells
   species_flowcytometer:
     - Bacteria
@@ -209,7 +208,7 @@ if (!exists("params")) {
     params <- rmarkdown::yaml_front_matter('~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning - Verification.qmd')$params
 }
 
-options(RRDarrow = "/Volumes/RRD.Reclassification_LEEF-2/parquet/")
+options(RRDarrow = params$arrow_dir)
 
 densities <- arrow_read_density() |>
     arrange(day)
@@ -228,32 +227,42 @@ densities |>
   select(timestamp) |>
   filter(!(timestamp %in% exp_timestamps)) |>
   rename(additional_timestamps = timestamp) |>
+  distinct() |>
   knitr::kable()
 ```
 
-### Additional timestamps
+### Missing timestamps
 ```{r}
 densities |>
   select(timestamp) |>
   reframe(missing_timestamps = as.numeric(exp_timestamps[which(!(exp_timestamps %in% unique(timestamp)))])) |>
+  distinct() |>
   knitr::kable()
 ```
 
 ## measurements
 ```{r}
 missing_timestamps <- densities %>%
+    group_by(measurement) %>%
+    reframe(missing_timestamps = as.numeric(exp_timestamps[which(!(exp_timestamps %in% unique(timestamp)))]))
+```
+## DISABLED - measurements & bottle
+```{r}
+#| eval: false
+#| echo: false
+
+missing_timestamps <- densities %>%
     group_by(measurement, bottle) %>%
     reframe(missing_timestamps = as.numeric(exp_timestamps[which(!(exp_timestamps %in% unique(timestamp)))]))
 
-missing_timestamps |>
-    arrange(missing_timestamps, bottle) |>
-    knitr::kable()
 ```
+
+
 
 ### bemovi_16
 ```{r}
 missing_timestamps |>
-    filter(measurement == "bemovi_16") |>
+    filter(measurement == "bemovi_mag_16") |>
     select(measurement, missing_timestamps) |>
     distinct() |>
     arrange() |>
@@ -263,7 +272,7 @@ missing_timestamps |>
 ### bemovi_25
 ```{r}
 missing_timestamps |>
-    filter(measurement == "bemovi_25") |>
+    filter(measurement == "bemovi_mag_25") |>
     select(measurement, missing_timestamps) |>
     distinct() |>
     arrange() |>
@@ -273,7 +282,7 @@ missing_timestamps |>
 ### bemovi_25_cropped
 ```{r}
 missing_timestamps |>
-    filter(measurement == "bemovi_25_cropped") |>
+    filter(measurement == "bemovi_mag_25_cropped") |>
     select(measurement, missing_timestamps) |>
     distinct() |>
     arrange() |>
@@ -305,14 +314,14 @@ missing_timestamps |>
 
 ```{r}
 missing_timestamps_o2 <- o2 %>%
-    group_by(sensor, bottle) %>%
+#    group_by(sensor, bottle) %>%
     reframe(missing_timestamps = as.numeric(exp_timestamps[which(!(exp_timestamps %in% unique(timestamp)))])) # %>%
 # dplyr::filter(
 #     !(missing_timestamps == 20211208 & bottle == "b_01" & sensor == 4),
 #     missing_timestamps != 20211201,
 # ) # Previously confirmed missing data is filtered out
 missing_timestamps_o2 |>
-    arrange(missing_timestamps, bottle, sensor) |>
+    arrange(missing_timestamps) |>
     knitr::kable()
 ```  
 
@@ -325,12 +334,8 @@ missing_timestamps_wc <- water_chem %>%
 table(missing_timestamps_wc$missing_timestamps, missing_timestamps_wc$bottle) |>
     knitr::kable()
 
-missing_timestamps_wc |>
-    arrange(missing_timestamps, bottle, inj_type) |>
-    knitr::kable()
+# missing_timestamps_wc |>
+#     arrange(missing_timestamps, bottle, inj_type) |>
+#     knitr::kable()
 ```
 
-# Diagnostic Report
-```{r}
-LEEF_2_report_diagnostic(arrow = TRUE)
-```

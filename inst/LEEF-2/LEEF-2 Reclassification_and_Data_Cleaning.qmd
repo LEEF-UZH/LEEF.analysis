@@ -44,26 +44,29 @@ params:
   reclassify_bemovi_16: false
   reclassify_bemovi_25: false
   regate_flowcytometer: false
-  assemble_toc: false
-  assemble_o2: false
   assemble_manualcount: false
+  assemble_o2: false
+  aassemble_conductivity: false
+  assemble_toc: false
   rename_parquet: false
-  diagnostic_report: false
   update_parquet_flowcam: true
   update_parquet_bemovi_16: true
   update_parquet_bemovi_25: true
   update_parquet_flowcytometer: true
-  update_parquet_toc: true
-  update_parquet_o2: true
   update_parquet_manualcount: true
+  update_parquet_o2: true
+  update_parquet_conductivity: true
+  update_parquet_toc: true
   update_parquet_experimental_tables: true
-  parquet: false
+  parquet: true
+  diagnostic_report: false
+
 ---
 
 TODO: Chek for errors in pipeline and re-run these
 
 # Setup
-1. Download parameter as defined in the `params$version_tag` from the repo as defined in `parms$base` 
+1. Download parameter as defined in the `params$release` from the repo as defined in `parms$base` 
 2. Create output directory as specified in `params$output_dir`
 3. Check if `params$pre_processed_dir` and `params$extracted_dir` exist. The existance is only necessary for the re-classification and overlay creation (when done).
 4. Create empty database `params$db` in directory `params$output_dir` database, unless it already exists
@@ -85,6 +88,8 @@ knitr::opts_chunk$set(
     message = TRUE,
     warning = TRUE
 )
+
+tag <- paste0(params$release, "_", format(Sys.Date(), "%Y%m%d"))
 
 library(tictoc)
 
@@ -112,27 +117,6 @@ library(tidyr)
 library(DBI)
 library(RSQLite)
 library(lubridate)
-
-db <- function(
-    iteration = NULL,
-    db_org = params$db,
-    db_path = params$output_dir,
-    version_tag = params$version_tag,
-    temp = FALSE) {
-    if (!is.null(iteration)) {
-        db_name <- gsub(
-            pattern = ".sqlite",
-            replacement = paste0(".", version_tag, "_", iteration, ".sqlite"),
-            x = db_org
-        )
-    } else {
-        db_name <- db_org
-    }
-    if (temp) {
-        db_name <- paste0(db_name, ".tmp")
-    }
-    return(file.path(db_path, db_name))
-}
 
 ## 1. ------
 
@@ -168,58 +152,12 @@ if (!file.exists(params$extracted_dir)) {
     )
 }
 
-# ## 4. -----
+parquet_dir <- file.path(
+    params$output_dir,
+    paste0("parquet_", tag)
+)
 
-# if (file.exists(db())) {
-#     warning(
-#         db(), " exists and will not be overwritten!\n",
-#         "If you want to re-generate, please rename the database or delete it!\n",
-#         "\n",
-#         "All processes using / modifying the RRD are disabled!\n"
-#     )
-#     unlockBinding("params", env = .GlobalEnv)
-#     params$add_to_rrd <- FALSE
-#     params$rename_rrd <- FALSE
-#     params$final_rrd <- FALSE
-#     params$diagnostic_report <- FALSE
-#     lockBinding("params", env = .GlobalEnv)
-# } else {
-#     RRD_new(db(), LEEF = "LEEF-2")
-#     ## Adding of General Parameter tables
 
-#     suppressMessages(
-#         add_to_db(
-#             fns = file.path(parameter_dir, "parameter", "00.general.parameter", "compositions.csv"),
-#             db = db(),
-#             tables = "composition",
-#             remove_timestamps = NULL,
-#             check_timestamps = FALSE,
-#             backup_removed = TRUE
-#         )
-#     )
-
-#     suppressMessages(
-#         add_to_db(
-#             fns = file.path(parameter_dir, "parameter", "00.general.parameter", "experimental_design.csv"),
-#             db = db(),
-#             tables = "experimental_design",
-#             remove_timestamps = NULL,
-#             check_timestamps = FALSE,
-#             backup_removed = TRUE
-#         )
-#     )
-
-#     suppressMessages(
-#         add_to_db(
-#             fns = file.path(parameter_dir, "treatment", "stressor_levels.csv"),
-#             db = db(),
-#             tables = "stressor_levels",
-#             remove_timestamps = NULL,
-#             check_timestamps = FALSE,
-#             backup_removed = TRUE
-#         )
-#     )
-# }
 ```
 
 # 1. Re-calculations for all timestamps
@@ -738,16 +676,21 @@ fns_o2 <- list.files(
 dp <- file.path(params$output_dir, "o2meter")
 dir.create(dp, showWarnings = FALSE, recursive = TRUE)
 
-file.path(
+fns_to <- file.path(
     dp,
     paste0(
         fns_o2 |>
             gsub(pattern = file.path(params$extracted_dir, "LEEF.o2meter.o2meter."), replacement = "") |>
             gsub(pattern = "/o2meter.csv", replacement = ""),
-        ".csv"
+        ".rds"
     )
-) |>
-    file.copy(from = fns_o2)
+)
+
+for (i in 1:length(fns_o2)) {
+    read.csv(fns_o2[i]) |>
+        mutate(Temp = as.double(Temp)) |>
+        saveRDS(file = fns_to[i])
+}
 
 rm(dp, fns_o2)
 ```
@@ -842,7 +785,6 @@ file.rename(db_name(2, temp = TRUE), db_name(3, temp = FALSE))
 #| eval: true
 #| 
 
-parquet_dir <- file.path(params$output_dir, "parquet")
 
 dir.create(parquet_dir, showWarnings = FALSE, recursive = TRUE)
 ```
@@ -858,7 +800,7 @@ list.files(
     pattern = "\\.rds$",
     full.names = TRUE
 ) |>
-    parquet_add_bemovi_16(path_to_parquet_root_dir = parquet_dir)
+    parquet_add_bemovi_16(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
 
 ```
 
@@ -874,7 +816,7 @@ list.files(
     full.names = TRUE
 ) |>
     grep(pattern = "_cropped\\.", value = TRUE, invert = TRUE) |>
-    parquet_add_bemovi_25(path_to_parquet_root_dir = parquet_dir)
+    parquet_add_bemovi_25(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
 
 list.files(
     file.path(params$output_dir, "bemovi_mag_25"),
@@ -882,7 +824,7 @@ list.files(
     full.names = TRUE
 ) |>
     grep(pattern = "_cropped\\.", value = TRUE) |>
-    parquet_add_bemovi_25_cropped(path_to_parquet_root_dir = parquet_dir)
+    parquet_add_bemovi_25_cropped(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
 ```
 
 ```{r}
@@ -896,7 +838,7 @@ list.files(
     pattern = "\\.rds$",
     full.names = TRUE
 ) |>
-    parquet_add_flowcam(path_to_parquet_root_dir = parquet_dir)
+    parquet_add_flowcam(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
 
 ```
 
@@ -918,7 +860,7 @@ c(
         full.names = TRUE
     )
 ) |>
-    parquet_add_flowcytometer(path_to_parquet_root_dir = parquet_dir)
+    parquet_add_flowcytometer(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
 ```
 
 ```{r}
@@ -932,7 +874,7 @@ list.files(
     recursive = FALSE,
     full.names = TRUE
 ) |>
-    parquet_add_manualcount(path_to_parquet_root_dir = parquet_dir)
+    parquet_add_manualcount(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
 
 
 ```
@@ -945,7 +887,8 @@ list.files(
 ## toc
 parquet_add_toc(
     fn = file.path(params$output_dir, "toc", "toc.rds"),
-    path_to_parquet_root_dir = parquet_dir
+    path_to_parquet_root_dir = parquet_dir, 
+    rename = params$rename_parquet
 )
 
 
@@ -962,7 +905,7 @@ list.files(
     recursive = FALSE,
     full.names = TRUE
 ) |>
-    parquet_add_o2(path_to_parquet_root_dir = parquet_dir)
+    parquet_add_o2(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
 
 
 ```
@@ -978,7 +921,7 @@ list.files(
     recursive = FALSE,
     full.names = TRUE
 ) |>
-    parquet_add_conductivity(path_to_parquet_root_dir = parquet_dir)
+    parquet_add_conductivity(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
 
 
 
@@ -990,21 +933,33 @@ list.files(
 #| 
 
 ## experimental tables
+object <- read.csv(file.path(parameter_dir, "parameter", "00.general.parameter", "compositions.csv"))
+if (params$rename_parquet) {
+
+}
 unlink(file.path(parquet_dir, "composition"), recursive = TRUE, force = TRUE)
-parquetize::csv_to_parquet(
-    path_to_file = file.path(parameter_dir, "parameter", "00.general.parameter", "compositions.csv"),
+object_to_parquet(
+    object = object,
     path_to_parquet = file.path(parquet_dir, "composition")
 )
     
+object <- read.csv(file.path(parameter_dir, "parameter", "00.general.parameter", "experimental_design.csv"))
+if (params$rename_parquet) {
+
+}
 unlink(file.path(parquet_dir, "experimental_design"), recursive = TRUE, force = TRUE)
-parquetize::csv_to_parquet(
-    path_to_file = file.path(parameter_dir, "parameter", "00.general.parameter", "experimental_design.csv"),
+object_to_parquet(
+    object = object,
     path_to_parquet = file.path(parquet_dir, "experimental_design")
 )
 
+object <- read.csv(file.path(parameter_dir, "parameter", "00.general.parameter", "stressor_levels.csv"))
+if (params$rename_parquet) {
+
+}
 unlink(file.path(parquet_dir, "stressor_levels"), recursive = TRUE, force = TRUE)
-parquetize::csv_to_parquet(
-    path_to_file = file.path(parameter_dir, "treatment", "stressor_levels.csv"),
+object_to_parquet(
+    object = object,
     path_to_parquet = file.path(parquet_dir, "stressor_levels")
 )
 
@@ -1020,9 +975,10 @@ The Diagnostic report needs to be created before the renaming as it does rely on
 options(knitr.duplicate.label = "allow")
 
 LEEF_2_report_diagnostic(
-    suffix = paste0("LEEF-2_reclassified_", params$version_tag), 
+    lastDays = 300,
+    suffix = paste0("LEEF-2_reclassified_", params$release, "_", tag), 
     format = "html",
     arrow = TRUE,
-    parquet_dir = file.path(params$output_dir, "parquet")
+    parquet_dir = parquet_dir
 )
 ```
