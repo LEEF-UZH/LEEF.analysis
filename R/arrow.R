@@ -25,6 +25,11 @@ parquet_add_bemovi_16 <- function(
     unlink(file.path(path_to_parquet_root_dir, "bemovi_16_density"), recursive = TRUE, force = TRUE)
     unlink(file.path(path_to_parquet_root_dir, "bemovi_16_morph"), recursive = TRUE, force = TRUE)
 
+
+    rename <- function(object) {
+
+    }
+    
     pbapply::pblapply(
         fns,
         function(fn) {
@@ -471,6 +476,7 @@ parquet_add_conductivity <- function(
 #' }
 #' @seealso
 #' @rdname parquet
+#' @export
 object_to_parquet <- function(
     object,
     path_to_parquet,

@@ -935,7 +935,7 @@ list.files(
 ## experimental tables
 object <- read.csv(file.path(parameter_dir, "parameter", "00.general.parameter", "compositions.csv"))
 if (params$rename_parquet) {
-
+    object <- LEEF_2_rename_composition(object)
 }
 unlink(file.path(parquet_dir, "composition"), recursive = TRUE, force = TRUE)
 object_to_parquet(
