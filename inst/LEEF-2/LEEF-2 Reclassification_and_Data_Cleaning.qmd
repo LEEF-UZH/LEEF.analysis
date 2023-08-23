@@ -49,14 +49,14 @@ params:
   aassemble_conductivity: false
   assemble_toc: false
   rename_parquet: false
-  update_parquet_flowcam: true
-  update_parquet_bemovi_16: true
-  update_parquet_bemovi_25: true
-  update_parquet_flowcytometer: true
-  update_parquet_manualcount: true
-  update_parquet_o2: true
-  update_parquet_conductivity: true
-  update_parquet_toc: true
+  update_parquet_flowcam: false
+  update_parquet_bemovi_16: false
+  update_parquet_bemovi_25: false
+  update_parquet_flowcytometer: false
+  update_parquet_manualcount: false
+  update_parquet_o2: false
+  update_parquet_toc: false
+  update_parquet_conductivity: false
   update_parquet_experimental_tables: true
   parquet: true
   diagnostic_report: false
@@ -161,6 +161,9 @@ parquet_dir <- file.path(
 ```
 
 # 1. Re-calculations for all timestamps
+
+TODO: There are still timestamps missing which did not make it thorough the pipeline, but all should be in the pre-processed directory. Check if they are there and re-run the extraction from there. If necessary, the pre-processing needds to be run again from =the raw data (available!).
+
 ## Reclassification of Flowcam
 
 
@@ -953,7 +956,7 @@ object_to_parquet(
     path_to_parquet = file.path(parquet_dir, "experimental_design")
 )
 
-object <- read.csv(file.path(parameter_dir, "parameter", "00.general.parameter", "stressor_levels.csv"))
+object <- read.csv(file.path(parameter_dir, "treatment", "stressor_levels.csv"))
 if (params$rename_parquet) {
 
 }

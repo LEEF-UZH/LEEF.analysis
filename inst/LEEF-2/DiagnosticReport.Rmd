@@ -25,7 +25,7 @@ format:
     fig_height: 12
 params:
   db: ~/Desktop/9.backend/LEEF-2.RRD.sqlite
-  parquet_dir: /Volumes/RRD.Reclassification_LEEF-2//parquet_v2.3.7-LEEF-2_20230727
+  parquet_dir: /Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.7-LEEF-2_20230813
   lastDays: 300
   arrow: true
 ---

@@ -1,0 +1,1267 @@
+---
+title: "LEEF2 RRD post-pipeline cleaning"
+author: "Uriah Daugaard"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format:
+  html:
+    theme: journal
+    embed-resources: true
+    number-sections: true
+    code-fold: true
+    toc: true
+    toc-float: true
+    toc-depth: 2
+---
+
+# Dependencies and Data
+
+## Dependencies
+
+```{r packages, message=FALSE}
+library(tidyverse)
+library(patchwork)
+library(LEEF.analysis)
+library(lubridate)
+library(parallel)
+library(doParallel)
+
+set.seed(1)
+options(dplyr.summarise.inform = FALSE)
+```
+
+
+## Data {#data}
+
+### Species densities
+
+```{r data, warning=FALSE, message=FALSE}
+options(RRDarrow = "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.7-LEEF-2_20230813/")
+
+densities <- arrow_read_density() %>%
+  arrange(day)
+```
+
+### Experimental design
+
+```{r}
+# exp_design <- db_read_table(table = "experimetal_design") %>% collect()
+```
+
+
+# Removing classes not of interest
+
+@Rainer: here I do the following change only with the densities. Please also do it with the respective trait datasets.
+
+The following classes are to be removed everywhere:
+
+- HNA
+- LNA
+- MNA
+- Loxocephallus in flowcam
+- OtherCiliate
+
+Also, the following bottles are removed:
+
+- b_103
+- b_102
+- b_101
+
+Everything else is kept
+
+Note: in contrast to LEEF1 I decided to keep the class "Debris_and_other"
+
+```{r}
+densities <- densities %>%
+  dplyr::filter(!(species %in% c("OtherCiliate", "HNA", "LNA", "MNA")),
+                !(species=="Loxocephallus" & measurement=="flowcam"),
+                !(bottle %in% c("b_103", "b_102", "b_101"))
+                ) 
+```
+
+
+# Exclusion of faulty videos
+
+@Rainer: you can skip to the subsection "Exclusion of faulty videos and recalculating densities"
+
+In this section I do the identification and exclusion of problematic videos. 
+
+## First method
+
+```{r}
+# root <- "../../../../LEEF-2_archive/archive/extracted/LEEF.bemovi.mag.25.bemovi."
+# overlay <- "/4 - overlays/"
+# 
+# copied <- apply(tocheck_1stmethod, 1 , function(row){
+#   video <- row["file"]
+#   timestamp <- row["timestamp"]
+#   
+#   folder <- paste0(root,timestamp,overlay)
+#   file.extension <- file_ext(list.files(folder)[1])
+#   path <- paste0(folder,video,".",file.extension)
+#   
+#   file.copy(from = path, to = "FirstMethodCheck/25x/")
+# })
+# 
+# tocheck_1stmethod$copied <- copied
+# 
+# tocheck_1stmethod <- tocheck_1stmethod %>%
+#   filter(copied==T) %>%
+#   select(-copied)
+# 
+# 
+# write_csv(tocheck_1stmethod, file = "FirstMethodCheck/tocheck_1stmethod.csv")
+```
+
+
+I looked at video overlays for when the densities of Loxo were above 50 ind/ml (a semi-random threshold).
+
+```{r tocheck_1stmethod2, message=FALSE, warning=FALSE}
+tocheck_1stmethod <- read_csv("VideoChecks/FirstMethodCheck/tocheck_1stmethod.csv")
+
+print("Video classification at 25x, first check found:")
+table(tocheck_1stmethod$decision)
+
+tocheck_1stmethod_all <- tocheck_1stmethod
+tocheck_1stmethod <- tocheck_1stmethod %>%
+  filter(decision!="ok")
+```
+
+## Second method
+
+I looked at video overlays for when the densities of "Debris_and_other" were above 40 ind/ml (a semi-random threshold).
+
+```{r tocheck_2ndmethod2, message=FALSE, warning=FALSE}
+# tocheck_2ndmethod <- arrow_read_table("bemovi_25_morph") %>%
+#   collect()
+# 
+# tocheck_2ndmethod <- tocheck_2ndmethod %>%
+#   dplyr::filter(species == "Debris_and_other") %>%
+#   group_by(timestamp,bottle,file,species) %>%
+#   summarize(count = n()) %>%
+#   mutate(moving_back = ifelse(file %in% tocheck_1stmethod$file,T,F))  %>%
+#   dplyr::filter(count>=40, moving_back==F)  %>%
+#   arrange(timestamp, bottle, file)
+
+tocheck_2ndmethod <- read_csv("VideoChecks/SecondMethodCheck/tocheck_2ndmethod.csv")  %>%
+  mutate(faulty_video = ifelse(decision=="ok",F,T),
+         faulty_video_int = ifelse(decision=="ok",0,1)) 
+
+tocheck_2ndmethod_temp <- arrow_read_table("bemovi_25_morph") %>%
+  collect() %>%
+  dplyr::filter(species == "Debris_and_other") %>%
+  group_by(timestamp,bottle,file,species) %>%
+  summarize(count = n()) %>%
+  mutate(moving_back = ifelse(file %in% tocheck_1stmethod$file,T,F))  %>%
+  dplyr::filter(count>=40, moving_back==F)  %>%
+  arrange(timestamp, bottle, file)
+
+tocheck_2ndmethod <- full_join(tocheck_2ndmethod, tocheck_2ndmethod_temp)
+
+tocheck_2ndmethod %>%
+  ggplot(aes(count,faulty_video_int))+
+  geom_point()+
+  geom_smooth()+
+  labs(x="Number of tracked particles classified as debris",
+       y="Faulty video (True = video is faulty)")
+
+cdplot(as.factor(faulty_video) ~ count, data = tocheck_2ndmethod, 
+       ylab = "Conditional density (probability) of a video being faulty",
+       xlab = "Number of tracked particles classified as debris")
+
+
+print("Video classification at 25x, second check found:")
+table(tocheck_2ndmethod$decision)
+
+tocheck_2ndmethod_all <- tocheck_2ndmethod
+tocheck_2ndmethod <- tocheck_2ndmethod %>%
+  filter(decision!="ok")
+```
+The first plot simply shows the scatter plot of faulty_videos (True/False) vs. number of particles classified as debris. The second plot shows something similar, but with the conditional density on the y axis. Based on these figures I think it does not makes sense to look at videos with a debris count below 40.
+
+
+## Third method
+
+I randomly selected 300 videos at both magnifications and looked at the corresponding overlays
+
+```{r, message=FALSE, warning=FALSE}
+# videos_25x <- arrow_read_table("bemovi_25_morph") %>% 
+#   collect() %>%
+#   group_by(magnification,file) %>%
+#   summarize(n=n()) %>%
+#   slice_sample(n = 300) 
+# 
+# videos_25x <- videos_25x %>%
+#   mutate(timestamp=unlist(map(strsplit(file, split = "_"),1)),
+#          timestamp2 = as_date(timestamp),
+#          day = time_length(interval(as_date("20221107"),timestamp2), unit = 'day')) %>%
+#   select(magnification,timestamp,day,file)
+# 
+# videos_16x <- arrow_read_table(table = "bemovi_16_morph") %>% 
+#   collect() %>%
+#   group_by(magnification,file) %>%
+#   summarize(n=n()) %>%
+#   slice_sample(n = 300) 
+# 
+# videos_16x <- videos_16x %>%
+#   mutate(timestamp=unlist(map(strsplit(file, split = "_"),1)),
+#          timestamp2 = as_date(timestamp),
+#          day = time_length(interval(as_date("20221107"),timestamp2), unit = 'day')) %>%
+#   select(magnification,timestamp,day,file)
+
+tocheck_3rdmethod16 <- read_csv("VideoChecks/ThirdMethodCheck/videos_16x.csv")
+tocheck_3rdmethod25 <- read_csv("VideoChecks/ThirdMethodCheck/videos_25x.csv")
+
+print("Video classification at 25x, third check found:")
+table(tocheck_3rdmethod25$decision)
+print("Video classification at 16x, third check found:")
+table(tocheck_3rdmethod16$decision)
+```
+By randomly selecting videos I found only 1 out of 600 that had a moving background. 
+
+## The methods taken together
+
+```{r}
+# 16x
+videos_to_remove_16 <- tocheck_3rdmethod16 %>%
+  dplyr::filter(decision!="ok")
+videos_to_remove_16 <- videos_to_remove_16$file
+
+# 25x
+videos_to_remove_25_1 <- tocheck_1stmethod_all %>%
+  dplyr::filter(decision!="ok")
+videos_to_remove_25_2 <- tocheck_2ndmethod_all %>%
+  dplyr::filter(decision!="ok")
+videos_to_remove_25_3 <- tocheck_3rdmethod25 %>%
+  dplyr::filter(decision!="ok")
+
+videos_to_remove_25_1 <- videos_to_remove_25_1$file
+videos_to_remove_25_2 <- videos_to_remove_25_2$file
+videos_to_remove_25_3 <- videos_to_remove_25_3$file
+
+videos_to_remove_25 <- unique(c(videos_to_remove_25_1,videos_to_remove_25_2,videos_to_remove_25_3))
+
+print("16x: Number of faulty videos found:")
+length(videos_to_remove_16)
+print("25x: Number of faulty videos found:")
+length(videos_to_remove_25)
+```
+
+## Exclusion of faulty videos and recalculating densities
+
+**Note UD (20230816)**: because there are currently 8 sampling days missing in the RRD, I could check for faulty videos in them.
+
+@Rainer: below I recalculate the densities after excluding some videos. Please overwrite the density and trait tables in the RRD accordingly (as you did in LEEF1). Also, I think at this point in your script the species biomasses are not yet calculated, correct? Because if the biomasses are already calculated then just like the densities they also need to be recalculated after the faulty video exclusion...
+
+
+loading in (again) the video file names that need to be removed
+
+```{r, message=FALSE}
+# read in video file names to remove
+tocheck_1stmethod <- read_csv("VideoChecks/FirstMethodCheck/tocheck_1stmethod.csv")
+tocheck_2ndmethod <- read_csv("VideoChecks/SecondMethodCheck/tocheck_2ndmethod.csv") 
+tocheck_3rdmethod16 <- read_csv("VideoChecks/ThirdMethodCheck/videos_16x.csv")
+tocheck_3rdmethod25 <- read_csv("VideoChecks/ThirdMethodCheck/videos_25x.csv")
+
+# 16x
+videos_to_remove_16 <- tocheck_3rdmethod16 %>%
+  dplyr::filter(decision!="ok") %>%
+  mutate(video.nr = as.numeric(sub('.+_(.+)', '\\1', file)),
+         bottle = ceiling((video.nr - 100)/3),
+         bottle = ifelse(bottle<10,paste0("b_0",bottle),paste0("b_",bottle)))
+
+# 25x
+videos_to_remove_25_1 <- tocheck_1stmethod %>%
+  dplyr::filter(decision!="ok")
+videos_to_remove_25_2 <- tocheck_2ndmethod %>%
+  dplyr::filter(decision!="ok")
+videos_to_remove_25_3 <- tocheck_3rdmethod25 %>%
+  dplyr::filter(decision!="ok")
+
+videos_to_remove_25 <- full_join(videos_to_remove_25_1,
+                                 full_join(videos_to_remove_25_2,videos_to_remove_25_3)) %>%
+  distinct %>%
+  mutate(video.nr = as.numeric(sub('.+_(.+)', '\\1', file)),
+         bottle = ceiling(video.nr/3),
+         bottle = ifelse(bottle<10,paste0("b_0",bottle),paste0("b_",bottle)))
+```
+
+function to re-calculate the density:
+
+```{r}
+CalculateDensities <- function(morph, meas, extrapolation.factor, cropping.factor){
+  density <- morph %>%
+    group_by(timestamp, bottle, species, file) %>%
+    summarize(count=sum(n_frames)) %>%
+    # summarize(count=sum(N_frames)) %>%
+    mutate(dens.ml = count * extrapolation.factor * cropping.factor) %>%
+    na.omit() %>%
+    group_by(timestamp, bottle, species) %>%
+    summarise(density = sum(dens.ml)/(3*125)) %>%
+    mutate(measurement=meas)
+  return(density)
+}
+```
+
+updating densities (after excluding the videos with moving background)
+
+```{r SetNotFoundSpeciesTo0, message=FALSE, warning=FALSE}
+### BEMOVI 25
+
+species.tracked <- c("Coleps_irchel",
+                     "Colpidium",
+                     "Stylonychia2",
+                     "Paramecium_caudatum",
+                     "Paramecium_bursaria",
+                     # "Euplotes",
+                     # "Loxocephallus",
+                     "Debris_and_other")
+
+meas <- "bemovi_mag_25"
+extrapolation.factor <- 23.367 
+cropping.factor <- 1
+
+morph25 <- arrow_read_table("bemovi_25_morph") %>%
+  collect() %>%
+  dplyr::filter(species!="Cryptomonas")
+
+# morph25 contains the remaining 1 or 2 videos of a bottle for a timestamp for
+# which 1 or 2 faulty videos were found. These remaining videos are then used
+# to recalculate the densities without the faulty videos.
+morph25 <- inner_join(morph25, 
+                      videos_to_remove_25 %>% select(timestamp, bottle)) %>%
+  dplyr::filter(!(file %in% videos_to_remove_25$file))
+
+# calculate new densities
+morph25_density <- CalculateDensities(morph25, meas, extrapolation.factor, cropping.factor) 
+
+# setting not found species to 0 
+skeleton <- expand.grid(bottle_timestamp = unique(paste(morph25_density$bottle,morph25_density$timestamp)),
+                        species = species.tracked,
+                        measurement =  unique(morph25_density$measurement))
+skeleton <- skeleton %>%
+  mutate(bottle = unlist(map(str_split(bottle_timestamp, " "),1)),
+         timestamp = as.numeric(unlist(map(str_split(bottle_timestamp, " "),2)))) %>%
+  select(-bottle_timestamp)
+
+morph25_density <- full_join(morph25_density, skeleton)
+morph25_density$density <- ifelse(is.na(morph25_density$density),0,morph25_density$density)
+
+### ### ### ### 
+
+### BEMOVI 25 CROPPED
+
+species.tracked <- c(
+                     # "Loxocephallus",
+                     "Debris_and_other")
+
+meas <- "bemovi_mag_25_cropped"
+extrapolation.factor <- 23.367 
+cropping.factor <- 4 # check whether this is the right cropping factor
+
+morph25 <- arrow_read_table("bemovi_25_morph_cropped") %>%
+  collect() %>%
+  dplyr::filter(species!="Cryptomonas")
+
+morph25 <- inner_join(morph25, 
+                      videos_to_remove_25 %>% select(timestamp, bottle)) %>%
+  dplyr::filter(!(file %in% videos_to_remove_25$file))
+
+# calculate new densities
+morph25_cropped_density <- CalculateDensities(morph25, meas, extrapolation.factor, cropping.factor) 
+
+# setting not found species to 0 
+skeleton <- expand.grid(bottle_timestamp = unique(paste(morph25_cropped_density$bottle,morph25_cropped_density$timestamp)),
+                        species = species.tracked,
+                        measurement =  unique(morph25_cropped_density$measurement))
+skeleton <- skeleton %>%
+  mutate(bottle = unlist(map(str_split(bottle_timestamp, " "),1)),
+         timestamp = as.numeric(unlist(map(str_split(bottle_timestamp, " "),2)))) %>%
+  select(-bottle_timestamp)
+
+morph25_cropped_density <- full_join(morph25_cropped_density, skeleton)
+morph25_cropped_density$density <- ifelse(is.na(morph25_cropped_density$density),0,morph25_cropped_density$density)
+
+
+### ### ### ### 
+
+### BEMOVI 16
+
+species.tracked <- c("Coleps_irchel",
+                     "Colpidium",
+                     "Stylonychia2",
+                     "Paramecium_caudatum",
+                     "Paramecium_bursaria",
+                     # "Euplotes",
+                     # "Loxocephallus",
+                     "Debris_and_other")
+
+meas <- "bemovi_mag_16"
+extrapolation.factor <- 10.044 
+cropping.factor <- 1
+
+morph16 <- arrow_read_table("bemovi_16_morph") %>%
+  collect() %>%
+  dplyr::filter(species!="Cryptomonas")
+
+morph16 <- inner_join(morph16, 
+                      videos_to_remove_16 %>% select(timestamp, bottle)) %>%
+  dplyr::filter(!(file %in% videos_to_remove_16$file))
+
+# calculate new densities
+morph16_density <- CalculateDensities(morph16, meas, extrapolation.factor, cropping.factor) 
+
+# setting not found species to 0 
+skeleton <- expand.grid(bottle_timestamp = unique(paste(morph16_density$bottle,morph16_density$timestamp)),
+                        species = species.tracked,
+                        measurement =  unique(morph16_density$measurement))
+skeleton <- skeleton %>%
+  mutate(bottle = unlist(map(str_split(bottle_timestamp, " "),1)),
+         timestamp = as.numeric(unlist(map(str_split(bottle_timestamp, " "),2)))) %>%
+  select(-bottle_timestamp)
+
+morph16_density <- full_join(morph16_density, skeleton)
+morph16_density$density <- ifelse(is.na(morph16_density$density),0,morph16_density$density)
+
+
+### bind new densities together
+
+new_densities <- rbind(morph25_density,morph25_cropped_density,morph16_density)
+
+### overwrite the new densities in the main density data.frame
+
+densities$rownumber <- 1:nrow(densities)
+
+old_densities <- right_join(densities,new_densities[,-4])
+
+rownumbers <- old_densities$rownumber
+
+densities[rownumbers,"density"] <- NA
+
+densities <- full_join(densities,new_densities, 
+                       by = c("timestamp", "bottle", "measurement", "species")) %>%
+  mutate(density.x = case_when(is.na(density.x)~density.y,
+                               T ~ density.x)) %>%
+  rename(density=density.x) %>%
+  select(-density.y)
+
+### NOTE: I'm saving the new_densities so that in the RRDReadyCheck it is possible to see whether the densities have been recalculated
+write_csv(new_densities, "VideoChecks/new_densities_for_doublecheck.csv")
+
+rm(old_densities, new_densities)
+```
+
+
+# Setting the density to 0 for species that have not been tracked.
+
+**Note UD (20230816):** I'm currently not sure whether this is needed. At the moment if a species is not present in a certain bottle on a certain sampling dax I do NOT know whether this is because it wasn't tracked/detected and the PIPELINE code failed to put the density to 0, or whether it is because the raw data is either missing or has not been processes.
+
+Essentially, in the pipeline there is code that sets the density of a class (i.e. the species_tracked in the .yml) to 0 if for the currently processed sampling day it was not detected in a bottle. E.g. for the flowcam I think it is done here:https://github.com/LEEF-UZH/LEEF.measurement.flowcam/blob/LEEF-2/R/classify_LEEF_2.R, line 115 onwwards. It is this working? (same goes for the video script).
+
+
+# Manual correction of Colpidium classification & recalculation of densities
+
+When all experimental stressors are high, Colpidium died out. However, because other species (namely P. caudatum) changed in their traits at these conditions and became more similar to Colpidium, the classifiers still classified particles as Colpidium.
+
+@Rainer you can skip to the subsection "Correction: manual reclassificaiton and density estimate update"
+
+## Investigation of problem
+
+This is visible in the next figure (especially in bottle 15)
+
+```{r, fig.width=10, fig.height=4, warning=FALSE, message=FALSE}
+dens <- densities %>%
+  dplyr::filter(species=="Colpidium") %>%
+  mutate(resources = ifelse(resources=="constant","cnst.","incr."),
+         temperature = ifelse(temperature=="constant","cnst.","incr."),
+         salinity = ifelse(salinity=="constant","cnst.","incr."),
+         conditions = paste0("T: ",temperature,"; S: ",salinity,"; R: ",resources)) %>%
+  dplyr::filter(conditions == "T: incr.; S: incr.; R: incr.")
+
+manual_occurences <- read_csv("microscopic_checks_ciliates.csv")
+
+manual_occurences_long <- manual_occurences %>%
+  select(-comments) %>%
+  pivot_longer(cols = colnames(manual_occurences)[4:10], 
+               names_to = "species",
+               values_to = "presence") %>%
+  mutate(timestamp=date)
+
+occs <- manual_occurences_long %>%
+  dplyr::filter(species=="Colpidium",
+                bottle %in% unique(dens$bottle))
+
+dens <- full_join(occs,dens) %>%
+  mutate(presence2 = presence*max(density))
+
+annot <- dens %>%
+  group_by(species,bottle,conditions,replicate,measurement) %>%
+  summarize(dummy_var = n())
+
+dens %>%
+  ggplot(aes(day, density, col=measurement))+
+  geom_line() +
+  facet_grid(~replicate, scales = "free")+
+  geom_hline(yintercept = 10, col="black")+
+  labs(title = paste("Colpidium","(in black is manual occurence check done by RL)"),
+       subtitle = unique(dens$conditions))+
+  geom_line(data = dens %>% na.omit(),
+            aes(y=presence2), col="black") +
+  geom_point(aes(y=presence2), col="black",size=1.2) +
+  theme_bw()+
+  geom_text(data=annot, aes(x = -Inf, y = -Inf, label = bottle),
+            hjust = -0.5, vjust = -7,col="black") +
+  scale_y_continuous("Density (video)", limits = c(0, max(dens$density)),
+                     sec.axis = sec_axis(~ . * 1/max(dens$density), name = "Presence (manual check)"))
+```
+
+The next figure shows the species probabilities in bottle 15 for the particles that have been classified as Colpidium. The black dots are the estimated probabilities that they are Colpidium, and the blue line is a loess fit to them. The red line is the loess fit to the same particles and their estimated probabilities that they are Paramecium caudatum instead (which they probably are).
+
+
+```{r, warning=FALSE, message=FALSE}
+Colpidium_b15 <- arrow_read_table("bemovi_16_morph") %>%
+  collect() %>%
+  dplyr::filter(species == "Colpidium", bottle=="b_15")
+
+Colpidium_b15$timestamp_date <- as_date(as.character(Colpidium_b15$timestamp), format="%Y%m%d") 
+days <- time_length(interval(min(Colpidium_b15$timestamp_date),Colpidium_b15$timestamp_date), unit = 'day')
+Colpidium_b15$days <- days
+
+Colpidium_b15 %>%
+  ggplot(aes(days, species_probability))+
+  geom_point()+
+  geom_smooth()+
+  geom_smooth(aes(y=paramecium_caudatum_prob), col="red")
+```
+
+As can be seen, the classifier is relatively certain that these particles are Colpidium. Changing the classification probability threshold or ortherwise improving the classifiers seems hard. 
+
+I think the best approach is to manually reclassify the particles identified as Colpidium in bottles 2, 15, 20 and 31 as P.caudatum from roughly day 147 onwards.
+
+## Correction: manual reclassification and density estimate update
+
+To repeat: I think the best approach is to manually reclassify the particles identified as Colpidium in bottles 2, 15, 20 and 31 as P.caudatum rom roughly day 147 (included) onwards (i.e timestamp 20230403). Thoughts?
+
+This means that the particles are manually reclassified in the traits tables and then the densities are recalculated. This is done in the next code chunk.
+
+@Rainer: below I recalculate the densities after a manual correction of a classification. Please overwrite the density and trait tables in the RRD accordingly (very similar to the faulty video exclusion section above).
+
+```{r}
+### Bemovi 16
+morph16 <- arrow_read_table("bemovi_16_morph") %>%
+  collect() %>%
+  dplyr::filter(bottle%in%c("b_02","b_15","b_20","b_31"),
+                timestamp >= 20230403) %>%
+  mutate(species = ifelse(species=="Colpidium","Paramecium_caudatum",species))
+
+species.tracked <- c("Coleps_irchel",
+                     "Colpidium",
+                     "Stylonychia2",
+                     "Paramecium_caudatum",
+                     "Paramecium_bursaria",
+                     # "Euplotes",
+                     # "Loxocephallus",
+                     "Debris_and_other")
+
+meas <- "bemovi_mag_16"
+extrapolation.factor <- 10.044 
+cropping.factor <- 1
+
+# calculate new densities
+morph16_density <- CalculateDensities(morph16, meas, extrapolation.factor, cropping.factor) 
+
+# setting not found species to 0 
+skeleton <- expand.grid(bottle_timestamp = unique(paste(morph16_density$bottle,morph16_density$timestamp)),
+                        species = species.tracked,
+                        measurement =  unique(morph16_density$measurement))
+
+skeleton <- skeleton %>%
+  mutate(bottle = unlist(map(str_split(bottle_timestamp, " "),1)),
+         timestamp = as.numeric(unlist(map(str_split(bottle_timestamp, " "),2)))) %>%
+  select(-bottle_timestamp)
+
+morph16_density <- full_join(morph16_density, skeleton)
+morph16_density$density <- ifelse(is.na(morph16_density$density),0,morph16_density$density)
+  
+
+### Bemovi 25
+
+morph25 <- arrow_read_table("bemovi_25_morph") %>%
+  collect() %>%
+  dplyr::filter(bottle%in%c("b_02","b_15","b_20","b_31"),
+                timestamp >= 20230403) %>%
+  mutate(species = ifelse(species=="Colpidium","Paramecium_caudatum",species))
+
+species.tracked <- c("Coleps_irchel",
+                     "Colpidium",
+                     "Stylonychia2",
+                     "Paramecium_caudatum",
+                     "Paramecium_bursaria",
+                     # "Euplotes",
+                     # "Loxocephallus",
+                     "Debris_and_other")
+
+meas <- "bemovi_mag_25"
+extrapolation.factor <- 23.367 
+cropping.factor <- 1
+
+# calculate new densities
+morph25_density <- CalculateDensities(morph25, meas, extrapolation.factor, cropping.factor) 
+
+# setting not found species to 0 
+skeleton <- expand.grid(bottle_timestamp = unique(paste(morph25_density$bottle,morph25_density$timestamp)),
+                        species = species.tracked,
+                        measurement =  unique(morph25_density$measurement))
+skeleton <- skeleton %>%
+  mutate(bottle = unlist(map(str_split(bottle_timestamp, " "),1)),
+         timestamp = as.numeric(unlist(map(str_split(bottle_timestamp, " "),2)))) %>%
+  select(-bottle_timestamp)
+
+morph25_density <- full_join(morph25_density, skeleton)
+morph25_density$density <- ifelse(is.na(morph25_density$density),0,morph25_density$density)
+
+### bind new densities together
+
+new_densities <- rbind(morph25_density,morph16_density)
+
+### overwrite the new densities in the main density data.frame
+
+densities$rownumber <- 1:nrow(densities)
+
+old_densities <- right_join(densities,new_densities[,-4])
+
+rownumbers <- old_densities$rownumber
+
+densities[rownumbers,"density"] <- NA
+
+densities <- full_join(densities,new_densities, 
+                       by = c("timestamp", "bottle", "measurement", "species")) %>%
+  mutate(density.x = case_when(is.na(density.x)~density.y,
+                               T ~ density.x)) %>%
+  rename(density=density.x) %>%
+  select(-density.y)
+
+### NOTE: I'm saving the new_densities so that in the RRDReadyCheck it is possible to see whether the densities have been recalculated
+write_csv(new_densities, "new_PCaudatum_densities_for_doublecheck.csv")
+
+rm(old_densities, new_densities)
+```
+
+## Figure after correction
+
+This is how it is after the manual correction:
+
+```{r, fig.width=10, fig.height=4, warning=FALSE, message=FALSE}
+dens <- densities %>%
+  dplyr::filter(species=="Colpidium") %>%
+  mutate(resources = ifelse(resources=="constant","cnst.","incr."),
+         temperature = ifelse(temperature=="constant","cnst.","incr."),
+         salinity = ifelse(salinity=="constant","cnst.","incr."),
+         conditions = paste0("T: ",temperature,"; S: ",salinity,"; R: ",resources)) %>%
+  dplyr::filter(conditions == "T: incr.; S: incr.; R: incr.")
+
+occs <- manual_occurences_long %>%
+  dplyr::filter(species=="Colpidium",
+                bottle %in% unique(dens$bottle))
+
+dens <- full_join(occs,dens) %>%
+  mutate(presence2 = presence*max(density))
+
+annot <- dens %>%
+  group_by(species,bottle,conditions,replicate,measurement) %>%
+  summarize(dummy_var = n())
+
+dens %>%
+  ggplot(aes(day, density, col=measurement))+
+  geom_line() +
+  facet_grid(~replicate, scales = "free")+
+  geom_hline(yintercept = 10, col="black")+
+  labs(title = paste("Colpidium","(in black is manual occurence check done by RL)"),
+       subtitle = unique(dens$conditions))+
+  geom_line(data = dens %>% na.omit(),
+            aes(y=presence2), col="black") +
+  geom_point(aes(y=presence2), col="black",size=1.2) +
+  theme_bw()+
+  geom_text(data=annot, aes(x = -Inf, y = -Inf, label = bottle),
+            hjust = -0.5, vjust = -7,col="black") +
+  scale_y_continuous("Density (video)", limits = c(0, max(dens$density)),
+                     sec.axis = sec_axis(~ . * 1/max(dens$density), name = "Presence (manual check)"))
+```
+
+# Exclusion of time series that are wrong classifications or only noise
+
+@Rainer: you can skip to the section "Exclusion of the selected time series"
+
+I exclude the time series of species that were (practically) always extinct in a certain bottle. The condition is that Romana saw them less than at twice consecutive manual checks during the experiment and that the recorded time series more or less agree with this (in the case of Stylo and Colpidium I'm keeping the time series even if Romana saw the species even less, because there are no manual measurements form the very beginning of the experiment). Note that this means that I'm keeping time series even if Romana saw them as little as two times. however, most likely these time series will not be used for forecasting and will only contribute to the total biomass (to which they will not contribute much in any case as the detected abundances are low).
+
+## Investigations: decision of which time series to remove
+
+### Videos
+
+```{r, fig.width=14, fig.height=14, message=FALSE, warning=FALSE}
+manual_occurences <- read_csv("microscopic_checks_ciliates.csv")
+
+manual_occurences_long <- manual_occurences %>%
+  select(-comments) %>%
+  pivot_longer(cols = colnames(manual_occurences)[4:10], 
+               names_to = "species",
+               values_to = "presence") %>%
+  mutate(timestamp=date)
+
+
+Bemovi16_classes <- c("Coleps_irchel",
+                      "Colpidium",
+                      "Stylonychia2",
+                      "Paramecium_caudatum",
+                      "Paramecium_bursaria",
+                      "Euplotes",
+                      "Loxocephallus")
+
+for(sp in Bemovi16_classes){
+  dens <- densities %>%
+    dplyr::filter(species==sp) %>%
+    mutate(resources = ifelse(resources=="constant","cnst.","incr."),
+           temperature = ifelse(temperature=="constant","cnst.","incr."),
+           salinity = ifelse(salinity=="constant","cnst.","incr."),
+           conditions = paste0("T: ",temperature,"; S: ",salinity,"; R: ",resources)) 
+  
+  if(sp=="Loxocephallus") {
+    dens <- dens %>%
+      dplyr::filter(density<100)
+  }
+  
+  occs <- manual_occurences_long %>%
+    dplyr::filter(species==sp) 
+  
+  dens <- full_join(occs,dens) %>%
+    mutate(presence2 = presence*max(density))
+  
+  annot <- dens %>%
+    group_by(species,bottle,conditions,replicate,measurement) %>%
+    summarize(dummy_var = n())
+  
+  p1 <- dens %>%
+    ggplot(aes(day, density, col=measurement))+
+    geom_line() +
+    facet_grid(conditions ~ replicate, scales = "free")+
+    geom_hline(yintercept = 10, col="black")+
+    labs(title = paste(sp,"(in black is manual occurence check done by RL)"))+
+    geom_line(data = dens %>% na.omit(),
+              aes(y=presence2), col="black") +
+    geom_point(aes(y=presence2), col="black",size=1.2) +
+    theme_bw()+
+    geom_text(data=annot, aes(x = -Inf, y = -Inf, label = bottle),
+              hjust = -0.5, vjust = -7,col="black") +
+    scale_y_continuous("Density (video)", limits = c(0, max(dens$density)),
+                       sec.axis = sec_axis(~ . * 1/max(dens$density), name = "Presence (manual check)"))
+
+  
+  # p2 <- occs %>%
+  #   na.omit() %>%
+  #   ggplot(aes(day, presence))+
+  #   geom_line() +
+  #   geom_point(size=1.2) +
+  #   facet_grid(conditions ~ replicate, scales = "free")+
+  #   labs(title = paste(sp,"(manual occurnce checks by RL)"))+
+  #   theme_bw() +
+  #   geom_text(data=annot, aes(x = -Inf, y = -Inf, label = bottle),
+  #             hjust = -0.5, vjust = -2)+
+  #   ylim(0,1)
+  
+  print(p1)
+}
+```
+
+Based on these figure I've decided that I'm excluding:
+
+- Euplotes everywhere
+- Loxocephalus everywhere
+
+
+
+### Flowcam
+
+Note: this section has no output because nothing needs to be removed
+
+
+```{r, fig.width=14, fig.height=14, eval=FALSE}
+Flowcam_classes <- c("Chlamydomonas",
+                     "DividingChlamydomonas",
+                     "ChlamydomonasClumpsLarge",
+                     "ChlamydomonasClumpsSmall",
+                     "Small_cells")
+
+for(sp in Flowcam_classes){
+  dens <- densities %>%
+    dplyr::filter(species==sp) %>%
+    mutate(resources = ifelse(resources=="constant","cnst.","incr."),
+           temperature = ifelse(temperature=="constant","cnst.","incr."),
+           salinity = ifelse(salinity=="constant","cnst.","incr."),
+           conditions = paste0("T: ",temperature,"; S: ",salinity,"; R: ",resources)) 
+  
+  p <- dens %>%
+    ggplot(aes(day, density, col=measurement))+
+    geom_line() +
+    facet_grid(conditions ~ replicate, scales = "free")+
+    geom_hline(yintercept = 100, col="black")+
+    labs(title = sp)+
+    theme_bw()
+  print(p)
+}
+```
+
+
+### Flowcytometer
+
+Note: this section has no output because nothing needs to be removed
+
+```{r, fig.width=14, fig.height=14, eval=FALSE}
+Flowcytometer_classes <- c("bacteria",
+                           "algae")
+
+for(sp in Flowcytometer_classes){
+  dens <- densities %>%
+    dplyr::filter(species==sp) %>%
+    mutate(resources = ifelse(resources=="constant","cnst.","incr."),
+           temperature = ifelse(temperature=="constant","cnst.","incr."),
+           salinity = ifelse(salinity=="constant","cnst.","incr."),
+           conditions = paste0("T: ",temperature,"; S: ",salinity,"; R: ",resources)) %>%
+    group_by(species,timestamp,bottle,replicate)%>%
+    mutate(sample = as.factor(1:n()))
+  
+  p <- dens %>%
+    ggplot(aes(day, density, col=sample))+
+    geom_line() +
+    facet_grid(conditions ~ replicate, scales = "free")+
+    geom_hline(yintercept = 100, col="black")+
+    labs(title = sp)+
+    theme_bw()
+  print(p)
+}
+```
+
+## Exclusion of the selected time series
+
+@Rainer: I do the following only in the density data.frame. Please do the same also with the trait data. As it turns out, Euplotes and Loxo have to be removed everywhere. The code below is a bit more general in case that they are not removed from every bottle but only in some (in case we change our mind).
+
+```{r}
+# preparation
+Euplotes <- c(1:32)
+Euplotes <- ifelse(Euplotes<10,paste0("b_0",Euplotes),paste0("b_",Euplotes))
+Loxocephallus <- Euplotes
+
+timeSeries_toExclude <- data.frame(
+  bottle = c(Euplotes, Loxocephallus),
+  species = c(rep("Euplotes",length(Euplotes)),
+              rep("Loxocephallus",length(Loxocephallus)))) %>%
+  dplyr::mutate(int = interaction(bottle, species))
+
+# exclusion
+densities <- densities %>%
+  dplyr::mutate(bottle.species = interaction(bottle, species)) %>%
+  dplyr::filter(!(bottle.species %in% timeSeries_toExclude$int)) %>%
+  dplyr::select(-bottle.species)
+```
+
+
+
+# Flowcytometer: investigation of contaminated samples
+
+On three sampling days (20230407, 20230531, 20230602, note20230817: 20230602 is currently missing in the RRD) the flowcytometer blanks were contaminated. In the next figures I investigated whether this influenced the bacteria density estimation.
+
+@Rainer: I think that for now no action is necessary as I do not think that the bacteria density differ by much on these days. However, this needs to be re-evaluated once all sampling days are in the RRD.
+
+Figures (The circles highlight the timestamps in question):
+
+Time series of bacteria (3 samples per bottle per sampling day)
+
+```{r, fig.height=14, fig.width=14}
+bac <- densities %>%
+  dplyr::filter(species=="bacteria") %>%
+  group_by(timestamp, day, bottle, replicate, temperature, resources, salinity) %>%
+  mutate(sample = as.factor(1:n()))  %>%
+  mutate(resources = ifelse(resources=="constant","cnst.","incr."),
+         temperature = ifelse(temperature=="constant","cnst.","incr."),
+         salinity = ifelse(salinity=="constant","cnst.","incr."),
+         conditions = paste0("T: ",temperature,"; S: ",salinity,"; R: ",resources))
+
+bac_sum <- densities %>%
+  dplyr::filter(species=="bacteria") %>%
+  group_by(timestamp, day, bottle, replicate, temperature, resources, salinity) %>%
+  summarize(density = median(density))  %>%
+  mutate(resources = ifelse(resources=="constant","cnst.","incr."),
+         temperature = ifelse(temperature=="constant","cnst.","incr."),
+         salinity = ifelse(salinity=="constant","cnst.","incr."),
+         conditions = paste0("T: ",temperature,"; S: ",salinity,"; R: ",resources))
+
+annot <- bac %>%
+    group_by(species,bottle,conditions,replicate,measurement) %>%
+    summarize(dummy_var = n())
+
+bac %>%
+  ggplot(aes(day, density, col=sample))+
+  geom_line() +
+  facet_grid(conditions ~ replicate, scales = "free")+
+  geom_point(data = bac %>% dplyr::filter(timestamp %in% c(20230407, 20230531, 20230602)),
+             shape=21, col="black") +
+  theme_bw()+
+  geom_text(data=annot, aes(x = -Inf, y = -Inf, label = bottle),
+            hjust = -0.5, vjust = -7,col="black")
+```
+
+Time series of bacteria (median per bottle per sampling day)
+
+```{r, fig.height=14, fig.width=14}
+bac_sum %>%
+  ggplot(aes(day, density))+
+  geom_line() +
+  facet_grid(conditions ~ replicate, scales = "free")+
+  geom_point(data = bac_sum %>% dplyr::filter(timestamp %in% c(20230407, 20230531, 20230602)),
+             shape=21, col="red") +
+  theme_bw()+
+  geom_text(data=annot, aes(x = -Inf, y = -Inf, label = bottle),
+            hjust = -0.5, vjust = -7,col="black")
+```
+
+# Biomass calculation
+
+@Rainer: below I do biomass calculation for one timestamp (20221107) as an example. PLease do it for all timestamps
+
+The biomasses are calculated as follows (as in LEEF1):
+
+**Ellipsoid:**
+
+- Chlamydomonas
+- Small_cells
+- Coleps_irchel
+- Colpidium
+- Euplotes (height = width/3)
+- Loxocephalus
+- Paramecium_bursaria (height = width/1.5)
+- Paramecium_caudatum
+- Stylonychia (height = width/3)
+- Bacteria (**Note:** not done in this document. Done as in LEEF1)
+
+**Double-ellipsoid:**
+
+- Dividing Chlamydomonas (a=width/2, b=c=length/4)
+
+**area_abd x height** (height: 5.8 um, based on LEEF1 classifiers)
+
+- ChlamydomonasClumpsSmall
+- ChlamydomonasClumpsLarge
+
+```{r}
+densities20221107 <- densities  %>%
+  dplyr::filter(timestamp == 20221107) %>%
+  select(-biomass)
+
+densities20221107flowcam <- densities20221107 %>%
+  dplyr::filter(measurement=="flowcam")
+
+densities20221107video <- densities20221107 %>%
+  dplyr::filter(measurement%in% c("bemovi_mag_16","bemovi_mag_25","bemovi_mag_25_cropped"))
+```
+
+
+
+## Flowcam
+
+```{r}
+algae_traits <- arrow_read_table(table="flowcam_traits") %>%
+  dplyr::filter(timestamp == 20221107) %>% # done as an example for this timestamp
+  collect() %>%
+  dplyr::filter(!(species %in% c("Chlamydomonas","Small_cells") & area_abd >500))  # filter out individuals that are too big for these two classes
+
+flowcam_biomass_species <- c("Chlamydomonas", # species for which biomass is calculated
+                             "DividingChlamydomonas",
+                             "ChlamydomonasClumpsLarge",
+                             "ChlamydomonasClumpsSmall",
+                             "Small_cells")
+
+# Median Chlamy based on classifier data
+
+ChlamyMedianWidth <- 5.8
+
+# Biomass calculation of normal cases
+
+algae_traits_normalCases <- algae_traits %>%
+  dplyr::filter(species %in% c("Chlamydomonas", 
+                               "Small_cells")) %>%
+  mutate(height = width,
+         biomass=(4/3)*pi*(width/2)*(height/2)*(length/2), # calculate biomass 
+         biomass=biomass/10^12)  # change it from um3 to g, assuming water density
+
+# Special cases
+
+## 2 ellipsoids
+
+algae_traits_2ellipsoids <- algae_traits %>%
+  dplyr::filter(species %in% c("DividingChlamydomonas")) %>%
+  mutate(height = length/4,
+         biomass=2 * (4/3)*pi*(width/2)*height*(length/4), # calculate biomass 
+         biomass=biomass/10^12)  # change it from um3 to g, assuming water density
+
+## ChlamyClumps
+
+algae_traitsChlamyClumps <- algae_traits %>%
+  dplyr::filter(species %in% c("ChlamydomonasClumpsLarge",
+                               "ChlamydomonasClumpsSmall")) %>%
+  mutate(height=ChlamyMedianWidth,
+         biomass=area_abd*height, # calculate biomass 
+         biomass=biomass/10^12)  # change it from um3 to g, assuming water density
+
+
+## not biomass
+
+algae_traitsNotBiomass <- algae_traits %>%
+  dplyr::filter(!(species %in% flowcam_biomass_species)) %>%
+  mutate(height=as.numeric(NA),
+         biomass=as.numeric(NA)) 
+
+# join datasets again
+
+algae_traits <- rbind(algae_traits_normalCases,
+                      algae_traits_2ellipsoids,
+                      algae_traitsChlamyClumps,
+                      algae_traitsNotBiomass) # traits dataset finished here
+
+### biomass per timestamp per bottle per species
+
+Flowcam_biomasses <- algae_traits %>%
+  group_by(timestamp, bottle, species) %>%
+  summarize(biomass = sum(biomass, na.rm = T),
+            volume_imaged=mean(volume_imaged)) %>%
+  mutate(biomass = biomass/volume_imaged,
+         measurement = "flowcam",
+         biomass = ifelse(!(species %in% flowcam_biomass_species), NA, biomass)) %>% # add biomass=NA if not a species
+  select(-volume_imaged)
+
+densities20221107flowcam <- full_join(densities20221107flowcam,Flowcam_biomasses, by = c("timestamp", "bottle", "measurement", "species")) 
+
+densities20221107flowcam <- densities20221107flowcam %>%
+  mutate(biomass = case_when(measurement == "flowcam" & species %in% flowcam_biomass_species & is.na(biomass) ~ 0, # changing NA to 0 if is a species
+                             T ~ biomass))
+```
+
+## Video
+
+```{r}
+ciliate_traits_16 <- arrow_read_table(table="bemovi_16_morph") %>%
+  collect() %>%
+  dplyr::filter(timestamp == "20221107") # done as an example for this timestamp
+
+ciliate_traits_25 <- arrow_read_table(table="bemovi_25_morph") %>%
+  collect() %>%
+  dplyr::filter(timestamp == "20221107")  # done as an example for this timestamp
+
+ciliate_traits_25_cropped <- arrow_read_table(table="bemovi_25_morph_cropped") %>%
+  collect() %>%
+  dplyr::filter(timestamp == "20221107")  # done as an example for this timestamp
+
+
+video_biomass_species <- c("Coleps_irchel", # species for which biomass is calculated
+                           "Colpidium",
+                           "Stylonychia2",
+                           "Paramecium_caudatum",
+                           "Paramecium_bursaria",
+                           "Euplotes",
+                           "Loxocephallus")
+
+# 16x
+
+ciliate_traits_16_normalCases <- ciliate_traits_16 %>%
+  dplyr::filter(species %in% video_biomass_species) %>%
+  mutate(height = ifelse(species %in% c("Euplotes","Stylonychia2"), mean_minor/3,
+                         ifelse(species %in% c("Paramecium_bursaria"), mean_minor/1.5, mean_minor)),
+         biomass=(4/3)*pi*(mean_minor/2)*(height/2)*(mean_major/2), # calculate biomass 
+         biomass=biomass/10^12)  # change it from um3 to g, assuming water density
+
+ciliate_traits_16_NotBiomass <- ciliate_traits_16 %>%
+  dplyr::filter(!(species %in% video_biomass_species)) %>%
+  mutate(height=as.numeric(NA),
+         biomass=as.numeric(NA)) 
+
+# 25x
+
+ciliate_traits_25_normalCases <- ciliate_traits_25 %>%
+  dplyr::filter(species %in% video_biomass_species) %>%
+  mutate(height = ifelse(species %in% c("Euplotes","Stylonychia2"), mean_minor/3,
+                         ifelse(species %in% c("Paramecium_bursaria"), mean_minor/1.5, mean_minor)),
+         biomass=(4/3)*pi*(mean_minor/2)*(height/2)*(mean_major/2), # calculate biomass 
+         biomass=biomass/10^12)  # change it from um3 to g, assuming water density
+
+ciliate_traits_25_NotBiomass <- ciliate_traits_25 %>%
+  dplyr::filter(!(species %in% video_biomass_species)) %>%
+  mutate(height=as.numeric(NA),
+         biomass=as.numeric(NA)) 
+
+# 25x cropped
+
+ciliate_traits_25_cropped_normalCases <- ciliate_traits_25_cropped %>%
+  dplyr::filter(species %in% video_biomass_species) %>%
+  mutate(height = ifelse(species %in% c("Euplotes","Stylonychia2"), mean_minor/3,
+                         ifelse(species %in% c("Paramecium_bursaria"), mean_minor/1.5, mean_minor)),
+         biomass=(4/3)*pi*(mean_minor/2)*(height/2)*(mean_major/2), # calculate biomass 
+         biomass=biomass/10^12)  # change it from um3 to g, assuming water density
+
+ciliate_traits_25_cropped_NotBiomass <- ciliate_traits_25_cropped %>%
+  dplyr::filter(!(species %in% video_biomass_species)) %>%
+  mutate(height=as.numeric(NA),
+         biomass=as.numeric(NA)) 
+
+
+# join datasets again
+
+ciliate_traits_16 <- rbind(ciliate_traits_16_normalCases,
+                           ciliate_traits_16_NotBiomass) # traits dataset finished here
+
+ciliate_traits_25 <- rbind(ciliate_traits_25_normalCases,
+                           ciliate_traits_25_NotBiomass) # traits dataset finished here
+
+ciliate_traits_25_cropped <- rbind(ciliate_traits_25_cropped_normalCases,
+                                   ciliate_traits_25_cropped_NotBiomass) # traits dataset finished here
+
+
+### biomass per timestamp per bottle per species
+
+meas_16 <- "bemovi_mag_16"
+meas_25 <- "bemovi_mag_25"
+meas_25_cropped <- "bemovi_mag_25_cropped"
+
+extrapolation.factor_16 <- 10.044 
+extrapolation.factor_25 <- 23.367 
+cropping.factor_16 <- 1
+cropping.factor_25 <- 1
+cropping.factor_25_cropped <- 4
+
+ciliate_biomasses_16 <- ciliate_traits_16 %>%
+  group_by(timestamp, bottle, species) %>%
+  summarize(biomass = sum(biomass*n_frames, na.rm = T)/(3*125)) %>%
+  mutate(biomass = biomass*extrapolation.factor_16*extrapolation.factor_16,
+         measurement = meas_16,
+         biomass = ifelse(!(species %in% video_biomass_species), NA, biomass)) # add biomass=NA if not a species
+
+ciliate_biomasses_25 <- ciliate_traits_25 %>%
+  group_by(timestamp, bottle, species) %>%
+  summarize(biomass = sum(biomass*n_frames, na.rm = T)/(3*125)) %>%
+  mutate(biomass = biomass*extrapolation.factor_25*cropping.factor_25,
+         measurement = meas_25,
+         biomass = ifelse(!(species %in% video_biomass_species), NA, biomass)) # add biomass=NA if not a species
+
+ciliate_biomasses_25_cropped <- ciliate_traits_25_cropped %>%
+  group_by(timestamp, bottle, species) %>%
+  summarize(biomass = sum(biomass*n_frames, na.rm = T)/(3*125)) %>%
+  mutate(biomass = biomass*extrapolation.factor_25*cropping.factor_25_cropped,
+         measurement = meas_25_cropped,
+         biomass = ifelse(!(species %in% video_biomass_species), NA, biomass)) # add biomass=NA if not a species
+
+biomasses <- rbind(ciliate_biomasses_16,
+                   ciliate_biomasses_25,
+                   ciliate_biomasses_25_cropped)
+
+densities20221107video <- full_join(densities20221107video,biomasses, by = c("timestamp", "bottle", "measurement", "species")) 
+
+video_meas <- c(meas_16,meas_25,meas_25_cropped)
+
+densities20221107video <- densities20221107video %>%
+  mutate(biomass = case_when(measurement %in% video_meas & species %in% video_biomass_species & is.na(biomass) ~ 0, # changing NA to 0 if is a species
+                             T ~ biomass))
+```
+
+## Merge densities again
+
+I did the biomass per bottle per species per timestamp separately for the flowcam and the videos. Here I merge it again (note that this does not include the bacteria)
+
+```{r}
+densities20221107flowcam_video <- rbind(densities20221107flowcam,
+                                        densities20221107video)
+```
+
+I'm also saving this data.frame so that I can use it in the RRDReadyCheck
+
+```{r}
+biomass20221107_doubleCheck <- densities20221107flowcam_video %>%
+  dplyr::filter(species %in% c(video_biomass_species,flowcam_biomass_species)) %>% 
+  dplyr::filter(species!="Euplotes", species!="Loxocephallus") # not needed once traits data.frame updated
+
+write_csv(biomass20221107_doubleCheck,"biomass20221107_doubleCheck.csv")
+```
+
+
+# Trend in water chemistry data caused by sampling order
+
+In LEEF1 there was a sampling order effect: the latter a bottle was sampled on a given day the bigger the values were. I think it is somewhat likely that the is the case in LEEF2.
+
+```{r, warning=FALSE, message=FALSE}
+toc <- arrow_read_table("toc")%>% 
+  collect() %>%
+  left_join(arrow_read_table("experimental_design") %>% collect()) %>%
+  filter(!is.na(conc))
+
+colnames_toc <- colnames(toc)
+
+toc$day <- as.Date(as.character(toc$timestamp), "%Y%m%d") - min(as.Date(as.character(toc$timestamp), "%Y%m%d") )
+toc$day <- as.numeric(toc$day)
+
+toc$analysis_time2 <- as_datetime(toc$anaysis_time, format="%Y-%m-%d %H:%M") # wrong time zones, but doesnt matter 
+toc$analysis_time2 <- sapply(toc$analysis_time2, function(d){
+  paste0(unlist(strsplit(as.character(d), "-")), collapse = "")
+})
+
+toc <- toc %>%
+  dplyr::mutate(experiment_phase = case_when(temperature =="constant" ~ "constant",
+                                        day < 70 ~ "constant before increase",
+                                        day >= 70 & day < 154 ~ "increasing",
+                                        day >= 154 ~ "constant after increase"),
+                int = interaction(analysis_time2,experiment_phase))  %>%
+  arrange(timestamp)
+
+toc_list <- split(toc, 
+                  f = toc$int, 
+                  drop = T)
+
+toc_list <- mclapply(toc_list, function(df){
+  if(nrow(df) < 3*4) { # at least 3 bottles per type to do the detrending
+    df$concentration.detrended <- df$conc
+    return(df)
+  }
+  
+  df <- lapply(c("IC", "TC", "TN", "TOC"), function(Type){
+    
+    df2 <- df %>% filter(inj_type==Type)
+    m <- lm(conc ~ position, data = df2)
+    predict <- predict(m) - predict(m)[1]
+    df2$concentration.detrended <- df2$conc - predict
+    df2
+  })
+  
+  do.call("rbind",df)
+  
+}, mc.cores = detectCores()-2)
+
+toc <- do.call("rbind",toc_list)
+
+toc_before_after <- toc
+
+toc <- toc %>%
+  dplyr::mutate(conc = concentration.detrended) %>%
+  select(all_of(colnames_toc))
+```
+
+The next figure shows that change in the trend (blue=before, red=after). 
+
+```{r, fig.height=8, fig.width=15, message=FALSE, warning=FALSE}
+toc_before_after %>%
+  ggplot(aes(position, concentration.detrended))+
+  facet_wrap(experiment_phase~inj_type) +
+  geom_smooth(col="red", method = "lm")+
+  geom_smooth(aes(y=conc), method = "lm", col="blue")+
+  labs(x="Bottle sampling order")+
+  theme_bw()
+```
+
+In LEEF2 there was no strong sampling order effect (a bit on TC), but it's good to remove it anyway
+
+# Further changes/checks with flowcytometry data (as done in LEEF1 and which I don’t know the specifics)
+
+I (UD) do not know what is needed here or whether something is needed here at all.
