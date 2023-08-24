@@ -60,10 +60,12 @@ LEEF_1_biomass_bemovi_25_non_cropped <- function(
 
   extrapolation.factor_25 <- 23.367
 
+  # Make sure, that we have n_frames and not N_frames
+  names(ciliate_traits_25_non_cropped)[names(ciliate_traits_25_non_cropped) == "N_frames"] <- "n_frames"
 
   biomasses <- ciliate_traits_25_non_cropped %>%
     group_by(timestamp, bottle, species) %>%
-    summarize(biomass = sum(biomass, na.rm = T)) %>%
+    summarize(biomass = sum(biomass * n_frames, na.rm = T)) %>%
     mutate(
       biomass = biomass * extrapolation.factor_25,
       biomass = ifelse(
