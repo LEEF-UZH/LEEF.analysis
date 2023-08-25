@@ -13,7 +13,8 @@ format:
     toc-depth: 2
 ---
 
-Dependencies
+# Setup
+## Dependencies
 
 ```{r packages, message=FALSE}
 library(tidyverse)
@@ -26,7 +27,7 @@ options(dplyr.summarise.inform = FALSE)
 ```
 
 
-Data 
+## Data 
 
 ```{r data, warning=FALSE, message=FALSE}
 options(RRDarrow = "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.7-LEEF-2_20230813/")
@@ -44,8 +45,13 @@ conductivity <- arrow_read_conductivity() %>%
   arrange(day)
 ```
 
+# General remarks
+RMK: Flowcytometer is not yet regated, and only included as from the pipeline. Consequently, no data has been cleaned. Only the bimoass is calculated.
 
 # Check 1: are all sampling days present?
+
+
+RMK: The timestamps were not processed due to wrong formated yaml files. The errors are fixed, and the pipeline is processing thse at the moment.
 
 ## Check 1.1: densities/biomasses
 
@@ -391,6 +397,8 @@ NAs_con
 ```
 
 # Check 5: have the faulty videos been correctly excluded and the densities correctly recalculated?
+
+RMK: Videos identified as moviong frame below are added to the list of videos to be removed. The list is then used to remove the videos from the RRD. The densities are then recalculated.
 
 This part is here to check whether the faulty videos (e.g. moving background) have correctly been removed and that the densities have correctly been recalculated.
 

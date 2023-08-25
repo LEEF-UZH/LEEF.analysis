@@ -13,7 +13,7 @@ format:
     code_folding: hide  
     embed-resources: true
 params:
-  release: "v2.3.7-LEEF-2"
+  release: "v2.3.8-LEEF-2"
   repo: "https://github.com/LEEF-UZH/LEEF.parameter/"
   output_dir: "/Volumes/RRD.Reclassification_LEEF-2/"
   db: "LEEF-2.RRD.sqlite"
@@ -38,8 +38,41 @@ params:
   keep_flowcytometer:
     - bacteria
     - algae
-  bemovi_mag_16_moving_background: ~
-  bemovi_mag_25_moving_background: ~
+  bemovi_mag_16_moving_background: 
+    - 20230203_00176
+  bemovi_mag_25_moving_background:
+    - 20221125_00035
+    - 20221205_00091
+    - 20221209_00094
+    - 20221212_00091
+    - 20230120_00082
+    - 20230526_00079
+    - 20230529_00088
+    - 20230609_00088
+    - 20230612_00094
+    - 20230721_00061
+    - 20221121_00094
+    - 20221128_00094
+    - 20221128_00095
+    - 20221212_00082
+    - 20230109_00004
+    - 20230130_00067
+    - 20230203_00093
+    - 20230306_00091
+    - 20230327_00064
+    - 20230417_00058
+    - 20230417_00067
+    - 20230505_00028
+    - 20230522_00079
+    - 20230526_00064
+    - 20230605_00061
+    - 20230609_00004
+    - 20230609_00013
+    - 20230717_00094
+    - 20230719_00028
+    - 20230721_00049
+    - 20230724_00016
+    - 20230807_00064
   reclassify_flowcam: false
   reclassify_bemovi_16: false
   reclassify_bemovi_25: false
@@ -77,7 +110,13 @@ TODO: Chek for errors in pipeline and re-run these
 #| include: false
 #|
 if (!exists("params")) {
-    params <- rmarkdown::yaml_front_matter("~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning.qmd")$params
+    p <- "~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning.qmd"
+    exists <- file.exists("~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning.qmd")
+    if(!exists){
+        p <- "~/Documents_Local/git/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning.qmd"
+    }
+
+    params <- rmarkdown::yaml_front_matter(p)$params
 }
 
 
