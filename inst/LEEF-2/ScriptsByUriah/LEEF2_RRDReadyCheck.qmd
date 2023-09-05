@@ -21,6 +21,7 @@ library(tidyverse)
 library(patchwork)
 library(LEEF.analysis)
 library(lubridate)
+library(dplyr)
 
 set.seed(1)
 options(dplyr.summarise.inform = FALSE)
@@ -30,7 +31,7 @@ options(dplyr.summarise.inform = FALSE)
 ## Data 
 
 ```{r data, warning=FALSE, message=FALSE}
-options(RRDarrow = "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.7-LEEF-2_20230813/")
+options(RRDarrow = "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20230825/")
 
 densities <- arrow_read_density() %>%
   arrange(day)
@@ -57,8 +58,11 @@ RMK: The timestamps were not processed due to wrong formated yaml files. The err
 
 ```{r}
 # timestamps and days in RRD
-timestamps <- unique(densities$timestamp)
-days <- sort(unique(densities$day))
+meas <- densities |>
+  select(day, timestamp, measurement) |>
+  distinct()
+days <- unique(meas$day) 
+timestamps <- unique(meas$timestamps) 
 
 # timestamps and days that should be in RRD
 days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
@@ -67,6 +71,12 @@ timestamps2 <- gsub("-","",as.character(timestamps2))
 
 # timestamps and day that should be in RRD but are not
 idx <- which(!(days2 %in% days))
+idx_bemov_16 <- which(!(days2 %in% days))
+idx <- which(!(days2 %in% days))
+idx <- which(!(days2 %in% days))
+idx <- which(!(days2 %in% days))
+idx <- which(!(days2 %in% days))
+
 missing_days <- days2[idx]
 missing_timestamps <- timestamps2[idx]
 
@@ -75,8 +85,15 @@ rbind(missing_days=missing_days,
       missing_timestamps=missing_timestamps)
 ```
 
+More detailsed:
+
+```{r}
+densities |>
+  filter(timestamp %in% as.numeric(missing_timestamps)) 
+```
 ## Check 1.2: oxygen
 
+RMK: `20230517` is missing from the raw data. 
 ```{r}
 # timestamps and days in RRD
 timestamps_o2 <- unique(o2$timestamp)
