@@ -60,7 +60,7 @@ The following classes are to be removed everywhere:
 - Loxocephallus in flowcam
 - OtherCiliate
 
-Also, the following bottles are removed:
+Also, the following bottles are removed from flowcytometer:
 
 - b_103
 - b_102
@@ -545,6 +545,9 @@ This means that the particles are manually reclassified in the traits tables and
 
 @Rainer: below I recalculate the densities after a manual correction of a classification. Please overwrite the density and trait tables in the RRD accordingly (very similar to the faulty video exclusion section above).
 
+TODO
+
+
 ```{r}
 ### Bemovi 16
 morph16 <- arrow_read_table("bemovi_16_morph") %>%
@@ -930,25 +933,29 @@ The biomasses are calculated as follows (as in LEEF1):
 
 **Ellipsoid:**
 
-- Chlamydomonas
-- Small_cells
-- Coleps_irchel
-- Colpidium
-- Euplotes (height = width/3)
-- Loxocephalus
-- Paramecium_bursaria (height = width/1.5)
-- Paramecium_caudatum
-- Stylonychia (height = width/3)
-- Bacteria (**Note:** not done in this document. Done as in LEEF1)
+- [x] Chlamydomonas - flowcam
+- [x] Small_cells - flowcam
+
+- [x]] Coleps_irchel - bm16, bm25
+- [x] Colpidium - bm16, bm25
+- [x] Euplotes (height = width/3) - bm16, bm25
+- [x] Loxocephalus - bm16, bm25 - excluded
+- [x] Paramecium_bursaria (height = width/1.5) - bm16, bm25
+- [x] Paramecium_caudatum - bm16, bm25
+- [x] Stylonychia2 (height = width/3) -  - bm16, bm25
+
+- [ ] Bacteria (**Note:** not done in this document. Done as in LEEF1) - flowcytometer
 
 **Double-ellipsoid:**
 
-- Dividing Chlamydomonas (a=width/2, b=c=length/4)
+- [x] DividingChlamydomonas (a=width/2, b=c=length/4) - flowcam
 
 **area_abd x height** (height: 5.8 um, based on LEEF1 classifiers)
 
-- ChlamydomonasClumpsSmall
-- ChlamydomonasClumpsLarge
+- [x] ChlamydomonasClumpsSmall - flowcam
+- [x] ChlamydomonasClumpsLarge - flowcam
+
+RMK: should we also filter out `area_abd > 500` for clumps?
 
 ```{r}
 densities20221107 <- densities  %>%
@@ -1190,7 +1197,7 @@ write_csv(biomass20221107_doubleCheck,"biomass20221107_doubleCheck.csv")
 
 # Trend in water chemistry data caused by sampling order
 
-In LEEF1 there was a sampling order effect: the latter a bottle was sampled on a given day the bigger the values were. I think it is somewhat likely that the is the case in LEEF2.
+In LEEF1 there was a sampling order effect: the later a bottle was sampled on a given day the bigger the values were. I think it is somewhat likely that the is the case in LEEF2.
 
 ```{r, warning=FALSE, message=FALSE}
 toc <- arrow_read_table("toc")%>% 

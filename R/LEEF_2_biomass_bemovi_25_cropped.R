@@ -13,25 +13,33 @@ LEEF_2_biomass_bemovi_25_cropped <- function(
     ciliate_traits_25,
     ciliate_density_25
 ){
-
-  video_biomass_species <- c("Paramecium_bursaria","Paramecium_caudatum","Coleps_irchel", # species for which biomass is calculated
-                             "Stylonychia1","Stylonychia2","Colpidium","Euplotes",
-                             "Tetrahymena", "Loxocephallus",
-                             "Dexiostoma")
+  video_biomass_species <- c(
+    "Coleps_irchel", # species for which biomass is calculated
+    "Colpidium",
+    "Stylonychia2",
+    "Paramecium_caudatum",
+    "Paramecium_bursaria",
+    "Euplotes",
+    "Loxocephallus"
+  )
 
   # 25x cropped
 
   ciliate_traits_25_cropped_normalCases <- ciliate_traits_25 %>%
     dplyr::filter(species %in% video_biomass_species) %>%
-    mutate(height = ifelse(
-      species %in% c("Euplotes","Stylonychia1","Stylonychia2"),
-      mean_minor/3,
-      ifelse(
-        species %in% c("Paramecium_bursaria"),
-        mean_minor/1.5, mean_minor)),
-      biomass = (4/3) * pi * (mean_minor/2) * (height/2) * (mean_major/2), # calculate biomass
-      biomass = biomass/10^12  # change it from um3 to g, assuming water density
+    mutate(
+      height = ifelse(
+        species %in% c("Euplotes", "Stylonychia2"),
+        mean_minor / 3,
+        ifelse(
+          species %in% c("Paramecium_bursaria"),
+          mean_minor / 1.5, mean_minor
+        )
+      ),
+      biomass = (4 / 3) * pi * (mean_minor / 2) * (height / 2) * (mean_major / 2), # calculate biomass
+      biomass = biomass / 10^12 # change it from um3 to g, assuming water density
     )
+  
   ciliate_traits_25_cropped_NotBiomass <- ciliate_traits_25 %>%
     dplyr::filter(!(species %in% video_biomass_species)) %>%
     mutate(

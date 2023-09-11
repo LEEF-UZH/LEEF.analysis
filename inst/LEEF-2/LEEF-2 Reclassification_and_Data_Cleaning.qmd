@@ -25,16 +25,9 @@ params:
     - bacteria
   cores: 7
   remove_all:
-    - airbubbles
     - OtherCiliate
-    - Debris_and_other
-    - Cryptomonas
   remove_flowcam:
-    - Dexiostoma
-    - Coleps_irchel
-    - Colpidium
     - Loxocephallus
-    - Tetrahymena
   keep_flowcytometer:
     - bacteria
     - algae
@@ -244,6 +237,31 @@ if (!file.exists(out)) {
 rm(timestamps)
 ```
 
+### Flowcam remove species not needed
+
+```{r}
+#| label: flowcam_remove_species
+#| eval: !expr params$reclassify_flowcam
+#| 
+
+fns <- list.files(
+  file.path(params$output_dir, "flowcam"),
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  sample(fns),
+  function(fn){
+    x <- readRDS(fn) |>
+      dplyr::filter(!(species %in% c(params$remove_flowcam)))
+    unlink(fn)
+    saveRDS(x, file = fn)
+  },
+  mc.cores = params$cores,
+  mc.preschedule = FALSE
+)
+```
 
 
 

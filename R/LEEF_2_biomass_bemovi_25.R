@@ -14,10 +14,15 @@ LEEF_2_biomass_bemovi_25 <- function(
     ciliate_density_25
 ){
 
-  video_biomass_species <- c("Paramecium_bursaria","Paramecium_caudatum","Coleps_irchel", # species for which biomass is calculated
-                             "Stylonychia1","Stylonychia2","Colpidium","Euplotes",
-                             "Tetrahymena", "Loxocephallus",
-                             "Dexiostoma")
+  video_biomass_species <- c(
+    "Coleps_irchel", # species for which biomass is calculated
+    "Colpidium",
+    "Stylonychia2",
+    "Paramecium_caudatum",
+    "Paramecium_bursaria",
+    "Euplotes",
+    "Loxocephallus"
+  )
 
   # 25x
 
@@ -25,7 +30,7 @@ LEEF_2_biomass_bemovi_25 <- function(
     dplyr::filter(species %in% video_biomass_species) %>%
     mutate(
       height = ifelse(
-        species %in% c("Euplotes","Stylonychia1","Stylonychia2"),
+        species %in% c("Euplotes", "Stylonychia2"),
         mean_minor/3,
         ifelse(
           species %in% c("Paramecium_bursaria"),
