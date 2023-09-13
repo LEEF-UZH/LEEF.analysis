@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples
-LEEF_1_biomass_bemovi_16 <- function(
+LEEF_2_biomass_bemovi_16 <- function(
     ciliate_traits_16,
     ciliate_density_16
 ){
