@@ -6,11 +6,13 @@ format:
   html:
     theme: journal
     embed-resources: true
-    number-sections: true
+    number-sections: false
     code-fold: true
     toc: true
     toc-float: true
-    toc-depth: 4
+    toc-depth: 6
+params:
+  RRDarrow: "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20230921"
 ---
 
 # Setup
@@ -23,15 +25,21 @@ library(LEEF.analysis)
 library(lubridate)
 library(dplyr)
 
+fn <- "~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/ScriptsByUriah/LEEF2_RRDReadyCheck.qmd"
+if (!exists("params")) {
+    params <- rmarkdown::yaml_front_matter(fn)$params
+}
+
 set.seed(1)
 options(dplyr.summarise.inform = FALSE)
+
+options(RRDarrow = params$RRDarrow)
 ```
 
 
 ## Data 
 
 ```{r data, warning=FALSE, message=FALSE}
-options(RRDarrow = "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20230825/")
 
 densities <- arrow_read_density() %>%
   arrange(day)
@@ -76,6 +84,9 @@ rbind(missing_days=missing_days,
 ```
 
 ### bemovi_mag_16 missing
+
+The timestamps `20230602`, `20230616` and  `20230621` are missing because of a dataloss during processing.
+
 ```{r}
 msm  <- "bemovi_mag_16"
 # timestamps and days in RRD |> unique()=
@@ -98,6 +109,9 @@ rbind(missing_days=missing_days,
 ```
 
 ### bemovi_mag_25 missing
+
+The timestamps `20230602`, `20230616` and  `20230621` are missing because of a dataloss during processing.
+
 ```{r}
 msm  <- "bemovi_mag_25"
 # timestamps and days in RRD |> unique()=
@@ -120,6 +134,9 @@ rbind(missing_days=missing_days,
 ```
 
 ### bemovi_mag_25_cropped missing
+
+The timestamps `20230602`, `20230616` and  `20230621` are missing because of a dataloss during processing.
+
 ```{r}
 msm  <- "bemovi_mag_25_cropped"
 # timestamps and days in RRD |> unique()=
@@ -142,6 +159,9 @@ rbind(missing_days=missing_days,
 ```
 
 ### flowcam missing
+
+The timestamp `20230719` is missing because of a dataloss during processing.
+
 ```{r}
 msm  <- "flowcam"
 # timestamps and days in RRD |> unique()=
@@ -211,7 +231,6 @@ rbind(missing_days=missing_days,
 
 ### Check 1.2: oxygen
 
-RMK: `20230517` is missing from the raw data. 
 ```{r}
 # timestamps and days in RRD
 timestamps_o2 <- unique(o2$timestamp)
@@ -428,6 +447,15 @@ UD comment (20230816):
 ## Check 3.2: oxygen
 
 The following data.frame should be empty 
+RMK
+```
+ A tibble: 4 × 3
+  sensor bottle missing_timestamps
+   <int> <chr>               <dbl>
+1      4 b_08             20230510  MISSING IN RAW DATA
+2      4 b_10             20230804  MISSING IN RAW DATA
+3      9 b_29             20230320  MISSING IN RAW DATA
+```
 
 ```{r}
 dd_missing_timestamps_o2 <- o2 %>%
@@ -452,7 +480,7 @@ dd_missing_timestamps_wc <- water_chem %>%
   reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
   dplyr::filter( # Previously confirmed missing data is filtered out
     !(missing_timestamps %in% as.numeric(missing_timestamps_wc)), # these timestamps are missing completely (see check 1)
-  ) 
+  )
 
 dd_missing_timestamps_wc
 ```
@@ -498,6 +526,7 @@ NAs
 ## Check 4.2: oxygen
 
 The following data.frame should be empty
+
 
 ```{r}
 NAs_o2 <- o2 %>%

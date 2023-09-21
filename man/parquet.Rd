@@ -142,8 +142,8 @@ FUNCTION_DESCRIPTION
 
 FUNCTION_DESCRIPTION
 
-Essentially combined re-implementation of \code{\link[parquetize]{rds_to_parquet}} 
-and \code{\link[parquetize]{csv_to_parquet}} plus standardisation on small 
+Essentially combined re-implementation of \code{\link[parquetize]{rds_to_parquet}}
+and \code{\link[parquetize]{csv_to_parquet}} plus standardisation on small
 letter column names and timestamps as character.
 }
 \details{

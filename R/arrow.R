@@ -26,10 +26,6 @@ parquet_add_bemovi_16 <- function(
     unlink(file.path(path_to_parquet_root_dir, "bemovi_16_morph"), recursive = TRUE, force = TRUE)
 
 
-    rename <- function(object) {
-
-    }
-    
     pbapply::pblapply(
         fns,
         function(fn) {
@@ -45,7 +41,7 @@ parquet_add_bemovi_16 <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
-            object  <- readRDS(fn)
+            object <- readRDS(fn)
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -102,7 +98,7 @@ parquet_add_bemovi_25 <- function(
                 dir.create(path_to_parquet)
             }
 
-            object  <- readRDS(fn)
+            object <- readRDS(fn)
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -158,7 +154,7 @@ parquet_add_bemovi_25_cropped <- function(
                 dir.create(path_to_parquet)
             }
 
-            object  <- readRDS(fn)
+            object <- readRDS(fn)
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -213,7 +209,7 @@ parquet_add_flowcam <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
-            object  <- readRDS(fn)
+            object <- readRDS(fn)
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -267,7 +263,7 @@ parquet_add_flowcytometer <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
-            object  <- readRDS(fn)
+            object <- readRDS(fn)
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -315,7 +311,7 @@ parquet_add_o2 <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
-            object  <- readRDS(fn)
+            object <- readRDS(fn)
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -363,7 +359,7 @@ parquet_add_manualcount <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
-            object  <- read.csv(fn)
+            object <- read.csv(fn)
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -399,9 +395,9 @@ parquet_add_toc <- function(
     rename = FALSE) {
     unlink(file.path(path_to_parquet_root_dir, "toc"), recursive = TRUE, force = TRUE)
 
-            object  <- readRDS(fn)
-            object_to_parquet(
-                object = object,
+    object <- readRDS(fn)
+    object_to_parquet(
+        object = object,
         path_to_parquet = file.path(path_to_parquet_root_dir, "toc"),
         partition = "yes",
         partitioning = c("bottle"),
@@ -444,7 +440,7 @@ parquet_add_conductivity <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
-            object  <- read.csv(fn)
+            object <- read.csv(fn)
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -457,9 +453,9 @@ parquet_add_conductivity <- function(
 }
 
 #' FUNCTION_TITLE
-#' 
-#' Essentially combined re-implementation of \code{\link[parquetize]{rds_to_parquet}} 
-#' and \code{\link[parquetize]{csv_to_parquet}} plus standardisation on small 
+#'
+#' Essentially combined re-implementation of \code{\link[parquetize]{rds_to_parquet}}
+#' and \code{\link[parquetize]{csv_to_parquet}} plus standardisation on small
 #' letter column names and timestamps as character.
 #' @param object object to be written as a parquet file / arrow db
 #' @param path_to_parquet PARAM_DESCRIPTION, Default: NULL
@@ -485,7 +481,7 @@ object_to_parquet <- function(
     compression_level = NULL,
     ...) {
     if (missing(path_to_parquet)) {
-        stop("Missing required argument `path_to_parquet`!") 
+        stop("Missing required argument `path_to_parquet`!")
     }
 
     ### some data standardisation
