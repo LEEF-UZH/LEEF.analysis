@@ -9,9 +9,10 @@ LEEF_2_density_flowcytometer_archive(
   timestamps,
   output,
   use_H,
+  gates_coordinates,
   min_FSC.A = NULL,
   particles = NULL,
-  mc.cores = 1
+  mc.cores = 5
 )
 }
 \arguments{
@@ -23,14 +24,14 @@ LEEF_2_density_flowcytometer_archive(
 
 \item{use_H}{if \code{TRUE}, gating will be done using \code{height}, otherwie \code{area}}
 
+\item{gates_coordinates}{the \code{gates_coordinates}}
+
 \item{min_FSC.A}{numeric. If \code{!NULL}, \code{FSA.A <= min_FSC.A} will be fitered out by using
 a rectangular filter
 \code{flowCore::rectangleGate(filterId="filter_out_0", "FSC-A" = c(min_FSC.A, +Inf))}}
 
 \item{particles}{particle class to extract. Mainly \code{bacteria} or
 \code{algae}.}
-
-\item{mc.cores}{number of cores to be used. Defaults to 1}
 }
 \value{
 invisible \code{NULL}

@@ -4,17 +4,19 @@
 #' @param extracted_dir srchive directory of the extracted data
 #' @param output path to which the classified data will be saved as `rds`
 #' @param use_H if \code{TRUE}, gating will be done using \code{height}, otherwie \code{area}
+#' @param gates_coordinates the \code{gates_coordinates}
 #' @param min_FSC.A numeric. If \code{!NULL}, \code{FSA.A <= min_FSC.A} will be fitered out by using
 #'   a rectangular filter
 #'   \code{flowCore::rectangleGate(filterId="filter_out_0", "FSC-A" = c(min_FSC.A, +Inf))}
 #' @param particles particle class to extract. Mainly \code{bacteria} or
 #'   \code{algae}.
-#' @param mc.cores number of cores to be used. Defaults to 1
 #'
 #' @return invisible `NULL`
 #'
 #' @importFrom  parallel mclapply
 #' @importFrom yaml read_yaml write_yaml
+#' @importFrom pbapply pblapply
+#' @importFrom pbmcapply pbmclapply
 #' @export
 #'
 #' @md
@@ -26,9 +28,10 @@ LEEF_2_density_flowcytometer_archive <- function(
   timestamps,
   output,
   use_H,
+  gates_coordinates,
   min_FSC.A = NULL,
   particles = NULL,
-  mc.cores = 1
+  mc.cores = 5
 ){
   dir.create(
     output,
@@ -49,8 +52,9 @@ LEEF_2_density_flowcytometer_archive <- function(
   # do the stuff -------------------------------------------------------
 
   return(
+    # lapply(
+    pbapply::pblapply(
     # pbmcapply::pbmclapply(
-    lapply(
       timestamps,
       function(timestamp){
         datadir <- file.path(
@@ -60,12 +64,21 @@ LEEF_2_density_flowcytometer_archive <- function(
 
         dir.create(file.path(tmpinput, "flowcytometer"), recursive = TRUE, showWarnings = FALSE)
         file.copy(
-            list.files(datadir, full.names = TRUE),
-            file.path(tmpinput, "flowcytometer"),
-            recursive = TRUE
+          list.files(datadir, full.names = TRUE),
+          file.path(tmpinput, "flowcytometer"),
+          recursive = TRUE
         )
 
-        message("###############################################")
+        unlink(file.path(tmpinput, "flowcytometer", "gates_coordinates.csv"))
+        write.csv(gates_coordinates, file.path(tmpinput, "flowcytometer", "gates_coordinates.csv"))
+        unlink(file.path(tmpinput, "flowcytometer", "flowcytometer_gates.p_1.rds"))
+        LEEF.2.measurement.flowcytometer::calculate_gates(gates_coordinates = gates_coordinates) |>
+          saveRDS(file = file.path(tmpinput, "flowcytometer", "flowcytometer_gates.p_1.rds"))
+        unlink(file.path(tmpinput, "flowcytometer", "flowcytometer_gates.p_2.rds"))
+        LEEF.2.measurement.flowcytometer::calculate_gates(gates_coordinates = gates_coordinates) |>
+          saveRDS(file = file.path(tmpinput, "flowcytometer", "flowcytometer_gates.p_2.rds"))
+
+        message("\n###############################################")
         message("Gating timestamp ", timestamp, "...")
 
         suppressMessages(
@@ -77,6 +90,7 @@ LEEF_2_density_flowcytometer_archive <- function(
                   input = tmpinput,
                   output = tmpinput,
                   use_H = use_H,
+                  gates_coordinates = gates_coordinates,
                   min_FSC.A = min_FSC.A,
                   dens_back = TRUE
                 )
@@ -92,7 +106,6 @@ LEEF_2_density_flowcytometer_archive <- function(
 
           message("Saving timestamp ", timestamp, "...")
 
-          dir.create(file.path(output))
           saveRDS(
             object = densities,
             file = file.path(output, paste0("flowcytometer_density.", timestamp, ".rds"))
@@ -107,9 +120,9 @@ LEEF_2_density_flowcytometer_archive <- function(
         message("Done")
         message("###############################################")
         invisible(NULL)
-      }#,
-      #mc.preschedule = FALSE,
-      #mc.cores = mc.cores
+      }# ,
+      # mc.preschedule = FALSE,
+      # mc.cores = mc.cores
     )
   )
 }

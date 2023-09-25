@@ -69,22 +69,22 @@ params:
   reclassify_flowcam: false
   reclassify_bemovi_16: false
   reclassify_bemovi_25: false
-  regate_flowcytometer: false
+  regate_flowcytometer: true
   assemble_manualcount: false
-  assemble_o2: true
+  assemble_o2: false
   aassemble_conductivity: false
   assemble_toc: false
   rename_parquet: false
-  update_parquet_flowcam: false
-  update_parquet_bemovi_16: false
-  update_parquet_bemovi_25: false
-  update_parquet_flowcytometer: false
-  update_parquet_manualcount: false
+  update_parquet_flowcam: true
+  update_parquet_bemovi_16: true
+  update_parquet_bemovi_25: true
+  update_parquet_flowcytometer: true
+  update_parquet_manualcount: true
   update_parquet_o2: true
-  update_parquet_toc: false
-  update_parquet_conductivity: false
-  update_parquet_experimental_tables: false
-  update_all_parquet: false
+  update_parquet_toc: true
+  update_parquet_conductivity: true
+  update_parquet_experimental_tables: true
+  update_all_parquet: true
   diagnostic_report: false
 
 ---
@@ -111,8 +111,6 @@ if (!exists("params")) {
 
     params <- rmarkdown::yaml_front_matter(p)$params
 }
-
-
 
 knitr::opts_chunk$set(
     echo = TRUE,
@@ -565,12 +563,9 @@ toc()
 
 ## TODO Regate Flowcytometer
 
-TODO Not implemented yet - needs a bit of thinking.
-
-TODO Biomass is missing from flowcytometer
+### Flowcytometer Density
 ```{r}
-#| label: regate_flowcytometer
-#| eval: false
+#| label: density_flowcytometer
 #|
 
 ## Select all timestamps
@@ -590,124 +585,31 @@ LEEF_2_density_flowcytometer_archive(
     timestamps = timestamps,
     output = file.path(params$output_dir, "flowcytometer"),
     use_H = FALSE,
+    gates_coordinates = read.csv( file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv") ),
     min_FSC.A = params$min_FSC.A,
-    particles = params$flowcytometer_particles,
-    mc.cores = 1 # params$cores
+    particles = params$flowcytometer_particles
 )
 
-## Biomass
-# TODO possibly can stay
-biomass_per_bottle <- extract_traits_flowcytometer_archive(
+```
+
+### Flowcytometer Traits and Biomass
+ ```{r}
+#| label: traits_biomass_flowcytometer
+#|
+## Extract traits and Biomass
+biomass_per_bottle <- LEEF_2_extract_traits_flowcytometer_archive(
     extracted_dir = params$extracted_dir,
-    gates_coordinates = read.csv(gates_coordinates),
+    gates_coordinates = read.csv( file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv") ),
     particles = params$flowcytometer_particles,
     use_H = FALSE,
     min_FSC.A = params$min_FSC.A,
     timestamps = timestamps,
-    output = file.path(params$output_dir, "flowcytometer_traits"),
-    length_slope = read.csv(conv_FSCA_length)$slope,
-    length_intercept = read.csv(conv_FSCA_length)$intercept,
-    mc.cores = params$cores
+    output = file.path(params$output_dir, "flowcytometer"),
+    length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
+    length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept
 )
 
-## Add biomass to density
-
-pbmcapply::pbmclapply(
-    names(biomass_per_bottle),
-    function(timestamp) {
-        dens_fn <- file.path(params$output_dir, "flowcytometer", paste0("flowcytometer_density.", timestamp, ".rds"))
-        merge(
-            readRDS(dens_fn),
-            biomass_per_bottle[[timestamp]],
-            by = c("sample", "species")
-        ) |>
-            saveRDS(file = dens_fn)
-    }
-)
-
-rm(gates_coordinates, metadata_flowcytometer, gates_coordinates_EAWAG_samples, conv_FSCA_length)
-```
-
-## Assemble Flowcytometer
-```{r}
-#| label: assemble_flowcytometer
-#| eval: !expr params$regate_flowcytometer
-#|
-
-### traits
-
-fns_traits <- list.files(
-    path = params$extracted_dir,
-    pattern = "^LEEF\\.flowcytometer\\.flowcytometer\\.",
-    recursive = FALSE,
-    full.names = TRUE
-)
-
-from_algae <- file.path(fns_traits, "flowcytometer_traits_algae.rds")
-from_bacteria <- file.path(fns_traits, "flowcytometer_traits_bacteria.rds")
-
-
-dp <- file.path(params$output_dir, "flowcytometer_traits")
-dir.create(dp, showWarnings = FALSE, recursive = TRUE)
-
-to_algae <- file.path(
-    dp,
-    paste0(
-        "flowcytometer_traits_algae.",
-        from_algae |>
-            gsub(pattern = file.path(params$extracted_dir, "LEEF.flowcytometer.flowcytometer."), replacement = "") |>
-            gsub(pattern = "/flowcytometer_traits_algae.rds", replacement = "") |>
-            gsub(pattern = "/flowcytometer_traits_bacteria.rds", replacement = ""),
-        ".rds"
-    )
-)
-
-to_bacteria <- file.path(
-    dp,
-    paste0(
-        "flowcytometer_traits_bacteria.",
-        from_bacteria |>
-            gsub(pattern = file.path(params$extracted_dir, "LEEF.flowcytometer.flowcytometer."), replacement = "") |>
-            gsub(pattern = "/flowcytometer_traits_algae.rds", replacement = "") |>
-            gsub(pattern = "/flowcytometer_traits_bacteria.rds", replacement = ""),
-        ".rds"
-    )
-)
-
-file.copy(from = c(from_algae, from_bacteria), to = c(to_algae, to_bacteria))
-
-### Density
-
-fns_density <- list.files(
-    path = params$extracted_dir,
-    pattern = "^LEEF\\.flowcytometer\\.flowcytometer\\.",
-    recursive = FALSE,
-    full.names = TRUE
-) |>
-    file.path("flowcytometer_density.csv")
-
-dp <- file.path(params$output_dir, "flowcytometer")
-dir.create(dp, showWarnings = FALSE, recursive = TRUE)
-
-to <- file.path(
-    dp,
-    paste0(
-        "flowcytometer_density.",
-        fns_density |>
-            gsub(pattern = file.path(params$extracted_dir, "LEEF.flowcytometer.flowcytometer."), replacement = "") |>
-            gsub(pattern = "/flowcytometer_density.csv", replacement = ""),
-        ".rds"
-    )
-)
-
-for (i in 1:length(fns_density)) {
-    read.csv(fns_density[i]) |>
-        saveRDS(file = to[i])
-}
-
-
-rm(dp, fns_traits, fns_density)
-
+rm(timestamps)
 ```
 
 ## Assemble TOC
@@ -895,20 +797,14 @@ list.files(
 ```{r}
 #| label: add_flowcytometer
 #| eval: !expr params$update_all_parquet | params$update_parquet_flowcytometer
-#| 
+#|
 
 ## flowcytometer
-c(
-    list.files(
-        file.path(params$output_dir, "flowcytometer"),
-        pattern = "\\.rds$",
-        full.names = TRUE
-    ),
-    list.files(
-        file.path(params$output_dir, "flowcytometer_traits"),
-        pattern = "\\.rds$",
-        full.names = TRUE
-    )
+
+list.files(
+    file.path(params$output_dir, "flowcytometer"),
+    pattern = "\\.rds$",
+    full.names = TRUE
 ) |>
     parquet_add_flowcytometer(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
 ```
