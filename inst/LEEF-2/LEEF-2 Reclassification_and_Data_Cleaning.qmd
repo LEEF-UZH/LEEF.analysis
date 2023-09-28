@@ -70,7 +70,7 @@ params:
   reclassify_bemovi_16: false
   reclassify_bemovi_25: false
   regate_flowcytometer: true
-  assemble_manualcount: false
+  assemble_manualcount: true
   assemble_o2: false
   aassemble_conductivity: false
   assemble_toc: false
@@ -182,18 +182,15 @@ if (!file.exists(params$extracted_dir)) {
     )
 }
 
-if (!params$rename_parquet) {
 parquet_dir <- file.path(
     params$output_dir,
     paste0("parquet_", tag)
 )
-} else {
-parquet_dir <- file.path(
+parquet_dir_renamed <- file.path(
     params$output_dir,
-    paste0("parquet_renamed_", tag)
+    paste0("parquet_", tag, "_renamed")
 )
 
-}
 
 
 ```
@@ -566,6 +563,7 @@ toc()
 ### Flowcytometer Density
 ```{r}
 #| label: density_flowcytometer
+#| eval: !expr params$regate_flowcytometer
 #|
 
 ## Select all timestamps
@@ -587,7 +585,8 @@ LEEF_2_density_flowcytometer_archive(
     use_H = FALSE,
     gates_coordinates = read.csv( file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv") ),
     min_FSC.A = params$min_FSC.A,
-    particles = params$flowcytometer_particles
+    particles = params$flowcytometer_particles,
+    mc.cores = 10 # params$cores
 )
 
 ```
@@ -595,9 +594,11 @@ LEEF_2_density_flowcytometer_archive(
 ### Flowcytometer Traits and Biomass
  ```{r}
 #| label: traits_biomass_flowcytometer
+#| eval: !expr params$regate_flowcytometer
 #|
+
 ## Extract traits and Biomass
-biomass_per_bottle <- LEEF_2_extract_traits_flowcytometer_archive(
+LEEF_2_extract_traits_flowcytometer_archive(
     extracted_dir = params$extracted_dir,
     gates_coordinates = read.csv( file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv") ),
     particles = params$flowcytometer_particles,
@@ -606,7 +607,8 @@ biomass_per_bottle <- LEEF_2_extract_traits_flowcytometer_archive(
     timestamps = timestamps,
     output = file.path(params$output_dir, "flowcytometer"),
     length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
-    length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept
+    length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept,
+    mc.cores = 5 # params$cores
 )
 
 rm(timestamps)
@@ -715,7 +717,7 @@ fns_mc <- list.files(
 dp <- file.path(params$output_dir, "manualcount")
 dir.create(dp, showWarnings = FALSE, recursive = TRUE)
 
-file.path(
+fns_to <- file.path(
     dp,
     paste0(
         "manualcount.",
@@ -724,10 +726,16 @@ file.path(
             gsub(pattern = "/manualcount_density.csv", replacement = ""),
         ".csv"
     )
-) |>
-    file.copy(from = fns_mc)
+) 
 
-rm(dp, fns_mc)
+for (i in 1:length(fns_mc)) {
+  read.csv(fns_mc[i]) |>
+    select(1:5) |>
+    write.csv(file = fns_to[i], row.names = FALSE)
+}
+
+
+rm(dp, fns_mc, fns_to)
 ```
 
 # Create parquet
@@ -736,9 +744,8 @@ rm(dp, fns_mc)
 #| label: create_parquet
 #| eval: true
 #| 
-
-
 dir.create(parquet_dir, showWarnings = FALSE, recursive = TRUE)
+dir.create(parquet_dir_renamed, showWarnings = FALSE, recursive = TRUE)
 ```
 
 ```{r}
@@ -747,12 +754,13 @@ dir.create(parquet_dir, showWarnings = FALSE, recursive = TRUE)
 #| 
 
 ## bemovi mag 16
-list.files(
+fns <- list.files(
     file.path(params$output_dir, "bemovi_mag_16"),
     pattern = "\\.rds$",
     full.names = TRUE
-) |>
-    parquet_add_bemovi_16(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
+)
+parquet_add_bemovi_16(fns = fns, path_to_parquet_root_dir = parquet_dir, rename = FALSE)
+parquet_add_bemovi_16(fns = fns, path_to_parquet_root_dir = parquet_dir_renamed, rename = TRUE)
 
 ```
 
@@ -762,21 +770,25 @@ list.files(
 #| 
 
 ## bemovi mag 25
-list.files(
+fns <- list.files(
     file.path(params$output_dir, "bemovi_mag_25"),
     pattern = "\\.rds$",
     full.names = TRUE
 ) |>
-    grep(pattern = "_cropped\\.", value = TRUE, invert = TRUE) |>
-    parquet_add_bemovi_25(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
+    grep(pattern = "_cropped\\.", value = TRUE, invert = TRUE)
 
-list.files(
+parquet_add_bemovi_25(fns = fns, path_to_parquet_root_dir = parquet_dir, rename = FALSE)
+parquet_add_bemovi_25(fns = fns, path_to_parquet_root_dir = parquet_dir_renamed, rename = TRUE)
+
+fns <- list.files(
     file.path(params$output_dir, "bemovi_mag_25"),
     pattern = "\\.rds$",
     full.names = TRUE
 ) |>
-    grep(pattern = "_cropped\\.", value = TRUE) |>
-    parquet_add_bemovi_25_cropped(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
+    grep(pattern = "_cropped\\.", value = TRUE)
+
+parquet_add_bemovi_25_cropped(fns = fns, path_to_parquet_root_dir = parquet_dir, rename = FALSE)
+parquet_add_bemovi_25_cropped(fns = fns, path_to_parquet_root_dir = parquet_dir_renamed, rename = TRUE)
 ```
 
 ```{r}
@@ -785,12 +797,13 @@ list.files(
 #| 
 
 ## flowcam
-list.files(
+fns <- list.files(
     file.path(params$output_dir, "flowcam"),
     pattern = "\\.rds$",
     full.names = TRUE
-) |>
-    parquet_add_flowcam(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
+)
+parquet_add_flowcam(fns = fns, path_to_parquet_root_dir = parquet_dir, rename = FALSE)me = FALSE)
+parquet_add_flowcam(fns = fns, path_to_parquet_root_dir = parquet_dir_renamed, rename = TRUE)ame = TRUE)
 
 ```
 
@@ -801,12 +814,13 @@ list.files(
 
 ## flowcytometer
 
-list.files(
+fns <- list.files(
     file.path(params$output_dir, "flowcytometer"),
     pattern = "\\.rds$",
     full.names = TRUE
-) |>
-    parquet_add_flowcytometer(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
+)
+parquet_add_flowcytometer(fns = fns, path_to_parquet_root_dir = parquet_dir, rename = FALSE)
+parquet_add_flowcytometer(path_to_parquet_root_dir = parquet_dir_renamed, rename = TRUE)ame = TRUE)
 ```
 
 ```{r}
@@ -815,14 +829,13 @@ list.files(
 #| 
 
 ## manualcount
-list.files(
+fns <- list.files(
     path = file.path(params$output_dir, "manualcount"),
     recursive = FALSE,
     full.names = TRUE
-) |>
-    parquet_add_manualcount(path_to_parquet_root_dir = parquet_dir, rename = params$rename_parquet)
-
-
+)
+parquet_add_manualcount(fns = fns, path_to_parquet_root_dir = parquet_dir, rename = FALSE)
+parquet_add_manualcount(fns = fns, path_to_parquet_root_dir = parquet_dir_renamed, rename = TRUE)
 ```
 
 ```{r}

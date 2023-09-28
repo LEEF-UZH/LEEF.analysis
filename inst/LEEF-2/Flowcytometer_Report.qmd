@@ -9,20 +9,40 @@ format:
 execute:
   cache: false
 params:
-  timestamp: "20230106"
-  extracted_base_dir: "~/Duck/LEEFSwift3/LEEF_2.archived.data/LEEF/3.archived.data/extracted/"
+  timestamp: "20221107"
+  extracted_base_dir: "/Volumes/RRD.Reclassification_LEEF-2/flowcytometer/fsa_gated"
 ---
+
+## Render from R
+The report will be generated in the current working directory which has to be the root folder of the package.
+
+```{r}
+#| eval: false
+#| 
+
+timestamp <- "20230419"
+quarto::quarto_render( 
+  input = "inst/LEEF-2/Flowcytometer_Report.qmd", 
+  execute_params = list(timestamp = timestamp)
+)
+file.copy(
+  "./inst/LEEF-2/Flowcytometer_Report.html",
+  paste0("./inst/LEEF-2/Flowcytometer_Report.", timestamp, ".html")
+)
+```
 
 ```{r}
 #| label: setup
-
+#| 
+if (!exists("params")){
+  params <- rmarkdown::yaml_front_matter('~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/Flowcytometer_Report.qmd')$params
+}
 
 library(LEEF.analysis)
 library(flowViz)
 library(ggcyto)
 library(ggplot2)
 ```
-
 
 ## Read Data
 ```{r}

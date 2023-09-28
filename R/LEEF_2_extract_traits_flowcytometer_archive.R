@@ -41,7 +41,8 @@ LEEF_2_extract_traits_flowcytometer_archive <- function(
     use_H,
     min_FSC.A,
     log10_all = FALSE,
-    wellid_keyword = "$WELLID") {
+    wellid_keyword = "$WELLID",
+    mc.cores = 1) {
     dir.create(
         output,
         showWarnings = FALSE,
@@ -51,8 +52,8 @@ LEEF_2_extract_traits_flowcytometer_archive <- function(
 
     # do the stuff -------------------------------------------------------
 
-    biomass_per_bottle <- pbapply::pblapply(
-    # biomass_per_bottle <- pbmcapply::pbmclapply(
+    # biomass_per_bottle <- pbapply::pblapply(
+    biomass_per_bottle <- pbmcapply::pbmclapply(
         timestamps,
         function(timestamp) {
             biomass_per_bottle <- dplyr::tibble()
@@ -134,7 +135,7 @@ LEEF_2_extract_traits_flowcytometer_archive <- function(
                 dens <- readRDS(dens_fn)
 
                 for (p in particles) {
-                                message("\nExtracting ", p, "...")
+                    message("\nExtracting ", p, "...")
 
                     traits[[p]]$species <- p
                     traits[[p]]$length <- as.numeric(NA)
@@ -184,11 +185,9 @@ LEEF_2_extract_traits_flowcytometer_archive <- function(
                     )
 
                     rm(bm)
-                                                    message("Done\n")
-
+                    message("Done\n")
                 }
 
-                browser()
                 unlink(dens_fn)
                 saveRDS(
                     object = biomass_per_bottle,
@@ -205,9 +204,9 @@ LEEF_2_extract_traits_flowcytometer_archive <- function(
 
 
             return(biomass_per_bottle)
-        }# ,
-        # mc.preschedule = FALSE,
-        # mc.cores = mc.cores
+        },
+        mc.preschedule = FALSE,
+        mc.cores = mc.cores
     )
     names(biomass_per_bottle) <- timestamps
     invisible(biomass_per_bottle)

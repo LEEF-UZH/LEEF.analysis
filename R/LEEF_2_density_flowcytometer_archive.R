@@ -21,46 +21,35 @@
 #'
 #' @md
 #' @examples
-#'
-#'
 LEEF_2_density_flowcytometer_archive <- function(
-  extracted_dir,
-  timestamps,
-  output,
-  use_H,
-  gates_coordinates,
-  min_FSC.A = NULL,
-  particles = NULL,
-  mc.cores = 5
-){
+    extracted_dir,
+    timestamps,
+    output,
+    use_H,
+    gates_coordinates,
+    min_FSC.A = NULL,
+    particles = NULL,
+    mc.cores = 1) {
   dir.create(
     output,
     showWarnings = FALSE,
     recursive = TRUE
   )
 
-  tmpinput <- tempfile()
-  dir.create(
-    tmpinput,
-    recursive = TRUE, 
-    showWarnings = FALSE
-  )
-
-  on.exit(unlink(tmpinput))
-
-
   # do the stuff -------------------------------------------------------
 
   return(
     # lapply(
-    pbapply::pblapply(
-    # pbmcapply::pbmclapply(
+    # pbapply::pblapply(
+    pbmcapply::pbmclapply(
       timestamps,
-      function(timestamp){
+      function(timestamp) {
         datadir <- file.path(
           extracted_dir,
           paste0("LEEF.flowcytometer.flowcytometer.", as.character(timestamp))
         )
+
+        tmpinput <- tempfile()
 
         dir.create(file.path(tmpinput, "flowcytometer"), recursive = TRUE, showWarnings = FALSE)
         file.copy(
@@ -81,27 +70,47 @@ LEEF_2_density_flowcytometer_archive <- function(
         message("\n###############################################")
         message("Gating timestamp ", timestamp, "...")
 
-        suppressMessages(
-          {
-            densities <- NULL
-            try(
-              expr = {
-                densities <- LEEF.2.measurement.flowcytometer::extractor_flowcytometer_density(
-                  input = tmpinput,
-                  output = tmpinput,
-                  use_H = use_H,
-                  gates_coordinates = gates_coordinates,
-                  min_FSC.A = min_FSC.A,
-                  dens_back = TRUE
-                )
-              }
-            )
-          }
+        suppressMessages({
+          densities <- NULL
+          try(
+            expr = {
+              densities <- LEEF.2.measurement.flowcytometer::extractor_flowcytometer_density(
+                input = tmpinput,
+                output = tmpinput,
+                use_H = use_H,
+                gates_coordinates = gates_coordinates,
+                min_FSC.A = min_FSC.A,
+                dens_back = TRUE
+              )
+            }
+          )
+        })
+
+        dir.create(
+          fsa_dir <- file.path(output, "fsa_gated_density", paste0("LEEF.flowcytometer.flowcytometer.", timestamp)),
+          recursive = TRUE,
+          showWarnings = FALSE
+        )
+        file.copy(
+          list.files(file.path(tmpinput, "flowcytometer"), "flowcytometer_fsa_ungated.", full.names = TRUE),
+          fsa_dir,
+          recursive = FALSE
+        )
+        file.copy(
+          list.files(file.path(tmpinput, "flowcytometer"), "flowcytometer_gates.", full.names = TRUE),
+          fsa_dir,
+          recursive = FALSE
         )
 
+        unlink(tmpinput, recursive = TRUE, force = TRUE)
+        if (dir.exists(tmpinput)) {
+          stop("Temporary directory ", tmpinput, " still exists!")
+        }
+
+
         if (!is.null(densities)) {
-          if (!is.null(particles)){
-            densities <- densities[densities$species %in% particles,]
+          if (!is.null(particles)) {
+            densities <- densities[densities$species %in% particles, ]
           }
 
           message("Saving timestamp ", timestamp, "...")
@@ -110,8 +119,6 @@ LEEF_2_density_flowcytometer_archive <- function(
             object = densities,
             file = file.path(output, paste0("flowcytometer_density.", timestamp, ".rds"))
           )
-          unlink(file.path(tmpinput, "flowcytometer"))
-
         } else {
           message("ERROR in extracting density in timestamp ", timestamp)
         }
@@ -120,9 +127,9 @@ LEEF_2_density_flowcytometer_archive <- function(
         message("Done")
         message("###############################################")
         invisible(NULL)
-      }# ,
-      # mc.preschedule = FALSE,
-      # mc.cores = mc.cores
+      },
+      mc.preschedule = FALSE,
+      mc.cores = mc.cores
     )
   )
 }

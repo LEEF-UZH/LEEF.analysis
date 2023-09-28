@@ -1,14 +1,13 @@
-
 #' @title FUNCTION_TITLE
 #' @description FUNCTION_DESCRIPTION
 #' @param x PARAM_DESCRIPTION
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples 
+#' @examples
 #' \dontrun{
-#' if(interactive()){
-#'  #EXAMPLE1
-#'  }
+#' if (interactive()) {
+#'   # EXAMPLE1
+#' }
 #' }
 #' @rdname LEEF_2_rename_species
 #' @export
@@ -65,19 +64,19 @@ LEEF_2_rename_species <- function(
 
 #' @title FUNCTION_TITLE
 #' @description FUNCTION_DESCRIPTION
-#' @param x PARAM_DESCRIPTION
+#' @param object PARAM_DESCRIPTION
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples 
+#' @examples
 #' \dontrun{
-#' if(interactive()){
-#'  #EXAMPLE1
-#'  }
+#' if (interactive()) {
+#'   # EXAMPLE1
+#' }
 #' }
 #' @rdname LEEF_2_rename_species_prob_columns
-#' @export 
+#' @export
 LEEF_2_rename_species_prob_columns <- function(
-    x) {
+    object) {
   species_prob_columns <- list(
     c("airbubbles_prob", "Air_bubbles_prob"),
     c("chlamydomonas_prob", "Chlamydomonas_reinhardtii_prob"),
@@ -109,15 +108,19 @@ LEEF_2_rename_species_prob_columns <- function(
     c("stylonychia2_prob", "Stylonychia_sp_prob"),
     c("tetrahymena_prob", "Tetrahymena_thermophila_prob")
   )
+
+  nms <- names(object) |>
+    tolower()
   
   for (i in 1:length(species_prob_columns)) {
-    if (species_prob_columns[[i]][1] %in% colnames(x)) {
-      trn <- (names(x) == species_prob_columns[[i]][1])
-      names(x)[trn] <- species_prob_columns[[i]][2]
+    toRename <- nms %in% species_prob_columns[[i]][1]
+    if (any(toRename)) {
+      nms[toRename] <- species_prob_columns[[i]][2]
     }
   }
+  names(object) <- nms
 
-  return(x)
+  return(object)
 }
 
 
@@ -126,11 +129,11 @@ LEEF_2_rename_species_prob_columns <- function(
 #' @param object PARAM_DESCRIPTION
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @examples 
+#' @examples
 #' \dontrun{
-#' if(interactive()){
-#'  #EXAMPLE1
-#'  }
+#' if (interactive()) {
+#'   # EXAMPLE1
+#' }
 #' }
 #' @rdname LEEF_2_rename_composition
 #' @export
@@ -148,4 +151,38 @@ LEEF_2_rename_composition <- function(object) {
       Paramecium_caudatum = Paramecium_caudatum,
       Stylonychia_sp = Stylonychia2
     )
+}
+
+
+#' @title FUNCTION_TITLE
+#' @description FUNCTION_DESCRIPTION
+#' @param x PARAM_DESCRIPTION
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if (interactive()) {
+#'   # EXAMPLE1
+#' }
+#' }
+#' @rdname LEEF_2_rename_toc
+#' @export
+
+LEEF_2_rename_toc <- function(x) {
+  if (!"inj_type" %in% colnames(x)) {
+    return(x)
+  } else {
+    inj_types <- list(
+      c("IC", "DIC"),
+      c("TC", "DC"),
+      c("TOC", "DOC"),
+      c("TN", "DN")
+    )
+    for (i in 1:length(inj_types)) {
+      trn <- x$inj_type == inj_types[[i]][1]
+      x$inj_type[trn] <- inj_types[[i]][2]
+    }
+
+    return(x)
+  }
 }

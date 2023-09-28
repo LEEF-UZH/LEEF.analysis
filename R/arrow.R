@@ -41,7 +41,15 @@ parquet_add_bemovi_16 <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
+
             object <- readRDS(fn)
+            if (rename) {
+                object <- LEEF_2_rename_species(object)
+                object <- LEEF_2_rename_species_prob_columns(object)
+            } else {
+                names(object) <- tolower(names(object))
+            }
+
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -99,6 +107,13 @@ parquet_add_bemovi_25 <- function(
             }
 
             object <- readRDS(fn)
+            if (rename) {
+                object <- LEEF_2_rename_species(object)
+                object <- LEEF_2_rename_species_prob_columns(object)
+            } else {
+                names(object) <- tolower(names(object))
+            }
+
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -155,6 +170,13 @@ parquet_add_bemovi_25_cropped <- function(
             }
 
             object <- readRDS(fn)
+            if (rename) {
+                object <- LEEF_2_rename_species(object)
+                object <- LEEF_2_rename_species_prob_columns(object)
+            } else {
+                names(object) <- tolower(names(object))
+            }
+
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -209,7 +231,15 @@ parquet_add_flowcam <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
+
             object <- readRDS(fn)
+            if (rename) {
+                object <- LEEF_2_rename_species(object)
+                object <- LEEF_2_rename_species_prob_columns(object)
+            } else {
+                names(object) <- tolower(names(object))
+            }
+
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -263,7 +293,15 @@ parquet_add_flowcytometer <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
+
             object <- readRDS(fn)
+            if (rename) {
+                object <- LEEF_2_rename_species(object)
+                object <- LEEF_2_rename_species_prob_columns(object)
+            } else {
+                names(object) <- tolower(names(object))
+            }
+
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
@@ -311,12 +349,17 @@ parquet_add_o2 <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
+
             object <- readRDS(fn)
+            if (rename) {
+            } else {
+                names(object) <- tolower(names(object))
+            }
+
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
-                partition = "yes",
-                partitioning = c("timestamp"),
+                partition = "no",
                 compression = compression
             )
         }
@@ -349,25 +392,32 @@ parquet_add_manualcount <- function(
     rename = FALSE) {
     unlink(file.path(path_to_parquet_root_dir, "manualcount"), recursive = TRUE, force = TRUE)
 
-    pbapply::pblapply(
+    object <- lapply(
         fns,
-        function(fn) {
-            message("\nadding ", basename(fn), " ...\n")
+        read.csv
+    ) |>
+        do.call(what = rbind)
 
-            path_to_parquet <- file.path(path_to_parquet_root_dir, "manualcount")
+    if (rename) {
+        object <- LEEF_2_rename_species(object)
+        object <- LEEF_2_rename_species_prob_columns(object)
+    } else {
+        names(object) <- tolower(names(object))
+    }
 
-            if (!dir.exists(path_to_parquet)) {
-                dir.create(path_to_parquet)
-            }
-            object <- read.csv(fn)
-            object_to_parquet(
-                object = object,
-                path_to_parquet = path_to_parquet,
-                partition = "yes",
-                partitioning = c("timestamp"),
-                compression = compression
-            )
-        }
+    message("\nadding Manualcount ...\n")
+
+    path_to_parquet <- file.path(path_to_parquet_root_dir, "manualcount", "")
+
+    if (!dir.exists(path_to_parquet)) {
+        dir.create(path_to_parquet, recursive = TRUE)
+    }
+
+    object_to_parquet(
+        object = object,
+        path_to_parquet = path_to_parquet,
+        partition = "no",
+        compression = compression
     )
 }
 
@@ -396,11 +446,16 @@ parquet_add_toc <- function(
     unlink(file.path(path_to_parquet_root_dir, "toc"), recursive = TRUE, force = TRUE)
 
     object <- readRDS(fn)
+    if (rename) {
+        object <- LEEF_2_rename_toc(object)
+    } else {
+        names(object) <- tolower(names(object))
+    }
+
     object_to_parquet(
         object = object,
         path_to_parquet = file.path(path_to_parquet_root_dir, "toc"),
-        partition = "yes",
-        partitioning = c("bottle"),
+        partition = "no",
         compression = compression
     )
 }
@@ -440,12 +495,17 @@ parquet_add_conductivity <- function(
             if (!dir.exists(path_to_parquet)) {
                 dir.create(path_to_parquet)
             }
+
             object <- read.csv(fn)
+            if (rename) {
+            } else {
+                names(object) <- tolower(names(object))
+            }
+
             object_to_parquet(
                 object = object,
                 path_to_parquet = path_to_parquet,
-                partition = "yes",
-                partitioning = c("timestamp"),
+                partition = "no",
                 compression = compression
             )
         }

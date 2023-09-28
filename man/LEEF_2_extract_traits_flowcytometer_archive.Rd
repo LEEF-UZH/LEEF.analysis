@@ -16,7 +16,8 @@ LEEF_2_extract_traits_flowcytometer_archive(
   use_H,
   min_FSC.A,
   log10_all = FALSE,
-  wellid_keyword = "$WELLID"
+  wellid_keyword = "$WELLID",
+  mc.cores = 1
 )
 }
 \arguments{

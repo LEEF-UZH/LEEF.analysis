@@ -12,7 +12,7 @@ LEEF_2_density_flowcytometer_archive(
   gates_coordinates,
   min_FSC.A = NULL,
   particles = NULL,
-  mc.cores = 5
+  mc.cores = 1
 )
 }
 \arguments{
