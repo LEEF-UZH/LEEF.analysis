@@ -19,30 +19,24 @@
 #'
 #' @md
 #' @examples
-#'
-#'
 LEEF_2_classify_flowcam_files <- function(
-  datadir,
-  algae_traits_name = "algae_traits_filtered.rds",
-  classifier = NULL,
-  timestamp = "55555555",
-  species_tracked = NULL,
-  bottle = NULL
-){
-
-  p <- yaml::read_yaml(file.path(datadir, "flowcam.yml"))
-
+    datadir,
+    algae_traits_name = "algae_traits_filtered.rds",
+    classifier = NULL,
+    timestamp = "55555555",
+    species_tracked = NULL,
+    bottle = NULL) {
   if (is.null(species_tracked)) {
-    species_tracked <- p$species_tracked
+    species_tracked <- yaml::read_yaml(file.path(datadir, "flowcam.yml"))$species_tracked
   }
 
 
-# Filter for bottle -------------------------------------------------------
+  # Filter for bottle -------------------------------------------------------
 
 
   dat <- readRDS(file.path(datadir, algae_traits_name))
   dat <- data.frame(dat)
-  if (!is.null(bottle)){
+  if (!is.null(bottle)) {
     # tmp_algae_traits <- tempfile(
     #   pattern = paste0("algae_traits_bottle_", bottle, "_"),
     #   fileext = ".rds"
@@ -50,12 +44,12 @@ LEEF_2_classify_flowcam_files <- function(
     dat <- dat[dat$bottle == bottle, ]
   }
 
-# This is needed for the v1.7.1 of the parameter --------------------------
+  # This is needed for the v1.7.1 of the parameter --------------------------
 
   names(dat) <- tolower(names(dat))
   names(dat)[which(names(dat) == "date_flowcam")] <- "Date_Flowcam"
 
-# The classification ------------------------------------------------------
+  # The classification ------------------------------------------------------
   classified <- LEEF.2.measurement.flowcam::classify_LEEF_2(
     algae_traits = dat,
     classifiers = classifier,
@@ -65,7 +59,7 @@ LEEF_2_classify_flowcam_files <- function(
   )
 
 
-# Return the classifications --------------------------------------------------
+  # Return the classifications --------------------------------------------------
 
   return(classified)
 }

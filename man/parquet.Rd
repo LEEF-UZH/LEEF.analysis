@@ -8,8 +8,8 @@
 \alias{parquet_add_flowcytometer}
 \alias{parquet_add_o2}
 \alias{parquet_add_manualcount}
-\alias{parquet_add_toc}
 \alias{parquet_add_conductivity}
+\alias{parquet_add_toc}
 \alias{object_to_parquet}
 \title{FUNCTION_TITLE}
 \usage{
@@ -62,15 +62,15 @@ parquet_add_manualcount(
   rename = FALSE
 )
 
-parquet_add_toc(
-  fn = NULL,
+parquet_add_conductivity(
+  fns = NULL,
   path_to_parquet_root_dir = NULL,
   compression = "snappy",
   rename = FALSE
 )
 
-parquet_add_conductivity(
-  fns = NULL,
+parquet_add_toc(
+  fn = NULL,
   path_to_parquet_root_dir = NULL,
   compression = "snappy",
   rename = FALSE

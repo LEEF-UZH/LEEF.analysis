@@ -90,7 +90,7 @@ LEEF_2_extract_traits_flowcytometer_archive <- function(
                         fsa_p2 <- readRDS(file.path(file.path(datadir, "flowcytometer_fsa_ungated.p_2.rds")))
                         if (log10_all) {
                             fsa_p2 <- flowCore::transform(
-                                fsa_p1,
+                                fsa_p2,
                                 flowCore::transformList(
                                     c("FL2-A", "FL1-H", "FL2-H", "FL3-H", "FL4-H", "FSC-H", "SSC-H"),
                                     flowCore::truncateTransform("truncate at 1")

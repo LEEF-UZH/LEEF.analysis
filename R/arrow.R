@@ -337,32 +337,29 @@ parquet_add_o2 <- function(
     path_to_parquet_root_dir = NULL,
     compression = "snappy",
     rename = FALSE) {
-    unlink(file.path(path_to_parquet_root_dir, "o2"), recursive = TRUE, force = TRUE)
+    message("\nadding  O2")
 
-    pbapply::pblapply(
+    object <- lapply(
         fns,
-        function(fn) {
-            message("\nadding ", basename(fn), " ...\n")
+        readRDS
+    ) |>
+        do.call(what = rbind)
 
-            path_to_parquet <- file.path(path_to_parquet_root_dir, "o2")
+    if (rename) {
+        names(object) <- tolower(names(object))
+    } else {
+        names(object) <- tolower(names(object))
+    }
 
-            if (!dir.exists(path_to_parquet)) {
-                dir.create(path_to_parquet)
-            }
+    path_to_parquet <- file.path(path_to_parquet_root_dir, "o2")
+    unlink(file.path(path_to_parquet, recursive = TRUE, force = TRUE))
+    dir.create(path_to_parquet, recursive = TRUE, showWarnings = FALSE)
 
-            object <- readRDS(fn)
-            if (rename) {
-            } else {
-                names(object) <- tolower(names(object))
-            }
-
-            object_to_parquet(
-                object = object,
-                path_to_parquet = path_to_parquet,
-                partition = "no",
-                compression = compression
-            )
-        }
+    object_to_parquet(
+        object = object,
+        path_to_parquet = path_to_parquet,
+        partition = "no",
+        compression = compression
     )
 }
 
@@ -390,7 +387,7 @@ parquet_add_manualcount <- function(
     path_to_parquet_root_dir = NULL,
     compression = "snappy",
     rename = FALSE) {
-    unlink(file.path(path_to_parquet_root_dir, "manualcount"), recursive = TRUE, force = TRUE)
+    message("\nadding  Manualcount")
 
     object <- lapply(
         fns,
@@ -405,13 +402,59 @@ parquet_add_manualcount <- function(
         names(object) <- tolower(names(object))
     }
 
-    message("\nadding Manualcount ...\n")
-
     path_to_parquet <- file.path(path_to_parquet_root_dir, "manualcount", "")
+    unlink(path_to_parquet, recursive = TRUE, force = TRUE)
+    dir.create(path_to_parquet, recursive = TRUE, showWarnings = FALSE)
 
-    if (!dir.exists(path_to_parquet)) {
-        dir.create(path_to_parquet, recursive = TRUE)
+    object_to_parquet(
+        object = object,
+        path_to_parquet = path_to_parquet,
+        partition = "no",
+        compression = compression
+    )
+}
+
+
+#' @title FUNCTION_TITLE
+#' @description FUNCTION_DESCRIPTION
+#' @param fn PARAM_DESCRIPTION, Default: NULL
+#' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
+#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
+#' @param compression PARAM_DESCRIPTION, Default: "snappy"
+#' @param rename Should data be renamed to follow specified standards, Default: FALSE
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if (interactive()) {
+#'     # EXAMPLE1
+#' }
+#' }
+#' @seealso
+#' @rdname parquet
+#' @export
+parquet_add_conductivity <- function(
+    fns = NULL,
+    path_to_parquet_root_dir = NULL,
+    compression = "snappy",
+    rename = FALSE) {
+    message("\nadding  Conductivity")
+
+    object <- lapply(
+        fns,
+        read.csv
+    ) |>
+        do.call(what = rbind)
+
+    if (rename) {
+        names(object) <- tolower(names(object))
+    } else {
+        names(object) <- tolower(names(object))
     }
+
+    path_to_parquet <- file.path(path_to_parquet_root_dir, "conductivity")
+    unlink(file.path(path_to_parquet, recursive = TRUE, force = TRUE))
+    dir.create(path_to_parquet, recursive = TRUE, showWarnings = FALSE)
 
     object_to_parquet(
         object = object,
@@ -443,7 +486,7 @@ parquet_add_toc <- function(
     path_to_parquet_root_dir = NULL,
     compression = "snappy",
     rename = FALSE) {
-    unlink(file.path(path_to_parquet_root_dir, "toc"), recursive = TRUE, force = TRUE)
+    message("\nadding  TOC")
 
     object <- readRDS(fn)
     if (rename) {
@@ -451,6 +494,10 @@ parquet_add_toc <- function(
     } else {
         names(object) <- tolower(names(object))
     }
+
+    path_to_parquet <- file.path(path_to_parquet_root_dir, "toc")
+    unlink(file.path(path_to_parquet, recursive = TRUE, force = TRUE))
+    dir.create(path_to_parquet, recursive = TRUE, showWarnings = FALSE)
 
     object_to_parquet(
         object = object,
@@ -460,57 +507,6 @@ parquet_add_toc <- function(
     )
 }
 
-#' @title FUNCTION_TITLE
-#' @description FUNCTION_DESCRIPTION
-#' @param fn PARAM_DESCRIPTION, Default: NULL
-#' @param path_to_parquet_root_dir PARAM_DESCRIPTION, Default: NULL
-#' @param compression compression as used in \code{\link[arrow]{write_parquet}}, Default: "snappy"
-#' @param compression PARAM_DESCRIPTION, Default: "snappy"
-#' @param rename Should data be renamed to follow specified standards, Default: FALSE
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
-#' @examples
-#' \dontrun{
-#' if (interactive()) {
-#'     # EXAMPLE1
-#' }
-#' }
-#' @seealso
-#' @rdname parquet
-#' @export
-parquet_add_conductivity <- function(
-    fns = NULL,
-    path_to_parquet_root_dir = NULL,
-    compression = "snappy",
-    rename = FALSE) {
-    unlink(file.path(path_to_parquet_root_dir, "conductivity"), recursive = TRUE, force = TRUE)
-
-    pbapply::pblapply(
-        fns,
-        function(fn) {
-            message("\nadding ", basename(fn), " ...\n")
-
-            path_to_parquet <- file.path(path_to_parquet_root_dir, "conductivity")
-
-            if (!dir.exists(path_to_parquet)) {
-                dir.create(path_to_parquet)
-            }
-
-            object <- read.csv(fn)
-            if (rename) {
-            } else {
-                names(object) <- tolower(names(object))
-            }
-
-            object_to_parquet(
-                object = object,
-                path_to_parquet = path_to_parquet,
-                partition = "no",
-                compression = compression
-            )
-        }
-    )
-}
 
 #' FUNCTION_TITLE
 #'

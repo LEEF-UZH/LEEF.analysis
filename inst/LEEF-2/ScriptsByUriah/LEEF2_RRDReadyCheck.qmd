@@ -12,7 +12,7 @@ format:
     toc-float: true
     toc-depth: 6
 params:
-  RRDarrow: "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20230921"
+  RRDarrow: "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20231003"
 ---
 
 # Setup
@@ -206,6 +206,9 @@ rbind(missing_days=missing_days,
 ```
 
 ### manualcount missing
+
+Manualcount only has been conducted once a week after the XXXX. These are bobnt checked yet.
+
 ```{r}
 msm  <- "manualcount"
 # timestamps and days in RRD |> unique()=
@@ -229,7 +232,7 @@ rbind(missing_days=missing_days,
 
 
 
-### Check 1.2: oxygen
+## Check 1.2: oxygen
 
 ```{r}
 # timestamps and days in RRD
@@ -246,7 +249,7 @@ rbind(missing_days=missing_days_o2,
       missing_timestamps=missing_timestamps_o2)
 ```
 
-### Check 1.3: water chemistry
+## Check 1.3: water chemistry
 
 ```{r}
 # timestamps and days in RRD
@@ -265,7 +268,7 @@ rbind(missing_days=missing_days_wc,
 
 Note UD (20230816): there are many missing sampling days for the water chemistry. As I understand it, this data is not yet ready (i.e. not all samples have been processed). It is probably still worth checking whether the non processed ones correspond to the missing sampling days listed here.
 
-### Check 1.4: conductivity
+## Check 1.4: conductivity
 
 
 ```{r}
@@ -436,11 +439,14 @@ if(nrow(dd_missing_timestamps)>0) {
 }
 ```
 
+
 UD comment (20230816): 
 
  - It seems that the flowcam data for the last 13 sampling days is completely missing. 
  - Additionally, the two flowcam classes CiliateCysts and CystsWhite have many missing values. I'm not sure why that is, but maybe this is worth looking into: in the flowcam (and video) script after the particles have been classified there is code that sets the density to 0 for classes that could be present but were not detected (here I think: https://github.com/LEEF-UZH/LEEF.measurement.flowcam/blob/LEEF-2/R/classify_LEEF_2.R, line 115 onwards). Maybe this is not working correctly or maybe this is not done after the re-classification (I think the second option is more likely)?
  - There are two sampling days that are missing for the flowcytometer.
+
+RMK: In the whole of flowcam is no 0 density. I assumed, that these missing were 0 but not added as zero. I fixed this.
 
 **On 20230315 some flowcytometry samples have only 2 replicates instead of 3 replicates. On all other dates there should be 3 replicates. **
 

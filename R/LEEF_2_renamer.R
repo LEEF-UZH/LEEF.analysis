@@ -53,7 +53,7 @@ LEEF_2_rename_species <- function(
       c("MNA", "MNA")
     )
 
-    for (i in 1:length(species_names)) {
+    for (i in seq_along(species_names)) {
       trn <- x$species == species_names[[i]][1]
       x$species[trn] <- x$species[trn] <- species_names[[i]][2]
     }
@@ -111,8 +111,8 @@ LEEF_2_rename_species_prob_columns <- function(
 
   nms <- names(object) |>
     tolower()
-  
-  for (i in 1:length(species_prob_columns)) {
+
+  for (i in seq_along(species_prob_columns)) {
     toRename <- nms %in% species_prob_columns[[i]][1]
     if (any(toRename)) {
       nms[toRename] <- species_prob_columns[[i]][2]
@@ -178,7 +178,7 @@ LEEF_2_rename_toc <- function(x) {
       c("TOC", "DOC"),
       c("TN", "DN")
     )
-    for (i in 1:length(inj_types)) {
+    for (i in seq_along(inj_types)) {
       trn <- x$inj_type == inj_types[[i]][1]
       x$inj_type[trn] <- inj_types[[i]][2]
     }
