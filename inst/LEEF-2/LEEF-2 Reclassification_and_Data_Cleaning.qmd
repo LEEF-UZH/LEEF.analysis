@@ -28,9 +28,17 @@ params:
     - OtherCiliate
   remove_flowcam:
     - Loxocephallus
+    - OtherCiliate
   keep_flowcytometer:
     - bacteria
     - algae
+  remove_bemovi:
+    - Euplotes
+    - Loxocephallus
+  remove_bottles_flowcytometer:
+    - b_102
+    - b_103
+    - b_104
   bemovi_mag_16_moving_background: 
     - 20230203_00176
   bemovi_mag_25_moving_background:
@@ -76,33 +84,28 @@ params:
     - "DigestedAlgae"
     - "DigestedWhite"
     - "DividingChlamydomonas"
-    - "OtherCiliate"
     - "Small_cells"
     - "Small_unidentified"
 
-  reclassify_flowcam: false
-  reclassify_bemovi_16: false
-  reclassify_bemovi_25: false
-  regate_flowcytometer: false  
-  assemble_manualcount: false
-  assemble_o2: false
-  assemble_conductivity: false
-  assemble_toc: false
-
-  rename_parquet: false
+  reclassify_flowcam: true
+  reclassify_bemovi_16: true
+  reclassify_bemovi_25: true
+  regate_flowcytometer: true  
+  assemble_manualcount: true
+  assemble_o2: true
+  assemble_conductivity: true
+  assemble_toc: true
 
   update_parquet_flowcam: true
-  update_parquet_bemovi_16: false
-  update_parquet_bemovi_25: false
-  update_parquet_flowcytometer: false
-  update_parquet_manualcount: false
-  update_parquet_o2: false
-  update_parquet_toc: false
-  update_parquet_conductivity: false
-  update_parquet_experimental_tables: false
-  update_all_parquet: false
-  
-  diagnostic_report: false
+  update_parquet_bemovi_16: true
+  update_parquet_bemovi_25: true
+  update_parquet_flowcytometer: true
+  update_parquet_manualcount: true
+  update_parquet_o2: true
+  update_parquet_toc: true
+  update_parquet_conductivity: true
+  update_parquet_experimental_tables: true
+  update_all_parquet: true
 
 ---
 
@@ -408,6 +411,31 @@ rm(timestamps)
 ```
 
 
+### Remove species not needed in Bemovi 16
+
+```{r}
+#| label: bemovi16_remove_species
+#| eval: !expr params$reclassify_bemovi_16
+#|
+
+fns <- list.files(
+  file.path(params$output_dir, "bemovi_mag_16"),
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  sample(fns),
+  function(fn) {
+    x <- readRDS(fn) |>
+      dplyr::filter(!(species %in% c(params$remove_bemovi)))
+    unlink(fn)
+    saveRDS(x, file = fn)
+  },
+  mc.cores = params$cores,
+  mc.preschedule = FALSE
+)
+```
 
 ### Calculate Biomass Bemovi 16
 The biomass is calculated here
@@ -519,6 +547,31 @@ rm(timestamps)
 ```
 
 
+### Remove species not needed in Bemovi 25
+
+```{r}
+#| label: bemovi25_remove_species
+#| eval: !expr params$reclassify_bemovi_25
+#|
+
+fns <- list.files(
+  file.path(params$output_dir, "bemovi_mag_25"),
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  sample(fns),
+  function(fn) {
+    x <- readRDS(fn) |>
+      dplyr::filter(!(species %in% c(params$remove_bemovi)))
+    unlink(fn)
+    saveRDS(x, file = fn)
+  },
+  mc.cores = params$cores,
+  mc.preschedule = FALSE
+)
+```
 
 ### Calculate Biomass Bemovi 25
 The biomass is calculated here
@@ -643,7 +696,6 @@ LEEF_2_density_flowcytometer_archive(
   particles = params$flowcytometer_particles,
   mc.cores = 10 # params$cores
 )
-
 ```
 
 ### Flowcytometer Traits and Biomass
@@ -667,6 +719,32 @@ LEEF_2_extract_traits_flowcytometer_archive(
 )
 
 rm(timestamps)
+```
+
+### Remove bottles not needed in Flowcytometer
+
+```{r}
+#| label: flowcytometer_remove_bottles
+#| eval: !expr params$regate_flowcytometer
+#|
+
+fns <- list.files(
+  file.path(params$output_dir, "flowcytometer"),
+  recursive = FALSE,
+  full.names = TRUE
+)
+
+pbmcapply::pbmclapply(
+  sample(fns),
+  function(fn) {
+    x <- readRDS(fn) |>
+      dplyr::filter(!(bottle %in% c(params$remove_bottles_flowcytometer)))
+    unlink(fn)
+    saveRDS(x, file = fn)
+  },
+  mc.cores = params$cores,
+  mc.preschedule = FALSE
+)
 ```
 
 ## Assemble TOC
@@ -1003,11 +1081,11 @@ object_to_parquet(object = object, path_to_parquet = path_to_parquet)
 ```
 
 # TODO Create Diagnostic Report
-The Diagnostic report needs to be created before the renaming as it does rely on the otriginal terminology.
+The Diagnostic report can be created manually by running:
 
 ```{r}
 #| label: createDiagReport
-#| eval: !expr params$diagnostic_report
+#| eval: false
 #|
 options(knitr.duplicate.label = "allow")
 

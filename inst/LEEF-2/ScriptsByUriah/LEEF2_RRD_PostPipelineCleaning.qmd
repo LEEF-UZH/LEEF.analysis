@@ -35,7 +35,7 @@ options(dplyr.summarise.inform = FALSE)
 ### Species densities
 
 ```{r data, warning=FALSE, message=FALSE}
-options(RRDarrow = "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.7-LEEF-2_20230813/")
+options(RRDarrow = "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20231003/")
 
 densities <- arrow_read_density() %>%
   arrange(day)
