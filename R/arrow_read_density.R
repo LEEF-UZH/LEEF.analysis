@@ -31,10 +31,8 @@ arrow_read_density <- function(
     fcam <- arrow_read_table("flowcam_density", db) |>
         dplyr::select(timestamp, bottle, species, density, biomass) |>
         mutate(measurement = "flowcam")
-## TODO remove biomass NA when set!
     fcyt <- arrow_read_table("flowcytometer_density", db) |>
-        dplyr::select(timestamp, bottle, species, density) |>
-        mutate(biomass = as.numeric(NA)) |>
+        dplyr::select(timestamp, bottle, species, density, biomass) |>
         mutate(measurement = "flowcytometer")
     manualcount <- arrow_read_table("manualcount", db) |>
         dplyr::select(timestamp, bottle, species, density) |>

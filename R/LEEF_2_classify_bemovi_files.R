@@ -18,28 +18,24 @@
 #'
 #' @md
 #' @examples
-#'
-#'
 LEEF_2_classify_bemovi_files <- function(
-  datadir,
-  bemovi_extract_name = NULL,
-  classifier = NULL,
-  exclude_videos = NULL
-){
-
+    datadir,
+    bemovi_extract_name = NULL,
+    classifier = NULL,
+    exclude_videos = NULL) {
   p <- yaml::read_yaml(bemovi_extract_name)
 
 
-# The classification ------------------------------------------------------
+  # The classification ------------------------------------------------------
 
   morph_mvt <- readRDS(file.path(datadir, p$merged.data.folder, p$morph_mvt))
   morph_mvt <- morph_mvt[, grep("_prob|species", names(morph_mvt), invert = TRUE)]
 
   traj <- readRDS(file.path(datadir, p$merged.data.folder, p$master))
 
-  if (!is.null(exclude_videos)){
-    morph_mvt <- morph_mvt[!(morph_mvt$file %in% exclude_videos),]
-    traj <- traj[!(traj$file %in% exclude_videos),]
+  if (!is.null(exclude_videos)) {
+    morph_mvt <- morph_mvt[!(morph_mvt$file %in% exclude_videos), ]
+    traj <- traj[!(traj$file %in% exclude_videos), ]
   }
   classified <- LEEF.2.measurement.bemovi::classify_LEEF_2(
     bemovi_extract = bemovi_extract_name,
@@ -47,18 +43,18 @@ LEEF_2_classify_bemovi_files <- function(
     trajectory_data = traj,
     classifiers = classifier,
     video_description_file = as.data.frame(
-        read.table(
-            file.path(datadir, p$video.description.folder, p$video.description.file), 
-            sep = "\t", 
-            header = TRUE, 
-            stringsAsFactors = FALSE
-        )
+      read.table(
+        file.path(datadir, p$video.description.folder, p$video.description.file),
+        sep = "\t",
+        header = TRUE,
+        stringsAsFactors = FALSE
+      )
     ),
     composition = utils::read.csv(file.path(datadir, "compositions.csv"))
   )
 
 
-# Return the classifications --------------------------------------------------
+  # Return the classifications --------------------------------------------------
 
 
   return(classified)

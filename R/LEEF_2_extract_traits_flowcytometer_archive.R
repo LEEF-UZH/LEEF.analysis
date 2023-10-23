@@ -31,7 +31,7 @@
 #' @md
 #' @examples
 LEEF_2_extract_traits_flowcytometer_archive <- function(
-    extracted_dir = "~/Desktop/flowcytometer.FIXED/LEEF.FIXED.archived.data/LEEF/3.archived.data/extracted/", # "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/",
+    extracted_dir = "~/Desktop/flowcytometer.FIXED/LEEF.FIXED.archived.data/LEEF/3.archived.data/extracted/", 
     gates_coordinates,
     particles = "bacteria",
     timestamps,
@@ -136,7 +136,7 @@ LEEF_2_extract_traits_flowcytometer_archive <- function(
 
                 for (p in particles) {
                     message("\nExtracting ", p, "...")
-
+                    
                     traits[[p]]$species <- p
                     traits[[p]]$length <- as.numeric(NA)
                     traits[[p]]$volume <- as.numeric(NA)
@@ -168,16 +168,16 @@ LEEF_2_extract_traits_flowcytometer_archive <- function(
                         file = file.path(output, paste0("flowcytometer_traits_", p, ".", timestamp, ".rds"))
                     )
 
-
                     bm <- traits[[p]] |>
                         group_by(bottle, sample, plate, species) |>
                         summarise(biomass = sum(biomass)) |>
-                        full_join(
+                        left_join(
                             x = dens,
                             by = dplyr::join_by(bottle, sample, plate, species)
                         ) |>
                         mutate(biomass = biomass * 1000000 / volume * dilution_factor) |>
-                        ungroup()
+                        ungroup() |>
+                        filter(species == p)
 
                     biomass_per_bottle <- rbind(
                         biomass_per_bottle,

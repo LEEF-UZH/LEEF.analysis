@@ -12,7 +12,7 @@ format:
     toc-float: true
     toc-depth: 6
 params:
-  RRDarrow: "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20231003"
+  RRDarrow: "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20231020"
 ---
 
 # Setup
@@ -394,7 +394,7 @@ densities |>
     select(species, measurement) |>
     distinct()
 ```
-TODO [?]: Should be fixed - "Loxocephallus" "Euplotes"      "OtherCiliate"
+
 
 ```{r}
 ## test2
@@ -414,7 +414,7 @@ densities |>
     select(bottle, measurement) |>
     distinct()
 ```
-TODO [?]: Should be fixed - "b_102" "b_103" "b_101"
+
 
 # Check 3: do some measurement methods have missing timestamps (that are unexpected)?
 
@@ -454,7 +454,7 @@ if(nrow(dd_missing_timestamps)>0) {
 }
 ```
 
-TODO [?]: Check after removal of b_10x - needs checking!
+TODO [ ]: needs checking!
 
 UD comment (20230816): 
 
@@ -557,8 +557,6 @@ NAs_o2 <- o2 %>%
   dplyr::filter(o2NA>0)
 NAs_o2
 ```
-
-TODO [ ]: Needs checking
 
 ## Check 4.3: water chemistry
 
@@ -716,8 +714,6 @@ nrow(morph25)
 ```
 
 If any of them are not empty then the classificaiton has not been corrected manually.
-
-TODO [ ]: correct manually
 
 
 ## Check 7.2: have the densities been correctly recalculated?
