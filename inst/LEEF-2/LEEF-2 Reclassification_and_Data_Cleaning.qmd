@@ -26,6 +26,18 @@ params:
   cores: 7
   remove_all:
     - OtherCiliate
+  flowcam_species:
+    - "Chlamydomonas"
+    - "ChlamydomonasClumpsLarge"
+    - "ChlamydomonasClumpsSmall"
+    - "CiliateCysts"
+    - "CystsWhite" 
+    - "Debris"
+    - "DigestedAlgae"
+    - "DigestedWhite"
+    - "DividingChlamydomonas"
+    - "Small_cells"
+    - "Small_unidentified"
   remove_flowcam:
     - Loxocephallus
     - OtherCiliate
@@ -75,38 +87,30 @@ params:
     - 20230721_00049
     - 20230724_00016
     - 20230807_00064
-  flowcam_species:
-    - "Chlamydomonas"
-    - "ChlamydomonasClumpsLarge"
-    - "ChlamydomonasClumpsSmall"
-    - "CiliateCysts"
-    - "CystsWhite" 
-    - "Debris"
-    - "DigestedAlgae"
-    - "DigestedWhite"
-    - "DividingChlamydomonas"
-    - "Small_cells"
-    - "Small_unidentified"
+    - 20230424_00091
+    - 20230512_00086
+    - 20230517_00055
 
-  reclassify_flowcam: true
-  reclassify_bemovi_16: false
-  reclassify_bemovi_25: false
-  regate_flowcytometer: true  
+
+  reclassify_flowcam: false
+  reclassify_bemovi_16: true
+  reclassify_bemovi_25: true
+  regate_flowcytometer: false  
   assemble_manualcount: false
   assemble_o2: false
   assemble_conductivity: false
   assemble_toc: false
 
-  update_parquet_flowcam: true
+  update_parquet_flowcam: false
   update_parquet_bemovi_16: true
   update_parquet_bemovi_25: true
-  update_parquet_flowcytometer: true
-  update_parquet_manualcount: true
-  update_parquet_o2: true
-  update_parquet_toc: true
-  update_parquet_conductivity: true
-  update_parquet_experimental_tables: true
-  update_all_parquet: true
+  update_parquet_flowcytometer: false
+  update_parquet_manualcount: false
+  update_parquet_o2: false
+  update_parquet_toc: false
+  update_parquet_conductivity: false
+  update_parquet_experimental_tables: false
+  update_all_parquet: false
 
 ---
 
@@ -419,6 +423,7 @@ rm(timestamps)
 
 fns <- list.files(
     file.path(params$output_dir, "bemovi_mag_16"),
+    pattern = "rds",
     recursive = FALSE,
     full.names = TRUE
 )
@@ -430,7 +435,7 @@ pbmcapply::pbmclapply(
             dplyr::filter(!(species %in% c(params$remove_bemovi)))
         fn_sp <- strsplit(basename(fn), "\\.")
         fn_sp[[1]][2] <- as.numeric(fn_sp[[1]][2])
-        if ((fn_sp[[1]][1] == "morph_mvt") & (fn_sp[[1]][2] >= 20230203)) {
+        if ((fn_sp[[1]][1] == "morph_mvt") & (fn_sp[[1]][2] >= 20230403)) {
             x <- x |>
                 mutate(
                     species = ifelse(
@@ -441,6 +446,10 @@ pbmcapply::pbmclapply(
                 )
         }
         if ((fn_sp[[1]][1] == "mean_density_per_ml") & (fn_sp[[1]][2] >= 20230203)) {
+            colp <- x |>
+                dplyr::filter(species == "Colpidium") |>
+                dplyr::filter(bottle %in% c("b_02", "b_15", "b_20", "b_31")) |>
+                dplyr::mutate(density = 0)
             x <- x |>
                 mutate(
                     species = ifelse(
@@ -449,6 +458,7 @@ pbmcapply::pbmclapply(
                         species
                     )
                 ) |>
+                tibble::add_row(colp) |>
                 group_by(timestamp, date, species, bottle, resources, temperature, salinity, magnification, sample, replicate) |>
                 summarize(density = sum(density), .groups = "drop") |>
                 arrange(timestamp, bottle, species)
@@ -580,6 +590,7 @@ rm(timestamps)
 
 fns <- list.files(
     file.path(params$output_dir, "bemovi_mag_25"),
+    pattern = "rds"
     recursive = FALSE,
     full.names = TRUE
 )
@@ -591,7 +602,7 @@ pbmcapply::pbmclapply(
             dplyr::filter(!(species %in% c(params$remove_bemovi)))
         fn_sp <- strsplit(basename(fn), "\\.")
         fn_sp[[1]][2] <- as.numeric(fn_sp[[1]][2])
-        if ((fn_sp[[1]][1] == "morph_mvt") & (fn_sp[[1]][2] >= 20230203)) {
+        if ((fn_sp[[1]][1] == "morph_mvt") & (fn_sp[[1]][2] >= 20230403)) {
             x <- x |>
                 mutate(
                     species = ifelse(
@@ -602,6 +613,10 @@ pbmcapply::pbmclapply(
                 )
         }
         if ((fn_sp[[1]][1] == "mean_density_per_ml") & (fn_sp[[1]][2] >= 20230203)) {
+            colp <- x |>
+                dplyr::filter(species == "Colpidium") |>
+                dplyr::filter(bottle %in% c("b_02", "b_15", "b_20", "b_31")) |>
+                dplyr::mutate(density = 0)
             x <- x |>
                 mutate(
                     species = ifelse(
@@ -610,11 +625,11 @@ pbmcapply::pbmclapply(
                         species
                     )
                 ) |>
+                tibble::add_row(colp) |>
                 group_by(timestamp, date, species, bottle, resources, temperature, salinity, magnification, sample, replicate) |>
                 summarize(density = sum(density), .groups = "drop") |>
                 arrange(timestamp, bottle, species)
         }
-
         unlink(fn)
         saveRDS(x, file = fn)
     },

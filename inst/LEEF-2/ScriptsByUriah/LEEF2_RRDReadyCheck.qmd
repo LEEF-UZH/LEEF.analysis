@@ -454,7 +454,6 @@ if(nrow(dd_missing_timestamps)>0) {
 }
 ```
 
-TODO [ ]: needs checking!
 
 UD comment (20230816): 
 
@@ -672,7 +671,12 @@ compare_densities <- left_join(new_densities %>% dplyr::filter(species!="Loxocep
                                densities)
 
 print("Do the densities in the RRD correspond to the densities in new_densities.csv"); all(round(compare_densities$density,3) == round(compare_densities$new_densities,3))
+
+ compare_densities |>
+     mutate(identical = round(density, 3) == round(new_densities, 3)) |>
+     filter(!identical)
 ```
+
 
 TODO [ ]: Check what and why
 
@@ -734,7 +738,6 @@ compare_densities2 <- left_join(new_PCaudatum_densities %>% dplyr::filter(specie
 print("Do the densities in the RRD correspond to the densities in new_PCaudatum_densities.csv"); all(round(compare_densities2$density,3) == round(compare_densities2$new_densities,3))
 ```
 
-TODO [ ]: Check
 
 # Check 8: has the biomass of the species been correctly implemented?
 
@@ -748,9 +751,19 @@ new_biomass20221107 <- new_biomass20221107 %>%
   mutate(new_biomass = biomass) %>%
   select(-biomass)
 
-compare_densities3 <- left_join(new_biomass20221107, densities)
+compare_densities3 <- left_join(
+  new_biomass20221107, 
+  densities, 
+  join_by(timestamp, day, bottle, species, density, measurement, incubator, temperature, resources, salinity, replicate)
+)
 
-print("Do the biomasses in the RRD correspond to the densities in biomass20221107_doubleCheck.csv"); all(compare_densities3$biomass == compare_densities3$new_biomass)
+
+print("Do the biomasses in the RRD correspond to the densities in biomass20221107_doubleCheck.csv"); 
+
+compare_densities3 |>
+    mutate(identical = round(biomass, 3) == round(new_biomass, 3)) |>
+    filter(!identical) |>
+    select(c(1:6, 13:15))
 ```
 
 TODO [ ]: Check

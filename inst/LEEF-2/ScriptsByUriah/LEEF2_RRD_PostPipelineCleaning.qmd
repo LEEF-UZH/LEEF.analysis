@@ -164,9 +164,9 @@ tocheck_2ndmethod %>%
   labs(x="Number of tracked particles classified as debris",
        y="Faulty video (True = video is faulty)")
 
-cdplot(as.factor(faulty_video) ~ count, data = tocheck_2ndmethod, 
-       ylab = "Conditional density (probability) of a video being faulty",
-       xlab = "Number of tracked particles classified as debris")
+# cdplot(as.factor(faulty_video) ~ count, data = tocheck_2ndmethod, 
+#       ylab = "Conditional density (probability) of a video being faulty",
+#       xlab = "Number of tracked particles classified as debris")
 
 
 print("Video classification at 25x, second check found:")
@@ -701,6 +701,7 @@ I exclude the time series of species that were (practically) always extinct in a
 ### Videos
 
 ```{r, fig.width=14, fig.height=14, message=FALSE, warning=FALSE}
+#| eval: false
 manual_occurences <- read_csv("microscopic_checks_ciliates.csv")
 
 manual_occurences_long <- manual_occurences %>%
