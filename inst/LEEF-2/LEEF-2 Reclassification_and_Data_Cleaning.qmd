@@ -590,7 +590,7 @@ rm(timestamps)
 
 fns <- list.files(
     file.path(params$output_dir, "bemovi_mag_25"),
-    pattern = "rds"
+    pattern = "rds",
     recursive = FALSE,
     full.names = TRUE
 )
