@@ -306,7 +306,7 @@ parquet_add_flowcytometer <- function(
                 object = object,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "bottle"),
+                partitioning = c("timestamp", "species", "bottle"),
                 compression = compression
             )
         }
