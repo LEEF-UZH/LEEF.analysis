@@ -18,7 +18,7 @@ params:
 # Setup
 ## Dependencies
 
-```{r packages, message=FALSE}
+```{r setup, message=FALSE}
 library(tidyverse)
 library(patchwork)
 library(LEEF.analysis)
@@ -559,6 +559,8 @@ NAs_o2
 
 ## Check 4.3: water chemistry
 
+TODO [ ]: Needs to be checked
+
 The following data.frame should be empty
 
 ```{r}
@@ -568,7 +570,6 @@ NAs_wc <- water_chem %>%
   dplyr::filter(concentrationNA>0)
 NAs_wc
 ```
-TODO [ ]: needs checking
 
 ## Check 4.4: conductivity
 
@@ -656,6 +657,8 @@ If any of them are not empty then the videos have not been removed (completely).
 
 ## Check 5.2: have the densities been correctly recalculated?
 
+TODO [ ]: Check what and why
+
 The file "new_densities.csv" contains the densities of the species that I've locally calculated after excluding the videos. I therefore compare these densities to the ones that are in the RRD.
 
 **Note UD (20230816)**: if the check fails it might also be because the "new_densities.csv" is no longer up-to-date. This file is produced in the script "LEEF2_RRD_PostPipelineCleaning.qmd". If in the mean time the RRD has been rerun (for instance because of new classifiers), then "new_densities.csv" also needs to be remade, otherwise this check might wrongly fail...
@@ -678,7 +681,6 @@ print("Do the densities in the RRD correspond to the densities in new_densities.
 ```
 
 
-TODO [ ]: Check what and why
 
 # Check 6: has the density and the biomass been set to 0 for species that have not been found?
 
@@ -741,6 +743,8 @@ print("Do the densities in the RRD correspond to the densities in new_PCaudatum_
 
 # Check 8: has the biomass of the species been correctly implemented?
 
+TODO [ ]: Check what and why
+
 The file "biomass20221107_doubleCheck.csv" contains the biomasses of the species that I calculated. I therefore compare these densities to the ones that are in the RRD. Note that this only checks the flowcam and the video biomasses, not the flowcytometer (bacteria) ones.
 
 **Note UD (20230817)**: if the check fails it might also be because the "biomass20221107_doubleCheck.csv" is no longer up-to-date. This file is produced in the script "LEEF2_RRD_PostPipelineCleaning.qmd". If in the mean time the RRD has been rerun (for instance because of new classifiers), then "biomass20221107_doubleCheck.csv" also needs to be remade, otherwise this check might wrongly fail...
@@ -765,8 +769,6 @@ compare_densities3 |>
     filter(!identical) |>
     select(c(1:6, 13:15))
 ```
-
-TODO [ ]: Check
 
 # Check 9: has the trend in the water chemistry been removed?
 

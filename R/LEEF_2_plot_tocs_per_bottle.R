@@ -26,7 +26,7 @@ LEEF_2_plot_tocs_per_bottle_per_timestamp <- function(
 ){
 
   if (arrow) {
-    toc <- arrow_read_toc()
+    toc <- arrow_read_toc(getOption("RRDarrow"))
   } else {
     toc <- db_read_toc(db)
   }
