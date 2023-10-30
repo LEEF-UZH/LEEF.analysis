@@ -251,7 +251,7 @@ rbind(missing_days=missing_days_o2,
 
 ## Check 1.3: water chemistry
 
-TODO [ ]: Needs to be checked
+TODO [ ]: These are not analysed yet due to machine failure.
 
 ```{r}
 # timestamps and days in RRD
@@ -565,7 +565,7 @@ The following data.frame should be empty
 
 ```{r}
 NAs_wc <- water_chem %>%
-  group_by(type, bottle) %>%
+  group_by(type, bottle, timestamp) %>%
   summarize(concentrationNA = sum(is.na(concentration))) %>%
   dplyr::filter(concentrationNA>0)
 NAs_wc

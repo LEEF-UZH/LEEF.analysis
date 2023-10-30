@@ -101,17 +101,17 @@ params:
   assemble_conductivity: false
   assemble_toc: true
 
-  update_parquet_flowcam: false
-  update_parquet_bemovi_16: false
-  update_parquet_bemovi_25: false
-  update_parquet_flowcytometer: false
-  update_parquet_manualcount: false
-  update_parquet_o2: false
-  update_parquet_conductivity: false
+  update_parquet_flowcam: true
+  update_parquet_bemovi_16: true
+  update_parquet_bemovi_25: true
+  update_parquet_flowcytometer: true
+  update_parquet_manualcount: true
+  update_parquet_o2: true
+  update_parquet_conductivity: true
   update_parquet_toc: true
   
-  update_parquet_experimental_tables: false
-  update_all_parquet: false
+  update_parquet_experimental_tables: true
+  update_all_parquet: true
 
 ---
 

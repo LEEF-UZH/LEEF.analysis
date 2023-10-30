@@ -16,6 +16,8 @@
 #'
 #' @examples
 arrow_read_toc <- function(
+# TODO: ADD MEAN CALCULATIONS AS IN DB_READ_TOC()
+ 
     db = getOption("RRDarrow", "/Volumes/RRD.Reclassification_LEEF-2/parquet/"),
     from_timestamp = 20221106,
     to_timestamp = 20230812) {
