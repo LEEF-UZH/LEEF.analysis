@@ -25,7 +25,6 @@ parquet_add_bemovi_16 <- function(
     unlink(file.path(path_to_parquet_root_dir, "bemovi_16_density"), recursive = TRUE, force = TRUE)
     unlink(file.path(path_to_parquet_root_dir, "bemovi_16_morph"), recursive = TRUE, force = TRUE)
 
-
     pbapply::pblapply(
         fns,
         function(fn) {
@@ -54,7 +53,7 @@ parquet_add_bemovi_16 <- function(
                 object = object,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "species"),
+                partitioning = c("timestamp"),
                 compression = compression
             )
         }
@@ -118,7 +117,7 @@ parquet_add_bemovi_25 <- function(
                 object = object,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "species"),
+                partitioning = c("timestamp"),
                 compression = compression
             )
         }
@@ -181,7 +180,7 @@ parquet_add_bemovi_25_cropped <- function(
                 object = object,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "species"),
+                partitioning = c("timestamp"),
                 compression = compression
             )
         }
@@ -244,7 +243,7 @@ parquet_add_flowcam <- function(
                 object = object,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "species"),
+                partitioning = c("timestamp"),
                 compression = compression
             )
         }
@@ -306,7 +305,7 @@ parquet_add_flowcytometer <- function(
                 object = object,
                 path_to_parquet = path_to_parquet,
                 partition = "yes",
-                partitioning = c("timestamp", "species", "bottle"),
+                partitioning = c("timestamp", "species"),
                 compression = compression
             )
         }

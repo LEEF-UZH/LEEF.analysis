@@ -1020,8 +1020,8 @@ fns <- list.files(
     pattern = "\\.rds$",
     full.names = TRUE
 )
-parquet_add_flowcytometer(fns = fns, path_to_parquet_root_dir = parquet_dir, rename = FALSE)
-parquet_add_flowcytometer(fns = fns, path_to_parquet_root_dir = parquet_dir_renamed, rename = TRUE)
+parquet_add_flowcytometer(fns = fns, path_to_parquet_root_dir = parquet_dir, rename = FALSE, compression = "brotli")
+parquet_add_flowcytometer(fns = fns, path_to_parquet_root_dir = parquet_dir_renamed, rename = TRUE, compression = "brotli")
 ```
 
 ```{r}
