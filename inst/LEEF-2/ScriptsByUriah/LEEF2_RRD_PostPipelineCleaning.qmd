@@ -288,19 +288,6 @@ videos_to_remove_25 <- full_join(videos_to_remove_25_1,
 function to re-calculate the density:
 
 ```{r}
-CalculateDensities <- function(morph, meas, extrapolation.factor, cropping.factor){
-  density <- morph %>%
-    group_by(timestamp, bottle, species, file) %>%
-    summarize(count=sum(n_frames)) %>%
-    # summarize(count=sum(N_frames)) %>%
-    mutate(dens.ml = count * extrapolation.factor * cropping.factor) %>%
-    na.omit() %>%
-    group_by(timestamp, bottle, species) %>%
-    summarise(density = sum(dens.ml)/(3*125)) %>%
-    mutate(measurement=meas)
-  return(density)
-}
-
 CalculateDensities <- function(morph, meas, extrapolation.factor, cropping.factor) {
     density <- morph %>%
         group_by(timestamp, bottle, species, file) %>%
@@ -441,7 +428,7 @@ morph16_density$density <- ifelse(is.na(morph16_density$density),0,morph16_densi
 
 ### bind new densities together
 
-new_densities <- rbind(morph25_density,morph25_cropped_density,morph16_density)
+new_densities <- rbind(morph25_density, morph25_cropped_density, morph16_density) %>% dplyr::select(-numberOfVideos)
 
 ### overwrite the new densities in the main density data.frame
 
@@ -640,7 +627,7 @@ morph25_density$density <- ifelse(is.na(morph25_density$density),0,morph25_densi
 
 ### bind new densities together
 
-new_densities <- rbind(morph25_density,morph16_density)
+new_densities <- rbind(morph25_density,morph16_density) %>%   dplyr::select(-numberOfVideos)
 
 ### overwrite the new densities in the main density data.frame
 
