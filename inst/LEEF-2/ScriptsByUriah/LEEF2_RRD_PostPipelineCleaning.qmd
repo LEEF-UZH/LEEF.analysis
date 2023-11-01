@@ -300,6 +300,22 @@ CalculateDensities <- function(morph, meas, extrapolation.factor, cropping.facto
     mutate(measurement=meas)
   return(density)
 }
+
+CalculateDensities <- function(morph, meas, extrapolation.factor, cropping.factor) {
+    density <- morph %>%
+        group_by(timestamp, bottle, species, file) %>%
+        summarize(count = sum(n_frames)) %>%
+        # summarize(count=sum(N_frames)) %>%
+        mutate(dens.ml = count * extrapolation.factor * cropping.factor) %>%
+        na.omit() %>%
+        group_by(timestamp, bottle, species) %>%
+        summarise(
+            numberOfVideos = length(unique(file)),
+            density = sum(dens.ml) / (numberOfVideos * 125)
+        ) %>%
+        mutate(measurement = meas)
+    return(density)
+}
 ```
 
 updating densities (after excluding the videos with moving background)
