@@ -22,16 +22,16 @@
 #'
 #' @examples
 db_read_toc <- function(
-  db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-  from_timestamp = 20210920,
-  to_timestamp = 21000101,
-  duplicates = mean
-){
+    db = getOption("RRDdb", "LEEF.RRD.sqlite"),
+    from_timestamp = 20210920,
+    to_timestamp = 21000101,
+    duplicates = mean
+) {
   con <- DBI::dbConnect(RSQLite::SQLite(), db, flags = RSQLite::SQLITE_RO)
   data <- con %>%
     dplyr::tbl("toc") %>%
-    filter (as.integer(timestamp) >= as.integer(from_timestamp)) %>%
-    filter (as.integer(timestamp) <= as.integer(to_timestamp))
+    filter(as.integer(timestamp) >= as.integer(from_timestamp)) %>%
+    filter(as.integer(timestamp) <= as.integer(to_timestamp))
 
   if (!is.null(duplicates)) {
     result <- NULL
@@ -45,13 +45,12 @@ db_read_toc <- function(
       },
       silent = TRUE
     )
-    if (is.null(result)){
+    if (is.null(result)) {
       ## LEEF-2
       result <- data %>%
         group_by(timestamp, day, bottle, type, temperature, salinity, resources, incubator, replicate) %>%
         summarise(concentration = mean(concentration), cv = as.numeric(NA), n = n()) %>%
         ungroup()
-
     }
     data <- result
   }

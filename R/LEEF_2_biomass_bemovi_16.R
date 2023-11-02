@@ -63,7 +63,9 @@ LEEF_2_biomass_bemovi_16 <- function(
 
   biomasses <- ciliate_traits_16 %>%
     group_by(timestamp, bottle, species) %>%
-    summarize(biomass = sum(biomass * n_frames, na.rm = TRUE) / (3 * 125)) %>%
+    summarize(
+      biomass = sum(biomass * n_frames, na.rm = TRUE) / (length(unique(file)) * 125)
+    ) %>%
     mutate(
       biomass = biomass * extrapolation.factor_16,
       biomass = ifelse(

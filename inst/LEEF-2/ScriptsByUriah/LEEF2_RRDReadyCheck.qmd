@@ -391,7 +391,7 @@ idx <- classes %in% unique(c(Bemovi16_classes,Bemovi25_classes,Bemovi25cropped_c
 print("The following classes are present but shouldn't be:"); classes[!idx]
 densities |>
     filter(species %in% classes[!idx]) |>
-    select(species, measurement) |>
+    select(species, measurement, timestamp) |>
     distinct()
 ```
 
@@ -810,3 +810,5 @@ toc %>%
 ```
 
 
+# Check 
+TODO Check that salinity etc has been set everywhere, particularly where density is 0!

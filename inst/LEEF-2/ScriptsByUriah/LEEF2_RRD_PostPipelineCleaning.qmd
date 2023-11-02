@@ -297,10 +297,8 @@ CalculateDensities <- function(morph, meas, extrapolation.factor, cropping.facto
         na.omit() %>%
         group_by(timestamp, bottle, species) %>%
         summarise(
-            numberOfVideos = length(unique(file)),
-            density = sum(dens.ml) / (numberOfVideos * 125)
-        ) %>%
-        mutate(measurement = meas)
+            density = sum(dens.ml) / (length(unique(file)) * 125)
+        )
     return(density)
 }
 ```
@@ -332,7 +330,8 @@ morph25 <- arrow_read_table("bemovi_25_morph") %>%
 # to recalculate the densities without the faulty videos.
 morph25 <- inner_join(morph25, 
                       videos_to_remove_25 %>% select(timestamp, bottle)) %>%
-  dplyr::filter(!(file %in% videos_to_remove_25$file))
+  dplyr::filter(!(file %in% videos_to_remove_25$file)) %>%
+  distinct()
 
 # calculate new densities
 morph25_density <- CalculateDensities(morph25, meas, extrapolation.factor, cropping.factor) 
@@ -367,7 +366,8 @@ morph25 <- arrow_read_table("bemovi_25_morph_cropped") %>%
 
 morph25 <- inner_join(morph25, 
                       videos_to_remove_25 %>% select(timestamp, bottle)) %>%
-  dplyr::filter(!(file %in% videos_to_remove_25$file))
+  dplyr::filter(!(file %in% videos_to_remove_25$file)) %>%
+  distinct()
 
 # calculate new densities
 morph25_cropped_density <- CalculateDensities(morph25, meas, extrapolation.factor, cropping.factor) 
@@ -408,7 +408,8 @@ morph16 <- arrow_read_table("bemovi_16_morph") %>%
 
 morph16 <- inner_join(morph16, 
                       videos_to_remove_16 %>% select(timestamp, bottle)) %>%
-  dplyr::filter(!(file %in% videos_to_remove_16$file))
+  dplyr::filter(!(file %in% videos_to_remove_16$file)) %>%
+  distinct()
 
 # calculate new densities
 morph16_density <- CalculateDensities(morph16, meas, extrapolation.factor, cropping.factor) 
@@ -428,7 +429,7 @@ morph16_density$density <- ifelse(is.na(morph16_density$density),0,morph16_densi
 
 ### bind new densities together
 
-new_densities <- rbind(morph25_density, morph25_cropped_density, morph16_density) %>% dplyr::select(-numberOfVideos)
+new_densities <- rbind(morph25_density, morph25_cropped_density, morph16_density)
 
 ### overwrite the new densities in the main density data.frame
 
@@ -627,7 +628,7 @@ morph25_density$density <- ifelse(is.na(morph25_density$density),0,morph25_densi
 
 ### bind new densities together
 
-new_densities <- rbind(morph25_density,morph16_density) %>%   dplyr::select(-numberOfVideos)
+new_densities <- rbind(morph25_density,morph16_density)
 
 ### overwrite the new densities in the main density data.frame
 
@@ -1147,21 +1148,27 @@ cropping.factor_25_cropped <- 4
 
 ciliate_biomasses_16 <- ciliate_traits_16 %>%
   group_by(timestamp, bottle, species) %>%
-  summarize(biomass = sum(biomass*n_frames, na.rm = T)/(3*125)) %>%
+  summarize(
+    biomass = sum(biomass*n_frames, na.rm = TRUE)/(length(unique(file)) * 125)
+  ) %>%
   mutate(biomass = biomass*extrapolation.factor_16*extrapolation.factor_16,
          measurement = meas_16,
          biomass = ifelse(!(species %in% video_biomass_species), NA, biomass)) # add biomass=NA if not a species
 
 ciliate_biomasses_25 <- ciliate_traits_25 %>%
   group_by(timestamp, bottle, species) %>%
-  summarize(biomass = sum(biomass*n_frames, na.rm = T)/(3*125)) %>%
+  summarize(
+    biomass = sum(biomass*n_frames, na.rm = TRUE)/(length(unique(file)) * 125)
+  ) %>%
   mutate(biomass = biomass*extrapolation.factor_25*cropping.factor_25,
          measurement = meas_25,
          biomass = ifelse(!(species %in% video_biomass_species), NA, biomass)) # add biomass=NA if not a species
 
 ciliate_biomasses_25_cropped <- ciliate_traits_25_cropped %>%
   group_by(timestamp, bottle, species) %>%
-  summarize(biomass = sum(biomass*n_frames, na.rm = T)/(3*125)) %>%
+  summarize(
+    biomass = sum(biomass*n_frames, na.rm = TRUE)/(length(unique(file)) * 125)
+  ) %>%
   mutate(biomass = biomass*extrapolation.factor_25*cropping.factor_25_cropped,
          measurement = meas_25_cropped,
          biomass = ifelse(!(species %in% video_biomass_species), NA, biomass)) # add biomass=NA if not a species

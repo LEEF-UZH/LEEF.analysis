@@ -7,7 +7,8 @@
 arrow_read_toc(
   db = getOption("RRDarrow", "/Volumes/RRD.Reclassification_LEEF-2/parquet/"),
   from_timestamp = 20221106,
-  to_timestamp = 20230812
+  to_timestamp = 20230812,
+  duplicates = mean
 )
 }
 \arguments{
@@ -17,6 +18,9 @@ in case of LEEF called \code{parquet}. Defaul: \code{getOption("RRDarrow", "/Vol
 \item{from_timestamp}{\code{integer}. Earliest timestamp to return. Default: \code{20210920}}
 
 \item{to_timestamp}{\code{integer}. Latest timestamp to return. Default: \code{21000101}}
+
+\item{duplicates}{function which will be used to combine duplicates. If \code{NULL}, co summarising is done.
+Default is `mean`.}
 }
 \value{
 \code{tibble} containing the data

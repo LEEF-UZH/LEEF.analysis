@@ -5,6 +5,8 @@
 #'  in case of LEEF called \code{parquet}. Defaul: \code{getOption("RRDarrow", "/Volumes/RRD.Reclassification_LEEF-2/parquet/")}
 #' @param from_timestamp \code{integer}. Earliest timestamp to return. Default: \code{20210920}
 #' @param to_timestamp \code{integer}. Latest timestamp to return. Default: \code{21000101}
+#' @param duplicates function which will be used to combine duplicates. If \code{NULL}, co summarising is done.
+#'   Default is `mean`.
 #'
 #' @return \code{tibble} containing the data
 #'
@@ -16,12 +18,10 @@
 #'
 #' @examples
 arrow_read_toc <- function(
-# TODO: ADD MEAN CALCULATIONS AS IN DB_READ_TOC()
- 
     db = getOption("RRDarrow", "/Volumes/RRD.Reclassification_LEEF-2/parquet/"),
     from_timestamp = 20221106,
-    to_timestamp = 20230812) {
-
+    to_timestamp = 20230812,
+    duplicates = mean) {
     exp_des <- arrow_read_table("experimental_design", db)
 
     toc <- arrow_read_table("toc", db) |>
@@ -32,12 +32,20 @@ arrow_read_toc <- function(
         filter(as.integer(timestamp) <= as.integer(to_timestamp)) |>
         full_join(exp_des, by = "bottle")
 
+    #  if (!is.null(duplicates)) {
 
     toc <- toc |>
         dplyr::collect() |>
         dplyr::mutate(day = as.integer(difftime(as.Date(as.character(timestamp), format = "%Y%m%d"), as.Date("2022-11-07"), units = "days"))) |>
         dplyr::relocate(day, .after = timestamp) |>
         tibble::as_tibble()
+
+    if (!is.null(duplicates)) {
+        toc <- toc %>%
+            group_by(timestamp, day, bottle, type, temperature, salinity, resources, incubator, replicate) %>%
+            summarise(concentration = mean(concentration), cv = as.numeric(NA), n = n()) %>%
+            ungroup()
+    }
 
     return(toc)
 }
