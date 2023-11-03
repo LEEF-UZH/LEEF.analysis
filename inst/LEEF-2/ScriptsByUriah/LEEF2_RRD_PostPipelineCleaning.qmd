@@ -298,7 +298,8 @@ CalculateDensities <- function(morph, meas, extrapolation.factor, cropping.facto
         group_by(timestamp, bottle, species) %>%
         summarise(
             density = sum(dens.ml) / (length(unique(file)) * 125)
-        )
+        ) %>%
+    mutate(measurement=meas)
     return(density)
 }
 ```

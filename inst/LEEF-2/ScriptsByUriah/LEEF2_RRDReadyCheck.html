@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Uriah Daugaard">
-<meta name="dcterms.date" content="2023-11-01">
+<meta name="dcterms.date" content="2023-11-03">
 
 <title>LEEF2 RRD Ready Check</title>
 <style>
@@ -3104,7 +3104,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 1, 2023</p>
+      <p class="date">November 3, 2023</p>
     </div>
   </div>
   
@@ -4103,7 +4103,7 @@ missing_timestamps</code></pre>
 <pre><code>[1] &quot;Do the densities in the RRD correspond to the densities in new_densities.csv&quot;</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] FALSE</code></pre>
+<pre><code>[1] TRUE</code></pre>
 </div>
 <details>
 <summary>Code</summary>
@@ -4112,15 +4112,10 @@ missing_timestamps</code></pre>
 <span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a>     <span class="fu">filter</span>(<span class="sc">!</span>identical)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 14
-  timestamp bottle species      measurement new_densities   day density  biomass
-      &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt;               &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;    &lt;dbl&gt;
-1  20221128 b_32   Coleps_irch… bemovi_mag…         614.     21   307.   1.51e-5
-2  20221128 b_32   Debris_and_… bemovi_mag…          46.7    21    23.4 NA      
-3  20221128 b_32   Paramecium_… bemovi_mag…         230.     21   115.   6.71e-5
-4  20221128 b_32   Paramecium_… bemovi_mag…         406.     21   203.   1.10e-4
-5  20221128 b_32   Stylonychia2 bemovi_mag…         158.     21    78.9  9.15e-6
-# ℹ 6 more variables: incubator &lt;chr&gt;, temperature &lt;chr&gt;, resources &lt;chr&gt;,
+<pre><code># A tibble: 0 × 14
+# ℹ 14 variables: timestamp &lt;dbl&gt;, bottle &lt;chr&gt;, species &lt;chr&gt;,
+#   measurement &lt;chr&gt;, new_densities &lt;dbl&gt;, day &lt;int&gt;, density &lt;dbl&gt;,
+#   biomass &lt;dbl&gt;, incubator &lt;chr&gt;, temperature &lt;chr&gt;, resources &lt;chr&gt;,
 #   salinity &lt;chr&gt;, replicate &lt;int&gt;, identical &lt;lgl&gt;</code></pre>
 </div>
 </div>
@@ -4234,11 +4229,11 @@ missing_timestamps</code></pre>
       &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;             &lt;dbl&gt;   &lt;dbl&gt;
 1  20221107     0 b_01   Paramecium_cau…    401. bemovi_mag…   0.000560  5.58e-5
 2  20221107     0 b_06   Paramecium_cau…    416. bemovi_mag…   0.000630  6.27e-5
-3  20221107     0 b_09   Paramecium_cau…    406. bemovi_mag…   0.000643  6.40e-5
-4  20221107     0 b_12   Paramecium_cau…    309. bemovi_mag…   0.000516  5.14e-5
-5  20221107     0 b_15   Paramecium_cau…    380. bemovi_mag…   0.000538  5.36e-5
-6  20221107     0 b_22   Paramecium_cau…    427. bemovi_mag…   0.000655  6.52e-5
-7  20221107     0 b_30   Paramecium_cau…    450. bemovi_mag…   0.000587  5.85e-5
+3  20221107     0 b_12   Paramecium_cau…    309. bemovi_mag…   0.000516  5.14e-5
+4  20221107     0 b_15   Paramecium_cau…    380. bemovi_mag…   0.000538  5.36e-5
+5  20221107     0 b_22   Paramecium_cau…    427. bemovi_mag…   0.000655  6.52e-5
+6  20221107     0 b_30   Paramecium_cau…    450. bemovi_mag…   0.000587  5.85e-5
+7  20221107     0 b_09   Paramecium_cau…    406. bemovi_mag…   0.000643  6.40e-5
 8  20221107     0 b_09   Paramecium_cau…    486. bemovi_mag…   0.0000714 6.17e-4
 # ℹ 1 more variable: identical &lt;lgl&gt;</code></pre>
 </div>
