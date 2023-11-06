@@ -55,46 +55,47 @@ params:
   bemovi_mag_16_moving_background: 
     - 20230203_00176
   bemovi_mag_25_moving_background:
-    - 20221125_00035
-    - 20221205_00091
-    - 20221209_00094
-    - 20221212_00091
-    - 20230120_00082
-    - 20230526_00079
-    - 20230529_00088
-    - 20230609_00088
-    - 20230612_00094
-    - 20230721_00061
     - 20221121_00094
+    - 20221125_00035
     - 20221128_00094
     - 20221128_00095
+    - 20221205_00091
+    - 20221209_00094
     - 20221212_00082
+    - 20221212_00091
     - 20230109_00004
+    - 20230120_00082
     - 20230130_00067
     - 20230203_00093
     - 20230306_00091
     - 20230327_00064
     - 20230417_00058
     - 20230417_00067
+    - 20230424_00091
     - 20230505_00028
+    - 20230512_00086
+    - 20230517_00055
     - 20230522_00079
     - 20230526_00064
+    - 20230526_00079
+    - 20230529_00088
     - 20230605_00061
     - 20230609_00004
     - 20230609_00013
+    - 20230609_00088
+    - 20230612_00094
     - 20230717_00094
     - 20230719_00028
     - 20230721_00049
+    - 20230721_00061
     - 20230724_00016
     - 20230807_00064
-    - 20230424_00091
-    - 20230512_00086
-    - 20230517_00055
+
 
 
   reclassify_flowcam: false
-  reclassify_bemovi_16: true
-  reclassify_bemovi_25: true
+  reclassify_bemovi_16: false
+  reclassify_bemovi_25: false
   regate_flowcytometer: false  
   assemble_manualcount: false
   assemble_o2: false
@@ -103,7 +104,7 @@ params:
 
   update_parquet_flowcam: false
   update_parquet_bemovi_16: true
-  update_parquet_bemovi_25: true
+  update_parquet_bemovi_25: false
   update_parquet_flowcytometer: false
   update_parquet_manualcount: false
   update_parquet_o2: false
@@ -140,7 +141,8 @@ knitr::opts_chunk$set(
     echo = TRUE,
     eval = FALSE,
     message = TRUE,
-    warning = TRUE
+    warning = TRUE,
+    message = NA
 )
 
 tag <- paste0(params$release, "_", format(Sys.Date(), "%Y%m%d"))
@@ -489,7 +491,7 @@ fns <- list.files(
 
 tic()
 
-pbmcapply::pbmclapply(
+lapply(
     fns,
     function(fn_traits) {
         fn_dens <- fn_traits |>
@@ -508,16 +510,16 @@ pbmcapply::pbmclapply(
         traits <- readRDS(fn_traits) |>
             mutate(timestamp = timestamp)
 
-        biomass_bemovi_16 <- LEEF_2_biomass_bemovi_16(
-            ciliate_traits_16 = traits,
-            ciliate_density_16 = readRDS(fn_dens)
+        biomass_bemovi <- LEEF_2_biomass_bemovi(
+            ciliate_traits = traits,
+            ciliate_density = readRDS(fn_dens),
+            extrapolation_factor = yaml::read_yaml(file.path(parameter_dir, "parameter", "0.raw.data", "bemovi.mag.16", "bemovi_extract.mag.16.yml"))$extrapolation.factor,
+            cropping_factor = 1
         )
 
-        saveRDS(biomass_bemovi_16$traits, file = fn_traits)
-        saveRDS(biomass_bemovi_16$density, file = fn_dens)
-    },
-    mc.preschedule = FALSE,
-    mc.cores = 1 # when using more, some timestamps were not there... was: params$cores
+        saveRDS(biomass_bemovi$traits, file = fn_traits)
+        saveRDS(biomass_bemovi$density, file = fn_dens)
+    }
 )
 
 toc()
@@ -552,7 +554,7 @@ if (!file.exists(out)) {
             bemovi_extract_name = file.path(parameter_dir, "parameter", "0.raw.data", "bemovi.mag.25", "bemovi_extract.mag.25.yml"),
             output = out,
             exclude_videos = params$bemovi_mag_25_moving_background,
-            mc.cores = 1 # params$cores
+            mc.cores = params$cores
         )
     )
     toc()
@@ -596,7 +598,7 @@ fns <- list.files(
     full.names = TRUE
 )
 
-pbmcapply::pbmclapply(
+lapply(
     sample(fns),
     function(fn) {
         x <- readRDS(fn) |>
@@ -633,9 +635,7 @@ pbmcapply::pbmclapply(
         }
         unlink(fn)
         saveRDS(x, file = fn)
-    },
-    mc.cores = params$cores,
-    mc.preschedule = FALSE
+    }
 )
 ```
 
@@ -656,7 +656,7 @@ fns <- list.files(
 )
 
 tic()
-pbmcapply::pbmclapply(
+lapply(
     fns,
     function(fn_traits) {
         fn_dens <- fn_traits |>
@@ -675,16 +675,24 @@ pbmcapply::pbmclapply(
         traits <- readRDS(fn_traits) |>
             mutate(timestamp = timestamp)
 
-        biomass_bemovi_25 <- LEEF_2_biomass_bemovi_25(
-            ciliate_traits_25 = traits,
-            ciliate_density_25 = readRDS(fn_dens)
+        biomass_bemovi <- LEEF_2_biomass_bemovi(
+            ciliate_traits = traits,
+            ciliate_density = readRDS(fn_dens),
+            extrapolation_factor = yaml::read_yaml(file.path(parameter_dir, "parameter", "0.raw.data", "bemovi.mag.25", "bemovi_extract.mag.25.yml"))$extrapolation.factor,
+            cropping_factor = 1
         )
 
-        saveRDS(biomass_bemovi_25$traits, file = fn_traits)
-        saveRDS(biomass_bemovi_25$density, file = fn_dens)
-    },
-    mc.preschedule = FALSE,
-    mc.cores = params$cores
+        unlink(fn_traits)
+        saveRDS(
+            biomass_bemovi$traits, 
+            file = fn_traits
+        )
+        unlink(fn_dens)
+        saveRDS(
+            biomass_bemovi$density, 
+            file = fn_dens
+        )
+    }
 )
 toc()
 
@@ -698,7 +706,7 @@ fns <- list.files(
 )
 
 tic()
-pbmcapply::pbmclapply(
+lapply(
     fns,
     function(fn_traits) {
         fn_dens <- fn_traits |>
@@ -717,16 +725,18 @@ pbmcapply::pbmclapply(
         traits <- readRDS(fn_traits) |>
             mutate(timestamp = timestamp)
 
-        biomass_bemovi_25 <- LEEF_2_biomass_bemovi_25_cropped(
-            ciliate_traits_25 = traits,
-            ciliate_density_25 = readRDS(fn_dens)
+        biomass_bemovi <- LEEF_2_biomass_bemovi(
+            ciliate_traits = traits,
+            ciliate_density = readRDS(fn_dens),
+            extrapolation_factor = yaml::read_yaml(file.path(parameter_dir, "parameter", "0.raw.data", "bemovi.mag.25", "bemovi_extract.mag.25.cropped.yml"))$extrapolation.factor,
+            cropping_factor = 4
         )
 
-        saveRDS(biomass_bemovi_25$traits, file = fn_traits)
-        saveRDS(biomass_bemovi_25$density, file = fn_dens)
-    },
-    mc.preschedule = FALSE,
-    mc.cores = params$cores
+        unlink(fn_traits)
+        saveRDS(biomass_bemovi$traits, file = fn_traits)
+        unlink(fn_dens)
+        saveRDS(biomass_bemovi$density, file = fn_dens)
+    }
 )
 toc()
 ```

@@ -1060,16 +1060,16 @@ densities20221107flowcam <- densities20221107flowcam %>%
 
 ```{r}
 ciliate_traits_16 <- arrow_read_table(table="bemovi_16_morph") %>%
-  collect() %>%
-  dplyr::filter(timestamp == "20221107") # done as an example for this timestamp
+  collect() # %>%
+#  dplyr::filter(timestamp == "20221107") # done as an example for this timestamp
 
 ciliate_traits_25 <- arrow_read_table(table="bemovi_25_morph") %>%
-  collect() %>%
-  dplyr::filter(timestamp == "20221107")  # done as an example for this timestamp
+  collect() # %>%
+#  dplyr::filter(timestamp == "20221107")  # done as an example for this timestamp
 
 ciliate_traits_25_cropped <- arrow_read_table(table="bemovi_25_morph_cropped") %>%
-  collect() %>%
-  dplyr::filter(timestamp == "20221107")  # done as an example for this timestamp
+  collect() # %>%
+#  dplyr::filter(timestamp == "20221107")  # done as an example for this timestamp
 
 
 video_biomass_species <- c("Coleps_irchel", # species for which biomass is calculated

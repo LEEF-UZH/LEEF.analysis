@@ -738,6 +738,11 @@ compare_densities2 <- left_join(new_PCaudatum_densities %>% dplyr::filter(specie
                                 densities)
 
 print("Do the densities in the RRD correspond to the densities in new_PCaudatum_densities.csv"); all(round(compare_densities2$density,3) == round(compare_densities2$new_densities,3))
+
+compare_densities2 |>
+    mutate(identical = round(density, 3) == round(new_densities, 3)) |>
+    filter(!identical) |>
+    select(c(1:5, 7))
 ```
 
 
