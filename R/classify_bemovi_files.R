@@ -21,29 +21,25 @@
 #'
 #' @md
 #' @examples
-#'
-#'
 classify_bemovi_files <- function(
-  datadir,
-  bemovi_extract_name = NULL,
-  classifier_constant_name,
-  classifier_increasing_name,
-  exclude_videos = NULL
-){
-
+    datadir,
+    bemovi_extract_name = NULL,
+    classifier_constant_name,
+    classifier_increasing_name,
+    exclude_videos = NULL) {
   p <- yaml::read_yaml(bemovi_extract_name)
 
 
-# The classification ------------------------------------------------------
+  # The classification ------------------------------------------------------
 
   morph_mvt <- readRDS(file.path(datadir, p$merged.data.folder, p$morph_mvt))
   morph_mvt <- morph_mvt[, grep("_prob|species", names(morph_mvt), invert = TRUE)]
 
   traj <- readRDS(file.path(datadir, p$merged.data.folder, p$master))
 
-  if (!is.null(exclude_videos)){
-    morph_mvt <- morph_mvt[!(morph_mvt$file %in% exclude_videos),]
-    traj <- traj[!(traj$file %in% exclude_videos),]
+  if (!is.null(exclude_videos)) {
+    morph_mvt <- morph_mvt[!(morph_mvt$file %in% exclude_videos), ]
+    traj <- traj[!(traj$file %in% exclude_videos), ]
   }
   classified <- LEEF.measurement.bemovi::classify(
     bemovi_extract = bemovi_extract_name,
@@ -55,8 +51,43 @@ classify_bemovi_files <- function(
     composition = utils::read.csv(file.path(datadir, "compositions.csv"))
   )
 
+# Correction for exclude_videos ----------------------------------------------
 
-# Return the classifications --------------------------------------------------
+  vdf <- as.data.frame(
+    read.table(
+      file.path(datadir, p$video.description.folder, p$video.description.file),
+      sep = "\t",
+      header = TRUE
+    )
+  )
+
+  dens_corr <- vdf |>
+    select(bottle, file) |>
+    filter(file %in% exclude_videos) |>
+    group_by(bottle) |>
+    mutate(
+      dens_factor = 3 / (3 - n()),
+      file = NULL
+    )
+
+  classified$mean_density_per_ml <-
+    classified$mean_density_per_ml |>
+    left_join(
+      y = dens_corr,
+      by = join_by(bottle)
+    ) |>
+    mutate(
+      dens_factor = ifelse(
+        is.na(dens_factor),
+        1,
+        dens_factor
+      )
+    ) |>
+    mutate(
+      density = density * dens_factor
+    )
+
+  # Return the classifications --------------------------------------------------
 
 
   return(classified)

@@ -11,13 +11,13 @@
 #' @examples
 LEEF_1_biomass_bemovi_25 <- function(
     ciliate_traits_25,
-    ciliate_density_25
-){
-
-  video_biomass_species <- c("Paramecium_bursaria","Paramecium_caudatum","Coleps_irchel", # species for which biomass is calculated
-                             "Stylonychia1","Stylonychia2","Colpidium","Euplotes",
-                             "Tetrahymena", "Loxocephallus",
-                             "Dexiostoma")
+    ciliate_density_25) {
+  video_biomass_species <- c(
+    "Paramecium_bursaria", "Paramecium_caudatum", "Coleps_irchel", # species for which biomass is calculated
+    "Stylonychia1", "Stylonychia2", "Colpidium", "Euplotes",
+    "Tetrahymena", "Loxocephallus",
+    "Dexiostoma"
+  )
 
   # 25x
 
@@ -25,22 +25,23 @@ LEEF_1_biomass_bemovi_25 <- function(
     dplyr::filter(species %in% video_biomass_species) %>%
     mutate(
       height = ifelse(
-        species %in% c("Euplotes","Stylonychia1","Stylonychia2"),
-        mean_minor/3,
+        species %in% c("Euplotes", "Stylonychia1", "Stylonychia2"),
+        mean_minor / 3,
         ifelse(
           species %in% c("Paramecium_bursaria"),
-          mean_minor/1.5,
-          mean_minor)
+          mean_minor / 1.5,
+          mean_minor
+        )
       ),
-      biomass = (4/3) * pi * (mean_minor/2) * (height/2) * (mean_major/2), # calculate biomass
-      biomass = biomass/10^12  # change it from um3 to g, assuming water density
+      biomass = (4 / 3) * pi * (mean_minor / 2) * (height / 2) * (mean_major / 2), # calculate biomass
+      biomass = biomass / 10^12 # change it from um3 to g, assuming water density
     )
 
   ciliate_traits_25_NotBiomass <- ciliate_traits_25 %>%
     dplyr::filter(!(species %in% video_biomass_species)) %>%
     mutate(
-      height=as.numeric(NA),
-      biomass=as.numeric(NA)
+      height = as.numeric(NA),
+      biomass = as.numeric(NA)
     )
 
 
@@ -73,8 +74,14 @@ LEEF_1_biomass_bemovi_25 <- function(
       )
     ) # add biomass=NA if not a species
 
+  biomasses <- biomasses |>
+    mutate(
+      biomas = biomas * dens_factor
+    )
 
   biomasses$timestamp <- as.character(biomasses$timestamp)
+
+
 
   densities <- full_join(
     ciliate_density_25,
@@ -82,11 +89,11 @@ LEEF_1_biomass_bemovi_25 <- function(
     by = c("timestamp", "bottle", "species")
   )
   densities$biomass[densities$species %in% video_biomass_species & is.na(densities$biomass)] <- 0
-    # mutate(
-    #   biomass = case_when(
-    #     species %in% flowcam_biomass_species & is.na(biomass) ~ 0,
-    #     TRUE ~ biomass)
-    # )
+  # mutate(
+  #   biomass = case_when(
+  #     species %in% flowcam_biomass_species & is.na(biomass) ~ 0,
+  #     TRUE ~ biomass)
+  # )
 
   return(
     list(
@@ -94,5 +101,4 @@ LEEF_1_biomass_bemovi_25 <- function(
       density = densities
     )
   )
-
 }
