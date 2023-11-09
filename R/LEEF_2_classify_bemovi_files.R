@@ -36,6 +36,18 @@ LEEF_2_classify_bemovi_files <- function(
   if (!is.null(exclude_videos)) {
     morph_mvt <- morph_mvt[!(morph_mvt$file %in% exclude_videos), ]
     traj <- traj[!(traj$file %in% exclude_videos), ]
+
+# TODO    
+    # vdf <- as.data.frame(
+    #   read.table(
+    #     file.path(datadir, p$video.description.folder, p$video.description.file),
+    #     sep = "\t",
+    #     header = TRUE,
+    #     stringsAsFactors = FALSE
+    #   )
+    
+
+
   }
   classified <- LEEF.2.measurement.bemovi::classify_LEEF_2(
     bemovi_extract = bemovi_extract_name,

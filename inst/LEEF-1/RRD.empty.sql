@@ -133,7 +133,8 @@ CREATE TABLE `bemovi_mag_25__mean_density_per_ml_cropped` (
   `magnification` INTEGER,
   `sample` INTEGER,
   `density` REAL,
-  `biomass` REAL
+  `biomass` REAL,
+  `dens_factor` REAL
 );
 CREATE TABLE `bemovi_mag_25__mean_density_per_ml` (
   `timestamp` TEXT,
@@ -145,7 +146,8 @@ CREATE TABLE `bemovi_mag_25__mean_density_per_ml` (
   `magnification` INTEGER,
   `sample` INTEGER,
   `density` REAL,
-  `biomass` REAL
+  `biomass` REAL,
+  `dens_factor` REAL
 );
 CREATE TABLE `bemovi_mag_25__morph_mvt_cropped` (
   `timestamp` TEXT,
@@ -271,7 +273,8 @@ CREATE TABLE `bemovi_mag_16__mean_density_per_ml` (
   `magnification` INTEGER,
   `sample` INTEGER,
   `density` REAL,
-  `biomass` REAL
+  `biomass` REAL,
+  `dens_factor` REAL
 );
 CREATE TABLE `bemovi_mag_16__morph_mvt` (
   `timestamp` TEXT,
@@ -336,7 +339,8 @@ CREATE TABLE `bemovi_mag_25__mean_density_per_ml_non_cropped` (
   `magnification` INTEGER,
   `sample` INTEGER,
   `density` REAL,
-  `biomass` REAL
+  `biomass` REAL,
+  `dens_factor` REAL
 );
 CREATE TABLE `bemovi_mag_25__morph_mvt_non_cropped` (
   `timestamp` TEXT,

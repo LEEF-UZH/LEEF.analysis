@@ -97,6 +97,7 @@ LEEF_2_biomass_bemovi <- function(
         biomasses,
         by = c("timestamp", "bottle", "species")
     )
+    
     densities$biomass[densities$species %in% video_biomass_species & is.na(densities$biomass)] <- 0
     # mutate(
     #   biomass = case_when(
@@ -105,6 +106,15 @@ LEEF_2_biomass_bemovi <- function(
     # )
 
     biomasses$timestamp <- as.character(biomasses$timestamp)
+
+    ## begin correct for excluded videos
+
+    densities <- densities |>
+        mutate(
+            biomass = biomass * dens_factor
+        )
+
+    ## begin correct for excluded videos
 
     return(
         list(

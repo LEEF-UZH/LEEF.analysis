@@ -19,18 +19,15 @@
 #'
 #' @md
 #' @examples
-#'
-#'
 LEEF_2_classify_bemovi_archive <- function(
-  extracted_dir = NULL,
-  magnification = 16,
-  bemovi_extract_name = NULL,
-  timestamps,
-  classifier = NULL,
-  output,
-  exclude_videos = NULL,
-  mc.cores = 1
-){
+    extracted_dir = NULL,
+    magnification = 16,
+    bemovi_extract_name = NULL,
+    timestamps,
+    classifier = NULL,
+    output,
+    exclude_videos = NULL,
+    mc.cores = 1) {
   dir.create(
     output,
     showWarnings = FALSE,
@@ -44,9 +41,9 @@ LEEF_2_classify_bemovi_archive <- function(
 
   return(
     pbmcapply::pbmclapply(
-    # parallel::mclapply(
+      # parallel::mclapply(
       timestamps,
-      function(timestamp){
+      function(timestamp) {
         datadir <- file.path(
           extracted_dir,
           paste0("LEEF.bemovi.mag.", as.character(magnification), ".bemovi.", as.character(timestamp))
@@ -63,21 +60,19 @@ LEEF_2_classify_bemovi_archive <- function(
         #   yaml::write_yaml(p, beyml)
         # }
 
-        suppressMessages(
-          {
-            classified <- NULL
-            try(
-              expr = {
-                classified <- LEEF_2_classify_bemovi_files(
-                  datadir = datadir,
-                  bemovi_extract_name = bemovi_extract_name,
-                  classifier = classifier,
-                  exclude_videos
-                )
-              }
-            )
-          }
-        )
+        suppressMessages({
+          classified <- NULL
+          try(
+            expr = {
+              classified <- LEEF_2_classify_bemovi_files(
+                datadir = datadir,
+                bemovi_extract_name = bemovi_extract_name,
+                classifier = classifier,
+                exclude_videos
+              )
+            }
+          )
+        })
 
         if (!is.null(classified)) {
           message("Saving timestamp ", timestamp, "...")
@@ -86,6 +81,44 @@ LEEF_2_classify_bemovi_archive <- function(
 
           p <- yaml::read_yaml(bemovi_extract_name)
 
+          ## begin correct for excluded videos
+
+          vdf <- as.data.frame(
+            read.table(
+              file.path(datadir, p$video.description.folder, p$video.description.file),
+              sep = "\t",
+              header = TRUE
+            )
+          )
+
+          dens_corr <- vdf |>
+            select(bottle, file) |>
+            filter(file %in% exclude_videos) |>
+            group_by(bottle) |>
+            mutate(
+              dens_factor = 3 / (3 - n()),
+              file = NULL
+            )
+
+          classified$mean_density_per_ml <-
+            classified$mean_density_per_ml |>
+            left_join(
+              y = dens_corr,
+              by = join_by(bottle)
+            ) |>
+            mutate(
+              dens_factor = ifelse(
+                is.na(dens_factor),
+                1,
+                dens_factor
+              )
+            ) |>
+            mutate(
+              density = density * dens_factor
+            )
+
+          ## end correct for excluded videos
+          
           trajectory_path <- file.path(output, "trajectories")
 
           dir.create(
@@ -104,7 +137,7 @@ LEEF_2_classify_bemovi_archive <- function(
             file = file.path(
               output,
               tolower(gsub("\\.rds$", paste0(".", timestamp, ".rds"), p$morph_mvt))
-              )
+            )
           )
 
           saveRDS(
@@ -122,7 +155,6 @@ LEEF_2_classify_bemovi_archive <- function(
               tolower(gsub("\\.rds$", paste0(".", timestamp, ".rds"), p$master))
             )
           )
-
         } else {
           message("ERROR in classifying timestamp ", timestamp)
         }
@@ -132,8 +164,8 @@ LEEF_2_classify_bemovi_archive <- function(
         message("###############################################")
         invisible(NULL)
       },
-    mc.preschedule = FALSE,
-    mc.cores = mc.cores
+      mc.preschedule = FALSE,
+      mc.cores = mc.cores
     )
   )
 }

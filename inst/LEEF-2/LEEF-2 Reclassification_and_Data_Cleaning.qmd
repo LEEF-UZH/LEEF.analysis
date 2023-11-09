@@ -93,26 +93,27 @@ params:
 
 
 
-  reclassify_flowcam: false
-  reclassify_bemovi_16: false
-  reclassify_bemovi_25: false
-  regate_flowcytometer: false  
-  assemble_manualcount: false
-  assemble_o2: false
-  assemble_conductivity: false
-  assemble_toc: false
+  reclassify_flowcam: true
+  reclassify_bemovi_16: true
+  reclassify_bemovi_25: true
+  regate_flowcytometer: true  
+  assemble_manualcount: true
+  assemble_o2: true
+  assemble_conductivity: true
+  assemble_toc: true
 
-  update_parquet_flowcam: false
+  update_parquet_flowcam: true
   update_parquet_bemovi_16: true
-  update_parquet_bemovi_25: false
-  update_parquet_flowcytometer: false
-  update_parquet_manualcount: false
-  update_parquet_o2: false
-  update_parquet_conductivity: false
-  update_parquet_toc: false
+  update_parquet_bemovi_25: true
+  update_parquet_flowcytometer: true
+  update_parquet_manualcount: true
+  update_parquet_o2: true
+  update_parquet_conductivity: true
+  update_parquet_toc: true
   
-  update_parquet_experimental_tables: false
-  update_all_parquet: false
+  update_parquet_experimental_tables: true
+
+  update_all_parquet: true
 
 ---
 
@@ -462,7 +463,7 @@ pbmcapply::pbmclapply(
                     )
                 ) |>
                 tibble::add_row(colp) |>
-                group_by(timestamp, date, species, bottle, resources, temperature, salinity, magnification, sample, replicate) |>
+                group_by(timestamp, date, species, bottle, resources, temperature, salinity, magnification, sample, replicate, dens_factor) |>
                 summarize(density = sum(density), .groups = "drop") |>
                 arrange(timestamp, bottle, species)
         }
@@ -684,12 +685,12 @@ lapply(
 
         unlink(fn_traits)
         saveRDS(
-            biomass_bemovi$traits, 
+            biomass_bemovi$traits,
             file = fn_traits
         )
         unlink(fn_dens)
         saveRDS(
-            biomass_bemovi$density, 
+            biomass_bemovi$density,
             file = fn_dens
         )
     }
