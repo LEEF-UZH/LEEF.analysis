@@ -42,9 +42,9 @@ params:
   contamination_timestamp: 20220128
   contamination_bottle: "b_02"
 
-  reclassify_flowcam: true
-  reclassify_bemovi_16: true
-  reclassify_bemovi_25: true
+  reclassify_flowcam: false
+  reclassify_bemovi_16: false
+  reclassify_bemovi_25: false
   regate_flowcytometer: true
 
   add_to_rrd: true
