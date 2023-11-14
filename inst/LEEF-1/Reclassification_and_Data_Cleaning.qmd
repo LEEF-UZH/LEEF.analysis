@@ -43,9 +43,9 @@ params:
   contamination_bottle: "b_02"
 
   reclassify_flowcam: false
-  reclassify_bemovi_16: false
-  reclassify_bemovi_25: false
-  regate_flowcytometer: true
+  reclassify_bemovi_16: true
+  reclassify_bemovi_25: true
+  regate_flowcytometer: false
 
   add_to_rrd: true
   add_others_to_rrd: true
@@ -783,7 +783,7 @@ pbmcapply::pbmclapply(
 
 ```
 
-### Exclusion of time series that are wrong classifications or only noise
+### Exclusion of time series that are wrong classifications or only noise and remove duplicates
 ```{r}
 #| label: bemovi_16_exclusion_timeseries
 #| eval: !expr params$reclassify_bemovi_16
@@ -846,6 +846,7 @@ pbapply::pblapply(
     
     x |>
       dplyr::select(-bottle_species) |>
+      distinct() |>
       saveRDS(file = fn)
   }
 )
@@ -1151,7 +1152,7 @@ pbapply::pblapply(
 ```
 
 
-### Exclusion of time series that are wrong classifications or only noise
+### Exclusion of time series that are wrong classifications or only noise and remove duplicates
 ```{r}
 #| label: bemovi_25_exclusion_timeseries
 #| eval: !expr params$reclassify_bemovi_25
@@ -1215,6 +1216,7 @@ pbapply::pblapply(
     
     x |>
       dplyr::select(-bottle_species) |>
+      distinct() |>
       saveRDS(file = fn)
   }
 )

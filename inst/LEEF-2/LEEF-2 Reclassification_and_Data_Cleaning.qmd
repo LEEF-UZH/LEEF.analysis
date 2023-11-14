@@ -93,8 +93,8 @@ params:
 
 
 
-  reclassify_flowcam: true
-  reclassify_bemovi_16: true
+  reclassify_flowcam: false
+  reclassify_bemovi_16: false
   reclassify_bemovi_25: true
   regate_flowcytometer: true  
   assemble_manualcount: true
@@ -630,7 +630,7 @@ lapply(
                     )
                 ) |>
                 tibble::add_row(colp) |>
-                group_by(timestamp, date, species, bottle, resources, temperature, salinity, magnification, sample, replicate) |>
+                group_by(timestamp, date, species, bottle, resources, temperature, salinity, magnification, sample, replicate, dens_factor) |>
                 summarize(density = sum(density), .groups = "drop") |>
                 arrange(timestamp, bottle, species)
         }
@@ -676,6 +676,8 @@ lapply(
         traits <- readRDS(fn_traits) |>
             mutate(timestamp = timestamp)
 
+        message(fn_traits)
+        
         biomass_bemovi <- LEEF_2_biomass_bemovi(
             ciliate_traits = traits,
             ciliate_density = readRDS(fn_dens),
@@ -725,6 +727,8 @@ lapply(
 
         traits <- readRDS(fn_traits) |>
             mutate(timestamp = timestamp)
+
+        message(fn_traits)
 
         biomass_bemovi <- LEEF_2_biomass_bemovi(
             ciliate_traits = traits,
