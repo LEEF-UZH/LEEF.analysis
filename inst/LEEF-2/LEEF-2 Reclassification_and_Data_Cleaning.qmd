@@ -95,25 +95,25 @@ params:
 
   reclassify_flowcam: false
   reclassify_bemovi_16: false
-  reclassify_bemovi_25: true
-  regate_flowcytometer: true  
-  assemble_manualcount: true
-  assemble_o2: true
-  assemble_conductivity: true
+  reclassify_bemovi_25: false
+  regate_flowcytometer: false  
+  assemble_manualcount: false
+  assemble_o2: false
+  assemble_conductivity: false
   assemble_toc: true
 
-  update_parquet_flowcam: true
-  update_parquet_bemovi_16: true
-  update_parquet_bemovi_25: true
-  update_parquet_flowcytometer: true
-  update_parquet_manualcount: true
-  update_parquet_o2: true
-  update_parquet_conductivity: true
+  update_parquet_flowcam: false
+  update_parquet_bemovi_16: false
+  update_parquet_bemovi_25: false
+  update_parquet_flowcytometer: false
+  update_parquet_manualcount: false
+  update_parquet_o2: false
+  update_parquet_conductivity: false
   update_parquet_toc: true
   
-  update_parquet_experimental_tables: true
+  update_parquet_experimental_tables: false
 
-  update_all_parquet: true
+  update_all_parquet: false
 
 ---
 
@@ -677,7 +677,7 @@ lapply(
             mutate(timestamp = timestamp)
 
         message(fn_traits)
-        
+
         biomass_bemovi <- LEEF_2_biomass_bemovi(
             ciliate_traits = traits,
             ciliate_density = readRDS(fn_dens),
@@ -838,12 +838,76 @@ pbmcapply::pbmclapply(
 tp <- file.path(params$output_dir, "toc")
 dir.create(tp, showWarnings = FALSE, recursive = TRUE)
 
-file.copy(
-    from = params$toc,
-    to = file.path(tp, basename(params$toc))
+toc <- readRDS(params$toc)
+
+#### detrending begin
+
+colnames_toc <- colnames(toc)
+exp_des <- read.csv(file.path(parameter_dir, "parameter", "00.general.parameter", "experimental_design.csv"))
+toc <- full_join(
+    toc,
+    exp_des,
+    by = "bottle"
 )
 
-rm(tp)
+toc$day <- as.Date(as.character(toc$timestamp), "%Y%m%d") - min(as.Date(as.character(toc$timestamp), "%Y%m%d"))
+toc$day <- as.numeric(toc$day)
+
+toc$analysis_time2 <- as_datetime(toc$anaysis_time, format = "%Y-%m-%d %H:%M") # wrong time zones, but doesnt matter
+toc$analysis_time2 <- sapply(toc$analysis_time2, function(d) {
+    paste0(unlist(strsplit(as.character(d), "-")), collapse = "")
+})
+
+toc <- toc %>%
+    dplyr::mutate(
+        experiment_phase = case_when(
+            temperature == "constant" ~ "constant",
+            day < 70 ~ "constant before increase",
+            day >= 70 & day < 154 ~ "increasing",
+            day >= 154 ~ "constant after increase"
+        ),
+        int = interaction(analysis_time2, experiment_phase)
+    ) %>%
+    arrange(timestamp)
+
+toc_list <- split(toc,
+    f = toc$int,
+    drop = T
+)
+
+toc_list <- mclapply(
+    toc_list,
+    function(df) {
+        if (nrow(df) < 3 * 4) { # at least 3 bottles per type to do the detrending
+            df$concentration.detrended <- df$conc
+            return(df)
+        }
+
+        df <- lapply(c("IC", "TC", "TN", "TOC"), function(Type) {
+            df2 <- df %>% filter(inj_type == Type)
+            m <- lm(conc ~ position, data = df2)
+            predict <- predict(m) - predict(m)[1]
+            df2$concentration.detrended <- df2$conc - predict
+            df2
+        })
+
+        do.call("rbind", df)
+    },
+    mc.cores = params$cores
+)
+
+toc <- do.call("rbind", toc_list)
+
+toc_before_after <- toc
+
+toc <- toc %>%
+    dplyr::mutate(conc = concentration.detrended) %>%
+    select(all_of(colnames_toc))
+
+#### detrending end
+
+saveRDS(toc, file = file.path(tp, basename(params$toc)))
+
 ```
 
 ## [ ] Assemble O2
