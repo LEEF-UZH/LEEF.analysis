@@ -12,7 +12,7 @@ format:
     toc-float: true
     toc-depth: 6
 params:
-  RRDarrow: "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20231020"
+  RRDarrow: "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20231124"
 ---
 
 # Setup
@@ -42,16 +42,16 @@ options(RRDarrow = params$RRDarrow)
 ```{r data, warning=FALSE, message=FALSE}
 
 densities <- arrow_read_density() %>%
-  arrange(day)
+    arrange(day)
 
 o2 <- arrow_read_o2() %>%
-  arrange(day)
+    arrange(day)
 
 water_chem <- arrow_read_toc() %>%
-  arrange(day)
+    arrange(day)
 
 conductivity <- arrow_read_conductivity() %>%
-  arrange(day)
+    arrange(day)
 ```
 
 # General remarks
@@ -69,9 +69,9 @@ timestamps <- unique(densities$timestamp)
 days <- sort(unique(densities$day))
 
 # timestamps and days that should be in RRD
-days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
-timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
-timestamps2 <- gsub("-","",as.character(timestamps2))
+days2 <- sort(c(0 + (0:39 * 7), 2 + (0:39 * 7), 4 + (0:39 * 7)))
+timestamps2 <- as_date("20221107", format = "%Y%m%d") + days2
+timestamps2 <- gsub("-", "", as.character(timestamps2))
 
 # timestamps and day that should be in RRD but are not
 idx <- which(!(days2 %in% days))
@@ -79,8 +79,10 @@ missing_days <- days2[idx]
 missing_timestamps <- timestamps2[idx]
 
 print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
-rbind(missing_days=missing_days,
-      missing_timestamps=missing_timestamps)
+rbind(
+    missing_days = missing_days,
+    missing_timestamps = missing_timestamps
+)
 ```
 
 ### bemovi_mag_16 missing
@@ -88,15 +90,24 @@ rbind(missing_days=missing_days,
 The timestamps `20230602`, `20230616` and  `20230621` are missing because of a dataloss during processing.
 
 ```{r}
-msm  <- "bemovi_mag_16"
+msm <- "bemovi_mag_16"
 # timestamps and days in RRD |> unique()=
-timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
-days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+timestamps <- densities |>
+    filter(measurement == msm) |>
+    select(timestamp) |>
+    unlist() |>
+    unique()
+days <- densities |>
+    filter(measurement == msm) |>
+    select(day) |>
+    unlist() |>
+    unique() |>
+    sort()
 
 # timestamps and days that should be in RRD
-days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
-timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
-timestamps2 <- gsub("-","",as.character(timestamps2))
+days2 <- sort(c(0 + (0:39 * 7), 2 + (0:39 * 7), 4 + (0:39 * 7)))
+timestamps2 <- as_date("20221107", format = "%Y%m%d") + days2
+timestamps2 <- gsub("-", "", as.character(timestamps2))
 
 # timestamps and day that should be in RRD but are not
 idx <- which(!(days2 %in% days))
@@ -104,8 +115,10 @@ missing_days <- days2[idx]
 missing_timestamps <- timestamps2[idx]
 
 print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
-rbind(missing_days=missing_days,
-      missing_timestamps=missing_timestamps)
+rbind(
+    missing_days = missing_days,
+    missing_timestamps = missing_timestamps
+)
 ```
 
 ### bemovi_mag_25 missing
@@ -113,15 +126,24 @@ rbind(missing_days=missing_days,
 The timestamps `20230602`, `20230616` and  `20230621` are missing because of a dataloss during processing.
 
 ```{r}
-msm  <- "bemovi_mag_25"
+msm <- "bemovi_mag_25"
 # timestamps and days in RRD |> unique()=
-timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
-days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+timestamps <- densities |>
+    filter(measurement == msm) |>
+    select(timestamp) |>
+    unlist() |>
+    unique()
+days <- densities |>
+    filter(measurement == msm) |>
+    select(day) |>
+    unlist() |>
+    unique() |>
+    sort()
 
 # timestamps and days that should be in RRD
-days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
-timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
-timestamps2 <- gsub("-","",as.character(timestamps2))
+days2 <- sort(c(0 + (0:39 * 7), 2 + (0:39 * 7), 4 + (0:39 * 7)))
+timestamps2 <- as_date("20221107", format = "%Y%m%d") + days2
+timestamps2 <- gsub("-", "", as.character(timestamps2))
 
 # timestamps and day that should be in RRD but are not
 idx <- which(!(days2 %in% days))
@@ -129,8 +151,10 @@ missing_days <- days2[idx]
 missing_timestamps <- timestamps2[idx]
 
 print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
-rbind(missing_days=missing_days,
-      missing_timestamps=missing_timestamps)
+rbind(
+    missing_days = missing_days,
+    missing_timestamps = missing_timestamps
+)
 ```
 
 ### bemovi_mag_25_cropped missing
@@ -138,15 +162,24 @@ rbind(missing_days=missing_days,
 The timestamps `20230602`, `20230616` and  `20230621` are missing because of a dataloss during processing.
 
 ```{r}
-msm  <- "bemovi_mag_25_cropped"
+msm <- "bemovi_mag_25_cropped"
 # timestamps and days in RRD |> unique()=
-timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
-days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+timestamps <- densities |>
+    filter(measurement == msm) |>
+    select(timestamp) |>
+    unlist() |>
+    unique()
+days <- densities |>
+    filter(measurement == msm) |>
+    select(day) |>
+    unlist() |>
+    unique() |>
+    sort()
 
 # timestamps and days that should be in RRD
-days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
-timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
-timestamps2 <- gsub("-","",as.character(timestamps2))
+days2 <- sort(c(0 + (0:39 * 7), 2 + (0:39 * 7), 4 + (0:39 * 7)))
+timestamps2 <- as_date("20221107", format = "%Y%m%d") + days2
+timestamps2 <- gsub("-", "", as.character(timestamps2))
 
 # timestamps and day that should be in RRD but are not
 idx <- which(!(days2 %in% days))
@@ -154,24 +187,33 @@ missing_days <- days2[idx]
 missing_timestamps <- timestamps2[idx]
 
 print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
-rbind(missing_days=missing_days,
-      missing_timestamps=missing_timestamps)
+rbind(
+    missing_days = missing_days,
+    missing_timestamps = missing_timestamps
+)
 ```
 
 ### flowcam missing
 
-The timestamp `20230719` is missing because of a dataloss during processing.
-
 ```{r}
-msm  <- "flowcam"
+msm <- "flowcam"
 # timestamps and days in RRD |> unique()=
-timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
-days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+timestamps <- densities |>
+    filter(measurement == msm) |>
+    select(timestamp) |>
+    unlist() |>
+    unique()
+days <- densities |>
+    filter(measurement == msm) |>
+    select(day) |>
+    unlist() |>
+    unique() |>
+    sort()
 
 # timestamps and days that should be in RRD
-days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
-timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
-timestamps2 <- gsub("-","",as.character(timestamps2))
+days2 <- sort(c(0 + (0:39 * 7), 2 + (0:39 * 7), 4 + (0:39 * 7)))
+timestamps2 <- as_date("20221107", format = "%Y%m%d") + days2
+timestamps2 <- gsub("-", "", as.character(timestamps2))
 
 # timestamps and day that should be in RRD but are not
 idx <- which(!(days2 %in% days))
@@ -179,21 +221,32 @@ missing_days <- days2[idx]
 missing_timestamps <- timestamps2[idx]
 
 print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
-rbind(missing_days=missing_days,
-      missing_timestamps=missing_timestamps)
+rbind(
+    missing_days = missing_days,
+    missing_timestamps = missing_timestamps
+)
 ```
 
 ### flowcytometer missing
 ```{r}
-msm  <- "flowcytometer"
+msm <- "flowcytometer"
 # timestamps and days in RRD |> unique()=
-timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
-days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+timestamps <- densities |>
+    filter(measurement == msm) |>
+    select(timestamp) |>
+    unlist() |>
+    unique()
+days <- densities |>
+    filter(measurement == msm) |>
+    select(day) |>
+    unlist() |>
+    unique() |>
+    sort()
 
 # timestamps and days that should be in RRD
-days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
-timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
-timestamps2 <- gsub("-","",as.character(timestamps2))
+days2 <- sort(c(0 + (0:39 * 7), 2 + (0:39 * 7), 4 + (0:39 * 7)))
+timestamps2 <- as_date("20221107", format = "%Y%m%d") + days2
+timestamps2 <- gsub("-", "", as.character(timestamps2))
 
 # timestamps and day that should be in RRD but are not
 idx <- which(!(days2 %in% days))
@@ -201,8 +254,10 @@ missing_days <- days2[idx]
 missing_timestamps <- timestamps2[idx]
 
 print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
-rbind(missing_days=missing_days,
-      missing_timestamps=missing_timestamps)
+rbind(
+    missing_days = missing_days,
+    missing_timestamps = missing_timestamps
+)
 ```
 
 ### manualcount missing
@@ -210,15 +265,24 @@ rbind(missing_days=missing_days,
 Manualcount only has been conducted once a week after the XXXX. These are not checked yet.
 
 ```{r}
-msm  <- "manualcount"
+msm <- "manualcount"
 # timestamps and days in RRD |> unique()=
-timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
-days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+timestamps <- densities |>
+    filter(measurement == msm) |>
+    select(timestamp) |>
+    unlist() |>
+    unique()
+days <- densities |>
+    filter(measurement == msm) |>
+    select(day) |>
+    unlist() |>
+    unique() |>
+    sort()
 
 # timestamps and days that should be in RRD
-days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
-timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
-timestamps2 <- gsub("-","",as.character(timestamps2))
+days2 <- sort(c(0 + (0:39 * 7), 2 + (0:39 * 7), 4 + (0:39 * 7)))
+timestamps2 <- as_date("20221107", format = "%Y%m%d") + days2
+timestamps2 <- gsub("-", "", as.character(timestamps2))
 
 # timestamps and day that should be in RRD but are not
 idx <- which(!(days2 %in% days))
@@ -226,8 +290,10 @@ missing_days <- days2[idx]
 missing_timestamps <- timestamps2[idx]
 
 print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
-rbind(missing_days=missing_days,
-      missing_timestamps=missing_timestamps)
+rbind(
+    missing_days = missing_days,
+    missing_timestamps = missing_timestamps
+)
 ```
 
 
@@ -245,8 +311,10 @@ missing_days_o2 <- days2[idx]
 missing_timestamps_o2 <- timestamps2[idx]
 
 print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
-rbind(missing_days=missing_days_o2,
-      missing_timestamps=missing_timestamps_o2)
+rbind(
+    missing_days = missing_days_o2,
+    missing_timestamps = missing_timestamps_o2
+)
 ```
 
 ## Check 1.3: water chemistry
@@ -264,8 +332,10 @@ missing_days_wc <- days2[idx]
 missing_timestamps_wc <- timestamps2[idx]
 
 print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
-rbind(missing_days=missing_days_wc,
-      missing_timestamps=missing_timestamps_wc)
+rbind(
+    missing_days = missing_days_wc,
+    missing_timestamps = missing_timestamps_wc
+)
 ```
 
 Note UD (20230816): there are many missing sampling days for the water chemistry. As I understand it, this data is not yet ready (i.e. not all samples have been processed). It is probably still worth checking whether the non processed ones correspond to the missing sampling days listed here.
@@ -284,8 +354,10 @@ missing_days_con <- days2[idx]
 missing_timestamps_con <- timestamps2[idx]
 
 print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
-rbind(missing_days=missing_days_con,
-      missing_timestamps=missing_timestamps_con)
+rbind(
+    missing_days = missing_days_con,
+    missing_timestamps = missing_timestamps_con
+)
 ```
 
 # Check 2: are all desired classes present and are no other classes present?
@@ -295,36 +367,44 @@ This code chunk simply specifies the classes of interest. Note that I've already
 ```{r}
 # these are the desired classes in the respective measurement methods
 
-Bemovi16_classes <- c("Coleps_irchel",
-                      "Colpidium",
-                      "Stylonychia2",
-                      "Paramecium_caudatum",
-                      "Paramecium_bursaria",
-                      "Debris_and_other")
+Bemovi16_classes <- c(
+    "Coleps_irchel",
+    "Colpidium",
+    "Stylonychia2",
+    "Paramecium_caudatum",
+    "Paramecium_bursaria",
+    "Debris_and_other"
+)
 
-Bemovi25_classes <- c("Coleps_irchel",
-                      "Colpidium",
-                      "Stylonychia2",
-                      "Paramecium_caudatum",
-                      "Paramecium_bursaria",
-                      "Debris_and_other")
+Bemovi25_classes <- c(
+    "Coleps_irchel",
+    "Colpidium",
+    "Stylonychia2",
+    "Paramecium_caudatum",
+    "Paramecium_bursaria",
+    "Debris_and_other"
+)
 
 Bemovi25cropped_classes <- c("Debris_and_other")
 
-Flowcam_classes <- c("Chlamydomonas",
-                     "Debris",
-                     "DigestedAlgae",
-                     "Small_unidentified",
-                     "DividingChlamydomonas",
-                     "ChlamydomonasClumpsLarge",
-                     "ChlamydomonasClumpsSmall",
-                     "CiliateCysts",
-                     "CystsWhite",
-                     "DigestedWhite",
-                     "Small_cells")
+Flowcam_classes <- c(
+    "Chlamydomonas",
+    "Debris",
+    "DigestedAlgae",
+    "Small_unidentified",
+    "DividingChlamydomonas",
+    "ChlamydomonasClumpsLarge",
+    "ChlamydomonasClumpsSmall",
+    "CiliateCysts",
+    "CystsWhite",
+    "DigestedWhite",
+    "Small_cells"
+)
 
-Flowcytometer_classes <- c("bacteria",
-                           "algae")
+Flowcytometer_classes <- c(
+    "bacteria",
+    "algae"
+)
 
 manual_classes <- c("Didinium")
 ```
@@ -334,51 +414,52 @@ manual_classes <- c("Didinium")
 ```{r}
 # now the tests
 ## bemovi 16
-idx <- Bemovi16_classes %in% unique(densities[densities$measurement=="bemovi_mag_16",]$species)
+idx <- Bemovi16_classes %in% unique(densities[densities$measurement == "bemovi_mag_16", ]$species)
 test <- all(idx)
-print(paste("Are all desired classes present in bemovi_mag_16?",test))
+print(paste("Are all desired classes present in bemovi_mag_16?", test))
 
-if(!test){
-  print(paste("The following classes are missing from it:", Bemovi16_classes[idx]))
+if (!test) {
+    print(paste("The following classes are missing from it:", Bemovi16_classes[idx]))
 }
 
 ## bemovi 25
-idx <- Bemovi25_classes %in% unique(densities[densities$measurement=="bemovi_mag_25",]$species)
+idx <- Bemovi25_classes %in% unique(densities[densities$measurement == "bemovi_mag_25", ]$species)
 test <- all(idx)
-print(paste("Are all desired classes present in bemovi_mag_25?",test))
+print(paste("Are all desired classes present in bemovi_mag_25?", test))
 
-if(!test){
-  print(paste("The following classes are missing from it:", Bemovi25_classes[idx]))
+if (!test) {
+    print(paste("The following classes are missing from it:", Bemovi25_classes[idx]))
 }
 
 ## bemovi 25 cropped
-idx <- Bemovi25cropped_classes %in% unique(densities[densities$measurement=="bemovi_mag_25_cropped",]$species)
+idx <- Bemovi25cropped_classes %in% unique(densities[densities$measurement == "bemovi_mag_25_cropped", ]$species)
 test <- all(idx)
-print(paste("Are all desired classes present in bemovi_mag_25 cropped?",test))
+print(paste("Are all desired classes present in bemovi_mag_25 cropped?", test))
 
-if(!test){
-  print(paste("The following classes are missing from it:", Bemovi25cropped_classes[idx]))
+if (!test) {
+    print(paste("The following classes are missing from it:", Bemovi25cropped_classes[idx]))
 }
 
 ## Flowcam
-idx <- Flowcam_classes %in% unique(densities[densities$measurement=="flowcam",]$species)
+idx <- Flowcam_classes %in% unique(densities[densities$measurement == "flowcam", ]$species)
 test <- all(idx)
-print(paste("Are all desired classes present in flowcam?",test))
+print(paste("Are all desired classes present in flowcam?", test))
 
-if(!test){
-  print(paste("The following classes are missing from it:", Flowcam_classes[idx]))
+if (!test) {
+    print(paste("The following classes are missing from it:", Flowcam_classes[idx]))
 }
 
 ## Flowcytometer
-idx <- Flowcytometer_classes %in% unique(densities[densities$measurement=="flowcytometer",]$species)
+idx <- Flowcytometer_classes %in% unique(densities[densities$measurement == "flowcytometer", ]$species)
 test <- all(idx)
-print(paste("Are all desired classes present in Flowcytometer?",test))
+print(paste("Are all desired classes present in Flowcytometer?", test))
 
-if(!test){
-  print(paste("The following classes are missing from it:", Flowcytometer_classes[idx]))
+if (!test) {
+    print(paste("The following classes are missing from it:", Flowcytometer_classes[idx]))
 }
 
-print("Is Didinium present?"); "Didinium" %in% unique(densities$species)
+print("Is Didinium present?")
+"Didinium" %in% unique(densities$species)
 ```
 
 ## Check 2.2: are any undesired classes present?
@@ -387,8 +468,9 @@ Now the opposite: are any classes present that shouldnt be?
 ```{r}
 ## test 1
 classes <- unique(densities$species)
-idx <- classes %in% unique(c(Bemovi16_classes,Bemovi25_classes,Bemovi25cropped_classes,Flowcam_classes,Flowcytometer_classes,manual_classes))
-print("The following classes are present but shouldn't be:"); classes[!idx]
+idx <- classes %in% unique(c(Bemovi16_classes, Bemovi25_classes, Bemovi25cropped_classes, Flowcam_classes, Flowcytometer_classes, manual_classes))
+print("The following classes are present but shouldn't be:")
+classes[!idx]
 densities |>
     filter(species %in% classes[!idx]) |>
     select(species, measurement, timestamp) |>
@@ -398,17 +480,19 @@ densities |>
 
 ```{r}
 ## test2
-Loxo <- "Loxocephallus" %in% unique(densities[densities$measurement=="flowcam",]$species)
-print("Loxocephalus has been correctly removed from the flowcam"); !Loxo
+Loxo <- "Loxocephallus" %in% unique(densities[densities$measurement == "flowcam", ]$species)
+print("Loxocephalus has been correctly removed from the flowcam")
+!Loxo
 ```
 
 ```{r}
 ## test3
 bots <- unique(densities$bottle)
 actual_bots <- 1:32
-actual_bots <- ifelse(actual_bots<10,paste0("b_0",actual_bots),paste0("b_",actual_bots))
+actual_bots <- ifelse(actual_bots < 10, paste0("b_0", actual_bots), paste0("b_", actual_bots))
 idx <- bots %in% actual_bots
-print("The following bottles are present but shouldn't be:"); bots[!idx]
+print("The following bottles are present but shouldn't be:")
+bots[!idx]
 densities |>
     filter(bottle %in% bots[!idx]) |>
     select(bottle, measurement) |>
@@ -426,16 +510,16 @@ timestamps2 <- as.numeric(timestamps2)
 missing_timestamps2 <- missing_timestamps
 
 dd_missing_timestamps <- densities %>%
-  group_by(measurement, species, bottle) %>%
-  reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
-  dplyr::filter( # here I filter out things that we know about (please update and document!)
-    !(species %in% c("OtherCiliate", "HNA", "LNA", "MNA")), # these things should not be in anyway
-    !(species=="Loxocephallus" & measurement=="flowcam"), # these things should not be in anyway
-    !(species %in% c("airbubbles","Cryptomonas")), # these things should not be in anyway
-    !(missing_timestamps %in% as.numeric(missing_timestamps2)), # these timestamps are missing completely (see check 1)
-    measurement != "manualcount", # didinium was not always measured
-    # !(measurement == "flowcytometer" & (missing_timestamps %in% c())) # For the flowcytometer for the following timestamps there was no data collection: c()
-  )
+    group_by(measurement, species, bottle) %>%
+    reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
+    dplyr::filter( # here I filter out things that we know about (please update and document!)
+        !(species %in% c("OtherCiliate", "HNA", "LNA", "MNA")), # these things should not be in anyway
+        !(species == "Loxocephallus" & measurement == "flowcam"), # these things should not be in anyway
+        !(species %in% c("airbubbles", "Cryptomonas")), # these things should not be in anyway
+        !(missing_timestamps %in% as.numeric(missing_timestamps2)), # these timestamps are missing completely (see check 1)
+        measurement != "manualcount", # didinium was not always measured
+        # !(measurement == "flowcytometer" & (missing_timestamps %in% c())) # For the flowcytometer for the following timestamps there was no data collection: c()
+    )
 # dd_missing_timestamps
 
 print(paste("Number of rows in dd_missing_timestamps:", nrow(dd_missing_timestamps)))
@@ -444,13 +528,13 @@ print(paste("Number of rows in dd_missing_timestamps:", nrow(dd_missing_timestam
 If it is not empty the next code chunk prints out some information
 
 ```{r}
-if(nrow(dd_missing_timestamps)>0) {
-  for(sp in unique(dd_missing_timestamps$species)){
-    d <- dd_missing_timestamps %>%
-      dplyr::filter(species==sp)
-    print(paste(sp,"has the following missing timestamps (the number indicates in how many bottles it is missing)"))
-    print(table(d$missing_timestamps))
-  }
+if (nrow(dd_missing_timestamps) > 0) {
+    for (sp in unique(dd_missing_timestamps$species)) {
+        d <- dd_missing_timestamps %>%
+            dplyr::filter(species == sp)
+        print(paste(sp, "has the following missing timestamps (the number indicates in how many bottles it is missing)"))
+        print(table(d$missing_timestamps))
+    }
 }
 ```
 
@@ -480,11 +564,11 @@ RMK
 
 ```{r}
 dd_missing_timestamps_o2 <- o2 %>%
-  group_by(sensor, bottle) %>%
-  reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
-  dplyr::filter( # Previously confirmed missing data is filtered out
-    !(missing_timestamps %in% as.numeric(missing_timestamps_o2)), # these timestamps are missing completely (see check 1)
-  ) 
+    group_by(sensor, bottle) %>%
+    reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
+    dplyr::filter( # Previously confirmed missing data is filtered out
+        !(missing_timestamps %in% as.numeric(missing_timestamps_o2)), # these timestamps are missing completely (see check 1)
+    )
 
 dd_missing_timestamps_o2
 ```
@@ -497,11 +581,11 @@ The following data.frame should be empty
 
 ```{r}
 dd_missing_timestamps_wc <- water_chem %>%
-  group_by(type, bottle) %>%
-  reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
-  dplyr::filter( # Previously confirmed missing data is filtered out
-    !(missing_timestamps %in% as.numeric(missing_timestamps_wc)), # these timestamps are missing completely (see check 1)
-  )
+    group_by(type, bottle) %>%
+    reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
+    dplyr::filter( # Previously confirmed missing data is filtered out
+        !(missing_timestamps %in% as.numeric(missing_timestamps_wc)), # these timestamps are missing completely (see check 1)
+    )
 
 dd_missing_timestamps_wc
 ```
@@ -513,11 +597,11 @@ The following data.frame should be empty
 
 ```{r}
 dd_missing_timestamps_con <- conductivity %>%
-  group_by(bottle) %>%
-  reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
-  dplyr::filter( # Previously confirmed missing data is filtered out
-    !(missing_timestamps %in% as.numeric(missing_timestamps_con)), # these timestamps are missing completely (see check 1)
-  ) 
+    group_by(bottle) %>%
+    reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
+    dplyr::filter( # Previously confirmed missing data is filtered out
+        !(missing_timestamps %in% as.numeric(missing_timestamps_con)), # these timestamps are missing completely (see check 1)
+    )
 
 dd_missing_timestamps_con
 ```
@@ -530,17 +614,21 @@ The following data.frame should be empty
 
 ```{r}
 NAs <- densities %>%
-  dplyr::filter(
-    !(species=="Loxocephallus" & measurement=="flowcam"), # should not be in anyway
-    !(species %in% c("LNA","MNA","HNA","Debris","DigestedAlgae","Cryptomonas",
-                     "Small_unidentified","Didinium","algae","OtherCiliate",
-                     "Debris_and_other","CiliateCysts","CystsWhite","airbubbles",
-                     "DigestedWhite")), #biomass not calculated for these classes
-  ) %>%
-  group_by(measurement, species, bottle, timestamp) %>%
-  summarize(densityNA = sum(is.na(density)),
-            biomassNA = sum(is.na(biomass))) %>%
-  dplyr::filter(biomassNA>0 | densityNA>0) 
+    dplyr::filter(
+        !(species == "Loxocephallus" & measurement == "flowcam"), # should not be in anyway
+        !(species %in% c(
+            "LNA", "MNA", "HNA", "Debris", "DigestedAlgae", "Cryptomonas",
+            "Small_unidentified", "Didinium", "algae", "OtherCiliate",
+            "Debris_and_other", "CiliateCysts", "CystsWhite", "airbubbles",
+            "DigestedWhite"
+        )), # biomass not calculated for these classes
+    ) %>%
+    group_by(measurement, species, bottle, timestamp) %>%
+    summarize(
+        densityNA = sum(is.na(density)),
+        biomassNA = sum(is.na(biomass))
+    ) %>%
+    dplyr::filter(biomassNA > 0 | densityNA > 0)
 NAs
 ```
 
@@ -551,9 +639,9 @@ The following data.frame should be empty
 
 ```{r}
 NAs_o2 <- o2 %>%
-  group_by(sensor, bottle) %>%
-  summarize(o2NA = sum(is.na(percent_o2))) %>%
-  dplyr::filter(o2NA>0)
+    group_by(sensor, bottle) %>%
+    summarize(o2NA = sum(is.na(percent_o2))) %>%
+    dplyr::filter(o2NA > 0)
 NAs_o2
 ```
 
@@ -565,9 +653,9 @@ The following data.frame should be empty
 
 ```{r}
 NAs_wc <- water_chem %>%
-  group_by(type, bottle, timestamp) %>%
-  summarize(concentrationNA = sum(is.na(concentration))) %>%
-  dplyr::filter(concentrationNA>0)
+    group_by(type, bottle, timestamp) %>%
+    summarize(concentrationNA = sum(is.na(concentration))) %>%
+    dplyr::filter(concentrationNA > 0)
 NAs_wc
 ```
 
@@ -577,9 +665,9 @@ The following data.frame should be empty
 
 ```{r}
 NAs_con <- conductivity %>%
-  group_by(bottle) %>%
-  summarize(conductivityNA = sum(is.na(conductivity))) %>%
-  dplyr::filter(conductivityNA>0)
+    group_by(bottle) %>%
+    summarize(conductivityNA = sum(is.na(conductivity))) %>%
+    dplyr::filter(conductivityNA > 0)
 NAs_con
 ```
 
@@ -594,31 +682,37 @@ The first code chunk simply loads in the information about which videos are faul
 ```{r, message=FALSE}
 # read in video file names to remove
 tocheck_1stmethod <- read_csv("VideoChecks/FirstMethodCheck/tocheck_1stmethod.csv")
-tocheck_2ndmethod <- read_csv("VideoChecks/SecondMethodCheck/tocheck_2ndmethod.csv") 
+tocheck_2ndmethod <- read_csv("VideoChecks/SecondMethodCheck/tocheck_2ndmethod.csv")
 tocheck_3rdmethod16 <- read_csv("VideoChecks/ThirdMethodCheck/videos_16x.csv")
 tocheck_3rdmethod25 <- read_csv("VideoChecks/ThirdMethodCheck/videos_25x.csv")
 
 # 16x
 videos_to_remove_16 <- tocheck_3rdmethod16 %>%
-  dplyr::filter(decision!="ok") %>%
-  mutate(video.nr = as.numeric(sub('.+_(.+)', '\\1', file)),
-         bottle = ceiling((video.nr - 100)/3),
-         bottle = ifelse(bottle<10,paste0("b_0",bottle),paste0("b_",bottle)))
+    dplyr::filter(decision != "ok") %>%
+    mutate(
+        video.nr = as.numeric(sub(".+_(.+)", "\\1", file)),
+        bottle = ceiling((video.nr - 100) / 3),
+        bottle = ifelse(bottle < 10, paste0("b_0", bottle), paste0("b_", bottle))
+    )
 
 # 25x
 videos_to_remove_25_1 <- tocheck_1stmethod %>%
-  dplyr::filter(decision!="ok")
+    dplyr::filter(decision != "ok")
 videos_to_remove_25_2 <- tocheck_2ndmethod %>%
-  dplyr::filter(decision!="ok")
+    dplyr::filter(decision != "ok")
 videos_to_remove_25_3 <- tocheck_3rdmethod25 %>%
-  dplyr::filter(decision!="ok")
+    dplyr::filter(decision != "ok")
 
-videos_to_remove_25 <- full_join(videos_to_remove_25_1,
-                                 full_join(videos_to_remove_25_2,videos_to_remove_25_3)) %>%
-  distinct %>%
-  mutate(video.nr = as.numeric(sub('.+_(.+)', '\\1', file)),
-         bottle = ceiling(video.nr/3),
-         bottle = ifelse(bottle<10,paste0("b_0",bottle),paste0("b_",bottle)))
+videos_to_remove_25 <- full_join(
+    videos_to_remove_25_1,
+    full_join(videos_to_remove_25_2, videos_to_remove_25_3)
+) %>%
+    distinct() %>%
+    mutate(
+        video.nr = as.numeric(sub(".+_(.+)", "\\1", file)),
+        bottle = ceiling(video.nr / 3),
+        bottle = ifelse(bottle < 10, paste0("b_0", bottle), paste0("b_", bottle))
+    )
 ```
 
 ## Check 5.1: have the faulty videos been excluded?
@@ -627,8 +721,8 @@ The following data.frame should be empty (i.e. 0 rows)
 
 ```{r}
 video16 <- arrow_read_table("bemovi_16_morph") %>%
-  collect() %>%
-  dplyr::filter(file %in% videos_to_remove_16$file)
+    collect() %>%
+    dplyr::filter(file %in% videos_to_remove_16$file)
 
 nrow(video16)
 ```
@@ -637,8 +731,8 @@ The following data.frame should be empty (i.e. 0 rows)
 
 ```{r}
 video25 <- arrow_read_table("bemovi_25_morph") %>%
-  collect() %>%
-  dplyr::filter(file %in% videos_to_remove_25$file)
+    collect() %>%
+    dplyr::filter(file %in% videos_to_remove_25$file)
 
 nrow(video25)
 ```
@@ -647,8 +741,8 @@ The following data.frame should be empty (i.e. 0 rows)
 
 ```{r}
 video25_cropped <- arrow_read_table("bemovi_25_morph_cropped") %>%
-  collect() %>%
-  dplyr::filter(file %in% videos_to_remove_25$file)
+    collect() %>%
+    dplyr::filter(file %in% videos_to_remove_25$file)
 
 nrow(video25_cropped)
 ```
@@ -666,18 +760,21 @@ The file "new_densities.csv" contains the densities of the species that I've loc
 ```{r, message=FALSE}
 new_densities <- read_csv("VideoChecks/new_densities_for_doublecheck.csv")
 new_densities <- new_densities %>%
-  dplyr::filter(!(bottle %in% c("b_02","b_15","b_20","b_31"))) %>%
-  mutate(new_densities = density) %>%
-  select(-density)
+    dplyr::filter(!(bottle %in% c("b_02", "b_15", "b_20", "b_31"))) %>%
+    mutate(new_densities = density) %>%
+    select(-density)
 
-compare_densities <- left_join(new_densities %>% dplyr::filter(species!="Loxocephallus",species!="Euplotes"), 
-                               densities)
+compare_densities <- left_join(
+    new_densities %>% dplyr::filter(species != "Loxocephallus", species != "Euplotes"),
+    densities
+)
 
-print("Do the densities in the RRD correspond to the densities in new_densities.csv"); all(round(compare_densities$density,3) == round(compare_densities$new_densities,3))
+print("Do the densities in the RRD correspond to the densities in new_densities.csv")
+all(round(compare_densities$density, 3) == round(compare_densities$new_densities, 3))
 
- compare_densities |>
-     mutate(identical = round(density, 3) == round(new_densities, 3)) |>
-     filter(!identical)
+compare_densities |>
+    mutate(identical = round(density, 3) == round(new_densities, 3)) |>
+    filter(!identical)
 ```
 
 
@@ -699,10 +796,12 @@ The following data.frame should be empty (i.e. 0 rows)
 
 ```{r}
 morph16 <- arrow_read_table("bemovi_16_morph") %>%
-  collect() %>%
-  dplyr::filter(bottle %in% c("b_02","b_15","b_20","b_31"),
-                timestamp >= 20230403,
-                species=="Colpidium")
+    collect() %>%
+    dplyr::filter(
+        bottle %in% c("b_02", "b_15", "b_20", "b_31"),
+        timestamp >= 20230403,
+        species == "Colpidium"
+    )
 
 nrow(morph16)
 ```
@@ -711,10 +810,12 @@ The following data.frame should be empty (i.e. 0 rows)
 
 ```{r}
 morph25 <- arrow_read_table("bemovi_25_morph") %>%
-  collect() %>%
-  dplyr::filter(bottle %in% c("b_02","b_15","b_20","b_31"),
-                timestamp >= 20230403,
-                species=="Colpidium")
+    collect() %>%
+    dplyr::filter(
+        bottle %in% c("b_02", "b_15", "b_20", "b_31"),
+        timestamp >= 20230403,
+        species == "Colpidium"
+    )
 
 nrow(morph25)
 ```
@@ -731,13 +832,16 @@ The file "new_PCaudatum_densities_for_doublecheck.csv" contains the densities of
 ```{r, message=FALSE}
 new_PCaudatum_densities <- read_csv("new_PCaudatum_densities_for_doublecheck.csv")
 new_PCaudatum_densities <- new_PCaudatum_densities %>%
-  mutate(new_densities = density) %>%
-  select(-density)
+    mutate(new_densities = density) %>%
+    select(-density)
 
-compare_densities2 <- left_join(new_PCaudatum_densities %>% dplyr::filter(species!="Loxocephallus",species!="Euplotes"), 
-                                densities)
+compare_densities2 <- left_join(
+    new_PCaudatum_densities %>% dplyr::filter(species != "Loxocephallus", species != "Euplotes"),
+    densities
+)
 
-print("Do the densities in the RRD correspond to the densities in new_PCaudatum_densities.csv"); all(round(compare_densities2$density,3) == round(compare_densities2$new_densities,3))
+print("Do the densities in the RRD correspond to the densities in new_PCaudatum_densities.csv")
+all(round(compare_densities2$density, 3) == round(compare_densities2$new_densities, 3))
 
 compare_densities2 |>
     mutate(identical = round(density, 3) == round(new_densities, 3)) |>
@@ -757,17 +861,17 @@ The file "biomass20221107_doubleCheck.csv" contains the biomasses of the species
 ```{r, message=FALSE}
 new_biomass20221107 <- read_csv("biomass20221107_doubleCheck.csv")
 new_biomass20221107 <- new_biomass20221107 %>%
-  mutate(new_biomass = biomass) %>%
-  select(-biomass)
+    mutate(new_biomass = biomass) %>%
+    select(-biomass)
 
 compare_densities3 <- left_join(
-  new_biomass20221107, 
-  densities, 
-  join_by(timestamp, day, bottle, species, density, measurement, incubator, temperature, resources, salinity, replicate)
+    new_biomass20221107,
+    densities,
+    join_by(timestamp, day, bottle, species, density, measurement, incubator, temperature, resources, salinity, replicate)
 )
 
 
-print("Do the biomasses in the RRD correspond to the densities in biomass20221107_doubleCheck.csv"); 
+print("Do the biomasses in the RRD correspond to the densities in biomass20221107_doubleCheck.csv")
 
 compare_densities3 |>
     mutate(identical = round(biomass, 3) == round(new_biomass, 3)) |>
@@ -780,38 +884,240 @@ compare_densities3 |>
 This is a visual test. The read line (the data) and the black line (the intercept) should be the same (minus a small change in intercept, but the slope should be the same). If unsure compare also with the corresponding figure in the document "LEEF2_RRD_PostPipelineCleaning.qmd".
 
 ```{r, fig.height=8, fig.width=15, message=FALSE, warning=FALSE}
-toc <- arrow_read_table("toc")%>% 
-  collect() %>%
-  left_join(arrow_read_table("experimental_design") %>% collect()) %>%
-  filter(!is.na(conc))
+toc <- arrow_read_table("toc") %>%
+    collect() %>%
+    left_join(arrow_read_table("experimental_design") %>% collect()) %>%
+    filter(!is.na(conc))
 
-toc$day <- as.Date(as.character(toc$timestamp), "%Y%m%d") - min(as.Date(as.character(toc$timestamp), "%Y%m%d") )
+toc$day <- as.Date(as.character(toc$timestamp), "%Y%m%d") - min(as.Date(as.character(toc$timestamp), "%Y%m%d"))
 toc$day <- as.numeric(toc$day)
 
 toc <- toc %>%
-  dplyr::mutate(experiment_phase = case_when(temperature =="constant" ~ "constant",
-                                        day < 70 ~ "constant before increase",
-                                        day >= 70 & day < 154 ~ "increasing",
-                                        day >= 154 ~ "constant after increase"))  %>%
-  arrange(timestamp) 
+    dplyr::mutate(experiment_phase = case_when(
+        temperature == "constant" ~ "constant",
+        day < 70 ~ "constant before increase",
+        day >= 70 & day < 154 ~ "increasing",
+        day >= 154 ~ "constant after increase"
+    )) %>%
+    arrange(timestamp)
 
 toc_sum <- toc %>%
-  group_by(experiment_phase,inj_type) %>%
-  summarize(intercept = coef(lm(conc~position))[1])
+    group_by(experiment_phase, inj_type) %>%
+    summarize(intercept = coef(lm(conc ~ position))[1])
 
 position_sum <- toc %>%
-  group_by(experiment_phase,inj_type,position) %>%
-  summarize(dummy=n())
+    group_by(experiment_phase, inj_type, position) %>%
+    summarize(dummy = n())
 
 toc_sum <- full_join(toc_sum, position_sum)
 
 toc %>%
-  ggplot(aes(position, conc))+
-  facet_wrap(experiment_phase~inj_type) +
-  geom_smooth(col="red", method = "lm")+
-  geom_line(data=toc_sum, aes(position, intercept))+
-  labs(x="Bottle sampling order")+
-  theme_bw()
+    ggplot(aes(position, conc)) +
+    facet_wrap(experiment_phase ~ inj_type) +
+    geom_smooth(col = "red", method = "lm") +
+    geom_line(data = toc_sum, aes(position, intercept)) +
+    labs(x = "Bottle sampling order") +
+    theme_bw()
+```
+
+
+# Check add missing data points
+## flowcam 20230719 b_01
+```{r}
+#| eval: true
+#|
+
+cat("\n\nWrong number of datapoints:\n")
+arrow_read_table(table = "flowcam_density") |>
+    group_by(timestamp, bottle) |>
+    summarise(n = n()) |>
+    filter(n != 11) |>
+    collect() |>
+    knitr::kable()
+
+ts <- arrow_read_table(table = "flowcam_density") |>
+    select(timestamp) |>
+    distinct() |>
+    collect() |>
+    unlist() |>
+    sort() |>
+    as.vector()
+
+cat("\n\nMissing timestamps:\n")
+timestamps2[!(timestamps2 %in% ts)]
+```
+
+## bemovi_mag_16 20230602 20230616 20230621
+```{r}
+#| eval: true
+#|
+
+cat("\n\nWrong number of datapoints:\n")
+arrow_read_table(table = "bemovi_16_density") |>
+    group_by(timestamp, bottle) |>
+    summarise(n = n()) |>
+    filter(n != 6) |>
+    collect() |>
+    knitr::kable()
+
+ts <- arrow_read_table(table = "bemovi_16_density") |>
+    select(timestamp) |>
+    distinct() |>
+    collect() |>
+    unlist() |>
+    sort() |>
+    as.vector()
+
+cat("\n\nMissing timestamps:\n")
+timestamps2[!(timestamps2 %in% ts)]
+```
+
+## bemovi_mag_25_cropped 20230602 20230616 20230621
+```{r}
+#| eval: true
+#|
+
+cat("\n\nWrong number of datapoints:\n")
+arrow_read_table(table = "bemovi_25_density_cropped") |>
+    group_by(timestamp, bottle) |>
+    summarise(n = n()) |>
+    filter(n != 1) |>
+    collect() |>
+    knitr::kable()
+
+ts <- arrow_read_table(table = "bemovi_25_density_cropped") |>
+    select(timestamp) |>
+    distinct() |>
+    collect() |>
+    unlist() |>
+    sort() |>
+    as.vector()
+
+cat("\n\nMissing timestamps:\n")
+timestamps2[!(timestamps2 %in% ts)]
+```
+
+## bemovi_mag_25 20230602 20230616 20230621
+```{r}
+#| eval: true
+#|
+
+cat("\n\nWrong number of datapoints:\n")
+arrow_read_table(table = "bemovi_25_density") |>
+    group_by(timestamp, bottle) |>
+    summarise(n = n()) |>
+    filter(n != 6) |>
+    collect() |>
+    knitr::kable()
+
+ts <- arrow_read_table(table = "bemovi_25_density") |>
+    select(timestamp) |>
+    distinct() |>
+    collect() |>
+    unlist() |>
+    sort() |>
+    as.vector()
+
+cat("\n\nMissing timestamps:\n")
+timestamps2[!(timestamps2 %in% ts)]
+```
+
+## manualcount for all not measured data points
+```{r}
+#| eval: true
+#|
+
+cat("\n\nWrong number of datapoints:\n")
+arrow_read_table(table = "manualcount") |>
+    group_by(timestamp, bottle) |>
+    summarise(n = n()) |>
+    filter(n != 1) |>
+    collect() |>
+    knitr::kable()
+
+ts <- arrow_read_table(table = "manualcount") |>
+    select(timestamp) |>
+    distinct() |>
+    collect() |>
+    unlist() |>
+    sort() |>
+    as.vector()
+
+cat("\n\nMissing timestamps:\n")
+timestamps2[!(timestamps2 %in% ts)]
+```
+
+## Conductivity OK
+```{r}
+#| eval: true
+#|
+
+cat("\n\nWrong number of datapoints:\n")
+arrow_read_table(table = "conductivity") |>
+    group_by(timestamp, bottle) |>
+    summarise(n = n()) |>
+    filter(n != 1) |>
+    collect() |>
+    knitr::kable()
+
+ts <- arrow_read_table(table = "conductivity") |>
+    select(timestamp) |>
+    distinct() |>
+    collect() |>
+    unlist() |>
+    sort() |>
+    as.vector()
+
+cat("\n\nMissing timestamps:\n")
+timestamps2[!(timestamps2 %in% ts)]
+```
+
+## O2 **missing (n < 2) or to many** (n > 2) datapoints
+
+```{r}
+#| eval: true
+#|
+
+cat("\n\nWrong number of datapoints:\n")
+arrow_read_o2() |>
+    group_by(timestamp, bottle) |>
+    summarise(n = n(), sensors = paste(sensor |> sort(), collapse = ", ")) |>
+    filter(n != 2) |>
+    knitr::kable()
+
+ts <- arrow_read_o2() |>
+    select(timestamp) |>
+    distinct() |>
+    unlist() |>
+    sort() |>
+    as.vector()
+
+cat("\n\nMissing timestamps:\n")
+timestamps2[!(timestamps2 %in% ts)]
+```
+
+
+## Check TOC missing datapoints
+```{r}
+#| eval: true
+#|
+
+cat("\n\nWrong number of datapoints:\n")
+arrow_read_toc() |>
+    group_by(timestamp, bottle) |>
+    summarise(n = n(), type = paste(type |> sort(), collapse = ", ")) |>
+    filter(n != 4) |>
+    knitr::kable()
+
+ts <- arrow_read_toc() |>
+    select(timestamp) |>
+    distinct() |>
+    unlist() |>
+    sort() |>
+    as.vector()
+
+cat("\n\nMissing timestamps:\n")
+timestamps2[!(timestamps2 %in% ts)]
 ```
 
 

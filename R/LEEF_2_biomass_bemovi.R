@@ -97,7 +97,7 @@ LEEF_2_biomass_bemovi <- function(
         biomasses,
         by = c("timestamp", "bottle", "species")
     )
-    
+
     densities$biomass[densities$species %in% video_biomass_species & is.na(densities$biomass)] <- 0
     # mutate(
     #   biomass = case_when(
@@ -119,7 +119,7 @@ LEEF_2_biomass_bemovi <- function(
     return(
         list(
             traits = ciliate_traits,
-            density = densities
+            density = unique(densities)
         )
     )
 }
