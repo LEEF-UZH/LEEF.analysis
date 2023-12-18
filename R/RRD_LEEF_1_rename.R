@@ -2,7 +2,6 @@
 #'
 #' @param db fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 #'   If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}
-#' @param revert if \code{TRUE}, the changes are reverted. Default: \code{FALSE}
 #'
 #' @return
 #' @importFrom DBI dbConnect dbBegin dbCommit dbDisconnect
@@ -11,14 +10,12 @@
 #'
 #' @examples
 RRD_LEEF_1_rename <- function(
-    db = getOption("RRDdb", "LEEF.RRD.sqlite"),
-    revert = FALSE
-){
-
+    db = getOption("RRDdb", "LEEF.RRD.sqlite")) {
   # temp to light column names ----------------------------------------------
 
   # c("TABLE_NAME", "FROM", "TO")
   column_names <- list(
+    ## Tempature & temperature to light_treatment
     c("bemovi_mag_16__mean_density_per_ml", "temperature_treatment", "light_treatment"),
     c("bemovi_mag_16__morph_mvt", "temperature_treatment", "light_treatment"),
     c("bemovi_mag_25__mean_density_per_ml", "temperature_treatment", "light_treatment"),
@@ -30,6 +27,8 @@ RRD_LEEF_1_rename <- function(
     c("experimetal_design", "temperature", "light_treatment"),
     c("flowcam__algae_density", "temperature", "light_treatment"),
     c("flowcam__algae_traits", "temperature", "light_treatment"),
+    c("experimental_design", "temperature", "light_treatment"),
+    ##
     c("composition", "Chlamydomonas", "Chlamydomonas_reinhardtii"),
     c("composition", "Cryptomonas", "Cryptomonas_sp"),
     c("composition", "Monoraphidium", "Monoraphidium_obtusum"),
@@ -50,6 +49,20 @@ RRD_LEEF_1_rename <- function(
     c("composition", "Didinium", "Didinium_nasutum")
   )
 
+  tables_with_light_treatment_columns <- c(
+    "bemovi_mag_16__mean_density_per_ml",
+    "bemovi_mag_16__morph_mvt",
+    "bemovi_mag_25__mean_density_per_ml",
+    "bemovi_mag_25__mean_density_per_ml_cropped",
+    "bemovi_mag_25__mean_density_per_ml_non_cropped",
+    "bemovi_mag_25__morph_mvt",
+    "bemovi_mag_25__morph_mvt_cropped",
+    "bemovi_mag_25__morph_mvt_non_cropped",
+    "experimetal_design",
+    "flowcam__algae_density",
+    "flowcam__algae_traits",
+    "experimental_design"
+  )
 
   # _prob column names ------------------------------------------------------
 
@@ -156,104 +169,68 @@ RRD_LEEF_1_rename <- function(
 
 
 
-# Define SQLs -------------------------------------------------------------------
+  # Define SQLs -------------------------------------------------------------------
 
 
-  if (!revert) {
+  # Define temp to light column names ---------------------------------------
 
 
-    # Define temp to light column names ---------------------------------------
+  sqls_temp_light <- lapply(
+    column_names,
+    function(td) {
+      paste0("ALTER TABLE '", td[1], "' RENAME COLUMN '", td[[2]], "' TO '", td[[3]], "'")
+    }
+  ) |> unlist()
 
 
-    sqls_temp_light <- lapply(
-      column_names,
-      function(td){
-        paste0("ALTER TABLE '", td[1], "' RENAME COLUMN '", td[[2]], "' TO '", td[[3]], "'")
-      }
-    ) |> unlist()
+  # Define light_treatment values --------------------------------------------
 
-    # Define _prob column names -----------------------------------------------
-
-
-    sqls_prob <- lapply(
-      species_prob_columns,
-      function(td){
-        paste0("ALTER TABLE '", tables_with_prob_column, "' RENAME COLUMN '", td[[1]], "' TO '", td[[2]], "'")
-      }
-    ) |>
-      unlist()
+  sqls_light_treatment <- lapply(
+    species_names,
+    function(td) {
+      paste0(
+        " UPDATE '", tables_with_light_treatment_columns, "'",
+        " SET light_treatment = 'decreasing'",
+        " WHERE ",
+        " light_treatment = 'increasing'"
+      )
+    }
+  ) |>
+    unlist()
 
 
-    # Define species column values --------------------------------------------
+  # Define _prob column names -----------------------------------------------
 
-    sqls_species_names <- lapply(
-      species_names,
-      function(td){
-        paste0(
-          " UPDATE '", tables_with_species_column, "'",
-          " SET species = '", td[[2]], "'",
-          " WHERE ",
-          " species = '" , td[[1]], "'"
-        )
-      }
-    ) |>
-      unlist()
+  sqls_prob <- lapply(
+    species_prob_columns,
+    function(td) {
+      paste0("ALTER TABLE '", tables_with_prob_column, "' RENAME COLUMN '", td[[1]], "' TO '", td[[2]], "'")
+    }
+  ) |>
+    unlist()
 
 
-    # Combine SQLs  -----------------------------------------------------------
+  # Define species column values --------------------------------------------
+
+  sqls_species_names <- lapply(
+    species_names,
+    function(td) {
+      paste0(
+        " UPDATE '", tables_with_species_column, "'",
+        " SET species = '", td[[2]], "'",
+        " WHERE ",
+        " species = '", td[[1]], "'"
+      )
+    }
+  ) |>
+    unlist()
 
 
-    sqls <- c(sqls_temp_light, sqls_prob, sqls_species_names)
+  # Combine SQLs  -----------------------------------------------------------
 
 
+  sqls <- c(sqls_temp_light, sqls_light_treatment, sqls_prob, sqls_species_names)
 
-  } else {
-
-
-    # Define temp to light column names ---------------------------------------
-
-
-    sqls_temp_light <- lapply(
-      column_names,
-      function(td){
-        paste0("ALTER TABLE '", td[1], "' RENAME COLUMN '", td[[3]], "' TO '", td[[1]], "'")
-      }
-    ) |> unlist()
-
-    # Define _prob column names -----------------------------------------------
-
-
-    sqls_prob <- lapply(
-      species_prob_columns,
-      function(td){
-        paste0("ALTER TABLE '", tables_with_prob_column, "' RENAME COLUMN '", td[[2]], "' TO '", td[[1]], "'")
-      }
-    ) |>
-      unlist()
-
-
-    # Define species column values --------------------------------------------
-
-    sqls_species_names <- lapply(
-      species_names,
-      function(td){
-        paste0(
-          " UPDATE '", tables_with_species_column, "'",
-          " SET species = '", td[[1]], "'",
-          " WHERE ",
-          " species = '" , td[[2]], "'"
-        )
-      }
-    ) |>
-      unlist()
-
-
-    # Combine SQLs  -----------------------------------------------------------
-
-
-    sqls <- c(sqls_temp_light, sqls_prob, sqls_species_names)
-
-  }
 
   # Run the SQLs ------------------------------------------------------------
 
@@ -270,18 +247,15 @@ RRD_LEEF_1_rename <- function(
 
   lapply(
     sqls,
-    function(sql){
-      try(
-        {
-          cat(sql, "...\n")
-          DBI::dbExecute(conn, sql)
-        }
-      )
+    function(sql) {
+      try({
+        cat(sql, "...\n")
+        DBI::dbExecute(conn, sql)
+      })
     }
   )
   cat("Done\n")
 
 
   DBI::dbCommit(conn)
-
 }

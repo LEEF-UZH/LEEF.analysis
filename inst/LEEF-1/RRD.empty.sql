@@ -13,6 +13,7 @@ CREATE TABLE `flowcam__algae_density` (
   `biomass` REAL,
   `timestamp` TEXT
 );
+
 CREATE TABLE `flowcytometer__flowcytometer_traits` (
   `sample` TEXT,
   `species` TEXT,
@@ -37,6 +38,7 @@ CREATE TABLE `flowcytometer__flowcytometer_traits` (
   `volume` REAL,
   `biomass` REAL
 );
+
 CREATE TABLE `flowcytometer__flowcytometer_density` (
   `timestamp` TEXT,
   `filename` TEXT,
@@ -55,6 +57,7 @@ CREATE TABLE `flowcytometer__flowcytometer_density` (
   `density` REAL,
   `biomass` REAL
 );
+
 CREATE TABLE `manualcount__manualcount_density` (
   `timestamp` TEXT,
   `bottle` TEXT,
@@ -63,6 +66,7 @@ CREATE TABLE `manualcount__manualcount_density` (
   `count` INTEGER,
   `density` INTEGER
 );
+
 CREATE TABLE `o2meter__o2meter` (
   `timestamp` TEXT,
   `bottle` TEXT,
@@ -123,6 +127,7 @@ CREATE TABLE `o2meter__o2meter` (
   `battery_voltage` REAL,
   `battery_voltage_unit` TEXT
 );
+
 CREATE TABLE `bemovi_mag_25__mean_density_per_ml_cropped` (
   `timestamp` TEXT,
   `date` TEXT,
@@ -136,6 +141,7 @@ CREATE TABLE `bemovi_mag_25__mean_density_per_ml_cropped` (
   `biomass` REAL,
   `dens_factor` REAL
 );
+
 CREATE TABLE `bemovi_mag_25__mean_density_per_ml` (
   `timestamp` TEXT,
   `date` TEXT,
@@ -149,6 +155,7 @@ CREATE TABLE `bemovi_mag_25__mean_density_per_ml` (
   `biomass` REAL,
   `dens_factor` REAL
 );
+
 CREATE TABLE `bemovi_mag_25__morph_mvt_cropped` (
   `timestamp` TEXT,
   `file` TEXT,
@@ -206,6 +213,7 @@ CREATE TABLE `bemovi_mag_25__morph_mvt_cropped` (
   `height` REAL,
   `biomass` REAL
 );
+
 CREATE TABLE `bemovi_mag_25__morph_mvt` (
   `timestamp` TEXT,
   `file` TEXT,
@@ -263,6 +271,7 @@ CREATE TABLE `bemovi_mag_25__morph_mvt` (
   `height` REAL,
   `biomass` REAL
 );
+
 CREATE TABLE `bemovi_mag_16__mean_density_per_ml` (
   `timestamp` TEXT,
   `date` TEXT,
@@ -276,6 +285,7 @@ CREATE TABLE `bemovi_mag_16__mean_density_per_ml` (
   `biomass` REAL,
   `dens_factor` REAL
 );
+
 CREATE TABLE `bemovi_mag_16__morph_mvt` (
   `timestamp` TEXT,
   `file` TEXT,
@@ -329,6 +339,7 @@ CREATE TABLE `bemovi_mag_16__morph_mvt` (
   `height` REAL,
   `biomass` REAL
 );
+
 CREATE TABLE `bemovi_mag_25__mean_density_per_ml_non_cropped` (
   `timestamp` TEXT,
   `date` TEXT,
@@ -342,6 +353,7 @@ CREATE TABLE `bemovi_mag_25__mean_density_per_ml_non_cropped` (
   `biomass` REAL,
   `dens_factor` REAL
 );
+
 CREATE TABLE `bemovi_mag_25__morph_mvt_non_cropped` (
   `timestamp` TEXT,
   `file` TEXT,
@@ -399,6 +411,7 @@ CREATE TABLE `bemovi_mag_25__morph_mvt_non_cropped` (
   `height` REAL,
   `biomass` REAL
 );
+
 CREATE TABLE `composition` (
   `composition` TEXT,
   `richness` INTEGER,
@@ -421,6 +434,7 @@ CREATE TABLE `composition` (
   `Euplotes` INTEGER,
   `Didinium` INTEGER
 );
+
 CREATE TABLE `experimental_design` (
   `bottle` TEXT,
   `temperature` TEXT,
@@ -428,6 +442,7 @@ CREATE TABLE `experimental_design` (
   `composition` TEXT,
   `incubator` TEXT
 );
+
 CREATE TABLE `light_decline_schedule` (
   `timestamp` INTEGER,
   `temperature` INTEGER,
@@ -435,10 +450,9 @@ CREATE TABLE `light_decline_schedule` (
   `incubator_program` TEXT,
   `comment` INTEGER
 );
-CREATE TABLE `immigration_schedule` (
-  `timestamp` INTEGER,
-  `comment` INTEGER
-);
+
+CREATE TABLE `immigration_schedule` (`timestamp` INTEGER, `comment` INTEGER);
+
 CREATE TABLE `toc__toc` (
   `filename` TEXT,
   `anaysis_time` TEXT,
@@ -461,318 +475,379 @@ CREATE TABLE `toc__toc` (
   `conc_23` REAL,
   `conc_org` REAL
 );
+
 CREATE TABLE 'flowcam__algae_traits' (
-	"particle_id"	INTEGER,
-	"area_abd"	REAL,
-	"area_filled"	REAL,
-	"aspect_ratio"	REAL,
-	"average_blue"	REAL,
-	"average_green"	REAL,
-	"average_red"	REAL,
-	"calibration_factor"	REAL,
-	"calibration_image"	INTEGER,
-	"camera"	INTEGER,
-	"capture_x"	INTEGER,
-	"capture_y"	INTEGER,
-	"ch1_area"	INTEGER,
-	"ch1_peak"	INTEGER,
-	"ch1_width"	INTEGER,
-	"ch2_area"	INTEGER,
-	"ch2_peak"	INTEGER,
-	"ch2_width"	INTEGER,
-	"ch2_ch1_ratio"	INTEGER,
-	"circle_fit"	REAL,
-	"circularity"	REAL,
-	"circularity_hu"	REAL,
-	"compactness"	REAL,
-	"convex_perimeter"	REAL,
-	"convexity"	REAL,
-	"date_flowcam"	TEXT,
-	"diameter_abd"	REAL,
-	"diameter_esd"	REAL,
-	"edge_gradient"	REAL,
-	"elongation"	REAL,
-	"feret_angle_max"	INTEGER,
-	"feret_angle_min"	INTEGER,
-	"fiber_curl"	REAL,
-	"fiber_straightness"	REAL,
-	"filter_score"	INTEGER,
-	"geodesic_aspect_ratio"	REAL,
-	"geodesic_length"	REAL,
-	"geodesic_thickness"	REAL,
-	"image_file"	TEXT,
-	"image_height"	INTEGER,
-	"image_width"	INTEGER,
-	"image_x"	INTEGER,
-	"image_y"	INTEGER,
-	"intensity"	REAL,
-	"length"	REAL,
-	"particles_per_chain"	INTEGER,
-	"perimeter"	REAL,
-	"ratio_blue_green"	REAL,
-	"ratio_red_blue"	REAL,
-	"ratio_red_green"	REAL,
-	"roughness"	REAL,
-	"scatter_area"	INTEGER,
-	"scatter_peak"	INTEGER,
-	"scatter_width"	INTEGER,
-	"sigma_intensity"	REAL,
-	"source_image"	INTEGER,
-	"sum_intensity"	INTEGER,
-	"symmetry"	REAL,
-	"time"	TEXT,
-	"timestamp_flowcam"	TEXT,
-	"transparency"	REAL,
-	"volume_abd"	REAL,
-	"volume_esd"	REAL,
-	"width"	REAL,
-	"bottle"	TEXT,
-	"volume_imaged"	REAL,
-	"dilution_factor"	INTEGER,
-	"area_x"	TEXT,
-	"area_y"	TEXT,
-	"subarea"	TEXT,
-	"temperature"	TEXT,
-	"richness"	INTEGER,
-	"composition"	TEXT,
-	"incubator"	TEXT,
-	"species"	TEXT,
-	"species_probability"	REAL,
-	"airbubbles_prob"	REAL,
-	"chlamydomonas_prob"	REAL,
-	"chlamydomonasclumps_prob"	REAL,
-	"coleps_irchel_prob"	REAL,
-	"cosmarium_prob"	REAL,
-	"cryptomonas_prob"	REAL,
-	"debris_prob"	REAL,
-	"desmodesmus_prob"	REAL,
-	"digestedalgae_prob"	REAL,
-	"loxocephallus_prob"	REAL,
-	"otherciliate_prob"	REAL,
-	"tetrahymena_prob"	REAL,
-	"staurastrum1_prob"	INTEGER,
-	"colpidium_prob"	INTEGER,
-	"colpidiumvacuoles_prob"	INTEGER,
-	"monoraphidium_prob"	INTEGER,
-	"staurastrum2_prob"	INTEGER,
-	"dexiostoma_prob"	INTEGER,
-	"timestamp"	TEXT,
-	"flowcell"	text,
-	"filtration"	text,
-	"instrument"	TEXT,
-	"diameter_fd"	TEXT,
-	"elapsed_time"	TEXT,
-	"original_reference_id"	TEXT,
-	"sphere_complement"	TEXT,
-	"sphere_count"	TEXT,
-	"sphere_unknown"	TEXT,
-	"sphere_volume"	TEXT,
-	"dividingchlamydomonas_prob"	REAL,
-	"small_unidentified_prob"	REAL,
-	"small_cells_prob"	TEXT,
-	"desmodesmusclumps_prob"	TEXT,
+  "particle_id" INTEGER,
+  "area_abd" REAL,
+  "area_filled" REAL,
+  "aspect_ratio" REAL,
+  "average_blue" REAL,
+  "average_green" REAL,
+  "average_red" REAL,
+  "calibration_factor" REAL,
+  "calibration_image" INTEGER,
+  "camera" INTEGER,
+  "capture_x" INTEGER,
+  "capture_y" INTEGER,
+  "ch1_area" INTEGER,
+  "ch1_peak" INTEGER,
+  "ch1_width" INTEGER,
+  "ch2_area" INTEGER,
+  "ch2_peak" INTEGER,
+  "ch2_width" INTEGER,
+  "ch2_ch1_ratio" INTEGER,
+  "circle_fit" REAL,
+  "circularity" REAL,
+  "circularity_hu" REAL,
+  "compactness" REAL,
+  "convex_perimeter" REAL,
+  "convexity" REAL,
+  "date_flowcam" TEXT,
+  "diameter_abd" REAL,
+  "diameter_esd" REAL,
+  "edge_gradient" REAL,
+  "elongation" REAL,
+  "feret_angle_max" INTEGER,
+  "feret_angle_min" INTEGER,
+  "fiber_curl" REAL,
+  "fiber_straightness" REAL,
+  "filter_score" INTEGER,
+  "geodesic_aspect_ratio" REAL,
+  "geodesic_length" REAL,
+  "geodesic_thickness" REAL,
+  "image_file" TEXT,
+  "image_height" INTEGER,
+  "image_width" INTEGER,
+  "image_x" INTEGER,
+  "image_y" INTEGER,
+  "intensity" REAL,
+  "length" REAL,
+  "particles_per_chain" INTEGER,
+  "perimeter" REAL,
+  "ratio_blue_green" REAL,
+  "ratio_red_blue" REAL,
+  "ratio_red_green" REAL,
+  "roughness" REAL,
+  "scatter_area" INTEGER,
+  "scatter_peak" INTEGER,
+  "scatter_width" INTEGER,
+  "sigma_intensity" REAL,
+  "source_image" INTEGER,
+  "sum_intensity" INTEGER,
+  "symmetry" REAL,
+  "time" TEXT,
+  "timestamp_flowcam" TEXT,
+  "transparency" REAL,
+  "volume_abd" REAL,
+  "volume_esd" REAL,
+  "width" REAL,
+  "bottle" TEXT,
+  "volume_imaged" REAL,
+  "dilution_factor" INTEGER,
+  "area_x" TEXT,
+  "area_y" TEXT,
+  "subarea" TEXT,
+  "temperature" TEXT,
+  "richness" INTEGER,
+  "composition" TEXT,
+  "incubator" TEXT,
+  "species" TEXT,
+  "species_probability" REAL,
+  "airbubbles_prob" REAL,
+  "chlamydomonas_prob" REAL,
+  "chlamydomonasclumps_prob" REAL,
+  "coleps_irchel_prob" REAL,
+  "cosmarium_prob" REAL,
+  "cryptomonas_prob" REAL,
+  "debris_prob" REAL,
+  "desmodesmus_prob" REAL,
+  "digestedalgae_prob" REAL,
+  "loxocephallus_prob" REAL,
+  "otherciliate_prob" REAL,
+  "tetrahymena_prob" REAL,
+  "staurastrum1_prob" INTEGER,
+  "colpidium_prob" INTEGER,
+  "colpidiumvacuoles_prob" INTEGER,
+  "monoraphidium_prob" INTEGER,
+  "staurastrum2_prob" INTEGER,
+  "dexiostoma_prob" INTEGER,
+  "timestamp" TEXT,
+  "flowcell" text,
+  "filtration" text,
+  "instrument" TEXT,
+  "diameter_fd" TEXT,
+  "elapsed_time" TEXT,
+  "original_reference_id" TEXT,
+  "sphere_complement" TEXT,
+  "sphere_count" TEXT,
+  "sphere_unknown" TEXT,
+  "sphere_volume" TEXT,
+  "dividingchlamydomonas_prob" REAL,
+  "small_unidentified_prob" REAL,
+  "small_cells_prob" TEXT,
+  "desmodesmusclumps_prob" TEXT,
   "height" REAL,
-	"biomass"  REAL
+  "biomass" REAL
 );
 
-CREATE VIEW o2
-AS
+CREATE VIEW o2 AS
 SELECT
   *
 FROM
   (
-   SELECT
-     timestamp,
-     cast(
-          julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) -
-          julianday('2021-09-20') AS integer
-     ) AS day,
-     bottle,
-     sensor,
-     temp AS 'temperature_actual',
-     value AS 'percent_o2',
-     'o2meter' AS measurement
-   FROM
-     o2meter__o2meter
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') AS integer
+      ) AS day,
+      bottle,
+      sensor,
+      temp AS 'temperature_actual',
+      value AS 'percent_o2',
+      'o2meter' AS measurement
+    FROM
+      o2meter__o2meter
   )
-INNER JOIN
-  (
-   SELECT
-     bottle,
-     temperature,
-     richness,
-     composition,
-     incubator
-   FROM
-	 experimetal_design
-  )
-USING
-  (bottle)
-/* o2(timestamp,day,bottle,sensor,temperature_actual,percent_o2,measurement,temperature,richness,composition,incubator) */;
-CREATE VIEW density
-AS
-SELECT
-  *
-FROM
-  (
-   SELECT
-     timestamp,
-     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('2021-09-20') as integer ) AS day,
-     bottle,
-     'bemovi_mag_16' AS measurement,
-     species,
-     density,
-     biomass
-   FROM
-     bemovi_mag_16__mean_density_per_ml
-   UNION ALL
-   SELECT
-     timestamp,
-     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('2021-09-20') as integer ) AS day,
-     bottle,
-     'bemovi_mag_25' AS measurement,
-     species,
-     density,
-     biomass
-   FROM
-     bemovi_mag_25__mean_density_per_ml
-   UNION ALL
-   SELECT
-     timestamp,
-     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('2021-09-20') as integer ) AS day,
-     bottle,
-     'bemovi_mag_25_cropped' AS measurement,
-     species,
-     density,
-     biomass
-   FROM
-     bemovi_mag_25__mean_density_per_ml_cropped
-   UNION ALL
-   SELECT
-     timestamp,
-     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('2021-09-20') as integer ) AS day,
-     bottle,
-     'bemovi_mag_25_non_cropped' AS measurement,
-     species,
-     density,
-     biomass
-   FROM
-     bemovi_mag_25__mean_density_per_ml_non_cropped
-   UNION ALL
-   SELECT
-     timestamp,
-     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('2021-09-20') as integer ) AS day,
-     bottle,
-     'flowcam' AS measurement,
-     species,
-     density,
-     biomass
-   FROM
-     flowcam__algae_density
-   UNION ALL
-   SELECT
-     timestamp,
-     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('2021-09-20') as integer ) AS day,
-     bottle,
-     'flowcytometer' AS measurement,
-     species,
-     density,
-     biomass
-   FROM
-     flowcytometer__flowcytometer_density
-   UNION ALL
-   SELECT
-     timestamp,
-     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('2021-09-20') as integer ) AS day,
-     bottle,
-     'manualcount' AS measurement,
-     species,
-     density,
-     NULL AS biomass
-   FROM
-     manualcount__manualcount_density
-  )
-INNER JOIN
-  (
-   SELECT
-     bottle,
-     temperature,
-     richness,
-     composition,
-     incubator
-   FROM
-	 experimetal_design
-  )
-USING
-  (bottle)
-/* density(timestamp,day,bottle,measurement,species,density,temperature,richness,composition,incubator) */;
-CREATE VIEW immigration_event
-AS
-SELECT
-  *
-FROM
-  (
-   SELECT
-     timestamp,
-     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('2021-09-20') as integer ) AS day,
-     comment
-   FROM
-     immigration_schedule
-  )
-/* immigration_event(timestamp,day,comment) */;
-CREATE VIEW light_decline
-AS
-SELECT
-  *
-FROM
-  (
-   SELECT
-     timestamp,
-     cast( julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) - julianday('2021-09-20') as integer ) AS day,
-     temperature,
-     light
-   FROM
-     light_decline_schedule
-  )
-/* light_decline(timestamp,day,temperature,light) */;
-CREATE VIEW toc
-AS
-SELECT
-  *
-FROM
-  (
-   SELECT
-     timestamp,
-     cast(
-          julianday(date(substr(timestamp,1,4)||'-'||substr(timestamp,5,2)||'-'||substr(timestamp,7,2))) -
-          julianday('2021-09-20') AS integer
-     ) AS day,
-     bottle,
-     inj_type AS 'type',
-	 conc AS 'concentration',
-	 cv AS 'cv'
-   FROM
-     toc__toc
-   WHERE
-	 bottle IS NOT NULL
-	)
-INNER JOIN
-  (
-   SELECT
-     bottle,
-     temperature,
-     richness,
-     composition,
-     incubator
-   FROM
-	   experimetal_design
-  )
-USING
-  (bottle)
-/* toc(timestamp,day,bottle,type,concentration,cv,temperature,richness,composition,incubator) */;
+  INNER JOIN (
+    SELECT
+      bottle,
+      light_treatment,
+      richness,
+      composition,
+      incubator
+    FROM
+      experimetal_design
+  ) USING (bottle)
+  /* o2(timestamp,day,bottle,sensor,temperature_actual,percent_o2,measurement,temperature,richness,composition,incubator) */
+;
 
-CREATE VIEW experimetal_design
-AS
+CREATE VIEW density AS
+SELECT
+  *
+FROM
+  (
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') as integer
+      ) AS day,
+      bottle,
+      'bemovi_mag_16' AS measurement,
+      species,
+      density,
+      biomass
+    FROM
+      bemovi_mag_16__mean_density_per_ml
+    UNION
+    ALL
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') as integer
+      ) AS day,
+      bottle,
+      'bemovi_mag_25' AS measurement,
+      species,
+      density,
+      biomass
+    FROM
+      bemovi_mag_25__mean_density_per_ml
+    UNION
+    ALL
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') as integer
+      ) AS day,
+      bottle,
+      'bemovi_mag_25_cropped' AS measurement,
+      species,
+      density,
+      biomass
+    FROM
+      bemovi_mag_25__mean_density_per_ml_cropped
+    UNION
+    ALL
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') as integer
+      ) AS day,
+      bottle,
+      'bemovi_mag_25_non_cropped' AS measurement,
+      species,
+      density,
+      biomass
+    FROM
+      bemovi_mag_25__mean_density_per_ml_non_cropped
+    UNION
+    ALL
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') as integer
+      ) AS day,
+      bottle,
+      'flowcam' AS measurement,
+      species,
+      density,
+      biomass
+    FROM
+      flowcam__algae_density
+    UNION
+    ALL
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') as integer
+      ) AS day,
+      bottle,
+      'flowcytometer' AS measurement,
+      species,
+      density,
+      biomass
+    FROM
+      flowcytometer__flowcytometer_density
+    UNION
+    ALL
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') as integer
+      ) AS day,
+      bottle,
+      'manualcount' AS measurement,
+      species,
+      density,
+      NULL AS biomass
+    FROM
+      manualcount__manualcount_density
+  )
+  INNER JOIN (
+    SELECT
+      bottle,
+      light_treatment,
+      richness,
+      composition,
+      incubator
+    FROM
+      experimetal_design
+  ) USING (bottle)
+  /* density(timestamp,day,bottle,measurement,species,density,temperature,richness,composition,incubator) */
+;
+
+CREATE VIEW immigration_event AS
+SELECT
+  *
+FROM
+  (
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') as integer
+      ) AS day,
+      comment
+    FROM
+      immigration_schedule
+  )
+  /* immigration_event(timestamp,day,comment) */
+;
+
+CREATE VIEW light_decline AS
+SELECT
+  *
+FROM
+  (
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') as integer
+      ) AS day,
+      temperature,
+      light
+    FROM
+      light_decline_schedule
+  )
+  /* light_decline(timestamp,day,temperature,light) */
+;
+
+CREATE VIEW toc AS
+SELECT
+  *
+FROM
+  (
+    SELECT
+      timestamp,
+      cast(
+        julianday(
+          date(
+            substr(timestamp, 1, 4) || '-' || substr(timestamp, 5, 2) || '-' || substr(timestamp, 7, 2)
+          )
+        ) - julianday('2021-09-20') AS integer
+      ) AS day,
+      bottle,
+      inj_type AS 'type',
+      conc AS 'concentration',
+      cv AS 'cv'
+    FROM
+      toc__toc
+    WHERE
+      bottle IS NOT NULL
+  )
+  INNER JOIN (
+    SELECT
+      bottle,
+      light_treatment,
+      richness,
+      composition,
+      incubator
+    FROM
+      experimetal_design
+  ) USING (bottle)
+  /* toc(timestamp,day,bottle,type,concentration,cv,temperature,richness,composition,incubator) */
+;
+
+CREATE VIEW experimetal_design AS
 SELECT
   *
 FROM
