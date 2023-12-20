@@ -15,9 +15,9 @@ format:
 params:
   release: "v2.3.8-LEEF-2"
   repo: "https://github.com/LEEF-UZH/LEEF.parameter/"
-  output_dir: "/Volumes/RRD.Reclassification_LEEF-2/"
+  output_dir: "~/Desktop/test rrd remake/"
   extracted_dir: "/Volumes/LEEF-2_archive/archive/extracted/"
-  toc: "/Volumes/LEEF/0.TOC/LEEF-2/toc.rds"
+  toc: "/Volumes/Groups/LEEF/0.TOC/LEEF-2/toc.rds"
   min_FSC.A: 2
   flowcytometer_particles: 
     - algae
@@ -114,10 +114,21 @@ params:
 
 ---
 
+# To run parts
+
+Run a whole chunk so that the parameters above are read in.
+
+```{r}
+## run this chunk to make params
+```
+
+
 # Setup
 1. Download parameter as defined in the `params$release` from the repo as defined in `parms$base` 
 2. Create output directory as specified in `params$output_dir`
 3. Check if `params$pre_processed_dir` and `params$extracted_dir` exist. The existance is only necessary for the re-classification and overlay creation (when done).
+
+
 
 
 ```{r}
@@ -125,17 +136,18 @@ params:
 #| include: false
 #|
 
-set.seed(13)
+set.seed(13) ## just in case
 
-if (!exists("params")) {
-    p <- "~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning.qmd"
-    exists <- file.exists("~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning.qmd")
-    if (!exists) {
-        p <- "~/Documents_Local/git/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning.qmd"
-    }
-
-    params <- rmarkdown::yaml_front_matter(p)$params
-}
+## this is visual studio code -- can be ignored
+# if (!exists("params")) {
+#     p <- "~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning.qmd"
+#     exists <- file.exists("~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning.qmd")
+#     if (!exists) {
+#         p <- "~/Documents_Local/git/LEEF/analysis/LEEF.analysis/inst/LEEF-2/LEEF-2 Reclassification_and_Data_Cleaning.qmd"
+#     }
+# 
+#     params <- rmarkdown::yaml_front_matter(p)$params
+# }
 
 knitr::opts_chunk$set(
     echo = TRUE,
