@@ -15,8 +15,8 @@ format:
 params:
   release: "v2.3.8-LEEF-2"
   repo: "https://github.com/LEEF-UZH/LEEF.parameter/"
-  output_dir: "~/Desktop/test rrd remake/"
-  extracted_dir: "/Volumes/LEEF-2_archive/archive/extracted/"
+  output_dir: "~/Desktop/test rrd remake"
+  extracted_dir: "/Users/owenpetchey/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LEEFSwift3/LEEF_2.archived.data/LEEF/3.archived.data/extracted"
   toc: "/Volumes/Groups/LEEF/0.TOC/LEEF-2/toc.rds"
   min_FSC.A: 2
   flowcytometer_particles: 
@@ -124,10 +124,41 @@ Run a whole chunk so that the parameters above are read in.
 
 
 # Setup
+0. Install required packages
 1. Download parameter as defined in the `params$release` from the repo as defined in `parms$base` 
 2. Create output directory as specified in `params$output_dir`
 3. Check if `params$pre_processed_dir` and `params$extracted_dir` exist. The existance is only necessary for the re-classification and overlay creation (when done).
 
+
+```{r}
+#| eval: false
+## to install packages
+## Do not use drat as it will not be maintained 
+#drat::addRepo("LEEF-UZH") don't do this
+getOption("repos")
+
+## First must install bioconductor and flowcore
+#if (!require("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+## BiocManager::install(version = "3.18") ## this may be required with the version changed
+#BiocManager::install("flowCore")
+
+## Get from github, latest version
+#remotes::install_github("LEEF-UZH/LEEF", ref = "LEEF-2", force = TRUE) ## this installs dependencies using drat
+#remotes::install_github("LEEF-UZH/LEEF.measurement.flowcytometer", ref = "LEEF-1")
+#remotes::install_github("LEEF-UZH/LEEF.measurement.bemovi", ref = "LEEF-1")
+#remotes::install_github("LEEF-UZH/LEEF.measurement.flowcam", ref = "LEEF-1")
+remotes::install_github("LEEF-UZH/LEEF.measurement.flowcytometer", ref = "LEEF-2")
+remotes::install_github("LEEF-UZH/LEEF.measurement.bemovi", ref = "LEEF-2")
+remotes::install_github("LEEF-UZH/LEEF.measurement.flowcam", ref = "LEEF-2")
+remotes::install_github("LEEF-UZH/LEEF.measurement.conductivity", ref = "master")
+remotes::install_github("LEEF-UZH/LEEF.measurement.o2meter", ref = "master")
+remotes::install_github("LEEF-UZH/LEEF.measurement.manualcount", ref = "master")
+remotes::install_github("LEEF-UZH/LEEF.analysis", ref = "master")
+remotes::install_github("LEEF-UZH/bemovi", ref = "LEEF")
+
+
+```
 
 
 
@@ -173,6 +204,8 @@ knitr::knit_hooks$set(
         }
     }
 )
+
+
 
 ####
 
@@ -257,6 +290,8 @@ timestamps <- list.files(
 timestamps <- gsub("^LEEF\\.flowcam\\.flowcam\\.", "", timestamps)
 
 out <- file.path(params$output_dir, "flowcam")
+
+## for testing: timestamps <- timestamps[1:2]
 
 if (!file.exists(out)) {
     message("Classifying flowcam...")
@@ -427,6 +462,8 @@ timestamps <- list.files(
     full.names = FALSE
 )
 timestamps <- gsub("^LEEF\\.bemovi\\.mag\\.16\\.bemovi\\.", "", timestamps)
+
+## for testing: timestamps <- timestamps[1:2]
 
 out <- file.path(params$output_dir, "bemovi_mag_16")
 
