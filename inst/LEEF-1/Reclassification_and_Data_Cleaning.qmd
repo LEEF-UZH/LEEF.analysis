@@ -43,8 +43,8 @@ params:
   contamination_bottle: "b_02"
 
   reclassify_flowcam: false
-  reclassify_bemovi_16: true
-  reclassify_bemovi_25: true
+  reclassify_bemovi_16: false
+  reclassify_bemovi_25: false
   regate_flowcytometer: false
 
   add_to_rrd: true
@@ -1472,6 +1472,13 @@ download.file(
     destfile = experimental_design,
     mode = "wb"
 )
+x <- read.csv(experimental_design) |>
+  dplyr::rename(
+    light_treatment = temperature
+  ) 
+x$light_treatment[x$light_treatment == "increasing"] <-  "decreasing"
+write.csv(x, experimental_design, row.names = FALSE)
+rm(x)
 
 immigration_schedule <- file.path(pdir, "immigration_schedule.csv")
 download.file(
@@ -1688,7 +1695,7 @@ toc$analysis_time2 <- sapply(toc$analysis_time2, function(d){
 toc <- toc %>%
   dplyr::mutate(
     light_phase = case_when(
-      temperature == "constant" ~ "constant",
+      light_treatment == "constant" ~ "constant",
       day < 93 ~ "constant before decrease",
       day >= 93 & day < 198 ~ "decreasing",
       day >= 198 ~ "constant after decrease"),
@@ -1733,7 +1740,7 @@ toc$conc  <- toc$concentration.detrended
 toc <- toc |>
   select(
     -c(
-      "temperature", 
+      "light_treatment", 
       "richness", 
       "composition", 
       "incubator", 
