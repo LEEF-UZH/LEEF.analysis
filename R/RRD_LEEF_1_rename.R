@@ -24,10 +24,9 @@ RRD_LEEF_1_rename <- function(
     c("bemovi_mag_25__morph_mvt", "temperature_treatment", "light_treatment"),
     c("bemovi_mag_25__morph_mvt_cropped", "temperature_treatment", "light_treatment"),
     c("bemovi_mag_25__morph_mvt_non_cropped", "temperature_treatment", "light_treatment"),
-    c("experimetal_design", "temperature", "light_treatment"),
+    c("experimental_design", "temperature", "light_treatment"),
     c("flowcam__algae_density", "temperature", "light_treatment"),
     c("flowcam__algae_traits", "temperature", "light_treatment"),
-    c("experimental_design", "temperature", "light_treatment"),
     ##
     c("composition", "Chlamydomonas", "Chlamydomonas_reinhardtii"),
     c("composition", "Cryptomonas", "Cryptomonas_sp"),
@@ -58,7 +57,7 @@ RRD_LEEF_1_rename <- function(
     "bemovi_mag_25__morph_mvt",
     "bemovi_mag_25__morph_mvt_cropped",
     "bemovi_mag_25__morph_mvt_non_cropped",
-    "experimetal_design",
+    "experimental_design",
     "flowcam__algae_density",
     "flowcam__algae_traits",
     "experimental_design"
@@ -172,7 +171,7 @@ RRD_LEEF_1_rename <- function(
   # Define SQLs -------------------------------------------------------------------
 
 
-  # Define temp to light column names ---------------------------------------
+  # Define temp to light_treatment column names ---------------------------------------
 
 
   sqls_temp_light <- lapply(
@@ -183,18 +182,13 @@ RRD_LEEF_1_rename <- function(
   ) |> unlist()
 
 
-  # Define light_treatment values --------------------------------------------
+  # recode light_treatment values --------------------------------------------
 
-  sqls_light_treatment <- lapply(
-    species_names,
-    function(td) {
-      paste0(
-        " UPDATE '", tables_with_light_treatment_columns, "'",
-        " SET light_treatment = 'decreasing'",
-        " WHERE ",
-        " light_treatment = 'increasing'"
-      )
-    }
+  sqls_light_treatment <- paste0(
+    " UPDATE '", tables_with_light_treatment_columns, "'",
+    " SET light_treatment = 'decreasing'",
+    " WHERE ",
+    " light_treatment = 'increasing'"
   ) |>
     unlist()
 

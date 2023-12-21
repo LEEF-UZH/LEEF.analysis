@@ -4,13 +4,11 @@
 \alias{RRD_LEEF_1_rename}
 \title{Rename columns and species in the RRD}
 \usage{
-RRD_LEEF_1_rename(db = getOption("RRDdb", "LEEF.RRD.sqlite"), revert = FALSE)
+RRD_LEEF_1_rename(db = getOption("RRDdb", "LEEF.RRD.sqlite"))
 }
 \arguments{
 \item{db}{fully qualified path to the sqlite database. Default, read from option \code{RRDdb}.
 If not set, defaults to option \code{RRDdb}; if this is not set, defaults to \code{LEEF.RRD.sqlite}}
-
-\item{revert}{if \code{TRUE}, the changes are reverted. Default: \code{FALSE}}
 }
 \description{
 Rename columns and species in the RRD

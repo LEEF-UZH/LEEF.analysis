@@ -95,22 +95,22 @@ params:
   reclassify_flowcam: false
   reclassify_bemovi_16: false
   reclassify_bemovi_25: false
-  regate_flowcytometer: false  
+  regate_flowcytometer: true  
   assemble_manualcount: false
   assemble_o2: false
-  assemble_conductivity: true
+  assemble_conductivity: false
   assemble_toc: false
 
   update_parquet_flowcam: false
   update_parquet_bemovi_16: false
   update_parquet_bemovi_25: false
-  update_parquet_flowcytometer: false
-  update_parquet_manualcount: true
-  update_parquet_o2: true
-  update_parquet_conductivity: true
-  update_parquet_toc: true
+  update_parquet_flowcytometer: true
+  update_parquet_manualcount: false
+  update_parquet_o2: false
+  update_parquet_conductivity: false
+  update_parquet_toc: false
   
-  update_parquet_experimental_tables: true
+  update_parquet_experimental_tables: false
 
 ---
 
@@ -885,7 +885,7 @@ template |>
 
 ## Regate Flowcytometer
 
-### [ ] Flowcytometer Density
+### Flowcytometer Density
 ```{r}
 #| label: density_flowcytometer
 #| eval: !expr params$regate_flowcytometer
@@ -911,11 +911,11 @@ LEEF_2_density_flowcytometer_archive(
     gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
     min_FSC.A = params$min_FSC.A,
     particles = params$flowcytometer_particles,
-    mc.cores = 10 # params$cores
+    mc.cores = params$cores
 )
 ```
 
-### [ ] Flowcytometer Traits and Biomass
+### Flowcytometer Traits and Biomass
 ```{r}
 #| label: traits_biomass_flowcytometer
 #| eval: !expr params$regate_flowcytometer
@@ -932,18 +932,18 @@ LEEF_2_extract_traits_flowcytometer_archive(
     output = file.path(params$output_dir, "flowcytometer"),
     length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
     length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept,
-    mc.cores = min(5, params$cores)
+    mc.cores = min(4, params$cores)
 )
 
 rm(timestamps)
 ```
 
-### Remove bottles not needed in Flowcytometer
+### [ ] Remove bottles not needed in Flowcytometer and Set Individual Missing Samples to NA
 
 ```{r}
 #| label: flowcytometer_remove_bottles
 #| eval: !expr params$regate_flowcytometer
-#|
+#|#|
 
 fns <- list.files(
     path = file.path(params$output_dir, "flowcytometer"),
@@ -957,6 +957,36 @@ pbmcapply::pbmclapply(
     function(fn) {
         x <- readRDS(fn) |>
             dplyr::filter(!(bottle %in% c(params$remove_bottles_flowcytometer)))
+
+        if (grepl("_density", fn)) {
+            sm <- x |>
+                mutate(
+                    plate = NA,
+                    filename = NA,
+                    sample = NA,
+                    volume = NA,
+                    tot_density_perml = NA,
+                    specname = NA,
+                    dilution_factor = NA,
+                    sample_letter = NA,
+                    sample_number = NA,
+                    count = NA,
+                    density = NA,
+                    biomass = NA
+                ) |>
+                group_by(across()) |>
+                summarise(n = n(), p = paste(plate, collapse = "  "), .groups = ) |>
+                ungroup() |>
+                filter(n < 3) |>
+                mutate(n = NULL, p = NULL)
+
+            if (nrow(sm > 0)) {
+                x <- x |>
+                    dplyr::bind_rows(sm) |>
+                    arrange(bottle, plate, species)
+            }
+        }
+
         unlink(fn)
         saveRDS(x, file = fn)
     },
@@ -964,6 +994,9 @@ pbmcapply::pbmclapply(
     mc.preschedule = FALSE
 )
 ```
+
+### 
+
 
 ## Assemble TOC
 ```{r}

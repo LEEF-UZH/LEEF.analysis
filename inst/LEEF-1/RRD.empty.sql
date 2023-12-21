@@ -437,7 +437,7 @@ CREATE TABLE `composition` (
 
 CREATE TABLE `experimental_design` (
   `bottle` TEXT,
-  `temperature` TEXT,
+  `light_treatment` TEXT,
   `richness` INTEGER,
   `composition` TEXT,
   `incubator` TEXT
@@ -622,7 +622,6 @@ FROM
     FROM
       experimetal_design
   ) USING (bottle)
-  /* o2(timestamp,day,bottle,sensor,temperature_actual,percent_o2,measurement,temperature,richness,composition,incubator) */
 ;
 
 CREATE VIEW density AS
@@ -765,7 +764,6 @@ FROM
     FROM
       experimetal_design
   ) USING (bottle)
-  /* density(timestamp,day,bottle,measurement,species,density,temperature,richness,composition,incubator) */
 ;
 
 CREATE VIEW immigration_event AS
@@ -786,7 +784,6 @@ FROM
     FROM
       immigration_schedule
   )
-  /* immigration_event(timestamp,day,comment) */
 ;
 
 CREATE VIEW light_decline AS
@@ -808,7 +805,6 @@ FROM
     FROM
       light_decline_schedule
   )
-  /* light_decline(timestamp,day,temperature,light) */
 ;
 
 CREATE VIEW toc AS
@@ -844,7 +840,6 @@ FROM
     FROM
       experimetal_design
   ) USING (bottle)
-  /* toc(timestamp,day,bottle,type,concentration,cv,temperature,richness,composition,incubator) */
 ;
 
 CREATE VIEW experimetal_design AS
