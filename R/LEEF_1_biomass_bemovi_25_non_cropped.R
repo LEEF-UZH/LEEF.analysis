@@ -66,7 +66,7 @@ LEEF_1_biomass_bemovi_25_non_cropped <- function(
   biomasses <- ciliate_traits_25_non_cropped %>%
     group_by(timestamp, bottle, species) %>%
     summarize(
-      biomass = sum(biomass * n_frames, na.rm = TRUE) / 3 * 125
+      biomass = sum(biomass * n_frames, na.rm = TRUE) / (3 * 125) # if not 3 videos corrections is done below with dens_factor
     ) %>%
     mutate(
       biomass = biomass * extrapolation.factor_25,
@@ -90,7 +90,7 @@ LEEF_1_biomass_bemovi_25_non_cropped <- function(
     mutate(
       biomass = biomass * dens_factor
     )
-  
+
   # mutate(
     #   biomass = case_when(
     #     species %in% flowcam_biomass_species & is.na(biomass) ~ 0,

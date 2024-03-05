@@ -17,8 +17,8 @@ format:
 params:
   version_tag: "v1.8.5"
   base: "https://github.com/LEEF-UZH/LEEF.parameter/raw/"
-  output_dir: "/Volumes/RRD.Reclassification_final/"
-  db: "/Volumes/RRD.Reclassification_final/LEEF.RRD.sqlite"
+  output_dir: "/Volumes/UDWorkMobil/LEEF1RRD_Creation/"
+  db: "/Volumes/UDWorkMobil/LEEF1RRD_Creation/LEEF.RRD.sqlite"
   archive_dir: "/Volumes/LEEF-1_archive/"
   pre_processed_folder: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/pre_processed/"
   extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
@@ -47,13 +47,13 @@ params:
   reclassify_bemovi_25: false
   regate_flowcytometer: false
 
-  add_to_rrd: true
-  add_others_to_rrd: true
+  add_to_rrd: false
+  add_others_to_rrd: false
 
-  rename_rrd: true
-  final_rrd: true
+  rename_rrd: false
+  final_rrd: false
 
-  diagnostic_report: true
+  diagnostic_report: false
 
   parquet: false
 ---
@@ -69,6 +69,10 @@ This reclassification is based on the classifiers as in the repo at the base URL
 3. Set database
 4. Set Archive Directory
 Make sure, that the S3 LEEF archive is mounted and you know the path to the archive as it is needed.
+
+```{r}
+
+```
 
 
 ```{r}
@@ -1273,8 +1277,11 @@ download.file(
 Regate using H and re-calculate the densities
 
 #### Densities and Biomass UZH Samples
+
+Note by Uriah (20240229): because of RAM limitations I splitted the following chunk into several chunks based on timestamps.
+
 ```{r}
-#| label: flowcytometer_densities_biomass
+#| label: flowcytometer_densities_biomass_part1
 #| eval: !expr params$regate_flowcytometer
 #| 
 
@@ -1287,6 +1294,7 @@ timestamps <- list.files(
   full.names = FALSE
 )
 timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+timestamps <- timestamps[1:56]
 
 ## Density
 
@@ -1333,6 +1341,257 @@ pbmcapply::pbmclapply(
     }
 )
 ```
+
+
+```{r}
+#| label: flowcytometer_densities_biomass_part2
+#| eval: !expr params$regate_flowcytometer
+#| 
+
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+timestamps <- timestamps[57:80]
+
+## Density
+
+density_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer"),
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE,
+  particles = params$flowcytometer_particles,
+  mc.cores = params$cores
+)
+
+## Biomass
+
+biomass_per_bottle  <- extract_traits_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  particles = params$flowcytometer_particles,
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE, 
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer_traits"),
+  length_slope =  read.csv(conv_FSCA_length)$slope,
+  length_intercept =  read.csv(conv_FSCA_length)$intercept,
+  mc.cores = params$cores
+)
+
+## Add biomass to density
+
+pbmcapply::pbmclapply(
+    names(biomass_per_bottle),
+    function(timestamp) {
+        dens_fn <- file.path(params$output_dir, "flowcytometer", paste0("flowcytometer_density.", timestamp, ".rds"))
+        merge(
+            readRDS(dens_fn),
+            biomass_per_bottle[[timestamp]],
+            by = c("sample", "species")
+        ) |>
+            saveRDS(file = dens_fn)
+    }
+)
+```
+
+```{r}
+#| label: flowcytometer_densities_biomass_part3
+#| eval: !expr params$regate_flowcytometer
+#| 
+
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+timestamps <- timestamps[81:91]
+
+## Density
+
+density_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer"),
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE,
+  particles = params$flowcytometer_particles,
+  mc.cores = params$cores
+)
+
+## Biomass
+
+biomass_per_bottle  <- extract_traits_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  particles = params$flowcytometer_particles,
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE, 
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer_traits"),
+  length_slope =  read.csv(conv_FSCA_length)$slope,
+  length_intercept =  read.csv(conv_FSCA_length)$intercept,
+  mc.cores = params$cores
+)
+
+## Add biomass to density
+
+pbmcapply::pbmclapply(
+    names(biomass_per_bottle),
+    function(timestamp) {
+        dens_fn <- file.path(params$output_dir, "flowcytometer", paste0("flowcytometer_density.", timestamp, ".rds"))
+        merge(
+            readRDS(dens_fn),
+            biomass_per_bottle[[timestamp]],
+            by = c("sample", "species")
+        ) |>
+            saveRDS(file = dens_fn)
+    }
+)
+```
+
+```{r}
+#| label: flowcytometer_densities_biomass_part4
+#| eval: !expr params$regate_flowcytometer
+#| 
+
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+timestamps <- timestamps[92:102]
+
+## Density
+
+density_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer"),
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE,
+  particles = params$flowcytometer_particles,
+  mc.cores = params$cores
+)
+
+## Biomass
+
+biomass_per_bottle  <- extract_traits_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  particles = params$flowcytometer_particles,
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE, 
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer_traits"),
+  length_slope =  read.csv(conv_FSCA_length)$slope,
+  length_intercept =  read.csv(conv_FSCA_length)$intercept,
+  mc.cores = params$cores
+)
+
+## Add biomass to density
+
+pbmcapply::pbmclapply(
+    names(biomass_per_bottle),
+    function(timestamp) {
+        dens_fn <- file.path(params$output_dir, "flowcytometer", paste0("flowcytometer_density.", timestamp, ".rds"))
+        merge(
+            readRDS(dens_fn),
+            biomass_per_bottle[[timestamp]],
+            by = c("sample", "species")
+        ) |>
+            saveRDS(file = dens_fn)
+    }
+)
+```
+
+
+```{r}
+#| label: flowcytometer_densities_biomass_part5
+#| eval: !expr params$regate_flowcytometer
+#| 
+
+## Select all timestamps
+
+timestamps <- list.files(
+  path = params$extracted_dir, 
+  pattern = "^LEEF\\.fast\\.flowcytometer\\.",
+  recursive = FALSE, 
+  full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.fast\\.flowcytometer\\.", "", timestamps)
+timestamps <- timestamps[103:112]
+
+## Density
+
+density_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer"),
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE,
+  particles = params$flowcytometer_particles,
+  mc.cores = params$cores
+)
+
+## Biomass
+
+biomass_per_bottle  <- extract_traits_flowcytometer_archive(
+  extracted_dir = params$extracted_dir,
+  gates_coordinates = read.csv(gates_coordinates),
+  particles = params$flowcytometer_particles,
+  use_H = TRUE,
+  min_FSC.A = params$min_FSC.A,
+  log10_all = TRUE, 
+  timestamps = timestamps,
+  output = file.path(params$output_dir, "flowcytometer_traits"),
+  length_slope =  read.csv(conv_FSCA_length)$slope,
+  length_intercept =  read.csv(conv_FSCA_length)$intercept,
+  mc.cores = params$cores
+)
+
+## Add biomass to density
+
+pbmcapply::pbmclapply(
+    names(biomass_per_bottle),
+    function(timestamp) {
+        dens_fn <- file.path(params$output_dir, "flowcytometer", paste0("flowcytometer_density.", timestamp, ".rds"))
+        merge(
+            readRDS(dens_fn),
+            biomass_per_bottle[[timestamp]],
+            by = c("sample", "species")
+        ) |>
+            saveRDS(file = dens_fn)
+    }
+)
+```
+
 
 
 #### Densities and Biomass EAWAG Samples
@@ -1888,6 +2147,8 @@ file.copy(db_name(3, temp = FALSE), db_name("final", temp = FALSE))
 
 # Create Diagnostic Report from sqlite 3
 The Diagnostic report needs to be created before the renaming as it does rely on the otriginal terminology.
+
+NOTE (Uriah March 2024): The diagnostic report does not work because Rainer forgot to update all the functions! Well done
 
 ```{r}
 #| label: create_diag_report

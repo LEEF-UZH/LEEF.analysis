@@ -38,8 +38,10 @@ library(here)
 set.seed(1)
 options(dplyr.summarise.inform = FALSE)
 
-options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_final.sqlite")
+# options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_final.sqlite")
 # options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_2.sqlite")
+options(RRDdb = "/Volumes/UDWorkMobil/LEEF1RRD_Creation/LEEF.RRD.v1.8.5_final.sqlite")
+
 
 # options(RRDdb = "LEEF.RRD.v1.8.5_4.sqlite")
 
@@ -53,7 +55,15 @@ densities <- db_read_table(table = "density") %>%
 
 o2 <- db_read_table(table = "o2") %>% collect()
 
-water_chem <- db_read_toc() %>% collect()
+water_chem <- db_read_table(table = "toc") %>% collect()
+water_chem <- water_chem
+
+water_chem <- water_chem %>%
+  group_by(timestamp, day, type, 
+           bottle, light_treatment, richness,
+           composition, incubator) %>% 
+  summarise(concentration = mean(concentration), 
+            cv = as.numeric(NA), n = n()) %>% ungroup()
 
 ```
 
@@ -249,7 +259,7 @@ design <- db_read_table(table = "experimental_design") %>% collect()
 design <- full_join(design, comps)
 
 design_long <- design %>%
-  pivot_longer(cols = -c(bottle,temperature,richness,composition,incubator), names_to = "species") %>%
+  pivot_longer(cols = -c(bottle,light_treatment,richness,composition,incubator), names_to = "species") %>%
   dplyr::filter(value == 1) %>%
   select(-value)
 

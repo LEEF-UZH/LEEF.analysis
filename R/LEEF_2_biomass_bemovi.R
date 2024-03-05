@@ -78,7 +78,7 @@ LEEF_2_biomass_bemovi <- function(
     biomasses <- ciliate_traits %>%
         group_by(timestamp, bottle, species) %>%
         summarize(
-            biomass = sum(biomass * n_frames, na.rm = TRUE) / (length(unique(file)) * 125)
+          biomass = sum(biomass * n_frames, na.rm = TRUE) / (3 * 125) # if not 3 videos corrections is done below with dens_factor
         ) %>%
         mutate(
             biomass = biomass * extrapolation_factor * cropping_factor,
