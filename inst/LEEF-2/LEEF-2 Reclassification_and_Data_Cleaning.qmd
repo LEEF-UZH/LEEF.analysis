@@ -15,14 +15,14 @@ format:
 params:
   release: "v2.3.8-LEEF-2"
   repo: "https://github.com/LEEF-UZH/LEEF.parameter/"
-  output_dir: "~/Desktop/test rrd remake"
-  extracted_dir: "/Users/owenpetchey/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes.noindex/LEEFSwift3/LEEF_2.archived.data/LEEF/3.archived.data/extracted"
-  toc: "/Volumes/Groups/LEEF/0.TOC/LEEF-2/toc.rds"
+  output_dir: "/Volumes/UDWorkMobil/LEEF2RRD_Creation/"
+  extracted_dir: "/Volumes/LEEF-2_archive/archive/extracted/"
+  toc: "/Volumes/LEEF/0.TOC/LEEF-2/toc.rds"
   min_FSC.A: 2
   flowcytometer_particles: 
     - algae
     - bacteria
-  cores: 7
+  cores: 6
   remove_all:
     - OtherCiliate
   flowcam_species:
@@ -92,10 +92,10 @@ params:
 
 
 
-  reclassify_flowcam: false
+  reclassify_flowcam: true
   reclassify_bemovi_16: false
   reclassify_bemovi_25: false
-  regate_flowcytometer: true  
+  regate_flowcytometer: false  
   assemble_manualcount: false
   assemble_o2: false
   assemble_conductivity: false
@@ -104,7 +104,7 @@ params:
   update_parquet_flowcam: false
   update_parquet_bemovi_16: false
   update_parquet_bemovi_25: false
-  update_parquet_flowcytometer: true
+  update_parquet_flowcytometer: false
   update_parquet_manualcount: false
   update_parquet_o2: false
   update_parquet_conductivity: false
@@ -148,14 +148,14 @@ getOption("repos")
 #remotes::install_github("LEEF-UZH/LEEF.measurement.flowcytometer", ref = "LEEF-1")
 #remotes::install_github("LEEF-UZH/LEEF.measurement.bemovi", ref = "LEEF-1")
 #remotes::install_github("LEEF-UZH/LEEF.measurement.flowcam", ref = "LEEF-1")
-remotes::install_github("LEEF-UZH/LEEF.measurement.flowcytometer", ref = "LEEF-2")
-remotes::install_github("LEEF-UZH/LEEF.measurement.bemovi", ref = "LEEF-2")
-remotes::install_github("LEEF-UZH/LEEF.measurement.flowcam", ref = "LEEF-2")
-remotes::install_github("LEEF-UZH/LEEF.measurement.conductivity", ref = "master")
-remotes::install_github("LEEF-UZH/LEEF.measurement.o2meter", ref = "master")
-remotes::install_github("LEEF-UZH/LEEF.measurement.manualcount", ref = "master")
-remotes::install_github("LEEF-UZH/LEEF.analysis", ref = "master")
-remotes::install_github("LEEF-UZH/bemovi", ref = "LEEF")
+# remotes::install_github("LEEF-UZH/LEEF.measurement.flowcytometer", ref = "LEEF-2")
+# remotes::install_github("LEEF-UZH/LEEF.measurement.bemovi", ref = "LEEF-2")
+# remotes::install_github("LEEF-UZH/LEEF.measurement.flowcam", ref = "LEEF-2")
+# remotes::install_github("LEEF-UZH/LEEF.measurement.conductivity", ref = "master")
+# remotes::install_github("LEEF-UZH/LEEF.measurement.o2meter", ref = "master")
+# remotes::install_github("LEEF-UZH/LEEF.measurement.manualcount", ref = "master")
+# remotes::install_github("LEEF-UZH/LEEF.analysis", ref = "master")
+# remotes::install_github("LEEF-UZH/bemovi", ref = "LEEF")
 
 
 ```
@@ -965,8 +965,59 @@ LEEF_2_density_flowcytometer_archive(
 ```
 
 ### Flowcytometer Traits and Biomass
+
+Note by Uriah (20240229): because of RAM limitations I splitted the following chunk into several chunks based on timestamps.
+
 ```{r}
-#| label: traits_biomass_flowcytometer
+#| label: traits_biomass_flowcytometer_part1
+#| eval: !expr params$regate_flowcytometer
+#|
+
+timestamps <- list.files(
+    path = params$extracted_dir,
+    pattern = "^LEEF\\.flowcytometer\\.flowcytometer\\.",
+    recursive = FALSE,
+    full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.flowcytometer\\.flowcytometer\\.", "", timestamps)
+
+## Extract traits and Biomass
+LEEF_2_extract_traits_flowcytometer_archive(
+    extracted_dir = params$extracted_dir,
+    gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
+    particles = params$flowcytometer_particles,
+    use_H = FALSE,
+    min_FSC.A = params$min_FSC.A,
+    timestamps = timestamps[1:20],
+    output = file.path(params$output_dir, "flowcytometer"),
+    length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
+    length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept,
+    mc.cores = min(4, params$cores)
+)
+
+# timestamps <- c("20221116","20221207","20230127","20230203","20230215",
+#                 "20230320","20230329","20230403","20230505","20230705","20230719")
+
+# timestamps <- c("20230203","20230215",
+#                 "20230320","20230505","20230705")
+
+## Extract traits and Biomass
+# LEEF_2_extract_traits_flowcytometer_archive(
+#     extracted_dir = params$extracted_dir,
+#     gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
+#     particles = "bacteria",
+#     use_H = FALSE,
+#     min_FSC.A = params$min_FSC.A,
+#     timestamps = timestamps,
+#     output = file.path(params$output_dir, "flowcytometer"),
+#     length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
+#     length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept,
+#     mc.cores = 5
+# )
+```
+
+```{r}
+#| label: traits_biomass_flowcytometer_part2
 #| eval: !expr params$regate_flowcytometer
 #|
 
@@ -977,7 +1028,88 @@ LEEF_2_extract_traits_flowcytometer_archive(
     particles = params$flowcytometer_particles,
     use_H = FALSE,
     min_FSC.A = params$min_FSC.A,
-    timestamps = timestamps,
+    timestamps = timestamps[21:40],
+    output = file.path(params$output_dir, "flowcytometer"),
+    length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
+    length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept,
+    mc.cores = min(4, params$cores)
+)
+```
+
+```{r}
+#| label: traits_biomass_flowcytometer_part3
+#| eval: !expr params$regate_flowcytometer
+#|
+
+## Extract traits and Biomass
+LEEF_2_extract_traits_flowcytometer_archive(
+    extracted_dir = params$extracted_dir,
+    gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
+    particles = params$flowcytometer_particles,
+    use_H = FALSE,
+    min_FSC.A = params$min_FSC.A,
+    timestamps = timestamps[41:60],
+    output = file.path(params$output_dir, "flowcytometer"),
+    length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
+    length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept,
+    mc.cores = min(4, params$cores)
+)
+```
+
+
+```{r}
+#| label: traits_biomass_flowcytometer_part4
+#| eval: !expr params$regate_flowcytometer
+#|
+
+## Extract traits and Biomass
+LEEF_2_extract_traits_flowcytometer_archive(
+    extracted_dir = params$extracted_dir,
+    gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
+    particles = params$flowcytometer_particles,
+    use_H = FALSE,
+    min_FSC.A = params$min_FSC.A,
+    timestamps = timestamps[61:80],
+    output = file.path(params$output_dir, "flowcytometer"),
+    length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
+    length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept,
+    mc.cores = min(4, params$cores)
+)
+```
+
+```{r}
+#| label: traits_biomass_flowcytometer_part5
+#| eval: !expr params$regate_flowcytometer
+#|
+
+## Extract traits and Biomass
+LEEF_2_extract_traits_flowcytometer_archive(
+    extracted_dir = params$extracted_dir,
+    gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
+    particles = params$flowcytometer_particles,
+    use_H = FALSE,
+    min_FSC.A = params$min_FSC.A,
+    timestamps = timestamps[81:100],
+    output = file.path(params$output_dir, "flowcytometer"),
+    length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
+    length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept,
+    mc.cores = min(4, params$cores)
+)
+```
+
+```{r}
+#| label: traits_biomass_flowcytometer_part6
+#| eval: !expr params$regate_flowcytometer
+#|
+
+## Extract traits and Biomass
+LEEF_2_extract_traits_flowcytometer_archive(
+    extracted_dir = params$extracted_dir,
+    gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
+    particles = params$flowcytometer_particles,
+    use_H = FALSE,
+    min_FSC.A = params$min_FSC.A,
+    timestamps = timestamps[101:120],
     output = file.path(params$output_dir, "flowcytometer"),
     length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
     length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept,
@@ -987,7 +1119,7 @@ LEEF_2_extract_traits_flowcytometer_archive(
 rm(timestamps)
 ```
 
-### [ ] Remove bottles not needed in Flowcytometer and Set Individual Missing Samples to NA
+### Remove bottles not needed in Flowcytometer and Set Individual Missing Samples to NA
 
 ```{r}
 #| label: flowcytometer_remove_bottles
@@ -1001,43 +1133,52 @@ fns <- list.files(
     full.names = TRUE
 )
 
+skeleton <- expand.grid(bottle = 1:32,
+                        species = c("algae","bacteria"),
+                        replicate = 1:3) %>%
+            dplyr::mutate(bottle = ifelse(bottle<10,paste0("b_0",bottle),
+                                          paste0("b_",bottle)))
+
+
+
+# idxs <- c()
+# for(ts in timestamps){
+# 
+# idx <- which(grepl(ts, fns, fixed=T))
+# idxs <- c(idxs,idx)
+# 
+# }
+# idxs <- unique(idxs)
+# fns <- fns[sort(idxs)]
+
+
+# idx_error<- c(125, 134, 156, 182, 184, 230, 279, 284, 298, 318, 344)
+# timestamp_error <- fns[idx_error]
+
+# idx_error2 <- c(26,27,28,31,32)
+# fns_error <- fns[idx_error2]
+
 pbmcapply::pbmclapply(
-    sample(fns),
+    fns,
     function(fn) {
-        x <- readRDS(fn) |>
-            dplyr::filter(!(bottle %in% c(params$remove_bottles_flowcytometer)))
+      x <- readRDS(fn) |>
+        dplyr::filter(!(bottle %in% c(params$remove_bottles_flowcytometer))) %>%
+        group_by(bottle, species) |>
+        dplyr::mutate(replicate = 1:n())
 
-        if (grepl("_density", fn)) {
-            sm <- x |>
-                mutate(
-                    plate = NA,
-                    filename = NA,
-                    sample = NA,
-                    volume = NA,
-                    tot_density_perml = NA,
-                    specname = NA,
-                    dilution_factor = NA,
-                    sample_letter = NA,
-                    sample_number = NA,
-                    count = NA,
-                    density = NA,
-                    biomass = NA
-                ) |>
-                group_by(across()) |>
-                summarise(n = n(), p = paste(plate, collapse = "  "), .groups = ) |>
-                ungroup() |>
-                filter(n < 3) |>
-                mutate(n = NULL, p = NULL)
+      if (grepl("_density", fn)) {
+        ts <- sub(".*density.", "", fn) 
+        ts <- sub(".rds.*", "", ts) 
+        skeleton$timestamp = as.numeric(ts)
 
-            if (nrow(sm > 0)) {
-                x <- x |>
-                    dplyr::bind_rows(sm) |>
-                    arrange(bottle, plate, species)
-            }
-        }
+        x <- x |>
+          full_join(skeleton, by = join_by(timestamp, bottle, species, replicate)) |>
+          dplyr::select(-replicate) |>
+          arrange(bottle, plate, species)
+      }
 
-        unlink(fn)
-        saveRDS(x, file = fn)
+      unlink(fn)
+      saveRDS(x, file = fn)
     },
     mc.cores = params$cores,
     mc.preschedule = FALSE
@@ -1102,7 +1243,7 @@ toc_list <- mclapply(
         }
 
         df <- lapply(c("IC", "TC", "TN", "TOC"), function(Type) {
-            df2 <- df %>% filter(inj_type == Type)
+            df2 <- df %>% dplyr::filter(inj_type == Type)
             m <- lm(conc ~ position, data = df2)
             predict <- predict(m) - predict(m)[1]
             df2$concentration.detrended <- df2$conc - predict

@@ -40,7 +40,8 @@ options(dplyr.summarise.inform = FALSE)
 
 # options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_final.sqlite")
 # options(RRDdb = "/Volumes/RRD.Reclassification_final/LEEF.RRD.v1.8.5_2.sqlite")
-options(RRDdb = "/Volumes/UDWorkMobil/LEEF1RRD_Creation/LEEF.RRD.v1.8.5_final.sqlite")
+# options(RRDdb = "/Volumes/Macintosh HD/Users/uriah/Documents/1_Projects/LEEF_RRDs/LEEF1/LEEF.RRD.v1.8.5_final.sqlite")
+options(RRDdb = "/Volumes/LEEF/RRD.Reclassification_final/LEEF.RRD.v1.8.5_final_vacuumed.sqlite")
 
 
 # options(RRDdb = "LEEF.RRD.v1.8.5_4.sqlite")

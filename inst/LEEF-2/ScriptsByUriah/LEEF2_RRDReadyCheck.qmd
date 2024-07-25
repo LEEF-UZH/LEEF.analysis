@@ -12,7 +12,7 @@ format:
     toc-float: true
     toc-depth: 6
 params:
-  RRDarrow: "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20231124"
+  RRDarrow: "/Volumes/UDworkMobil/LEEF2RRD_Creation/parquet_v2.3.8-LEEF-2_20240314"
 ---
 
 # Setup

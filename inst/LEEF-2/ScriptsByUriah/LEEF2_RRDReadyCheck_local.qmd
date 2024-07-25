@@ -1,0 +1,840 @@
+---
+title: "LEEF2 RRD Ready Check"
+author: "Uriah Daugaard"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format:
+  html:
+    theme: journal
+    embed-resources: true
+    number-sections: false
+    code-fold: true
+    toc: true
+    toc-float: true
+    toc-depth: 6
+params:
+  RRDarrow: "/Volumes/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20231020"
+---
+
+# Setup
+## Dependencies
+
+```{r packages, message=FALSE}
+library(tidyverse)
+library(patchwork)
+library(LEEF.analysis)
+library(lubridate)
+library(dplyr)
+
+# fn <- "~/git/0.RPackages/LEEF/analysis/LEEF.analysis/inst/LEEF-2/ScriptsByUriah/LEEF2_RRDReadyCheck.qmd"
+# if (!exists("params")) {
+#     params <- rmarkdown::yaml_front_matter(fn)$params
+# }
+
+# options(RRDarrow = "/Users/uriah/Documents/1_Projects/LEEF_RRDs/LEEF2/parquet_v2.3.8-LEEF-2_20231113/")
+options(RRDarrow = "/Volumes//LEEF//RRD.Reclassification_LEEF-2//parquet_v2.3.8-LEEF-2_20231124/")
+# options(RRDarrow = "/Volumes//LEEF//RRD.Reclassification_LEEF-2//parquet_v2.3.8-LEEF-2_20231113/")
+
+set.seed(1)
+options(dplyr.summarise.inform = FALSE)
+
+# options(RRDarrow = params$RRDarrow)
+# test1 <- arrow_read_density("/Volumes//LEEF//RRD.Reclassification_LEEF-2//parquet_v2.3.8-LEEF-2_20231113")
+# 
+# test <- arrow_read_density("/Volumes/LEEF/RRD.Reclassification_LEEF-2/parquet_v2.3.8-LEEF-2_20231113")
+```
+
+
+## Data 
+
+```{r data, warning=FALSE, message=FALSE}
+densities <- arrow_read_density() %>%
+  arrange(day)
+
+o2 <- arrow_read_o2() %>%
+  arrange(day)
+
+water_chem <- arrow_read_toc() %>%
+  arrange(day)
+
+conductivity <- arrow_read_conductivity() %>%
+  arrange(day)
+```
+
+
+```{r}
+# table(densities$species,densities$measurement)/120
+# flow <- densities %>% dplyr::filter(measurement=="flowcytometer")
+# 
+# tab <- table(flow$bottle, flow$timestamp)
+# 
+# 
+# table(o2$sensor)/120
+# table(water_chem$type)/120
+# table(conductivity$bottle)/120
+
+```
+
+# General remarks
+RMK: Flowcytometer is not yet regated, and only included as from the pipeline. Consequently, no data has been cleaned. Only the bimoass is calculated.
+
+# Check 1: are all sampling days present?
+
+
+## Check 1.1: densities/biomasses present
+
+### All missing
+```{r}
+# timestamps and days in RRD
+timestamps <- unique(densities$timestamp) # from Nov 7 til Aug 11
+days <- sort(unique(densities$day))
+
+# timestamps and days that should be in RRD
+days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
+timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
+timestamps2 <- gsub("-","",as.character(timestamps2))
+
+# timestamps and day that should be in RRD but are not
+idx <- which(!(days2 %in% days))
+missing_days <- days2[idx]
+missing_timestamps <- timestamps2[idx]
+
+print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
+rbind(missing_days=missing_days,
+      missing_timestamps=missing_timestamps)
+```
+
+### bemovi_mag_16 missing
+
+The timestamps `20230602`, `20230616` and  `20230621` are missing because of a dataloss during processing.
+
+```{r}
+msm  <- "bemovi_mag_16"
+# timestamps and days in RRD |> unique()=
+timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
+days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+
+# timestamps and days that should be in RRD
+days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
+timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
+timestamps2 <- gsub("-","",as.character(timestamps2))
+
+# timestamps and day that should be in RRD but are not
+idx <- which(!(days2 %in% days))
+missing_days <- days2[idx]
+missing_timestamps <- timestamps2[idx]
+
+print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
+rbind(missing_days=missing_days,
+      missing_timestamps=missing_timestamps)
+```
+
+### bemovi_mag_25 missing
+
+The timestamps `20230602`, `20230616` and  `20230621` are missing because of a dataloss during processing.
+
+```{r}
+msm  <- "bemovi_mag_25"
+# timestamps and days in RRD |> unique()=
+timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
+days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+
+# timestamps and days that should be in RRD
+days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
+timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
+timestamps2 <- gsub("-","",as.character(timestamps2))
+
+# timestamps and day that should be in RRD but are not
+idx <- which(!(days2 %in% days))
+missing_days <- days2[idx]
+missing_timestamps <- timestamps2[idx]
+
+print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
+rbind(missing_days=missing_days,
+      missing_timestamps=missing_timestamps)
+```
+
+### bemovi_mag_25_cropped missing
+
+The timestamps `20230602`, `20230616` and  `20230621` are missing because of a dataloss during processing.
+
+```{r}
+msm  <- "bemovi_mag_25_cropped"
+# timestamps and days in RRD |> unique()=
+timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
+days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+
+# timestamps and days that should be in RRD
+days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
+timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
+timestamps2 <- gsub("-","",as.character(timestamps2))
+
+# timestamps and day that should be in RRD but are not
+idx <- which(!(days2 %in% days))
+missing_days <- days2[idx]
+missing_timestamps <- timestamps2[idx]
+
+print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
+rbind(missing_days=missing_days,
+      missing_timestamps=missing_timestamps)
+```
+
+### flowcam missing
+
+The timestamp `20230719` is missing FOR BOTTLE 01 because of a dataloss during processing.
+
+```{r}
+msm  <- "flowcam"
+# timestamps and days in RRD |> unique()=
+timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
+days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+
+# timestamps and days that should be in RRD
+days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
+timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
+timestamps2 <- gsub("-","",as.character(timestamps2))
+
+# timestamps and day that should be in RRD but are not
+idx <- which(!(days2 %in% days))
+missing_days <- days2[idx]
+missing_timestamps <- timestamps2[idx]
+
+print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
+rbind(missing_days=missing_days,
+      missing_timestamps=missing_timestamps)
+```
+
+### flowcytometer missing
+```{r}
+msm  <- "flowcytometer"
+# timestamps and days in RRD |> unique()=
+timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
+days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+
+# timestamps and days that should be in RRD
+days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
+timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
+timestamps2 <- gsub("-","",as.character(timestamps2))
+
+# timestamps and day that should be in RRD but are not
+idx <- which(!(days2 %in% days))
+missing_days <- days2[idx]
+missing_timestamps <- timestamps2[idx]
+
+print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
+rbind(missing_days=missing_days,
+      missing_timestamps=missing_timestamps)
+```
+
+### manualcount missing
+
+Manualcount only has been conducted once a week after the XXXX. These are not checked yet.
+
+```{r}
+msm  <- "manualcount"
+# timestamps and days in RRD |> unique()=
+timestamps <- densities |> filter(measurement == msm) |> select(timestamp) |> unlist() |> unique()
+days <- densities |> filter(measurement == msm) |> select(day)|> unlist() |> unique() |> sort()
+
+# timestamps and days that should be in RRD
+days2 <- sort(c(0+(0:39*7), 2+(0:39*7), 4+(0:39*7)))
+timestamps2 <- as_date("20221107", format="%Y%m%d") + days2
+timestamps2 <- gsub("-","",as.character(timestamps2))
+
+# timestamps and day that should be in RRD but are not
+idx <- which(!(days2 %in% days))
+missing_days <- days2[idx]
+missing_timestamps <- timestamps2[idx]
+
+print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
+rbind(missing_days=missing_days,
+      missing_timestamps=missing_timestamps)
+```
+
+
+
+## Check 1.2: oxygen
+
+```{r}
+# timestamps and days in RRD
+timestamps_o2 <- unique(o2$timestamp)
+days_o2 <- sort(unique(o2$day))
+
+# timestamps and day that should be in RRD but are not
+idx <- which(!(days2 %in% days_o2))
+missing_days_o2 <- days2[idx]
+missing_timestamps_o2 <- timestamps2[idx]
+
+print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
+rbind(missing_days=missing_days_o2,
+      missing_timestamps=missing_timestamps_o2)
+```
+
+## Check 1.3: water chemistry
+
+TODO [ ]: Needs to be checked
+
+```{r}
+# timestamps and days in RRD
+timestamps_wc <- unique(water_chem$timestamp)
+days_wc <- sort(unique(water_chem$day))
+
+# timestamps and day that should be in RRD but are not
+idx <- which(!(days2 %in% days_wc))
+missing_days_wc <- days2[idx]
+missing_timestamps_wc <- timestamps2[idx]
+
+print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
+rbind(missing_days=missing_days_wc,
+      missing_timestamps=missing_timestamps_wc)
+```
+
+Note UD (20230816): there are many missing sampling days for the water chemistry. As I understand it, this data is not yet ready (i.e. not all samples have been processed). It is probably still worth checking whether the non processed ones correspond to the missing sampling days listed here.
+
+## Check 1.4: conductivity
+
+
+```{r}
+# timestamps and days in RRD
+timestamps_con <- unique(conductivity$timestamp)
+days_con <- sort(unique(conductivity$day))
+
+# timestamps and day that should be in RRD but are not
+idx <- which(!(days2 %in% days_con))
+missing_days_con <- days2[idx]
+missing_timestamps_con <- timestamps2[idx]
+
+print("The following Days and timestamps are missing completely in the RRD (if empty none are missing)")
+rbind(missing_days=missing_days_con,
+      missing_timestamps=missing_timestamps_con)
+```
+
+# Check 2: are all desired classes present and are no other classes present?
+
+This code chunk simply specifies the classes of interest. Note that I've already removed Loxo and Euplotes from the classes of interest, which in "LEEF2_RRD_PostPipelineCleaning.qmd" is done under "Exclusion of time series that are wrong classifications or only noise".
+
+```{r}
+# these are the desired classes in the respective measurement methods
+
+Bemovi16_classes <- c("Coleps_irchel",
+                      "Colpidium",
+                      "Stylonychia2",
+                      "Paramecium_caudatum",
+                      "Paramecium_bursaria",
+                      "Debris_and_other")
+
+Bemovi25_classes <- c("Coleps_irchel",
+                      "Colpidium",
+                      "Stylonychia2",
+                      "Paramecium_caudatum",
+                      "Paramecium_bursaria",
+                      "Debris_and_other")
+
+Bemovi25cropped_classes <- c("Debris_and_other")
+
+Flowcam_classes <- c("Chlamydomonas",
+                     "Debris",
+                     "DigestedAlgae",
+                     "Small_unidentified",
+                     "DividingChlamydomonas",
+                     "ChlamydomonasClumpsLarge",
+                     "ChlamydomonasClumpsSmall",
+                     "CiliateCysts",
+                     "CystsWhite",
+                     "DigestedWhite",
+                     "Small_cells")
+
+Flowcytometer_classes <- c("bacteria",
+                           "algae")
+
+manual_classes <- c("Didinium")
+```
+
+## Check 2.1: are all desired classes present?
+
+```{r}
+# now the tests
+## bemovi 16
+idx <- Bemovi16_classes %in% unique(densities[densities$measurement=="bemovi_mag_16",]$species)
+test <- all(idx)
+print(paste("Are all desired classes present in bemovi_mag_16?",test))
+
+if(!test){
+  print(paste("The following classes are missing from it:", Bemovi16_classes[idx]))
+}
+
+## bemovi 25
+idx <- Bemovi25_classes %in% unique(densities[densities$measurement=="bemovi_mag_25",]$species)
+test <- all(idx)
+print(paste("Are all desired classes present in bemovi_mag_25?",test))
+
+if(!test){
+  print(paste("The following classes are missing from it:", Bemovi25_classes[idx]))
+}
+
+## bemovi 25 cropped
+idx <- Bemovi25cropped_classes %in% unique(densities[densities$measurement=="bemovi_mag_25_cropped",]$species)
+test <- all(idx)
+print(paste("Are all desired classes present in bemovi_mag_25 cropped?",test))
+
+if(!test){
+  print(paste("The following classes are missing from it:", Bemovi25cropped_classes[idx]))
+}
+
+## Flowcam
+idx <- Flowcam_classes %in% unique(densities[densities$measurement=="flowcam",]$species)
+test <- all(idx)
+print(paste("Are all desired classes present in flowcam?",test))
+
+if(!test){
+  print(paste("The following classes are missing from it:", Flowcam_classes[idx]))
+}
+
+## Flowcytometer
+idx <- Flowcytometer_classes %in% unique(densities[densities$measurement=="flowcytometer",]$species)
+test <- all(idx)
+print(paste("Are all desired classes present in Flowcytometer?",test))
+
+if(!test){
+  print(paste("The following classes are missing from it:", Flowcytometer_classes[idx]))
+}
+
+print("Is Didinium present?"); "Didinium" %in% unique(densities$species)
+```
+
+## Check 2.2: are any undesired classes present?
+Now the opposite: are any classes present that shouldnt be?
+
+```{r}
+## test 1
+classes <- unique(densities$species)
+idx <- classes %in% unique(c(Bemovi16_classes,Bemovi25_classes,Bemovi25cropped_classes,Flowcam_classes,Flowcytometer_classes,manual_classes))
+print("The following classes are present but shouldn't be:"); classes[!idx]
+densities |>
+    filter(species %in% classes[!idx]) |>
+    select(species, measurement) |>
+    distinct()
+```
+
+
+```{r}
+## test2
+Loxo <- "Loxocephallus" %in% unique(densities[densities$measurement=="flowcam",]$species)
+print("Loxocephalus has been correctly removed from the flowcam"); !Loxo
+```
+
+```{r}
+## test3
+bots <- unique(densities$bottle)
+actual_bots <- 1:32
+actual_bots <- ifelse(actual_bots<10,paste0("b_0",actual_bots),paste0("b_",actual_bots))
+idx <- bots %in% actual_bots
+print("The following bottles are present but shouldn't be:"); bots[!idx]
+densities |>
+    filter(bottle %in% bots[!idx]) |>
+    select(bottle, measurement) |>
+    distinct()
+```
+
+
+# Check 3: do some measurement methods have missing timestamps (that are unexpected)?
+
+## Check 3.1: densities/biomasses
+
+The data.frame "dd_missing_timestamps" should be empty (i.e. have 0 rows)
+```{r}
+timestamps2 <- as.numeric(timestamps2)
+missing_timestamps2 <- missing_timestamps
+
+dd_missing_timestamps <- densities %>%
+  group_by(measurement, species, bottle) %>%
+  reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
+  dplyr::filter( # here I filter out things that we know about (please update and document!)
+    !(species %in% c("OtherCiliate", "HNA", "LNA", "MNA")), # these things should not be in anyway
+    !(species=="Loxocephallus" & measurement=="flowcam"), # these things should not be in anyway
+    !(species %in% c("airbubbles","Cryptomonas")), # these things should not be in anyway
+    !(missing_timestamps %in% as.numeric(missing_timestamps2)), # these timestamps are missing completely (see check 1)
+    measurement != "manualcount", # didinium was not always measured
+    # !(measurement == "flowcytometer" & (missing_timestamps %in% c())) # For the flowcytometer for the following timestamps there was no data collection: c()
+  )
+# dd_missing_timestamps
+
+print(paste("Number of rows in dd_missing_timestamps:", nrow(dd_missing_timestamps)))
+```
+
+If it is not empty the next code chunk prints out some information
+
+```{r}
+if(nrow(dd_missing_timestamps)>0) {
+  for(sp in unique(dd_missing_timestamps$species)){
+    d <- dd_missing_timestamps %>%
+      dplyr::filter(species==sp)
+    print(paste(sp,"has the following missing timestamps (the number indicates in how many bottles it is missing)"))
+    print(table(d$missing_timestamps))
+  }
+}
+```
+
+TODO [ ]: needs checking!
+
+UD comment (20230816): 
+
+ - It seems that the flowcam data for the last 13 sampling days is completely missing. 
+ - Additionally, the two flowcam classes CiliateCysts and CystsWhite have many missing values. I'm not sure why that is, but maybe this is worth looking into: in the flowcam (and video) script after the particles have been classified there is code that sets the density to 0 for classes that could be present but were not detected (here I think: https://github.com/LEEF-UZH/LEEF.measurement.flowcam/blob/LEEF-2/R/classify_LEEF_2.R, line 115 onwards). Maybe this is not working correctly or maybe this is not done after the re-classification (I think the second option is more likely)?
+ - There are two sampling days that are missing for the flowcytometer.
+
+RMK: In the whole of flowcam is no 0 density. I assumed, that these missing were 0 but not added as zero. I fixed this.
+
+**On 20230315 some flowcytometry samples have only 2 replicates instead of 3 replicates. On all other dates there should be 3 replicates. **
+
+## Check 3.2: oxygen
+
+The following data.frame should be empty 
+RMK
+```
+ A tibble: 4 × 3
+  sensor bottle missing_timestamps
+   <int> <chr>               <dbl>
+1      4 b_08             20230510  MISSING IN RAW DATA
+2      4 b_10             20230804  MISSING IN RAW DATA
+3      9 b_29             20230320  MISSING IN RAW DATA
+```
+
+```{r}
+dd_missing_timestamps_o2 <- o2 %>%
+  group_by(sensor, bottle) %>%
+  reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
+  dplyr::filter( # Previously confirmed missing data is filtered out
+    !(missing_timestamps %in% as.numeric(missing_timestamps_o2)), # these timestamps are missing completely (see check 1)
+  ) 
+
+dd_missing_timestamps_o2
+```
+
+
+
+## Check 3.3: water chemistry
+
+The following data.frame should be empty 
+
+```{r}
+dd_missing_timestamps_wc <- water_chem %>%
+  group_by(type, bottle) %>%
+  reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
+  dplyr::filter( # Previously confirmed missing data is filtered out
+    !(missing_timestamps %in% as.numeric(missing_timestamps_wc)), # these timestamps are missing completely (see check 1)
+  )
+
+dd_missing_timestamps_wc
+```
+
+```{r}
+table(dd_missing_timestamps_wc$bottle, dd_missing_timestamps_wc$missing_timestamps)
+```
+
+
+## Check 3.4: conductivity
+
+The following data.frame should be empty 
+
+
+```{r}
+dd_missing_timestamps_con <- conductivity %>%
+  group_by(bottle) %>%
+  reframe(missing_timestamps = as.numeric(timestamps2[which(!(timestamps2 %in% unique(timestamp)))])) %>%
+  dplyr::filter( # Previously confirmed missing data is filtered out
+    !(missing_timestamps %in% as.numeric(missing_timestamps_con)), # these timestamps are missing completely (see check 1)
+  ) 
+
+dd_missing_timestamps_con
+```
+
+# Check 4: are there any NAs in the data that are not accounted for or expected?
+
+## Check 4.1: densities/biomasses
+
+The following data.frame should be empty
+
+```{r}
+
+
+NAs <- densities %>%
+  dplyr::filter(
+    !(species=="Loxocephallus" & measurement=="flowcam"), # should not be in anyway
+    !(species %in% c("LNA","MNA","HNA","Debris","DigestedAlgae","Cryptomonas",
+                     "Small_unidentified","Didinium","algae","OtherCiliate",
+                     "Debris_and_other","CiliateCysts","CystsWhite","airbubbles",
+                     "DigestedWhite")), #biomass not calculated for these classes
+  ) %>%
+  group_by(measurement, species, bottle, timestamp) %>%
+  summarize(densityNA = sum(is.na(density)),
+            biomassNA = sum(is.na(biomass))) %>%
+  dplyr::filter(biomassNA>0 | densityNA>0) 
+NAs
+```
+
+## Check 4.2: oxygen
+
+The following data.frame should be empty
+
+
+```{r}
+NAs_o2 <- o2 %>%
+  group_by(sensor, bottle) %>%
+  summarize(o2NA = sum(is.na(percent_o2))) %>%
+  dplyr::filter(o2NA>0)
+NAs_o2
+```
+
+## Check 4.3: water chemistry
+
+The following data.frame should be empty
+
+```{r}
+NAs_wc <- water_chem %>%
+  group_by(type, bottle) %>%
+  summarize(concentrationNA = sum(is.na(concentration))) %>%
+  dplyr::filter(concentrationNA>0)
+NAs_wc
+```
+TODO [ ]: needs checking
+
+## Check 4.4: conductivity
+
+The following data.frame should be empty
+
+```{r}
+NAs_con <- conductivity %>%
+  group_by(bottle) %>%
+  summarize(conductivityNA = sum(is.na(conductivity))) %>%
+  dplyr::filter(conductivityNA>0)
+NAs_con
+```
+
+# Check 5: have the faulty videos been correctly excluded and the densities correctly recalculated?
+
+RMK: Videos identified as moviong frame below are added to the list of videos to be removed. The list is then used to remove the videos from the RRD. The densities are then recalculated.
+
+This part is here to check whether the faulty videos (e.g. moving background) have correctly been removed and that the densities have correctly been recalculated.
+
+The first code chunk simply loads in the information about which videos are faulty.
+
+```{r, message=FALSE}
+# read in video file names to remove
+tocheck_1stmethod <- read_csv("VideoChecks/FirstMethodCheck/tocheck_1stmethod.csv")
+tocheck_2ndmethod <- read_csv("VideoChecks/SecondMethodCheck/tocheck_2ndmethod.csv") 
+tocheck_2ndmethod_2 <- read_csv("VideoChecks/SecondMethodCheck/tocheck_2ndmethod_MissingTimestamps.csv") 
+tocheck_2ndmethod <- rbind(tocheck_2ndmethod,tocheck_2ndmethod_2)
+tocheck_3rdmethod16 <- read_csv("VideoChecks/ThirdMethodCheck/videos_16x.csv")
+tocheck_3rdmethod25 <- read_csv("VideoChecks/ThirdMethodCheck/videos_25x.csv")
+
+# 16x
+videos_to_remove_16 <- tocheck_3rdmethod16 %>%
+  dplyr::filter(decision!="ok") %>%
+  mutate(video.nr = as.numeric(sub('.+_(.+)', '\\1', file)),
+         bottle = ceiling((video.nr - 100)/3),
+         bottle = ifelse(bottle<10,paste0("b_0",bottle),paste0("b_",bottle)))
+
+# 25x
+videos_to_remove_25_1 <- tocheck_1stmethod %>%
+  dplyr::filter(decision!="ok")
+videos_to_remove_25_2 <- tocheck_2ndmethod %>%
+  dplyr::filter(decision!="ok")
+videos_to_remove_25_3 <- tocheck_3rdmethod25 %>%
+  dplyr::filter(decision!="ok")
+
+videos_to_remove_25 <- full_join(videos_to_remove_25_1,
+                                 full_join(videos_to_remove_25_2,videos_to_remove_25_3)) %>%
+  distinct %>%
+  mutate(video.nr = as.numeric(sub('.+_(.+)', '\\1', file)),
+         bottle = ceiling(video.nr/3),
+         bottle = ifelse(bottle<10,paste0("b_0",bottle),paste0("b_",bottle)))
+```
+
+## Check 5.1: have the faulty videos been excluded?
+
+The following data.frame should be empty (i.e. 0 rows)
+
+```{r}
+video16 <- arrow_read_table("bemovi_16_morph") %>%
+  collect() %>%
+  dplyr::filter(file %in% videos_to_remove_16$file)
+
+nrow(video16)
+```
+
+The following data.frame should be empty (i.e. 0 rows)
+
+```{r}
+video25 <- arrow_read_table("bemovi_25_morph") %>%
+  collect() %>%
+  dplyr::filter(file %in% videos_to_remove_25$file)
+
+nrow(video25)
+```
+
+The following data.frame should be empty (i.e. 0 rows)
+
+```{r}
+video25_cropped <- arrow_read_table("bemovi_25_morph_cropped") %>%
+  collect() %>%
+  dplyr::filter(file %in% videos_to_remove_25$file)
+
+nrow(video25_cropped)
+```
+
+If any of them are not empty then the videos have not been removed (completely).
+
+## Check 5.2: have the densities been correctly recalculated?
+
+The file "new_densities.csv" contains the densities of the species that I've locally calculated after excluding the videos. I therefore compare these densities to the ones that are in the RRD.
+
+**Note UD (20230816)**: if the check fails it might also be because the "new_densities.csv" is no longer up-to-date. This file is produced in the script "LEEF2_RRD_PostPipelineCleaning.qmd". If in the mean time the RRD has been rerun (for instance because of new classifiers), then "new_densities.csv" also needs to be remade, otherwise this check might wrongly fail...
+
+```{r, message=FALSE}
+new_densities <- read_csv("VideoChecks/new_densities_for_doublecheck.csv")
+new_densities <- new_densities %>%
+  dplyr::filter(!(bottle %in% c("b_02","b_15","b_20","b_31"))) %>%
+  mutate(new_densities = density) %>%
+  select(-density)
+
+compare_densities <- left_join(new_densities %>% dplyr::filter(species!="Loxocephallus",species!="Euplotes",
+                                                               species!="Debris_and_other"), 
+                               densities) %>%
+  # mutate(round(compare_densities$density,3))
+  mutate(equal =round(density,2)== round(new_densities,2))
+
+print("Do the densities in the RRD correspond to the densities in new_densities.csv"); all(round(compare_densities$density,2) == round(compare_densities$new_densities,2))
+```
+
+TODO [ ]: Check what and why
+
+# Check 6: has the density and the biomass been set to 0 for species that have not been found?
+
+**Note UD (20230816):** I'm currently not sure how to test this, because if a species is not present in a certain bottle on a certain sampling day, is it because it wasn't tracked/detected and the code failed to put the density to 0, or is it because the raw data is either missing or has not been processes? See also my comment under Check 3.1 above. @Rainer: I think it's easier to check for this once all tests above pass. So please once the tests pass have a look and double check that this code is working.
+
+Essentially, in the pipeline there is code that sets the density of a class (i.e. the species_tracked in the .yml) to 0 if for the currently processed sampling day it was not detected in a bottle. E.g. for the flowcam I think it is done here:https://github.com/LEEF-UZH/LEEF.measurement.flowcam/blob/LEEF-2/R/classify_LEEF_2.R, line 115 onwwards. It is this working? (same goes for the video script).
+
+
+# Check 7: have the density and trait data of Colpidium and P. caudatum been corrected manually? 
+
+This part is here to check whether the wrong classificaiton of P.caudatum as Colpidium has been manually corrected and the densities recalculated
+
+## Check 7.1: Has the classification been corrected manually?
+
+The following data.frame should be empty (i.e. 0 rows)
+
+```{r}
+morph16 <- arrow_read_table("bemovi_16_morph") %>%
+  collect() %>%
+  dplyr::filter(bottle %in% c("b_02","b_15","b_20","b_31"),
+                timestamp >= 20230403,
+                species=="Colpidium")
+
+nrow(morph16)
+```
+
+The following data.frame should be empty (i.e. 0 rows)
+
+```{r}
+morph25 <- arrow_read_table("bemovi_25_morph") %>%
+  collect() %>%
+  dplyr::filter(bottle %in% c("b_02","b_15","b_20","b_31"),
+                timestamp >= 20230403,
+                species=="Colpidium")
+
+nrow(morph25)
+```
+
+If any of them are not empty then the classificaiton has not been corrected manually.
+
+
+## Check 7.2: have the densities been correctly recalculated?
+
+The file "new_PCaudatum_densities_for_doublecheck.csv" contains the densities of the species that I've locally calculated after correcting the classification. I therefore compare these densities to the ones that are in the RRD.
+
+**Note UD (20230817)**: if the check fails it might also be because the "new_PCaudatum_densities_for_doublecheck.csv" is no longer up-to-date. This file is produced in the script "LEEF2_RRD_PostPipelineCleaning.qmd". If in the mean time the RRD has been rerun (for instance because of new classifiers), then "new_PCaudatum_densities_for_doublecheck.csv" also needs to be remade, otherwise this check might wrongly fail...
+
+```{r, message=FALSE}
+new_PCaudatum_densities <- read_csv("new_PCaudatum_densities_for_doublecheck.csv")
+new_PCaudatum_densities <- new_PCaudatum_densities %>%
+  mutate(new_densities = density) %>%
+  select(-density)
+
+compare_densities2 <- left_join(new_PCaudatum_densities %>% dplyr::filter(species!="Loxocephallus",species!="Euplotes"), 
+                                densities) %>%
+  mutate(identical = round(density,3) == round(new_densities,3))
+
+print("Do the densities in the RRD correspond to the densities in new_PCaudatum_densities.csv"); all(round(compare_densities2$density,3) == round(compare_densities2$new_densities,3))
+```
+
+TODO [ ]: Check
+
+# Check 8: has the biomass of the species been correctly implemented?
+
+The file "biomass20221107_doubleCheck.csv" contains the biomasses of the species that I calculated. I therefore compare these densities to the ones that are in the RRD. Note that this only checks the flowcam and the video biomasses, not the flowcytometer (bacteria) ones.
+
+**Note UD (20230817)**: if the check fails it might also be because the "biomass20221107_doubleCheck.csv" is no longer up-to-date. This file is produced in the script "LEEF2_RRD_PostPipelineCleaning.qmd". If in the mean time the RRD has been rerun (for instance because of new classifiers), then "biomass20221107_doubleCheck.csv" also needs to be remade, otherwise this check might wrongly fail...
+
+```{r, message=FALSE}
+new_biomass20221107 <- read_csv("biomass20221107_doubleCheck.csv")
+new_biomass20221107 <- new_biomass20221107 %>%
+  mutate(new_biomass = biomass,
+         new_density = density) %>%
+  select(-biomass, -density)
+
+compare_densities3 <- left_join(new_biomass20221107, densities,
+                                join_by(timestamp, day, bottle, species, 
+                                        measurement, incubator, temperature,
+                                        resources, salinity, replicate)) %>%
+  mutate(new_biomass2=new_biomass*10000,
+         biomass2=biomass*10000) %>%
+  mutate(identical = round(new_biomass2,3)==round(biomass2,3))
+
+print("Do the biomasses in the RRD correspond to the densities in biomass20221107_doubleCheck.csv") 
+all(round(compare_densities3$biomass2,5) == round(compare_densities3$new_biomass2,5))
+
+table(compare_densities3$identical, compare_densities3$measurement)
+```
+
+TODO [ ]: Check
+
+# Check 9: has the trend in the water chemistry been removed?
+
+This is a visual test. The read line (the data) and the black line (the intercept) should be the same (minus a small change in intercept, but the slope should be the same). If unsure compare also with the corresponding figure in the document "LEEF2_RRD_PostPipelineCleaning.qmd".
+
+```{r, fig.height=8, fig.width=15, message=FALSE, warning=FALSE}
+toc <- arrow_read_table("toc")%>% 
+  collect() %>%
+  left_join(arrow_read_table("experimental_design") %>% collect()) %>%
+  filter(!is.na(conc))
+
+toc$day <- as.Date(as.character(toc$timestamp), "%Y%m%d") - min(as.Date(as.character(toc$timestamp), "%Y%m%d") )
+toc$day <- as.numeric(toc$day)
+
+toc <- toc %>%
+  dplyr::mutate(experiment_phase = case_when(temperature =="constant" ~ "constant",
+                                        day < 70 ~ "constant before increase",
+                                        day >= 70 & day < 154 ~ "increasing",
+                                        day >= 154 ~ "constant after increase"))  %>%
+  arrange(timestamp) 
+
+toc_sum <- toc %>%
+  group_by(experiment_phase,inj_type) %>%
+  summarize(intercept = coef(lm(conc~position))[1])
+
+position_sum <- toc %>%
+  group_by(experiment_phase,inj_type,position) %>%
+  summarize(dummy=n())
+
+toc_sum <- full_join(toc_sum, position_sum)
+
+toc %>%
+  ggplot(aes(position, conc))+
+  facet_wrap(experiment_phase~inj_type) +
+  geom_smooth(col="red", method = "lm")+
+  geom_line(data=toc_sum, aes(position, intercept))+
+  labs(x="Bottle sampling order")+
+  theme_bw()
+```
+
+

@@ -24,7 +24,7 @@ params:
   extracted_dir: "/Volumes/LEEF-1_archive/LEEF.archived.data/LEEF/3.archived.data/extracted/"
   toc: "/Volumes/LEEF/0.TOC/LEEF-1/toc.rds"
   min_FSC.A: 2
-  cores: 7
+  cores: 6
   remove_all:
     - airbubbles
     - OtherCiliate
@@ -47,11 +47,11 @@ params:
   reclassify_bemovi_25: false
   regate_flowcytometer: false
 
-  add_to_rrd: false
-  add_others_to_rrd: false
+  add_to_rrd: true
+  add_others_to_rrd: true
 
-  rename_rrd: false
-  final_rrd: false
+  rename_rrd: true
+  final_rrd: true
 
   diagnostic_report: false
 
@@ -2148,7 +2148,7 @@ file.copy(db_name(3, temp = FALSE), db_name("final", temp = FALSE))
 # Create Diagnostic Report from sqlite 3
 The Diagnostic report needs to be created before the renaming as it does rely on the otriginal terminology.
 
-NOTE (Uriah March 2024): The diagnostic report does not work because Rainer forgot to update all the functions! Well done
+NOTE (Uriah March 2024): The diagnostic report does not work because Rainer forgot to update all the functions! 
 
 ```{r}
 #| label: create_diag_report
