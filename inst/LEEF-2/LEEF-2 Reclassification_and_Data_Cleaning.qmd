@@ -15,8 +15,8 @@ format:
 params:
   release: "v2.3.8-LEEF-2"
   repo: "https://github.com/LEEF-UZH/LEEF.parameter/"
-  output_dir: "/Volumes/UDWorkMobil/LEEF2RRD_Creation/"
-  extracted_dir: "/Volumes/LEEF-2_archive/archive/extracted/"
+  output_dir: "/Users/owenpetchey/Desktop/LEEF2_flowcyt_data_test/level3-RRD/"
+  extracted_dir: "/Users/owenpetchey/Desktop/LEEF2_flowcyt_data_test/level2-extracted/"
   toc: "/Volumes/LEEF/0.TOC/LEEF-2/toc.rds"
   min_FSC.A: 2
   flowcytometer_particles: 
@@ -92,10 +92,10 @@ params:
 
 
 
-  reclassify_flowcam: true
+  reclassify_flowcam: false
   reclassify_bemovi_16: false
   reclassify_bemovi_25: false
-  regate_flowcytometer: false  
+  regate_flowcytometer: true  
   assemble_manualcount: false
   assemble_o2: false
   assemble_conductivity: false
@@ -148,14 +148,14 @@ getOption("repos")
 #remotes::install_github("LEEF-UZH/LEEF.measurement.flowcytometer", ref = "LEEF-1")
 #remotes::install_github("LEEF-UZH/LEEF.measurement.bemovi", ref = "LEEF-1")
 #remotes::install_github("LEEF-UZH/LEEF.measurement.flowcam", ref = "LEEF-1")
-# remotes::install_github("LEEF-UZH/LEEF.measurement.flowcytometer", ref = "LEEF-2")
-# remotes::install_github("LEEF-UZH/LEEF.measurement.bemovi", ref = "LEEF-2")
-# remotes::install_github("LEEF-UZH/LEEF.measurement.flowcam", ref = "LEEF-2")
-# remotes::install_github("LEEF-UZH/LEEF.measurement.conductivity", ref = "master")
-# remotes::install_github("LEEF-UZH/LEEF.measurement.o2meter", ref = "master")
-# remotes::install_github("LEEF-UZH/LEEF.measurement.manualcount", ref = "master")
-# remotes::install_github("LEEF-UZH/LEEF.analysis", ref = "master")
-# remotes::install_github("LEEF-UZH/bemovi", ref = "LEEF")
+#remotes::install_github("LEEF-UZH/LEEF.measurement.flowcytometer", ref = "LEEF-2")
+#remotes::install_github("LEEF-UZH/LEEF.measurement.bemovi", ref = "LEEF-2")
+#remotes::install_github("LEEF-UZH/LEEF.measurement.flowcam", ref = "LEEF-2")
+#remotes::install_github("LEEF-UZH/LEEF.measurement.conductivity", ref = "master")
+#remotes::install_github("LEEF-UZH/LEEF.measurement.o2meter", ref = "master")
+#remotes::install_github("LEEF-UZH/LEEF.measurement.manualcount", ref = "master")
+#remotes::install_github("LEEF-UZH/LEEF.analysis", ref = "master")
+#remotes::install_github("LEEF-UZH/bemovi", ref = "LEEF")
 
 
 ```
@@ -210,6 +210,7 @@ knitr::knit_hooks$set(
 ####
 
 library("LEEF.analysis")
+library(LEEF.2.measurement.flowcytometer)
 library(dplyr)
 library(pbmcapply)
 library(pbapply)
@@ -935,6 +936,7 @@ template |>
 ## Regate Flowcytometer
 
 ### Flowcytometer Density
+
 ```{r}
 #| label: density_flowcytometer
 #| eval: !expr params$regate_flowcytometer
@@ -942,27 +944,34 @@ template |>
 
 ## Select all timestamps
 
-timestamps <- list.files(
-    path = params$extracted_dir,
-    pattern = "^LEEF\\.flowcytometer\\.flowcytometer\\.",
-    recursive = FALSE,
-    full.names = FALSE
-)
-timestamps <- gsub("^LEEF\\.flowcytometer\\.flowcytometer\\.", "", timestamps)
-
-## Density
-
-LEEF_2_density_flowcytometer_archive(
-    extracted_dir = params$extracted_dir,
-    timestamps = timestamps,
-    output = file.path(params$output_dir, "flowcytometer"),
-    use_H = FALSE,
-    gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
-    min_FSC.A = params$min_FSC.A,
-    particles = params$flowcytometer_particles,
-    mc.cores = params$cores
-)
+# timestamps <- list.files(
+#     path = params$extracted_dir,
+#     pattern = "^LEEF\\.flowcytometer\\.flowcytometer\\.",
+#     recursive = FALSE,
+#     full.names = FALSE
+# )
+# timestamps <- gsub("^LEEF\\.flowcytometer\\.flowcytometer\\.", "", timestamps)
+# 
+# ## Density
+# 
+# LEEF_2_density_flowcytometer_archive(
+#     extracted_dir = params$extracted_dir,
+#     timestamps = timestamps,
+#     output = file.path(params$output_dir, "flowcytometer"),
+#     use_H = FALSE,
+#     gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
+#     min_FSC.A = params$min_FSC.A,
+#     particles = params$flowcytometer_particles,
+#     mc.cores = params$cores
+# )
 ```
+
+
+
+
+
+
+
 
 ### Flowcytometer Traits and Biomass
 
@@ -981,14 +990,14 @@ timestamps <- list.files(
 )
 timestamps <- gsub("^LEEF\\.flowcytometer\\.flowcytometer\\.", "", timestamps)
 
-## Extract traits and Biomass
+## Extract traits and give each bacteria particle a biomass
 LEEF_2_extract_traits_flowcytometer_archive(
     extracted_dir = params$extracted_dir,
     gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
     particles = params$flowcytometer_particles,
     use_H = FALSE,
     min_FSC.A = params$min_FSC.A,
-    timestamps = timestamps[1:20],
+    timestamps = timestamps[1],
     output = file.path(params$output_dir, "flowcytometer"),
     length_slope = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$slope,
     length_intercept = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "conv_FSCA_length.csv"))$intercept,
@@ -1117,6 +1126,41 @@ LEEF_2_extract_traits_flowcytometer_archive(
 )
 
 rm(timestamps)
+```
+
+
+### Flowcytometer calculate the per bottle total density and biomass
+
+```{r}
+#| label: density_flowcytometer
+#| eval: !expr params$regate_flowcytometer
+#|
+
+## Select all timestamps
+
+timestamps <- list.files(
+    path = params$extracted_dir,
+    pattern = "^LEEF\\.flowcytometer\\.flowcytometer\\.",
+    recursive = FALSE,
+    full.names = FALSE
+)
+timestamps <- gsub("^LEEF\\.flowcytometer\\.flowcytometer\\.", "", timestamps)
+
+## Density
+
+LEEF_2_density_flowcytometer_archive(
+    extracted_dir = params$extracted_dir,
+    timestamps = timestamps,
+    output = file.path(params$output_dir, "flowcytometer"),
+    use_H = FALSE,
+    gates_coordinates = read.csv(file.path(parameter_dir, "parameter", "0.raw.data", "flowcytometer", "gates_coordinates.csv")),
+    min_FSC.A = params$min_FSC.A,
+    particles = params$flowcytometer_particles,
+    mc.cores = params$cores
+)
+
+
+
 ```
 
 ### Remove bottles not needed in Flowcytometer and Set Individual Missing Samples to NA
@@ -1513,6 +1557,8 @@ parquet_add_flowcam(fns = fns, path_to_parquet_root_dir = parquet_dir, rename = 
 parquet_add_flowcam(fns = fns, path_to_parquet_root_dir = parquet_dir_renamed, rename = TRUE)
 ```
 
+## Add flowcytometer
+
 ```{r}
 #| label: add_flowcytometer
 #| eval: !expr params$update_parquet_flowcytometer
@@ -1528,6 +1574,8 @@ fns <- list.files(
 parquet_add_flowcytometer(fns = fns, path_to_parquet_root_dir = parquet_dir, rename = FALSE, compression = "brotli")
 parquet_add_flowcytometer(fns = fns, path_to_parquet_root_dir = parquet_dir_renamed, rename = TRUE, compression = "brotli")
 ```
+
+
 
 ```{r}
 #| label: add_manualcount
